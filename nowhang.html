@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            background: #0a0a0a;
+            color: #a8a8a8;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 80px 24px;
+        }
+
+        .media-item {
+            margin-bottom: 64px;
+            opacity: 0;
+            animation: fadeIn 1.2s ease forwards;
+        }
+
+        .media-item img,
+        .media-item video {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            background: #141414;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="gallery"></div>
+
+    <script>
+        (async function() {
+            const gallery = document.getElementById('gallery');
+            const basePath = '/private/';
+            const imageExts = ['.jpg', '.jpeg', '.png'];
+            const videoExts = ['.mp4'];
+
+            let files = [];
+
+            try {
+                const response = await fetch(basePath + 'manifest.json');
+                if (response.ok) {
+                    files = await response.json();
+                }
+            } catch (e) {}
+
+            if (files.length === 0) {
+                const maxAttempts = 500;
+                const patterns = ['', 'img_', 'image_', 'photo_', 'vid_', 'video_', 'IMG_', 'VID_', 'DSC', 'DSC_', 'DSCN', 'P', 'PXL_'];
+                const allExts = [...imageExts, ...videoExts];
+
+                for (let i = 1; i <= maxAttempts; i++) {
+                    for (const pattern of patterns) {
+                        for (const ext of allExts) {
+                            const padded = String(i).padStart(4, '0');
+                            const variants = [
+                                `${pattern}${i}${ext}`,
+                                `${pattern}${padded}${ext}`,
+                                `${i}${ext}`,
+                                `${padded}${ext}`
+                            ];
+                            for (const filename of variants) {
+                                if (!files.includes(filename)) {
+                                    files.push(filename);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            const loadedUrls = new Set();
+
+            async function checkAndRender(filename) {
+                const url = basePath + filename;
+                if (loadedUrls.has(url)) return;
+
+                const ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
+                const isImage = imageExts.includes(ext);
+                const isVideo = videoExts.includes(ext);
+
+                if (!isImage && !isVideo) return;
+
+                try {
+                    const head = await fetch(url, { method: 'HEAD' });
+                    if (!head.ok) return;
+
+                    loadedUrls.add(url);
+
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'media-item';
+                    wrapper.style.animationDelay = `${loadedUrls.size * 0.05}s`;
+
+                    if (isImage) {
+                        const img = document.createElement('img');
+                        img.src = url;
+                        img.loading = 'lazy';
+                        img.alt = '';
+                        wrapper.appendChild(img);
+                    } else if (isVideo) {
+                        const video = document.createElement('video');
+                        video.src = url;
+                        video.controls = true;
+                        video.preload = 'metadata';
+                        video.playsInline = true;
+                        wrapper.appendChild(video);
+                    }
+
+                    gallery.appendChild(wrapper);
+                } catch (e) {}
+            }
+
+            const batchSize = 10;
+            for (let i = 0; i < files.length; i += batchSize) {
+                const batch = files.slice(i, i + batchSize);
+                await Promise.all(batch.map(checkAndRender));
+            }
+        })();
+    </script>
+</body>
+</html>
