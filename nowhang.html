@@ -29,6 +29,10 @@
             overflow: hidden;
         }
 
+        body.locked {
+            overflow: hidden;
+        }
+
         body::before {
             content: '';
             position: fixed;
@@ -56,10 +60,150 @@
             z-index: -1;
         }
 
+        .lock-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 9999;
+            background-color: #0a0a0f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                        visibility 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .lock-screen.unlocked {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .lock-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .lock-input {
+            width: 220px;
+            padding: 14px 18px;
+            background: #12121c;
+            border: 1px solid #1e1e2e;
+            border-radius: 12px;
+            color: #a0a0b0;
+            font-family: inherit;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .lock-input::placeholder {
+            color: #4a4a5a;
+        }
+
+        .lock-input:focus {
+            border-color: #2a2a3e;
+            box-shadow: 0 0 0 3px rgba(42, 42, 62, 0.2);
+        }
+
+        .lock-input.shake {
+            animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+
+        .lock-btn {
+            padding: 12px 32px;
+            background: #12121c;
+            border: 1px solid #1e1e2e;
+            border-radius: 100px;
+            color: #a0a0b0;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+        }
+
+        .lock-btn:hover {
+            background: #161622;
+            border-color: #2a2a3e;
+            color: #c0c0d0;
+        }
+
+        .main-content {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s,
+                        visibility 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+        }
+
+        .main-content.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-home-btn {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            z-index: 500;
+            padding: 10px 20px;
+            background: #12121c;
+            border: 1px solid #1e1e2e;
+            border-radius: 100px;
+            color: #6a6a7a;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(0);
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                        visibility 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                        background 0.25s ease,
+                        border-color 0.25s ease,
+                        color 0.25s ease;
+        }
+
+        .back-home-btn.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-home-btn.hidden {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-20px);
+        }
+
+        .back-home-btn:hover {
+            background: #161622;
+            border-color: #2a2a3e;
+            color: #a0a0b0;
+        }
+
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 48px 24px;
+            padding-top: 80px;
             position: relative;
         }
 
@@ -89,6 +233,13 @@
             }
             .container {
                 padding: 24px 12px;
+                padding-top: 70px;
+            }
+            .back-home-btn {
+                top: 16px;
+                left: 16px;
+                padding: 8px 16px;
+                font-size: 12px;
             }
         }
 
@@ -297,142 +448,228 @@
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="grid" id="gallery"></div>
+<body class="locked">
+    <div class="lock-screen" id="lockScreen">
+        <div class="lock-form">
+            <input type="password" class="lock-input" id="accessInput" autocomplete="off" autofocus>
+            <button class="lock-btn" id="accessBtn">Enter</button>
+        </div>
     </div>
 
-    <div class="viewer-overlay" id="viewer">
-        <div class="viewer-backdrop"></div>
-        <div class="viewer-content" id="viewerContent"></div>
-        <button class="viewer-close" id="viewerClose" aria-label="Close"></button>
-        <button class="viewer-home" id="viewerHome">Back to Home</button>
+    <button class="back-home-btn" id="backHomeBtn">Back to Home</button>
+
+    <div class="main-content" id="mainContent">
+        <div class="container">
+            <div class="grid" id="gallery"></div>
+        </div>
+
+        <div class="viewer-overlay" id="viewer">
+            <div class="viewer-backdrop"></div>
+            <div class="viewer-content" id="viewerContent"></div>
+            <button class="viewer-close" id="viewerClose" aria-label="Close"></button>
+            <button class="viewer-home" id="viewerHome">Back to Home</button>
+        </div>
     </div>
 
     <script>
-        (async function() {
-            const gallery = document.getElementById('gallery');
-            const viewer = document.getElementById('viewer');
-            const viewerContent = document.getElementById('viewerContent');
-            const viewerClose = document.getElementById('viewerClose');
-            const viewerHome = document.getElementById('viewerHome');
-            const viewerBackdrop = viewer.querySelector('.viewer-backdrop');
-            const basePath = '/private/';
-            const imageExts = ['.jpg', '.jpeg', '.png'];
-            const videoExts = ['.mp4'];
+        (function() {
+            const ACCESS_CODE = 'Abhilasha';
+            let isUnlocked = false;
+            let wrongAttempt = false;
 
-            let files = [];
-            let scrollPosition = 0;
+            const lockScreen = document.getElementById('lockScreen');
+            const accessInput = document.getElementById('accessInput');
+            const accessBtn = document.getElementById('accessBtn');
+            const mainContent = document.getElementById('mainContent');
+            const backHomeBtn = document.getElementById('backHomeBtn');
 
-            try {
-                const response = await fetch(basePath + 'manifest.json');
-                if (response.ok) {
-                    files = await response.json();
-                }
-            } catch (e) {}
-
-            const items = [];
-
-            function openViewer(src, isVideo) {
-                scrollPosition = window.scrollY;
-                viewerContent.innerHTML = '';
-
-                if (isVideo) {
-                    const video = document.createElement('video');
-                    video.src = src;
-                    video.controls = true;
-                    video.playsInline = true;
-                    video.preload = 'metadata';
-                    viewerContent.appendChild(video);
+            function attemptUnlock() {
+                const code = accessInput.value;
+                
+                if (code === ACCESS_CODE) {
+                    isUnlocked = true;
+                    wrongAttempt = false;
+                    lockScreen.classList.add('unlocked');
+                    document.body.classList.remove('locked');
+                    mainContent.classList.add('visible');
+                    backHomeBtn.classList.add('visible');
+                    initGallery();
                 } else {
-                    const img = document.createElement('img');
-                    img.src = src;
-                    img.alt = '';
-                    viewerContent.appendChild(img);
+                    wrongAttempt = true;
+                    accessInput.classList.add('shake');
+                    accessInput.value = '';
+                    setTimeout(function() {
+                        accessInput.classList.remove('shake');
+                    }, 400);
                 }
-
-                viewer.classList.add('active');
-                document.body.classList.add('viewer-open');
             }
 
-            function closeViewer() {
-                const video = viewerContent.querySelector('video');
-                if (video) {
-                    video.pause();
+            accessBtn.addEventListener('click', attemptUnlock);
+            accessInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    attemptUnlock();
                 }
-
-                viewer.classList.remove('active');
-                document.body.classList.remove('viewer-open');
-
-                setTimeout(function() {
-                    viewerContent.innerHTML = '';
-                    window.scrollTo(0, scrollPosition);
-                }, 450);
-            }
-
-            files.forEach(function(filename) {
-                const ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
-                const isImage = imageExts.includes(ext);
-                const isVideo = videoExts.includes(ext);
-
-                if (!isImage && !isVideo) return;
-
-                const url = basePath + encodeURIComponent(filename);
-                const wrapper = document.createElement('div');
-                wrapper.className = 'media-item';
-
-                if (isImage) {
-                    const img = document.createElement('img');
-                    img.src = url;
-                    img.loading = 'lazy';
-                    img.alt = '';
-                    wrapper.appendChild(img);
-                } else if (isVideo) {
-                    const video = document.createElement('video');
-                    video.src = url;
-                    video.preload = 'metadata';
-                    video.playsInline = true;
-                    video.muted = true;
-                    wrapper.appendChild(video);
-                }
-
-                wrapper.addEventListener('click', function() {
-                    openViewer(url, isVideo);
-                });
-
-                gallery.appendChild(wrapper);
-                items.push(wrapper);
             });
 
-            viewerClose.addEventListener('click', closeViewer);
-            viewerBackdrop.addEventListener('click', closeViewer);
-
-            viewerHome.addEventListener('click', function() {
+            backHomeBtn.addEventListener('click', function() {
                 window.location.href = '/';
             });
 
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && viewer.classList.contains('active')) {
-                    closeViewer();
+            let lastScrollY = 0;
+            let ticking = false;
+
+            function handleScroll() {
+                const currentScrollY = window.scrollY;
+                
+                if (!isUnlocked) return;
+
+                if (currentScrollY > lastScrollY && currentScrollY > 60) {
+                    backHomeBtn.classList.add('hidden');
+                    backHomeBtn.classList.remove('visible');
+                } else {
+                    backHomeBtn.classList.remove('hidden');
+                    backHomeBtn.classList.add('visible');
                 }
-            });
 
-            const observer = new IntersectionObserver(function(entries) {
-                entries.forEach(function(entry) {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('visible');
-                        observer.unobserve(entry.target);
+                lastScrollY = currentScrollY;
+                ticking = false;
+            }
+
+            window.addEventListener('scroll', function() {
+                if (!ticking) {
+                    requestAnimationFrame(handleScroll);
+                    ticking = true;
+                }
+            }, { passive: true });
+
+            function initGallery() {
+                if (wrongAttempt || !isUnlocked) return;
+
+                const gallery = document.getElementById('gallery');
+                const viewer = document.getElementById('viewer');
+                const viewerContent = document.getElementById('viewerContent');
+                const viewerClose = document.getElementById('viewerClose');
+                const viewerHome = document.getElementById('viewerHome');
+                const viewerBackdrop = viewer.querySelector('.viewer-backdrop');
+                const basePath = '/private/';
+                const imageExts = ['.jpg', '.jpeg', '.png'];
+                const videoExts = ['.mp4'];
+
+                let files = [];
+                let scrollPosition = 0;
+
+                (async function loadFiles() {
+                    try {
+                        const response = await fetch(basePath + 'manifest.json');
+                        if (response.ok) {
+                            files = await response.json();
+                        }
+                    } catch (e) {}
+
+                    const items = [];
+
+                    function openViewer(src, isVideo) {
+                        scrollPosition = window.scrollY;
+                        viewerContent.innerHTML = '';
+
+                        if (isVideo) {
+                            const video = document.createElement('video');
+                            video.src = src;
+                            video.controls = true;
+                            video.playsInline = true;
+                            video.preload = 'metadata';
+                            viewerContent.appendChild(video);
+                        } else {
+                            const img = document.createElement('img');
+                            img.src = src;
+                            img.alt = '';
+                            viewerContent.appendChild(img);
+                        }
+
+                        viewer.classList.add('active');
+                        document.body.classList.add('viewer-open');
                     }
-                });
-            }, {
-                threshold: 0.1,
-                rootMargin: '0px 0px -40px 0px'
-            });
 
-            items.forEach(function(item, index) {
-                item.style.animationDelay = (index % 10) * 0.04 + 's';
-                observer.observe(item);
-            });
+                    function closeViewer() {
+                        const video = viewerContent.querySelector('video');
+                        if (video) {
+                            video.pause();
+                        }
+
+                        viewer.classList.remove('active');
+                        document.body.classList.remove('viewer-open');
+
+                        setTimeout(function() {
+                            viewerContent.innerHTML = '';
+                            window.scrollTo(0, scrollPosition);
+                        }, 450);
+                    }
+
+                    files.forEach(function(filename) {
+                        const ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
+                        const isImage = imageExts.includes(ext);
+                        const isVideo = videoExts.includes(ext);
+
+                        if (!isImage && !isVideo) return;
+
+                        const url = basePath + encodeURIComponent(filename);
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'media-item';
+
+                        if (isImage) {
+                            const img = document.createElement('img');
+                            img.src = url;
+                            img.loading = 'lazy';
+                            img.alt = '';
+                            wrapper.appendChild(img);
+                        } else if (isVideo) {
+                            const video = document.createElement('video');
+                            video.src = url;
+                            video.preload = 'metadata';
+                            video.playsInline = true;
+                            video.muted = true;
+                            wrapper.appendChild(video);
+                        }
+
+                        wrapper.addEventListener('click', function() {
+                            openViewer(url, isVideo);
+                        });
+
+                        gallery.appendChild(wrapper);
+                        items.push(wrapper);
+                    });
+
+                    viewerClose.addEventListener('click', closeViewer);
+                    viewerBackdrop.addEventListener('click', closeViewer);
+
+                    viewerHome.addEventListener('click', function() {
+                        window.location.href = '/';
+                    });
+
+                    document.addEventListener('keydown', function(e) {
+                        if (e.key === 'Escape' && viewer.classList.contains('active')) {
+                            closeViewer();
+                        }
+                    });
+
+                    const observer = new IntersectionObserver(function(entries) {
+                        entries.forEach(function(entry) {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add('visible');
+                                observer.unobserve(entry.target);
+                            }
+                        });
+                    }, {
+                        threshold: 0.1,
+                        rootMargin: '0px 0px -40px 0px'
+                    });
+
+                    items.forEach(function(item, index) {
+                        item.style.animationDelay = (index % 10) * 0.04 + 's';
+                        observer.observe(item);
+                    });
+                })();
+            }
         })();
     </script>
 </body>
