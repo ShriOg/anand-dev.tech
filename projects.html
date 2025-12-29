@@ -16,20 +16,24 @@
     }
 
     :root {
-      --color-bg: #0c0c0e;
-      --color-surface: #141417;
-      --color-surface-hover: #1a1a1e;
-      --color-border: #232328;
-      --color-border-hover: #3a3a42;
-      --color-text: #e8e8eb;
-      --color-text-secondary: #9898a0;
-      --color-text-muted: #5c5c64;
-      --color-accent: #6e7bf2;
-      --radius: 12px;
-      --radius-sm: 8px;
+      --color-bg: #09090b;
+      --color-surface: #111113;
+      --color-surface-elevated: #18181b;
+      --color-border: #27272a;
+      --color-border-hover: #3f3f46;
+      --color-text: #fafafa;
+      --color-text-secondary: #a1a1aa;
+      --color-text-muted: #71717a;
+      --color-accent: #818cf8;
+      --color-accent-glow: rgba(129, 140, 248, 0.15);
+      --color-glass: rgba(17, 17, 19, 0.8);
+      --radius: 16px;
+      --radius-sm: 10px;
       --radius-full: 100px;
-      --transition: 0.2s ease;
-      --max-width: 720px;
+      --transition-fast: 0.15s ease;
+      --transition: 0.25s ease;
+      --transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      --max-width: 760px;
     }
 
     html {
@@ -45,6 +49,7 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       min-height: 100vh;
+      overflow-x: hidden;
     }
 
     .page-wrapper {
@@ -70,6 +75,13 @@
       display: flex;
       justify-content: center;
       padding: 0 1rem;
+      transition: transform var(--transition-slow), opacity var(--transition);
+    }
+
+    .nav-wrapper.hidden {
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
     }
 
     .nav {
@@ -77,11 +89,12 @@
       align-items: center;
       gap: 0.25rem;
       padding: 0.375rem;
-      background: rgba(20, 20, 23, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: var(--color-glass);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
       border: 1px solid var(--color-border);
       border-radius: var(--radius-full);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255,255,255,0.03) inset;
     }
 
     .nav__link {
@@ -91,16 +104,17 @@
       font-size: 0.8125rem;
       font-weight: 500;
       border-radius: var(--radius-full);
-      transition: color var(--transition), background-color var(--transition);
+      transition: color var(--transition-fast), background-color var(--transition-fast), transform var(--transition-fast);
     }
 
     .nav__link:hover {
       color: var(--color-text);
+      transform: scale(1.02);
     }
 
     .nav__link--active {
       color: var(--color-text);
-      background-color: var(--color-surface-hover);
+      background-color: var(--color-surface-elevated);
     }
 
     /* Main Content */
@@ -110,25 +124,22 @@
       padding-bottom: 3rem;
     }
 
-    /* Fade In Animation */
-    .fade-in {
-      animation: fadeIn 0.5s ease-out both;
+    /* Reveal Animation System */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .fade-in-delay-1 { animation-delay: 0.05s; }
-    .fade-in-delay-2 { animation-delay: 0.1s; }
-    .fade-in-delay-3 { animation-delay: 0.15s; }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(6px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
+
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.15s; }
+    .reveal-delay-3 { transition-delay: 0.2s; }
+    .reveal-delay-4 { transition-delay: 0.25s; }
 
     /* Page Header */
     .page-header {
@@ -136,15 +147,15 @@
     }
 
     .page-header__title {
-      font-size: clamp(1.5rem, 4vw, 1.75rem);
+      font-size: clamp(1.75rem, 5vw, 2.25rem);
       font-weight: 700;
-      letter-spacing: -0.025em;
+      letter-spacing: -0.03em;
       margin-bottom: 0.5rem;
     }
 
     .page-header__desc {
       color: var(--color-text-secondary);
-      font-size: 0.9375rem;
+      font-size: 1rem;
     }
 
     /* Projects Grid */
@@ -154,7 +165,7 @@
       gap: 1rem;
     }
 
-    @media (min-width: 560px) {
+    @media (min-width: 600px) {
       .projects-grid {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -164,45 +175,65 @@
       background-color: var(--color-surface);
       border: 1px solid var(--color-border);
       border-radius: var(--radius);
-      padding: 1.5rem;
+      padding: 1.75rem;
       text-decoration: none;
       display: flex;
       flex-direction: column;
-      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition), background-color var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .project-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), var(--color-accent-glow), transparent 40%);
+      opacity: 0;
+      transition: opacity var(--transition);
+      pointer-events: none;
     }
 
     .project-card:hover {
-      transform: translateY(-2px);
-      border-color: var(--color-border-hover);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      transform: translateY(-4px);
+      border-color: var(--color-accent);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--color-accent-glow);
+      background-color: var(--color-surface-elevated);
+    }
+
+    .project-card:hover::before {
+      opacity: 1;
     }
 
     .project-card__title {
-      font-size: 0.9375rem;
+      font-size: 1rem;
       font-weight: 600;
       color: var(--color-text);
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.625rem;
+      position: relative;
     }
 
     .project-card__desc {
-      font-size: 0.8125rem;
+      font-size: 0.875rem;
       color: var(--color-text-secondary);
-      line-height: 1.6;
-      margin-bottom: 1rem;
+      line-height: 1.65;
+      margin-bottom: 1.25rem;
       flex: 1;
+      position: relative;
     }
 
     .project-card__tech {
       font-size: 0.6875rem;
       color: var(--color-text-muted);
-      font-weight: 500;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.08em;
+      position: relative;
     }
 
     /* Footer */
     .footer {
-      padding: 2rem 0;
+      padding: 2.5rem 0;
       border-top: 1px solid var(--color-border);
     }
 
@@ -215,6 +246,24 @@
     ::selection {
       background-color: var(--color-accent);
       color: var(--color-bg);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--color-bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--color-border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--color-border-hover);
     }
 
     /* Mobile */
@@ -233,14 +282,14 @@
       }
 
       .project-card {
-        padding: 1.25rem;
+        padding: 1.5rem;
       }
     }
   </style>
 </head>
 <body>
   <div class="page-wrapper">
-    <nav class="nav-wrapper">
+    <nav class="nav-wrapper" id="navbar">
       <div class="nav">
         <a href="index.html" class="nav__link">About</a>
         <a href="projects.html" class="nav__link nav__link--active">Projects</a>
@@ -250,25 +299,25 @@
     </nav>
 
     <main class="container">
-      <header class="page-header fade-in">
+      <header class="page-header reveal">
         <h1 class="page-header__title">Projects</h1>
         <p class="page-header__desc">Things I've built to learn and solve problems.</p>
       </header>
 
-      <div class="projects-grid fade-in fade-in-delay-1">
-        <a href="https://github.com/ShriOg/hand-gesture-control" class="project-card" target="_blank" rel="noopener noreferrer">
+      <div class="projects-grid">
+        <a href="https://github.com/ShriOg/hand-gesture-control" class="project-card reveal reveal-delay-1" target="_blank" rel="noopener noreferrer">
           <h2 class="project-card__title">Hand Gesture Laptop Control</h2>
           <p class="project-card__desc">Real-time system that translates hand gestures into laptop controls. Uses computer vision for accurate hand tracking and gesture recognition without any special hardware.</p>
           <span class="project-card__tech">Python · OpenCV · MediaPipe</span>
         </a>
 
-        <a href="https://github.com/ShriOg" class="project-card" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/ShriOg" class="project-card reveal reveal-delay-2" target="_blank" rel="noopener noreferrer">
           <h2 class="project-card__title">Portfolio Website</h2>
-          <p class="project-card__desc">This website. A minimal, dark-themed personal site built with pure HTML and CSS. No frameworks, no JavaScript—just clean markup and intentional design.</p>
-          <span class="project-card__tech">HTML · CSS</span>
+          <p class="project-card__desc">This website. A minimal, dark-themed personal site with smooth animations. Built with HTML, CSS, and vanilla JavaScript.</p>
+          <span class="project-card__tech">HTML · CSS · JavaScript</span>
         </a>
 
-        <a href="https://github.com/ShriOg" class="project-card" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/ShriOg" class="project-card reveal reveal-delay-3" target="_blank" rel="noopener noreferrer">
           <h2 class="project-card__title">More Coming Soon</h2>
           <p class="project-card__desc">Currently exploring more computer vision projects and system-level tools. Check back later or visit my GitHub for updates.</p>
           <span class="project-card__tech">In Progress</span>
@@ -276,11 +325,70 @@
       </div>
     </main>
 
-    <footer class="footer fade-in fade-in-delay-2">
+    <footer class="footer reveal reveal-delay-4">
       <div class="container">
         <p class="footer__text">© 2025 Anand Shukla</p>
       </div>
     </footer>
   </div>
+
+  <script>
+    (function() {
+      // Scroll-based navbar hide/show
+      const navbar = document.getElementById('navbar');
+      let lastScrollY = window.scrollY;
+      let ticking = false;
+
+      function updateNavbar() {
+        const currentScrollY = window.scrollY;
+        
+        if (currentScrollY > lastScrollY && currentScrollY > 100) {
+          navbar.classList.add('hidden');
+        } else {
+          navbar.classList.remove('hidden');
+        }
+        
+        lastScrollY = currentScrollY;
+        ticking = false;
+      }
+
+      window.addEventListener('scroll', function() {
+        if (!ticking) {
+          requestAnimationFrame(updateNavbar);
+          ticking = true;
+        }
+      }, { passive: true });
+
+      // Intersection Observer for reveal animations
+      const revealElements = document.querySelectorAll('.reveal');
+      
+      const revealObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      });
+
+      revealElements.forEach(function(el) {
+        revealObserver.observe(el);
+      });
+
+      // Card mouse tracking for glow effect
+      const cards = document.querySelectorAll('.project-card');
+      cards.forEach(function(card) {
+        card.addEventListener('mousemove', function(e) {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          card.style.setProperty('--mouse-x', x + 'px');
+          card.style.setProperty('--mouse-y', y + 'px');
+        });
+      });
+    })();
+  </script>
 </body>
 </html>

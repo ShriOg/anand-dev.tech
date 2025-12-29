@@ -16,20 +16,24 @@
     }
 
     :root {
-      --color-bg: #0c0c0e;
-      --color-surface: #141417;
-      --color-surface-hover: #1a1a1e;
-      --color-border: #232328;
-      --color-border-hover: #3a3a42;
-      --color-text: #e8e8eb;
-      --color-text-secondary: #9898a0;
-      --color-text-muted: #5c5c64;
-      --color-accent: #6e7bf2;
-      --radius: 12px;
-      --radius-sm: 8px;
+      --color-bg: #09090b;
+      --color-surface: #111113;
+      --color-surface-elevated: #18181b;
+      --color-border: #27272a;
+      --color-border-hover: #3f3f46;
+      --color-text: #fafafa;
+      --color-text-secondary: #a1a1aa;
+      --color-text-muted: #71717a;
+      --color-accent: #818cf8;
+      --color-accent-glow: rgba(129, 140, 248, 0.15);
+      --color-glass: rgba(17, 17, 19, 0.8);
+      --radius: 16px;
+      --radius-sm: 10px;
       --radius-full: 100px;
-      --transition: 0.2s ease;
-      --max-width: 640px;
+      --transition-fast: 0.15s ease;
+      --transition: 0.25s ease;
+      --transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      --max-width: 680px;
     }
 
     html {
@@ -45,6 +49,7 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       min-height: 100vh;
+      overflow-x: hidden;
     }
 
     .page-wrapper {
@@ -70,6 +75,13 @@
       display: flex;
       justify-content: center;
       padding: 0 1rem;
+      transition: transform var(--transition-slow), opacity var(--transition);
+    }
+
+    .nav-wrapper.hidden {
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
     }
 
     .nav {
@@ -77,11 +89,12 @@
       align-items: center;
       gap: 0.25rem;
       padding: 0.375rem;
-      background: rgba(20, 20, 23, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: var(--color-glass);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
       border: 1px solid var(--color-border);
       border-radius: var(--radius-full);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255,255,255,0.03) inset;
     }
 
     .nav__link {
@@ -91,16 +104,17 @@
       font-size: 0.8125rem;
       font-weight: 500;
       border-radius: var(--radius-full);
-      transition: color var(--transition), background-color var(--transition);
+      transition: color var(--transition-fast), background-color var(--transition-fast), transform var(--transition-fast);
     }
 
     .nav__link:hover {
       color: var(--color-text);
+      transform: scale(1.02);
     }
 
     .nav__link--active {
       color: var(--color-text);
-      background-color: var(--color-surface-hover);
+      background-color: var(--color-surface-elevated);
     }
 
     /* Main Content */
@@ -110,25 +124,25 @@
       padding-bottom: 3rem;
     }
 
-    /* Fade In Animation */
-    .fade-in {
-      animation: fadeIn 0.5s ease-out both;
+    /* Reveal Animation System */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .fade-in-delay-1 { animation-delay: 0.05s; }
-    .fade-in-delay-2 { animation-delay: 0.1s; }
-    .fade-in-delay-3 { animation-delay: 0.15s; }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(6px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
+
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.15s; }
+    .reveal-delay-3 { transition-delay: 0.2s; }
+    .reveal-delay-4 { transition-delay: 0.25s; }
+    .reveal-delay-5 { transition-delay: 0.3s; }
+    .reveal-delay-6 { transition-delay: 0.35s; }
+    .reveal-delay-7 { transition-delay: 0.4s; }
 
     /* Page Header */
     .page-header {
@@ -136,15 +150,15 @@
     }
 
     .page-header__title {
-      font-size: clamp(1.5rem, 4vw, 1.75rem);
+      font-size: clamp(1.75rem, 5vw, 2.25rem);
       font-weight: 700;
-      letter-spacing: -0.025em;
+      letter-spacing: -0.03em;
       margin-bottom: 0.5rem;
     }
 
     .page-header__desc {
       color: var(--color-text-secondary);
-      font-size: 0.9375rem;
+      font-size: 1rem;
     }
 
     /* Highlight Card */
@@ -152,22 +166,35 @@
       background-color: var(--color-surface);
       border: 1px solid var(--color-border);
       border-radius: var(--radius);
-      padding: 2.5rem 2rem;
+      padding: 3rem 2rem;
       text-align: center;
       margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .highlight::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
     }
 
     .highlight__value {
-      font-size: clamp(3rem, 10vw, 4rem);
+      font-size: clamp(3.5rem, 12vw, 5rem);
       font-weight: 700;
-      letter-spacing: -0.03em;
+      letter-spacing: -0.04em;
       color: var(--color-accent);
       line-height: 1;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.625rem;
     }
 
     .highlight__label {
-      font-size: 0.8125rem;
+      font-size: 0.875rem;
       color: var(--color-text-secondary);
       font-weight: 500;
     }
@@ -189,28 +216,31 @@
       background-color: var(--color-surface);
       border: 1px solid var(--color-border);
       border-radius: var(--radius-sm);
-      padding: 1.25rem;
+      padding: 1.25rem 1.5rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      transition: border-color var(--transition), transform var(--transition);
+      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition), background-color var(--transition);
     }
 
     .grade-card:hover {
+      transform: translateY(-2px);
       border-color: var(--color-border-hover);
-      transform: translateY(-1px);
+      background-color: var(--color-surface-elevated);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
     }
 
     .grade-card__subject {
-      font-size: 0.875rem;
+      font-size: 0.9375rem;
       font-weight: 500;
       color: var(--color-text);
     }
 
     .grade-card__score {
-      font-size: 0.9375rem;
+      font-size: 1rem;
       font-weight: 600;
       color: var(--color-text-secondary);
+      font-variant-numeric: tabular-nums;
     }
 
     /* Footer Note */
@@ -223,7 +253,7 @@
 
     /* Footer */
     .footer {
-      padding: 2rem 0;
+      padding: 2.5rem 0;
       border-top: 1px solid var(--color-border);
     }
 
@@ -236,6 +266,24 @@
     ::selection {
       background-color: var(--color-accent);
       color: var(--color-bg);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--color-bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--color-border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--color-border-hover);
     }
 
     /* Mobile */
@@ -254,18 +302,18 @@
       }
 
       .highlight {
-        padding: 2rem 1.5rem;
+        padding: 2.5rem 1.5rem;
       }
 
       .grade-card {
-        padding: 1rem;
+        padding: 1rem 1.25rem;
       }
     }
   </style>
 </head>
 <body>
   <div class="page-wrapper">
-    <nav class="nav-wrapper">
+    <nav class="nav-wrapper" id="navbar">
       <div class="nav">
         <a href="index.html" class="nav__link">About</a>
         <a href="projects.html" class="nav__link">Projects</a>
@@ -275,53 +323,100 @@
     </nav>
 
     <main class="container">
-      <header class="page-header fade-in">
+      <header class="page-header reveal">
         <h1 class="page-header__title">Academic Performance</h1>
         <p class="page-header__desc">My Grade 10 results.</p>
       </header>
 
-      <div class="highlight fade-in fade-in-delay-1">
-        <div class="highlight__value">94%</div>
+      <div class="highlight reveal reveal-delay-1">
+        <div class="highlight__value">97.2%</div>
         <div class="highlight__label">Overall Academic Average</div>
       </div>
 
-      <div class="grades-grid fade-in fade-in-delay-2">
-        <div class="grade-card">
+      <div class="grades-grid">
+        <div class="grade-card reveal reveal-delay-2">
           <span class="grade-card__subject">Mathematics</span>
           <span class="grade-card__score">98%</span>
         </div>
-        <div class="grade-card">
+        <div class="grade-card reveal reveal-delay-3">
           <span class="grade-card__subject">Science</span>
           <span class="grade-card__score">97%</span>
         </div>
-        <div class="grade-card">
+        <div class="grade-card reveal reveal-delay-4">
           <span class="grade-card__subject">Computer Science</span>
           <span class="grade-card__score">98%</span>
         </div>
-        <div class="grade-card">
+        <div class="grade-card reveal reveal-delay-5">
           <span class="grade-card__subject">English</span>
           <span class="grade-card__score">93%</span>
         </div>
-        <div class="grade-card">
+        <div class="grade-card reveal reveal-delay-6">
           <span class="grade-card__subject">Social Science</span>
           <span class="grade-card__score">96%</span>
         </div>
-        <div class="grade-card">
+        <div class="grade-card reveal reveal-delay-7">
           <span class="grade-card__subject">Hindi</span>
           <span class="grade-card__score">90%</span>
         </div>
       </div>
 
-      <p class="footer-note fade-in fade-in-delay-3">
+      <p class="footer-note reveal">
         Percentages based on Grade 10 academic assessment.
       </p>
     </main>
 
-    <footer class="footer fade-in fade-in-delay-3">
+    <footer class="footer reveal">
       <div class="container">
         <p class="footer__text">© 2025 Anand Shukla</p>
       </div>
     </footer>
   </div>
+
+  <script>
+    (function() {
+      // Scroll-based navbar hide/show
+      const navbar = document.getElementById('navbar');
+      let lastScrollY = window.scrollY;
+      let ticking = false;
+
+      function updateNavbar() {
+        const currentScrollY = window.scrollY;
+        
+        if (currentScrollY > lastScrollY && currentScrollY > 100) {
+          navbar.classList.add('hidden');
+        } else {
+          navbar.classList.remove('hidden');
+        }
+        
+        lastScrollY = currentScrollY;
+        ticking = false;
+      }
+
+      window.addEventListener('scroll', function() {
+        if (!ticking) {
+          requestAnimationFrame(updateNavbar);
+          ticking = true;
+        }
+      }, { passive: true });
+
+      // Intersection Observer for reveal animations
+      const revealElements = document.querySelectorAll('.reveal');
+      
+      const revealObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      });
+
+      revealElements.forEach(function(el) {
+        revealObserver.observe(el);
+      });
+    })();
+  </script>
 </body>
 </html>
