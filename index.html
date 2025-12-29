@@ -119,8 +119,194 @@
     /* Main Content */
     main {
       flex: 1;
-      padding-top: 8rem;
+      padding-top: 10rem;
       padding-bottom: 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Floating Elements */
+    .floating-elements {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .float {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.5;
+    }
+
+    .float--1 {
+      width: 8px;
+      height: 8px;
+      background: var(--color-accent);
+      top: 15%;
+      left: 8%;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .float--2 {
+      width: 12px;
+      height: 12px;
+      border: 2px solid var(--color-border-hover);
+      top: 25%;
+      right: 12%;
+      animation: float 8s ease-in-out infinite reverse;
+    }
+
+    .float--3 {
+      width: 6px;
+      height: 6px;
+      background: var(--color-accent-light);
+      top: 60%;
+      left: 5%;
+      animation: float 7s ease-in-out infinite;
+    }
+
+    .float--4 {
+      width: 10px;
+      height: 10px;
+      border: 2px solid var(--color-border);
+      top: 70%;
+      right: 8%;
+      transform: rotate(45deg);
+      border-radius: 2px;
+      animation: float 9s ease-in-out infinite reverse;
+    }
+
+    .float--5 {
+      width: 4px;
+      height: 4px;
+      background: var(--color-accent);
+      top: 40%;
+      left: 15%;
+      animation: float 5s ease-in-out infinite;
+    }
+
+    .float--6 {
+      width: 6px;
+      height: 6px;
+      background: var(--color-text-muted);
+      top: 50%;
+      right: 15%;
+      animation: float 7s ease-in-out infinite reverse;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(5deg); }
+    }
+
+    /* Hero Section */
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: calc(100vh - 16rem);
+      padding: 2rem 1.5rem;
+    }
+
+    .hero__avatar {
+      margin-bottom: 2rem;
+    }
+
+    .avatar-ring {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      padding: 4px;
+      background: var(--gradient-accent);
+      box-shadow: 0 0 40px var(--color-accent-glow), 0 0 80px rgba(59, 130, 246, 0.15);
+    }
+
+    .avatar-placeholder {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: var(--color-card);
+      border: 3px solid var(--color-bg);
+    }
+
+    .hero__name {
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-weight: 800;
+      background: var(--gradient-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+
+    .hero__tagline {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      color: var(--color-text-secondary);
+      font-weight: 400;
+      margin-bottom: 2.5rem;
+      max-width: 600px;
+    }
+
+    .hero__buttons {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: var(--radius-full);
+      transition: all var(--transition);
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn--primary {
+      background: var(--gradient-accent);
+      color: var(--color-text);
+      box-shadow: 0 4px 20px var(--color-accent-glow);
+    }
+
+    .btn--primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px var(--color-accent-glow);
+    }
+
+    .btn--secondary {
+      background: var(--color-card);
+      color: var(--color-text);
+      border: 1px solid var(--color-border);
+    }
+
+    .btn--secondary:hover {
+      background: var(--color-card-elevated);
+      border-color: var(--color-border-hover);
+      transform: translateY(-2px);
+    }
+
+    .btn__arrow {
+      transition: transform var(--transition-fast);
+    }
+
+    .btn--secondary:hover .btn__arrow {
+      transform: translateX(4px);
     }
 
     /* Reveal Animation */
@@ -363,9 +549,22 @@
     @media (max-width: 480px) {
       .nav__link { padding: 0.4375rem 0.875rem; font-size: 0.8125rem; }
       main { padding-top: 7rem; }
-      .bio-card { padding: 1.75rem; }
-      .section-card { padding: 1.5rem; }
-      .stat-card { padding: 1.5rem 1rem; }
+
+      .avatar-ring {
+        width: 140px;
+        height: 140px;
+      }
+
+      .hero__buttons {
+        flex-direction: column;
+        width: 100%;
+        max-width: 280px;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 0.875rem 1.5rem;
+      }
     }
   </style>
 </head>
@@ -380,73 +579,33 @@
       </div>
     </nav>
 
-    <main class="container">
-      <div class="page-title reveal">
-        <h1 class="page-title__text">About Me</h1>
+    <main>
+      <!-- Floating Elements -->
+      <div class="floating-elements">
+        <span class="float float--1"></span>
+        <span class="float float--2"></span>
+        <span class="float float--3"></span>
+        <span class="float float--4"></span>
+        <span class="float float--5"></span>
+        <span class="float float--6"></span>
       </div>
 
-      <div class="bio-card reveal reveal-delay-1">
-        <p class="bio-card__text">
-          I am Anand Shukla, a passionate student developer with a deep fascination for technology and engineering. My journey in the world of innovation began early, and I have been dedicated to exploring the intersection of creativity and technical excellence.
-        </p>
-      </div>
-
-      <div class="two-col">
-        <div class="section-card reveal reveal-delay-1">
-          <h2 class="section-card__title">Education</h2>
-          <p class="section-card__text">
-            Currently pursuing my studies with a focus on computer science, maintaining academic excellence while exploring advanced technical concepts.
-          </p>
-        </div>
-
-        <div class="section-card reveal reveal-delay-2">
-          <h2 class="section-card__title">Skills</h2>
-          <div class="skills__list">
-            <span class="skill-badge">Programming</span>
-            <span class="skill-badge">Computer Vision</span>
-            <span class="skill-badge">Web Developer</span>
-            <span class="skill-badge">Leadership Skills</span>
+      <!-- Hero Section -->
+      <section class="hero">
+        <div class="hero__avatar reveal">
+          <div class="avatar-ring">
+            <div class="avatar-placeholder"></div>
           </div>
         </div>
-      </div>
 
-      <div class="stats-section reveal reveal-delay-3">
-        <h2 class="stats-section__title">Achievements</h2>
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-card__value">97%</div>
-            <div class="stat-card__label">Academic Average</div>
-            <div class="stat-card__visual">
-              <div class="progress-bar">
-                <div class="progress-bar__fill" style="width: 97%"></div>
-              </div>
-            </div>
-            <a href="grades.html" class="stat-card__btn">View Grades</a>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card__value">3+</div>
-            <div class="stat-card__label">Projects Completed</div>
-            <div class="stat-card__visual">
-              <div class="dots">
-                <span class="dot dot--active"></span>
-                <span class="dot dot--active"></span>
-                <span class="dot dot--active"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
-              </div>
-            </div>
-            <a href="projects.html" class="stat-card__btn">View All Projects</a>
-          </div>
-          <div class="stat-card">
-            <div class="stat-card__value">∞</div>
-            <div class="stat-card__label">Curiosity Level</div>
-            <div class="stat-card__visual">
-              <div class="stars">★★★</div>
-            </div>
-            <a href="https://github.com/ShriOg" class="stat-card__btn" target="_blank">Visit GitHub</a>
-          </div>
+        <h1 class="hero__name reveal reveal-delay-1">Anand Shukla</h1>
+        <p class="hero__tagline reveal reveal-delay-2">Student Developer | Python & Computer Vision | Tech Enthusiast</p>
+
+        <div class="hero__buttons reveal reveal-delay-3">
+          <a href="projects.html" class="btn btn--primary">View Projects</a>
+          <a href="contact.html" class="btn btn--secondary">Get In Touch <span class="btn__arrow">→</span></a>
         </div>
-      </div>
+      </section>
     </main>
 
     <footer class="footer reveal">
