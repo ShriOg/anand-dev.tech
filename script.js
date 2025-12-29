@@ -152,6 +152,10 @@
     resize();
     window.addEventListener('resize', resize);
     
+    var isMobile = window.innerWidth < 768;
+    var mobileMaxLines = 12;
+    var actualMaxLines = isMobile ? mobileMaxLines : maxLines;
+    
     function Line() {
       this.reset();
       this.opacity = this.targetOpacity * 0.3;
@@ -233,7 +237,7 @@
       ctx.stroke();
     };
     
-    for (var i = 0; i < maxLines; i++) {
+    for (var i = 0; i < actualMaxLines; i++) {
       var line = new Line();
       line.born = Date.now() - Math.random() * 6000;
       lines.push(line);

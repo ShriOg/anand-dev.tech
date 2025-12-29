@@ -60,26 +60,31 @@
           <p class="section-label">Featured Work</p>
           <h2 class="section-title">Latest Project</h2>
         </div>
-        <a href="case-study.html" class="project-card project-card--featured">
-          <div class="project-card__image">
-            <div style="width:100%;height:100%;background:var(--color-surface-elevated);display:flex;align-items:center;justify-content:center;">
-              <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="1"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        <div class="featured-cards">
+          <div class="project-card project-card--compact">
+            <div class="project-card__image project-card__image--compact">
+              <div style="width:100%;height:100%;background:var(--color-surface-elevated);display:flex;align-items:center;justify-content:center;">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="1"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              </div>
+            </div>
+            <div class="project-card__content">
+              <h3 class="project-card__title">Hand-Controlled 3D Particle System</h3>
+              <p class="project-card__description">A real-time 3D particle morphing system controlled through hand gestures using computer vision and WebGL.</p>
+              <div class="project-card__tech">
+                <span>Three.js</span>
+                <span>MediaPipe</span>
+                <span>WebGL</span>
+                <span>JavaScript</span>
+              </div>
+              <div class="project-card__actions">
+                <a href="https://shriog.github.io/particle-system-guestures/particle-system.html" class="project-card__btn" target="_blank" rel="noopener">
+                  Open Project
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+              </div>
             </div>
           </div>
-          <div class="project-card__content">
-            <h3 class="project-card__title">Hand Gesture Mouse Control</h3>
-            <p class="project-card__description">Real-time computer vision system that translates hand gestures into mouse movements and actions using MediaPipe and OpenCV.</p>
-            <div class="project-card__tech">
-              <span>Python</span>
-              <span>OpenCV</span>
-              <span>MediaPipe</span>
-            </div>
-            <span class="project-card__cta">
-              View Case Study
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </span>
-          </div>
-        </a>
+        </div>
       </div>
     </section>
 
@@ -90,27 +95,27 @@
           <h2 class="section-title">Projects</h2>
         </div>
         <div class="projects-grid">
-          <a href="projects.html" class="project-card" style="--index: 0;">
+          <a href="case-study.html" class="project-card" style="--index: 0;">
             <div class="project-card__content">
-              <h3 class="project-card__title">Portfolio Website</h3>
-              <p class="project-card__description">This site. Built with vanilla HTML, CSS, and JavaScript with intentional motion design.</p>
+              <h3 class="project-card__title">Hand Gesture Mouse Control</h3>
+              <p class="project-card__description">Computer vision system translating hand gestures into mouse actions using MediaPipe and OpenCV.</p>
               <div class="project-card__tech">
-                <span>HTML</span>
-                <span>CSS</span>
-                <span>JavaScript</span>
+                <span>Python</span>
+                <span>OpenCV</span>
+                <span>MediaPipe</span>
               </div>
               <span class="project-card__cta">
-                View Project
+                View Case Study
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </span>
             </div>
           </a>
           <a href="projects.html" class="project-card" style="--index: 1;">
             <div class="project-card__content">
-              <h3 class="project-card__title">More Projects</h3>
-              <p class="project-card__description">Exploring new ideas in development. More projects coming soon.</p>
+              <h3 class="project-card__title">All Projects</h3>
+              <p class="project-card__description">View the complete collection of my work and ongoing explorations.</p>
               <div class="project-card__tech">
-                <span>In Progress</span>
+                <span>Browse All</span>
               </div>
               <span class="project-card__cta">
                 See All Projects
