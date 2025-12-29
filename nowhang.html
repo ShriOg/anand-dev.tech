@@ -25,6 +25,10 @@
             position: relative;
         }
 
+        body.viewer-open {
+            overflow: hidden;
+        }
+
         body::before {
             content: '';
             position: fixed;
@@ -104,6 +108,7 @@
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
             opacity: 0;
             transform: translateY(16px);
+            cursor: pointer;
             transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
                         box-shadow 0.35s ease,
                         border-color 0.35s ease;
@@ -127,10 +132,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-        }
-
-        .media-item video {
-            cursor: pointer;
+            pointer-events: none;
         }
 
         @keyframes fadeSlideIn {
@@ -143,6 +145,156 @@
                 transform: translateY(0);
             }
         }
+
+        .viewer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                        visibility 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .viewer-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .viewer-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(5, 5, 8, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .viewer-content {
+            position: relative;
+            z-index: 1;
+            max-width: 90vw;
+            max-height: 85vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: scale(0.92);
+            opacity: 0;
+            transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+                        opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .viewer-overlay.active .viewer-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .viewer-content img,
+        .viewer-content video {
+            max-width: 90vw;
+            max-height: 85vh;
+            width: auto;
+            height: auto;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+
+        .viewer-close {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 1001;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.35s ease;
+            padding: 0;
+        }
+
+        .viewer-overlay.active .viewer-close {
+            opacity: 0.4;
+        }
+
+        .viewer-close:hover {
+            opacity: 0.7;
+        }
+
+        .viewer-close::before,
+        .viewer-close::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 1.5px;
+            background: #a0a0b0;
+            border-radius: 1px;
+        }
+
+        .viewer-close::before {
+            transform: rotate(45deg);
+        }
+
+        .viewer-close::after {
+            transform: rotate(-45deg);
+        }
+
+        .viewer-home {
+            position: fixed;
+            bottom: 28px;
+            left: 28px;
+            z-index: 1001;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13px;
+            letter-spacing: 0.02em;
+            color: #606070;
+            opacity: 0;
+            transition: opacity 0.35s ease, color 0.3s ease;
+            padding: 0;
+        }
+
+        .viewer-overlay.active .viewer-home {
+            opacity: 0.5;
+        }
+
+        .viewer-home:hover {
+            opacity: 0.8;
+            color: #808090;
+        }
+
+        @media (max-width: 600px) {
+            .viewer-close {
+                top: 16px;
+                right: 16px;
+            }
+
+            .viewer-home {
+                bottom: 20px;
+                left: 20px;
+                font-size: 12px;
+            }
+
+            .viewer-content img,
+            .viewer-content video {
+                max-width: 94vw;
+                max-height: 80vh;
+            }
+        }
     </style>
 </head>
 <body>
@@ -150,14 +302,27 @@
         <div class="grid" id="gallery"></div>
     </div>
 
+    <div class="viewer-overlay" id="viewer">
+        <div class="viewer-backdrop"></div>
+        <div class="viewer-content" id="viewerContent"></div>
+        <button class="viewer-close" id="viewerClose" aria-label="Close"></button>
+        <button class="viewer-home" id="viewerHome">Back to Home</button>
+    </div>
+
     <script>
         (async function() {
             const gallery = document.getElementById('gallery');
+            const viewer = document.getElementById('viewer');
+            const viewerContent = document.getElementById('viewerContent');
+            const viewerClose = document.getElementById('viewerClose');
+            const viewerHome = document.getElementById('viewerHome');
+            const viewerBackdrop = viewer.querySelector('.viewer-backdrop');
             const basePath = '/private/';
             const imageExts = ['.jpg', '.jpeg', '.png'];
             const videoExts = ['.mp4'];
 
             let files = [];
+            let scrollPosition = 0;
 
             try {
                 const response = await fetch(basePath + 'manifest.json');
@@ -167,6 +332,43 @@
             } catch (e) {}
 
             const items = [];
+
+            function openViewer(src, isVideo) {
+                scrollPosition = window.scrollY;
+                viewerContent.innerHTML = '';
+
+                if (isVideo) {
+                    const video = document.createElement('video');
+                    video.src = src;
+                    video.controls = true;
+                    video.playsInline = true;
+                    video.preload = 'metadata';
+                    viewerContent.appendChild(video);
+                } else {
+                    const img = document.createElement('img');
+                    img.src = src;
+                    img.alt = '';
+                    viewerContent.appendChild(img);
+                }
+
+                viewer.classList.add('active');
+                document.body.classList.add('viewer-open');
+            }
+
+            function closeViewer() {
+                const video = viewerContent.querySelector('video');
+                if (video) {
+                    video.pause();
+                }
+
+                viewer.classList.remove('active');
+                document.body.classList.remove('viewer-open');
+
+                setTimeout(function() {
+                    viewerContent.innerHTML = '';
+                    window.scrollTo(0, scrollPosition);
+                }, 450);
+            }
 
             files.forEach(function(filename) {
                 const ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
@@ -188,14 +390,31 @@
                 } else if (isVideo) {
                     const video = document.createElement('video');
                     video.src = url;
-                    video.controls = true;
                     video.preload = 'metadata';
                     video.playsInline = true;
+                    video.muted = true;
                     wrapper.appendChild(video);
                 }
 
+                wrapper.addEventListener('click', function() {
+                    openViewer(url, isVideo);
+                });
+
                 gallery.appendChild(wrapper);
                 items.push(wrapper);
+            });
+
+            viewerClose.addEventListener('click', closeViewer);
+            viewerBackdrop.addEventListener('click', closeViewer);
+
+            viewerHome.addEventListener('click', function() {
+                window.location.href = '/';
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && viewer.classList.contains('active')) {
+                    closeViewer();
+                }
             });
 
             const observer = new IntersectionObserver(function(entries) {
