@@ -12,6 +12,10 @@
             box-sizing: border-box;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         html, body {
             background-color: #0a0a0f;
             color: #a0a0b0;
@@ -157,13 +161,74 @@
             visibility: visible;
         }
 
+        .section-slider-wrapper {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(0);
+            z-index: 600;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                        visibility 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .section-slider-wrapper.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .section-slider-wrapper.hidden {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(-50%) translateY(-20px);
+        }
+
+        .section-slider {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px;
+            background: rgba(15, 15, 23, 0.85);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid #1e1e2e;
+            border-radius: 100px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .section-slider-btn {
+            padding: 8px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 100px;
+            color: #6a6a7a;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.25s ease, background 0.25s ease;
+        }
+
+        .section-slider-btn:hover {
+            color: #a0a0b0;
+        }
+
+        .section-slider-btn.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: #ffffff;
+        }
+
         .back-home-btn {
             position: fixed;
             top: 24px;
             left: 24px;
             z-index: 500;
             padding: 10px 20px;
-            background: #12121c;
+            background: rgba(15, 15, 23, 0.85);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
             border: 1px solid #1e1e2e;
             border-radius: 100px;
             color: #6a6a7a;
@@ -171,6 +236,7 @@
             font-size: 13px;
             font-weight: 500;
             cursor: pointer;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
             opacity: 0;
             visibility: hidden;
             transform: translateY(0);
@@ -194,7 +260,7 @@
         }
 
         .back-home-btn:hover {
-            background: #161622;
+            background: rgba(22, 22, 34, 0.9);
             border-color: #2a2a3e;
             color: #a0a0b0;
         }
@@ -239,6 +305,13 @@
                 top: 16px;
                 left: 16px;
                 padding: 8px 16px;
+                font-size: 12px;
+            }
+            .section-slider-wrapper {
+                top: 16px;
+            }
+            .section-slider-btn {
+                padding: 6px 14px;
                 font-size: 12px;
             }
         }
@@ -446,6 +519,26 @@
                 max-height: 80vh;
             }
         }
+
+        .section {
+            margin-bottom: 48px;
+            scroll-margin-top: 80px;
+        }
+
+        .section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section.hidden {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .section {
+                margin-bottom: 36px;
+                scroll-margin-top: 70px;
+            }
+        }
     </style>
 </head>
 <body class="locked">
@@ -456,11 +549,24 @@
         </div>
     </div>
 
+    <div class="section-slider-wrapper" id="sectionSlider">
+        <div class="section-slider">
+            <button class="section-slider-btn active" id="photosBtn" data-section="photos">Photos</button>
+            <button class="section-slider-btn" id="videosBtn" data-section="videos">Videos</button>
+        </div>
+    </div>
+
     <button class="back-home-btn" id="backHomeBtn">Back to Home</button>
 
     <div class="main-content" id="mainContent">
         <div class="container">
-            <div class="grid" id="gallery"></div>
+            <div class="section hidden" id="photosSection">
+                <div class="grid" id="photosGallery"></div>
+            </div>
+
+            <div class="section hidden" id="videosSection">
+                <div class="grid" id="videosGallery"></div>
+            </div>
         </div>
 
         <div class="viewer-overlay" id="viewer">
@@ -482,6 +588,11 @@
             const accessBtn = document.getElementById('accessBtn');
             const mainContent = document.getElementById('mainContent');
             const backHomeBtn = document.getElementById('backHomeBtn');
+            const sectionSlider = document.getElementById('sectionSlider');
+            const photosBtn = document.getElementById('photosBtn');
+            const videosBtn = document.getElementById('videosBtn');
+            const photosSection = document.getElementById('photosSection');
+            const videosSection = document.getElementById('videosSection');
 
             function attemptUnlock() {
                 const code = accessInput.value;
@@ -493,6 +604,7 @@
                     document.body.classList.remove('locked');
                     mainContent.classList.add('visible');
                     backHomeBtn.classList.add('visible');
+                    sectionSlider.classList.add('visible');
                     initGallery();
                 } else {
                     wrongAttempt = true;
@@ -515,6 +627,39 @@
                 window.location.href = '/';
             });
 
+            function updateSliderState() {
+                const photosRect = photosSection.getBoundingClientRect();
+                const videosRect = videosSection.getBoundingClientRect();
+                const windowHeight = window.innerHeight;
+                const threshold = windowHeight * 0.4;
+
+                if (!photosSection.classList.contains('hidden') && !videosSection.classList.contains('hidden')) {
+                    if (videosRect.top < threshold) {
+                        photosBtn.classList.remove('active');
+                        videosBtn.classList.add('active');
+                    } else {
+                        photosBtn.classList.add('active');
+                        videosBtn.classList.remove('active');
+                    }
+                }
+            }
+
+            photosBtn.addEventListener('click', function() {
+                if (!photosSection.classList.contains('hidden')) {
+                    photosSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    photosBtn.classList.add('active');
+                    videosBtn.classList.remove('active');
+                }
+            });
+
+            videosBtn.addEventListener('click', function() {
+                if (!videosSection.classList.contains('hidden')) {
+                    videosSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    videosBtn.classList.add('active');
+                    photosBtn.classList.remove('active');
+                }
+            });
+
             let lastScrollY = 0;
             let ticking = false;
 
@@ -526,10 +671,16 @@
                 if (currentScrollY > lastScrollY && currentScrollY > 60) {
                     backHomeBtn.classList.add('hidden');
                     backHomeBtn.classList.remove('visible');
+                    sectionSlider.classList.add('hidden');
+                    sectionSlider.classList.remove('visible');
                 } else {
                     backHomeBtn.classList.remove('hidden');
                     backHomeBtn.classList.add('visible');
+                    sectionSlider.classList.remove('hidden');
+                    sectionSlider.classList.add('visible');
                 }
+
+                updateSliderState();
 
                 lastScrollY = currentScrollY;
                 ticking = false;
@@ -545,7 +696,8 @@
             function initGallery() {
                 if (wrongAttempt || !isUnlocked) return;
 
-                const gallery = document.getElementById('gallery');
+                const photosGallery = document.getElementById('photosGallery');
+                const videosGallery = document.getElementById('videosGallery');
                 const viewer = document.getElementById('viewer');
                 const viewerContent = document.getElementById('viewerContent');
                 const viewerClose = document.getElementById('viewerClose');
@@ -566,7 +718,8 @@
                         }
                     } catch (e) {}
 
-                    const items = [];
+                    const photoItems = [];
+                    const videoItems = [];
 
                     function openViewer(src, isVideo) {
                         scrollPosition = window.scrollY;
@@ -578,6 +731,7 @@
                             video.controls = true;
                             video.playsInline = true;
                             video.preload = 'metadata';
+                            video.muted = true;
                             viewerContent.appendChild(video);
                         } else {
                             const img = document.createElement('img');
@@ -622,6 +776,11 @@
                             img.loading = 'lazy';
                             img.alt = '';
                             wrapper.appendChild(img);
+                            wrapper.addEventListener('click', function() {
+                                openViewer(url, false);
+                            });
+                            photosGallery.appendChild(wrapper);
+                            photoItems.push(wrapper);
                         } else if (isVideo) {
                             const video = document.createElement('video');
                             video.src = url;
@@ -629,15 +788,36 @@
                             video.playsInline = true;
                             video.muted = true;
                             wrapper.appendChild(video);
+                            wrapper.addEventListener('click', function() {
+                                openViewer(url, true);
+                            });
+                            videosGallery.appendChild(wrapper);
+                            videoItems.push(wrapper);
                         }
-
-                        wrapper.addEventListener('click', function() {
-                            openViewer(url, isVideo);
-                        });
-
-                        gallery.appendChild(wrapper);
-                        items.push(wrapper);
                     });
+
+                    let hasPhotos = photoItems.length > 0;
+                    let hasVideos = videoItems.length > 0;
+
+                    if (hasPhotos) {
+                        photosSection.classList.remove('hidden');
+                    }
+                    if (hasVideos) {
+                        videosSection.classList.remove('hidden');
+                    }
+
+                    if (hasPhotos && !hasVideos) {
+                        videosBtn.style.display = 'none';
+                        photosBtn.classList.add('active');
+                    } else if (hasVideos && !hasPhotos) {
+                        photosBtn.style.display = 'none';
+                        videosBtn.classList.add('active');
+                        photosBtn.classList.remove('active');
+                    }
+
+                    if (!hasPhotos && !hasVideos) {
+                        sectionSlider.style.display = 'none';
+                    }
 
                     viewerClose.addEventListener('click', closeViewer);
                     viewerBackdrop.addEventListener('click', closeViewer);
@@ -664,7 +844,12 @@
                         rootMargin: '0px 0px -40px 0px'
                     });
 
-                    items.forEach(function(item, index) {
+                    photoItems.forEach(function(item, index) {
+                        item.style.animationDelay = (index % 10) * 0.04 + 's';
+                        observer.observe(item);
+                    });
+
+                    videoItems.forEach(function(item, index) {
                         item.style.animationDelay = (index % 10) * 0.04 + 's';
                         observer.observe(item);
                     });
