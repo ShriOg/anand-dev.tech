@@ -60,6 +60,44 @@ body {
   position: relative;
 }
 
+body::before {
+  content: '';
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  border: 1px solid rgba(113, 113, 122, 0.1);
+  border-radius: var(--radius-lg);
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  animation: borderFadeIn 1200ms var(--ease-out) 0.5s forwards;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  border-radius: var(--radius-lg);
+  pointer-events: none;
+  z-index: 9998;
+  background: 
+    radial-gradient(ellipse 80px 80px at 12px 12px, rgba(59, 130, 246, 0.06), transparent),
+    radial-gradient(ellipse 80px 80px at calc(100% - 12px) 12px, rgba(59, 130, 246, 0.06), transparent),
+    radial-gradient(ellipse 80px 80px at 12px calc(100% - 12px), rgba(59, 130, 246, 0.06), transparent),
+    radial-gradient(ellipse 80px 80px at calc(100% - 12px) calc(100% - 12px), rgba(59, 130, 246, 0.06), transparent);
+  opacity: 0;
+  animation: borderFadeIn 1200ms var(--ease-out) 0.8s forwards;
+}
+
+@keyframes borderFadeIn {
+  to { opacity: 1; }
+}
+
 #particle-canvas {
   position: fixed;
   top: 0;
@@ -216,6 +254,15 @@ section { padding: var(--spacing-2xl) 0; }
   overflow: hidden;
 }
 
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 50%, transparent 40%, rgba(10, 10, 11, 0.4) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
 .hero__accent {
   position: absolute;
   top: 20%;
@@ -229,6 +276,19 @@ section { padding: var(--spacing-2xl) 0; }
   transform: scale(0.96);
   animation: accentReveal var(--duration-accent) var(--ease-out) 0.2s forwards;
   pointer-events: none;
+}
+
+.hero__accent::before {
+  content: '';
+  position: absolute;
+  top: -16px;
+  left: -16px;
+  right: -16px;
+  bottom: -16px;
+  border-radius: 50%;
+  border: 1px solid rgba(59, 130, 246, 0.06);
+  opacity: 0;
+  animation: accentReveal 900ms var(--ease-out) 0.35s forwards;
 }
 
 @keyframes accentReveal {
@@ -284,12 +344,12 @@ section { padding: var(--spacing-2xl) 0; }
   align-items: center;
   gap: var(--spacing-xs);
   font-size: 0.9rem;
-  color: var(--color-text-secondary);
-  transition: color var(--duration-hover) var(--ease-out);
+  color: var(--color-text-muted);
+  transition: color 280ms var(--ease-out);
 }
 
-.hero__link:hover { color: var(--color-text); }
-.hero__link svg { width: 18px; height: 18px; }
+.hero__link:hover { color: var(--color-accent); }
+.hero__link svg { width: 20px; height: 20px; }
 
 .section-header { margin-bottom: var(--spacing-xl); }
 
@@ -327,9 +387,12 @@ section { padding: var(--spacing-2xl) 0; }
 }
 
 .project-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-hover);
-  border-color: var(--color-border-hover);
+  transform: translateY(-3px);
+  box-shadow: 
+    0 16px 48px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(59, 130, 246, 0.08),
+    0 0 40px -10px rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.15);
 }
 
 .project-card--featured {
@@ -443,9 +506,12 @@ section { padding: var(--spacing-2xl) 0; }
 }
 
 .project-item:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-hover);
-  border-color: var(--color-border-hover);
+  transform: translateY(-3px);
+  box-shadow: 
+    0 16px 48px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(59, 130, 246, 0.08),
+    0 0 40px -10px rgba(59, 130, 246, 0.12);
+  border-color: rgba(59, 130, 246, 0.15);
 }
 
 .project-item__header {
@@ -722,6 +788,13 @@ section { padding: var(--spacing-2xl) 0; }
   font-size: 1rem;
   line-height: 1.8;
   color: var(--color-text-secondary);
+}
+
+.about-section__aside {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+  margin-top: var(--spacing-lg);
 }
 
 .skills-grid {
@@ -1031,6 +1104,17 @@ section { padding: var(--spacing-2xl) 0; }
   
   #particle-canvas {
     display: none;
+  }
+  
+  body::before,
+  body::after {
+    opacity: 1 !important;
+    animation: none !important;
+  }
+  
+  .project-card:hover,
+  .project-item:hover {
+    box-shadow: var(--shadow-hover) !important;
   }
   
   .hero__greeting,

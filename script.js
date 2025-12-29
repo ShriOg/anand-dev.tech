@@ -122,69 +122,121 @@
     revealObserver.observe(el);
   });
 
-  // Particle Background System
-  (function initParticles() {
+  // Ambient Line Background System
+  (function initLines() {
     var canvas = document.createElement('canvas');
     canvas.id = 'particle-canvas';
     document.body.insertBefore(canvas, document.body.firstChild);
     
     var ctx = canvas.getContext('2d');
-    var particles = [];
-    var particleCount = 40;
+    var lines = [];
+    var maxLines = 22;
     var mouseX = window.innerWidth / 2;
     var mouseY = window.innerHeight / 2;
     var targetMouseX = mouseX;
     var targetMouseY = mouseY;
+    var scrollY = 0;
+    var targetScrollY = 0;
+    
+    // Circle focal point (right side of viewport)
+    var circleX = window.innerWidth * 0.85;
+    var circleY = window.innerHeight * 0.35;
     
     function resize() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      circleX = window.innerWidth * 0.85;
+      circleY = window.innerHeight * 0.35;
     }
     
     resize();
     window.addEventListener('resize', resize);
     
-    function Particle() {
-      this.x = Math.random() * canvas.width;
+    function Line() {
+      this.reset();
+      this.opacity = this.targetOpacity * 0.3;
+      this.life = Math.random() * 12000 + 8000;
+      this.born = Date.now();
+    }
+    
+    Line.prototype.reset = function() {
+      // Bias position toward right side (circle area)
+      var xBias = Math.random() * Math.random();
+      this.x = canvas.width * (0.3 + xBias * 0.65);
       this.y = Math.random() * canvas.height;
       this.baseX = this.x;
       this.baseY = this.y;
-      this.size = Math.random() * 1 + 1;
-      this.opacity = Math.random() * 0.15 + 0.1;
-      this.isAccent = Math.random() < 0.08;
-      this.vx = (Math.random() - 0.5) * 0.15;
-      this.vy = (Math.random() - 0.5) * 0.15;
-    }
-    
-    Particle.prototype.update = function() {
-      this.baseX += this.vx;
-      this.baseY += this.vy;
+      this.length = Math.random() * 80 + 50;
       
-      if (this.baseX < 0 || this.baseX > canvas.width) this.vx *= -1;
-      if (this.baseY < 0 || this.baseY > canvas.height) this.vy *= -1;
+      // Calculate angle pointing toward circle with some randomness
+      var toCircleX = circleX - this.x;
+      var toCircleY = circleY - this.y;
+      var toCircleAngle = Math.atan2(toCircleY, toCircleX);
+      var randomOffset = (Math.random() - 0.5) * Math.PI * 0.8;
+      this.angle = toCircleAngle + randomOffset;
+      
+      this.thickness = Math.random() * 0.8 + 0.6;
+      this.isAccent = Math.random() < 0.1;
+      
+      // Lower opacity for lines on left side (text area)
+      var leftFade = this.x < canvas.width * 0.4 ? 0.5 : 1;
+      this.targetOpacity = (Math.random() * 0.18 + 0.12) * leftFade;
+      
+      this.life = Math.random() * 12000 + 8000;
+      this.born = Date.now();
+      this.parallaxFactor = Math.random() * 0.3 + 0.1;
+    };
+    
+    Line.prototype.update = function() {
+      var age = Date.now() - this.born;
+      var lifeRatio = age / this.life;
+      
+      if (lifeRatio < 0.2) {
+        this.opacity += (this.targetOpacity - this.opacity) * 0.04;
+      } else if (lifeRatio > 0.75) {
+        this.opacity *= 0.988;
+      }
+      
+      if (age > this.life) {
+        this.reset();
+        this.opacity = 0;
+      }
       
       var dx = mouseX - canvas.width / 2;
       var dy = mouseY - canvas.height / 2;
-      var offsetX = dx * 0.008;
-      var offsetY = dy * 0.008;
+      var offsetX = dx * 0.005;
+      var offsetY = dy * 0.005;
       
-      this.x += (this.baseX + offsetX - this.x) * 0.03;
-      this.y += (this.baseY + offsetY - this.y) * 0.03;
+      // Parallax scroll offset (lines move slower than content)
+      var scrollOffset = scrollY * this.parallaxFactor;
+      
+      this.x += (this.baseX + offsetX - this.x) * 0.02;
+      this.y += (this.baseY + offsetY + scrollOffset - this.y) * 0.02;
     };
     
-    Particle.prototype.draw = function() {
+    Line.prototype.draw = function() {
+      if (this.opacity < 0.01) return;
+      
+      var endX = this.x + Math.cos(this.angle) * this.length;
+      var endY = this.y + Math.sin(this.angle) * this.length;
+      
       ctx.beginPath();
-      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.moveTo(this.x, this.y);
+      ctx.lineTo(endX, endY);
+      ctx.lineWidth = this.thickness;
+      
       if (this.isAccent) {
-        ctx.fillStyle = 'rgba(59, 130, 246, ' + this.opacity + ')';
+        ctx.strokeStyle = 'rgba(59, 130, 246, ' + this.opacity + ')';
       } else {
-        ctx.fillStyle = 'rgba(113, 113, 122, ' + this.opacity + ')';
+        ctx.strokeStyle = 'rgba(113, 113, 122, ' + this.opacity + ')';
       }
-      ctx.fill();
+      ctx.stroke();
     };
     
-    for (var i = 0; i < particleCount; i++) {
-      particles.push(new Particle());
+    for (var i = 0; i < maxLines; i++) {
+      var line = new Line();
+      line.born = Date.now() - Math.random() * 6000;
+      lines.push(line);
     }
     
     var throttleTimer = null;
@@ -197,15 +249,20 @@
       }, 16);
     }, { passive: true });
     
+    window.addEventListener('scroll', function() {
+      targetScrollY = window.scrollY;
+    }, { passive: true });
+    
     function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      mouseX += (targetMouseX - mouseX) * 0.05;
-      mouseY += (targetMouseY - mouseY) * 0.05;
+      mouseX += (targetMouseX - mouseX) * 0.03;
+      mouseY += (targetMouseY - mouseY) * 0.03;
+      scrollY += (targetScrollY - scrollY) * 0.08;
       
-      for (var i = 0; i < particles.length; i++) {
-        particles[i].update();
-        particles[i].draw();
+      for (var i = 0; i < lines.length; i++) {
+        lines[i].update();
+        lines[i].draw();
       }
       
       requestAnimationFrame(animate);
