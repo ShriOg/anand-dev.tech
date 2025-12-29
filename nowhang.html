@@ -20,35 +20,98 @@
         }
 
         .container {
-            max-width: 720px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 80px 24px;
+            padding: 48px 24px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 1200px) {
+            .grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .container {
+                padding: 24px 12px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .media-item {
-            margin-bottom: 64px;
+            position: relative;
+            aspect-ratio: 1 / 1;
+            overflow: hidden;
+            border-radius: 10px;
+            background: #111;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             opacity: 0;
-            animation: fadeIn 1.2s ease forwards;
+            transform: translateY(20px);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .media-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+            animation: fadeSlideIn 0.8s ease forwards;
+        }
+
+        .media-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         }
 
         .media-item img,
         .media-item video {
             display: block;
             width: 100%;
-            height: auto;
-            border-radius: 8px;
-            background: #141414;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
         }
 
-        @keyframes fadeIn {
+        .media-item video {
+            cursor: pointer;
+        }
+
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
             to {
                 opacity: 1;
+                transform: translateY(0);
             }
         }
     </style>
 </head>
 <body>
-    <div class="container" id="gallery"></div>
+    <div class="container">
+        <div class="grid" id="gallery"></div>
+    </div>
 
     <script>
         (async function() {
@@ -66,7 +129,8 @@
                 }
             } catch (e) {}
 
-            let index = 0;
+            const items = [];
+
             files.forEach(function(filename) {
                 const ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
                 const isImage = imageExts.includes(ext);
@@ -77,7 +141,6 @@
                 const url = basePath + encodeURIComponent(filename);
                 const wrapper = document.createElement('div');
                 wrapper.className = 'media-item';
-                wrapper.style.animationDelay = (index * 0.05) + 's';
 
                 if (isImage) {
                     const img = document.createElement('img');
@@ -95,7 +158,24 @@
                 }
 
                 gallery.appendChild(wrapper);
-                index++;
+                items.push(wrapper);
+            });
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -40px 0px'
+            });
+
+            items.forEach(function(item, index) {
+                item.style.animationDelay = (index % 10) * 0.05 + 's';
+                observer.observe(item);
             });
         })();
     </script>
