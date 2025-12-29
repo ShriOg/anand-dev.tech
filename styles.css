@@ -5,6 +5,13 @@
 }
 
 :root {
+  /* Layout System */
+  --navbar-height: 3.5rem;
+  --navbar-top: 1.25rem;
+  --navbar-offset: calc(var(--navbar-height) + var(--navbar-top) + 3rem);
+  --navbar-offset-mobile: calc(var(--navbar-height) + var(--navbar-top) + 2rem);
+  
+  /* Colors */
   --color-bg: #0a0a0f;
   --color-surface: #0f0f17;
   --color-card: #12121c;
@@ -20,13 +27,19 @@
   --gradient-text: linear-gradient(135deg, #3b82f6 0%, #60a5fa 50%, #93c5fd 100%);
   --gradient-accent: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   --color-glass: rgba(15, 15, 23, 0.9);
+  
+  /* Spacing & Radius */
   --radius: 16px;
   --radius-sm: 10px;
   --radius-lg: 20px;
   --radius-full: 100px;
+  
+  /* Transitions */
   --transition-fast: 0.15s ease;
   --transition: 0.25s ease;
   --transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  
+  /* Layout */
   --max-width: 900px;
 }
 
@@ -110,11 +123,19 @@ body {
   background: var(--gradient-accent);
 }
 
-/* Main Content */
+/* Main Content - Single Source of Truth */
 main {
   flex: 1;
-  padding-top: 10rem;
+  padding-top: var(--navbar-offset);
   padding-bottom: 3rem;
+}
+
+/* Page Layout Container */
+.page-content {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 1.5rem;
 }
 
 /* Reveal Animation */
@@ -777,13 +798,13 @@ main {
 
 /* Mobile Responsive */
 @media (max-width: 480px) {
+  :root {
+    --navbar-offset: var(--navbar-offset-mobile);
+  }
+
   .nav__link {
     padding: 0.4375rem 0.875rem;
     font-size: 0.8125rem;
-  }
-
-  main {
-    padding-top: 9rem;
   }
 
   .bio-card {

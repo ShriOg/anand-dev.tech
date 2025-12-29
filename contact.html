@@ -8,319 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    :root {
-      --color-bg: #0a0a0f;
-      --color-surface: #0f0f17;
-      --color-card: #12121c;
-      --color-card-elevated: #161622;
-      --color-border: #1e1e2e;
-      --color-border-hover: #2a2a3e;
-      --color-text: #ffffff;
-      --color-text-secondary: #a0a0b0;
-      --color-text-muted: #6a6a7a;
-      --color-accent: #3b82f6;
-      --color-accent-light: #60a5fa;
-      --color-accent-glow: rgba(59, 130, 246, 0.25);
-      --gradient-text: linear-gradient(135deg, #3b82f6 0%, #60a5fa 50%, #93c5fd 100%);
-      --gradient-accent: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      --color-glass: rgba(15, 15, 23, 0.9);
-      --radius: 16px;
-      --radius-sm: 10px;
-      --radius-lg: 20px;
-      --radius-full: 100px;
-      --transition-fast: 0.15s ease;
-      --transition: 0.25s ease;
-      --transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      --max-width: 900px;
-    }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background-color: var(--color-bg);
-      color: var(--color-text);
-      line-height: 1.6;
-      font-size: 15px;
-      -webkit-font-smoothing: antialiased;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    .page-wrapper {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .container {
-      width: 100%;
-      max-width: var(--max-width);
-      margin: 0 auto;
-      padding: 0 1.5rem;
-    }
-
-    /* Navigation */
-    .nav-wrapper {
-      position: fixed;
-      top: 1.25rem;
-      left: 0;
-      right: 0;
-      z-index: 100;
-      display: flex;
-      justify-content: center;
-      padding: 0 1rem;
-      transition: transform var(--transition-slow), opacity var(--transition);
-    }
-
-    .nav-wrapper.hidden {
-      transform: translateY(-100%);
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .nav {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.5rem;
-      background: var(--color-glass);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-full);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    }
-
-    .nav__link {
-      padding: 0.5rem 1.125rem;
-      color: var(--color-text-secondary);
-      text-decoration: none;
-      font-size: 0.875rem;
-      font-weight: 500;
-      border-radius: var(--radius-full);
-      transition: all var(--transition-fast);
-    }
-
-    .nav__link:hover { color: var(--color-text); }
-
-    .nav__link--active {
-      color: var(--color-text);
-      background: var(--gradient-accent);
-    }
-
-    /* Main Content */
-    main {
-      flex: 1;
-      padding-top: 12rem;
-      padding-bottom: 3rem;
-    }
-
-    /* Reveal Animation */
-    .reveal {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .reveal-delay-1 { transition-delay: 0.1s; }
-    .reveal-delay-2 { transition-delay: 0.2s; }
-
-    /* Page Title */
-    .page-title {
-      text-align: center;
-      margin-bottom: 2.5rem;
-    }
-
-    .page-title__text {
-      font-size: clamp(2rem, 6vw, 3rem);
-      font-weight: 800;
-      background: var(--gradient-text);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: -0.02em;
-    }
-
-    /* Contact Layout */
-    .contact-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 2rem;
-      align-items: start;
-    }
-
-    @media (min-width: 768px) {
-      .contact-grid { grid-template-columns: 1fr 1.2fr; }
-    }
-
-    /* Contact Info */
-    .contact-info {
-      padding-right: 1rem;
-    }
-
-    .contact-info__title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--color-accent-light);
-      margin-bottom: 1rem;
-    }
-
-    .contact-info__text {
-      color: var(--color-text-secondary);
-      font-size: 0.9375rem;
-      line-height: 1.7;
-      margin-bottom: 2rem;
-    }
-
-    .contact-links {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .contact-link {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      color: var(--color-text-secondary);
-      text-decoration: none;
-      transition: all var(--transition-fast);
-    }
-
-    .contact-link:hover {
-      color: var(--color-text);
-    }
-
-    .contact-link__icon {
-      width: 44px;
-      height: 44px;
-      background: var(--gradient-accent);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.125rem;
-      flex-shrink: 0;
-    }
-
-    .contact-link__text {
-      font-size: 0.9375rem;
-    }
-
-    /* Contact Form Card */
-    .form-card {
-      background: var(--color-card);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-lg);
-      padding: 2rem;
-    }
-
-    .form-group {
-      margin-bottom: 1.25rem;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--color-text-secondary);
-      margin-bottom: 0.5rem;
-    }
-
-    .form-group input,
-    .form-group textarea {
-      width: 100%;
-      padding: 0.875rem 1rem;
-      background: var(--color-card-elevated);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-sm);
-      color: var(--color-text);
-      font-family: inherit;
-      font-size: 0.9375rem;
-      transition: all var(--transition-fast);
-      outline: none;
-    }
-
-    .form-group input::placeholder,
-    .form-group textarea::placeholder {
-      color: var(--color-text-muted);
-    }
-
-    .form-group input:focus,
-    .form-group textarea:focus {
-      border-color: var(--color-accent);
-      box-shadow: 0 0 0 3px var(--color-accent-glow);
-    }
-
-    .form-group textarea {
-      min-height: 140px;
-      resize: vertical;
-    }
-
-    .form-btn {
-      width: 100%;
-      padding: 1rem 2rem;
-      background: var(--gradient-accent);
-      border: none;
-      border-radius: var(--radius-sm);
-      color: var(--color-text);
-      font-family: inherit;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all var(--transition-fast);
-    }
-
-    .form-btn:hover {
-      transform: scale(1.02);
-      box-shadow: 0 8px 30px var(--color-accent-glow);
-    }
-
-    .form-btn:active {
-      transform: scale(0.98);
-    }
-
-    /* Footer */
-    .footer {
-      padding: 2.5rem 0;
-      border-top: 1px solid var(--color-border);
-      text-align: center;
-    }
-
-    .footer__text {
-      font-size: 0.8125rem;
-      color: var(--color-text-muted);
-    }
-
-    ::selection {
-      background-color: var(--color-accent);
-      color: var(--color-bg);
-    }
-
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: var(--color-bg); }
-    ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
-
-    @media (max-width: 480px) {
-      .nav__link { padding: 0.4375rem 0.875rem; font-size: 0.8125rem; }
-      main { padding-top: 10rem; }
-      .form-card { padding: 1.5rem; }
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="page-wrapper">
@@ -333,93 +21,57 @@
       </div>
     </nav>
 
-    <main class="container">
-      <div class="page-title reveal">
-        <h1 class="page-title__text">Get In Touch</h1>
-      </div>
-
-      <div class="contact-grid">
-        <div class="contact-info reveal reveal-delay-1">
-          <h2 class="contact-info__title">Let us Connect</h2>
-          <p class="contact-info__text">
-            I am always excited to discuss new opportunities, collaborate on projects, or simply connect with fellow technology enthusiasts.
-          </p>
-          <div class="contact-links">
-            <a href="mailto:shrishukla04@gmail.com" class="contact-link">
-              <span class="contact-link__icon">✉️</span>
-              <span class="contact-link__text">shrishukla04@gmail.com</span>
-            </a>
-            <a href="https://github.com/ShriOg" class="contact-link" target="_blank">
-              <span class="contact-link__icon">👤</span>
-              <span class="contact-link__text">GitHub: /ShriOg</span>
-            </a>
-          </div>
+    <main>
+      <div class="container">
+        <div class="page-title reveal">
+          <h1 class="page-title__text">Get In Touch</h1>
         </div>
 
-        <div class="form-card reveal reveal-delay-2">
-          <form action="https://formspree.io/f/your-form-id" method="POST">
-            <div class="form-group">
-              <label for="name">Name</label>
-              <input type="text" id="name" name="name" required>
+        <div class="contact-grid">
+          <div class="contact-info reveal reveal-delay-1">
+            <h2 class="contact-info__title">Let us Connect</h2>
+            <p class="contact-info__text">
+              I am always excited to discuss new opportunities, collaborate on projects, or simply connect with fellow technology enthusiasts.
+            </p>
+            <div class="contact-links">
+              <a href="mailto:shrishukla04@gmail.com" class="contact-link">
+                <span class="contact-link__icon">✉️</span>
+                <span class="contact-link__text">shrishukla04@gmail.com</span>
+              </a>
+              <a href="https://github.com/ShriOg" class="contact-link" target="_blank">
+                <span class="contact-link__icon">👤</span>
+                <span class="contact-link__text">GitHub: /ShriOg</span>
+              </a>
             </div>
-            <div class="form-group">
-              <label for="email">Email</label>
-              <input type="email" id="email" name="email" required>
-            </div>
-            <div class="form-group">
-              <label for="message">Message</label>
-              <textarea id="message" name="message" required></textarea>
-            </div>
-            <button type="submit" class="form-btn">Send Message</button>
-          </form>
+          </div>
+
+          <div class="form-card reveal reveal-delay-2">
+            <form action="https://formspree.io/f/your-form-id" method="POST">
+              <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+              </div>
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+              </div>
+              <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" required></textarea>
+              </div>
+              <button type="submit" class="form-btn">Send Message</button>
+            </form>
+          </div>
         </div>
       </div>
     </main>
 
-    <footer class="footer reveal">
+    <footer class="footer">
       <div class="container">
         <p class="footer__text">© 2025 Anand Shukla. All rights reserved.</p>
       </div>
     </footer>
   </div>
-
-  <script>
-    (function() {
-      const navbar = document.getElementById('navbar');
-      let lastScrollY = window.scrollY;
-      let ticking = false;
-
-      function updateNavbar() {
-        const currentScrollY = window.scrollY;
-        if (currentScrollY > lastScrollY && currentScrollY > 100) {
-          navbar.classList.add('hidden');
-        } else {
-          navbar.classList.remove('hidden');
-        }
-        lastScrollY = currentScrollY;
-        ticking = false;
-      }
-
-      window.addEventListener('scroll', function() {
-        if (!ticking) {
-          requestAnimationFrame(updateNavbar);
-          ticking = true;
-        }
-      }, { passive: true });
-
-      const revealElements = document.querySelectorAll('.reveal');
-      const revealObserver = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-          }
-        });
-      }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-
-      revealElements.forEach(function(el) {
-        revealObserver.observe(el);
-      });
-    })();
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
