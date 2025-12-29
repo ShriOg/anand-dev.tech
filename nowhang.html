@@ -66,77 +66,37 @@
                 }
             } catch (e) {}
 
-            if (files.length === 0) {
-                const maxAttempts = 500;
-                const patterns = ['', 'img_', 'image_', 'photo_', 'vid_', 'video_', 'IMG_', 'VID_', 'DSC', 'DSC_', 'DSCN', 'P', 'PXL_'];
-                const allExts = [...imageExts, ...videoExts];
-
-                for (let i = 1; i <= maxAttempts; i++) {
-                    for (const pattern of patterns) {
-                        for (const ext of allExts) {
-                            const padded = String(i).padStart(4, '0');
-                            const variants = [
-                                `${pattern}${i}${ext}`,
-                                `${pattern}${padded}${ext}`,
-                                `${i}${ext}`,
-                                `${padded}${ext}`
-                            ];
-                            for (const filename of variants) {
-                                if (!files.includes(filename)) {
-                                    files.push(filename);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            const loadedUrls = new Set();
-
-            async function checkAndRender(filename) {
-                const url = basePath + filename;
-                if (loadedUrls.has(url)) return;
-
+            let index = 0;
+            files.forEach(function(filename) {
                 const ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
                 const isImage = imageExts.includes(ext);
                 const isVideo = videoExts.includes(ext);
 
                 if (!isImage && !isVideo) return;
 
-                try {
-                    const head = await fetch(url, { method: 'HEAD' });
-                    if (!head.ok) return;
+                const url = basePath + encodeURIComponent(filename);
+                const wrapper = document.createElement('div');
+                wrapper.className = 'media-item';
+                wrapper.style.animationDelay = (index * 0.05) + 's';
 
-                    loadedUrls.add(url);
+                if (isImage) {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.loading = 'lazy';
+                    img.alt = '';
+                    wrapper.appendChild(img);
+                } else if (isVideo) {
+                    const video = document.createElement('video');
+                    video.src = url;
+                    video.controls = true;
+                    video.preload = 'metadata';
+                    video.playsInline = true;
+                    wrapper.appendChild(video);
+                }
 
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'media-item';
-                    wrapper.style.animationDelay = `${loadedUrls.size * 0.05}s`;
-
-                    if (isImage) {
-                        const img = document.createElement('img');
-                        img.src = url;
-                        img.loading = 'lazy';
-                        img.alt = '';
-                        wrapper.appendChild(img);
-                    } else if (isVideo) {
-                        const video = document.createElement('video');
-                        video.src = url;
-                        video.controls = true;
-                        video.preload = 'metadata';
-                        video.playsInline = true;
-                        wrapper.appendChild(video);
-                    }
-
-                    gallery.appendChild(wrapper);
-                } catch (e) {}
-            }
-
-            const batchSize = 10;
-            for (let i = 0; i < files.length; i += batchSize) {
-                const batch = files.slice(i, i + batchSize);
-                await Promise.all(batch.map(checkAndRender));
-            }
+                gallery.appendChild(wrapper);
+                index++;
+            });
         })();
     </script>
 </body>
