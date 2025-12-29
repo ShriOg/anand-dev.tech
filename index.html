@@ -2,213 +2,70 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Anand Shukla | Developer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anand Shukla | Developer</title>
+  <meta name="description" content="Anand Shukla - Student Developer specializing in Python and Computer Vision">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    * {
+    *,
+    *::before,
+    *::after {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
     :root {
-      --primary: #6366f1;
-      --primary-light: #818cf8;
-      --accent: #22d3ee;
-      --bg-dark: #0a0a0f;
-      --bg-card: #12121a;
-      --bg-card-hover: #1a1a25;
-      --text-primary: #f8fafc;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
-      --border: rgba(99, 102, 241, 0.15);
-      --border-hover: rgba(99, 102, 241, 0.4);
-      --gradient: linear-gradient(135deg, #6366f1 0%, #22d3ee 100%);
+      --color-bg: #101014;
+      --color-surface: #18181c;
+      --color-surface-hover: #1f1f24;
+      --color-border: #2a2a30;
+      --color-text: #ececef;
+      --color-text-secondary: #a0a0a8;
+      --color-text-muted: #6b6b73;
+      --color-accent: #7c8aff;
+      --color-accent-hover: #9aa4ff;
+      --radius: 10px;
+      --radius-sm: 6px;
+      --transition: 0.2s ease;
+    }
+
+    html {
+      scroll-behavior: smooth;
     }
 
     body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: var(--bg-dark);
-      color: var(--text-primary);
-      min-height: 100vh;
-      line-height: 1.7;
-      background-image: 
-        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.15), transparent),
-        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(34, 211, 238, 0.08), transparent);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.6;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     .container {
-      max-width: 800px;
+      width: 100%;
+      max-width: 680px;
       margin: 0 auto;
-      padding: 5rem 2rem;
+      padding: 0 1.25rem;
     }
 
-    /* Hero Section */
-    .hero {
-      text-align: center;
-      margin-bottom: 4rem;
-      animation: fadeInUp 0.8s ease-out;
+    .fade-in {
+      animation: fadeIn 0.6s ease-out both;
     }
 
-    .hero h1 {
-      font-size: clamp(2.5rem, 5vw, 3.5rem);
-      font-weight: 700;
-      margin-bottom: 0.75rem;
-      background: var(--gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      letter-spacing: -0.02em;
-    }
+    .fade-in-delay-1 { animation-delay: 0.1s; }
+    .fade-in-delay-2 { animation-delay: 0.2s; }
+    .fade-in-delay-3 { animation-delay: 0.3s; }
+    .fade-in-delay-4 { animation-delay: 0.4s; }
 
-    .hero .tagline {
-      font-size: 1.125rem;
-      color: var(--text-secondary);
-      font-weight: 400;
-      letter-spacing: 0.5px;
-    }
-
-    .hero .tagline span {
-      color: var(--text-muted);
-      margin: 0 0.5rem;
-    }
-
-    /* Divider */
-    .divider {
-      width: 80px;
-      height: 3px;
-      background: var(--gradient);
-      margin: 2rem auto;
-      border-radius: 2px;
-    }
-
-    /* Cards */
-    .card {
-      background: var(--bg-card);
-      padding: 2rem;
-      border-radius: 16px;
-      margin-top: 1.5rem;
-      border: 1px solid var(--border);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-      animation: fadeInUp 0.8s ease-out backwards;
-    }
-
-    .card:nth-child(1) { animation-delay: 0.1s; }
-    .card:nth-child(2) { animation-delay: 0.2s; }
-
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .card:hover {
-      border-color: var(--border-hover);
-      background: var(--bg-card-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 60px rgba(99, 102, 241, 0.1);
-    }
-
-    .card:hover::before {
-      opacity: 1;
-    }
-
-    .card h2 {
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: var(--primary-light);
-      margin-bottom: 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .card h2::before {
-      content: '';
-      width: 8px;
-      height: 8px;
-      background: var(--gradient);
-      border-radius: 50%;
-    }
-
-    /* Lists */
-    ul {
-      list-style: none;
-    }
-
-    ul li {
-      padding: 0.75rem 0;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-      transition: padding-left 0.3s ease;
-    }
-
-    ul li:last-child {
-      border-bottom: none;
-    }
-
-    ul li:hover {
-      padding-left: 0.5rem;
-    }
-
-    /* Links */
-    a {
-      color: var(--text-primary);
-      text-decoration: none;
-      font-weight: 500;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    a:hover {
-      color: var(--accent);
-    }
-
-    a::after {
-      content: '→';
-      font-size: 0.875rem;
-      opacity: 0;
-      transform: translateX(-5px);
-      transition: all 0.2s ease;
-    }
-
-    a:hover::after {
-      opacity: 1;
-      transform: translateX(0);
-    }
-
-    /* Contact Info */
-    .contact-info {
-      color: var(--text-secondary);
-      font-family: 'Fira Code', monospace;
-      font-size: 0.9rem;
-    }
-
-    .contact-info::before {
-      content: '>';
-      color: var(--primary-light);
-      margin-right: 0.5rem;
-    }
-
-    /* Animations */
-    @keyframes fadeInUp {
+    @keyframes fadeIn {
       from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(12px);
       }
       to {
         opacity: 1;
@@ -216,65 +73,246 @@
       }
     }
 
-    /* Responsive */
-    @media (max-width: 640px) {
-      .container {
-        padding: 3rem 1.25rem;
-      }
+    /* Hero */
+    .hero {
+      padding: 5rem 0 4rem;
+      text-align: center;
+    }
 
-      .card {
-        padding: 1.5rem;
-      }
+    .hero__name {
+      font-size: clamp(2.25rem, 6vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.5rem;
+      color: var(--color-text);
+    }
+
+    .hero__tagline {
+      font-size: 1.125rem;
+      color: var(--color-text-secondary);
+      font-weight: 400;
+      margin-bottom: 1.75rem;
+    }
+
+    .hero__links {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .hero__link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--color-text-secondary);
+      text-decoration: none;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      transition: color var(--transition);
+    }
+
+    .hero__link:hover {
+      color: var(--color-accent-hover);
+    }
+
+    .hero__link svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    /* Sections */
+    .section {
+      padding: 2.5rem 0;
+    }
+
+    .section__title {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    /* About */
+    .about__text {
+      color: var(--color-text-secondary);
+      font-size: 1rem;
+      line-height: 1.75;
+    }
+
+    .about__text strong {
+      color: var(--color-text);
+      font-weight: 500;
+    }
+
+    /* Projects */
+    .projects__grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .project-card {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      text-decoration: none;
+      display: block;
+      transition: transform var(--transition), box-shadow var(--transition), background-color var(--transition);
+    }
+
+    .project-card:hover {
+      transform: translateY(-3px);
+      background-color: var(--color-surface-hover);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    .project-card__title {
+      font-size: 1.0625rem;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .project-card__title svg {
+      width: 16px;
+      height: 16px;
+      color: var(--color-text-muted);
+      flex-shrink: 0;
+    }
+
+    .project-card__desc {
+      font-size: 0.9375rem;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Skills */
+    .skills__list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.625rem;
+    }
+
+    .skill-badge {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      color: var(--color-text-secondary);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      padding: 0.5rem 0.875rem;
+      border-radius: 50px;
+      transition: border-color var(--transition), color var(--transition);
+    }
+
+    .skill-badge:hover {
+      border-color: var(--color-accent);
+      color: var(--color-text);
+    }
+
+    /* Footer */
+    .footer {
+      padding: 3rem 0 2rem;
+      text-align: center;
+      border-top: 1px solid var(--color-border);
+      margin-top: 2rem;
+    }
+
+    .footer__text {
+      font-size: 0.8125rem;
+      color: var(--color-text-muted);
     }
 
     /* Selection */
     ::selection {
-      background: var(--primary);
-      color: white;
+      background-color: var(--color-accent);
+      color: var(--color-bg);
     }
 
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
+    /* Mobile adjustments */
+    @media (max-width: 480px) {
+      .hero {
+        padding: 3.5rem 0 3rem;
+      }
 
-    ::-webkit-scrollbar-track {
-      background: var(--bg-dark);
-    }
+      .hero__links {
+        gap: 1.25rem;
+      }
 
-    ::-webkit-scrollbar-thumb {
-      background: var(--border-hover);
-      border-radius: 4px;
-    }
+      .section {
+        padding: 2rem 0;
+      }
 
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--primary);
+      .project-card {
+        padding: 1.25rem;
+      }
+
+      .skill-badge {
+        padding: 0.4375rem 0.75rem;
+        font-size: 0.75rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header class="hero">
-      <h1>Hi, I'm Anand 👋</h1>
-      <p class="tagline">Student <span>•</span> Developer <span>•</span> Computer Vision Enthusiast</p>
-      <div class="divider"></div>
+  <main class="container">
+    <header class="hero fade-in">
+      <h1 class="hero__name">Anand Shukla</h1>
+      <p class="hero__tagline">Student Developer · Computer Vision Enthusiast</p>
+      <nav class="hero__links">
+        <a href="https://github.com/ShriOg" class="hero__link" target="_blank" rel="noopener noreferrer">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+        <a href="mailto:shrishukla04@gmail.com" class="hero__link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          Email
+        </a>
+      </nav>
     </header>
 
-    <div class="card">
-      <h2>Projects</h2>
-      <ul>
-        <li>
-          <a href="https://github.com/ShriOg/hand-gesture-control">
-            Hand Gesture Laptop Control System
-          </a>
-        </li>
-      </ul>
-    </div>
+    <section class="section fade-in fade-in-delay-1">
+      <h2 class="section__title">About</h2>
+      <p class="about__text">
+        I'm a student developer with a deep curiosity for how things work under the hood. My focus is on <strong>Python</strong> and <strong>Computer Vision</strong>, where I enjoy building systems that bridge the gap between human interaction and machine understanding. I approach problems with a system-level mindset—breaking them down, understanding the fundamentals, and crafting solutions that are both functional and clean.
+      </p>
+    </section>
 
-    <div class="card">
-      <h2>Contact</h2>
-      <p class="contact-info">shrishukla04@gmail.com</p>
-    </div>
-  </div>
+    <section class="section fade-in fade-in-delay-2">
+      <h2 class="section__title">Projects</h2>
+      <div class="projects__grid">
+        <a href="https://github.com/ShriOg/hand-gesture-control" class="project-card" target="_blank" rel="noopener noreferrer">
+          <h3 class="project-card__title">
+            Hand Gesture Laptop Control
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>
+          </h3>
+          <p class="project-card__desc">A real-time computer vision system that lets you control your laptop using hand gestures. Built with OpenCV and MediaPipe for accurate hand tracking and gesture recognition.</p>
+        </a>
+      </div>
+    </section>
+
+    <section class="section fade-in fade-in-delay-3">
+      <h2 class="section__title">Skills</h2>
+      <div class="skills__list">
+        <span class="skill-badge">Python</span>
+        <span class="skill-badge">OpenCV</span>
+        <span class="skill-badge">MediaPipe</span>
+        <span class="skill-badge">Git</span>
+        <span class="skill-badge">Linux</span>
+        <span class="skill-badge">HTML/CSS</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer fade-in fade-in-delay-4">
+    <p class="footer__text">© 2025 Anand Shukla</p>
+  </footer>
 </body>
 </html>
