@@ -4,97 +4,91 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Projects | Anand Shukla</title>
-  <meta name="description" content="Projects by Anand Shukla">
+  <meta name="description" content="Projects and work by Anand Shukla">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="page-wrapper">
-    <nav class="nav-wrapper" id="navbar">
-      <div class="nav">
-        <a href="index.html" class="nav__link">About</a>
-        <a href="projects.html" class="nav__link nav__link--active">Projects</a>
-        <a href="grades.html" class="nav__link">Grades</a>
-        <a href="contact.html" class="nav__link">Contact</a>
-      </div>
-    </nav>
+  <nav class="nav" id="navbar">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo">AS</a>
+      <ul class="nav__links" id="navLinks">
+        <li><a href="index.html" class="nav__link">Home</a></li>
+        <li><a href="projects.html" class="nav__link nav__link--active">Projects</a></li>
+        <li><a href="about.html" class="nav__link">About</a></li>
+        <li><a href="contact.html" class="nav__link">Contact</a></li>
+      </ul>
+      <button class="nav__toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
 
-    <main>
+  <main class="page-content">
+    <section class="projects-page" style="padding-top: var(--spacing-3xl);">
       <div class="container">
-        <div class="page-title reveal">
-          <h1 class="page-title__text">Projects</h1>
+        <div class="section-header" style="opacity:0;transform:translateY(20px);animation:fadeInUp var(--duration-slow) var(--ease-out) 0.1s forwards;">
+          <p class="section-label">Work</p>
+          <h1 class="section-title">Projects</h1>
         </div>
 
-        <div class="projects-grid">
-          <div class="project-card project-card--featured reveal reveal-delay-1">
-            <div>
-              <div class="project-card__icon">✋</div>
-              <h2 class="project-card__title">Hand Gesture Mouse Control</h2>
-              <p class="project-card__desc">
-                A computer vision project using Python, OpenCV, and MediaPipe to control mouse cursor with hand gestures. Features include click, scroll, and drag operations using real-time hand tracking.
-              </p>
-              <div class="project-card__tags">
-                <span class="tag">Python</span>
-                <span class="tag">OpenCV</span>
-                <span class="tag">MediaPipe</span>
-                <span class="tag">Computer Vision</span>
-              </div>
-              <a href="https://github.com/ShriOg" class="project-card__link" target="_blank">
-                View on GitHub
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                </svg>
-              </a>
+        <div class="projects-list">
+          <a href="case-study.html" class="project-item" style="--index: 0;">
+            <div class="project-item__header">
+              <h2 class="project-item__title">Hand Gesture Mouse Control</h2>
+              <svg class="project-item__arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
             </div>
-            <div style="background: var(--color-card-elevated); border-radius: var(--radius); padding: 2rem; display: flex; align-items: center; justify-content: center;">
-              <div style="font-size: 4rem; opacity: 0.8;">🖱️✋</div>
+            <p class="project-item__description">Real-time computer vision system that translates hand gestures into mouse movements and click actions using MediaPipe hand tracking and OpenCV.</p>
+            <div class="project-item__tech">
+              <span>Python</span>
+              <span>OpenCV</span>
+              <span>MediaPipe</span>
+              <span>Computer Vision</span>
             </div>
-          </div>
+          </a>
 
-          <div class="project-card reveal reveal-delay-2">
-            <div class="project-card__icon">🌐</div>
-            <h2 class="project-card__title">Personal Portfolio</h2>
-            <p class="project-card__desc">
-              Modern, responsive portfolio website built with vanilla HTML, CSS, and JavaScript. Features smooth animations and dark theme.
-            </p>
-            <div class="project-card__tags">
-              <span class="tag">HTML</span>
-              <span class="tag">CSS</span>
-              <span class="tag">JavaScript</span>
+          <a href="index.html" class="project-item" style="--index: 1;">
+            <div class="project-item__header">
+              <h2 class="project-item__title">Personal Portfolio</h2>
+              <svg class="project-item__arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
             </div>
-            <a href="https://github.com/ShriOg" class="project-card__link" target="_blank">
-              View Source
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-              </svg>
-            </a>
-          </div>
+            <p class="project-item__description">This website. A minimal, intentionally designed portfolio built with vanilla HTML, CSS, and JavaScript. Focused on clean motion and calm aesthetics.</p>
+            <div class="project-item__tech">
+              <span>HTML</span>
+              <span>CSS</span>
+              <span>JavaScript</span>
+            </div>
+          </a>
 
-          <div class="project-card reveal reveal-delay-3">
-            <div class="project-card__icon">🚀</div>
-            <h2 class="project-card__title">Coming Soon</h2>
-            <p class="project-card__desc">
-              More exciting projects in development. Stay tuned for updates on new innovations and experiments!
-            </p>
-            <div class="project-card__tags">
-              <span class="tag">In Progress</span>
+          <div class="project-item" style="--index: 2; cursor: default;">
+            <div class="project-item__header">
+              <h2 class="project-item__title">More Coming Soon</h2>
+              <svg class="project-item__arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.3;"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
             </div>
-            <span class="project-card__link" style="color: var(--color-text-muted); cursor: default;">
-              Under Development
-            </span>
+            <p class="project-item__description">Currently working on new projects exploring different areas of software development. Check back for updates.</p>
+            <div class="project-item__tech">
+              <span>In Progress</span>
+            </div>
           </div>
         </div>
       </div>
-    </main>
+    </section>
+  </main>
 
-    <footer class="footer">
-      <div class="container">
-        <p class="footer__text">© 2025 Anand Shukla. All rights reserved.</p>
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__text">© 2025 Anand Shukla</p>
+      <div class="footer__links">
+        <a href="https://github.com/ShriOg" class="footer__link" target="_blank" rel="noopener">GitHub</a>
+        <a href="mailto:shrishukla04@gmail.com" class="footer__link">Email</a>
       </div>
-    </footer>
-  </div>
+    </div>
+  </footer>
+
   <script src="script.js"></script>
 </body>
 </html>

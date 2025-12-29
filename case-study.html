@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hand Gesture Mouse Control | Case Study</title>
+  <meta name="description" content="Case study: Building a real-time hand gesture mouse control system using computer vision">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="nav" id="navbar">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo">AS</a>
+      <ul class="nav__links" id="navLinks">
+        <li><a href="index.html" class="nav__link">Home</a></li>
+        <li><a href="projects.html" class="nav__link">Projects</a></li>
+        <li><a href="about.html" class="nav__link">About</a></li>
+        <li><a href="contact.html" class="nav__link">Contact</a></li>
+      </ul>
+      <button class="nav__toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
+
+  <main class="page-content">
+    <section class="case-study-hero">
+      <div class="container container--narrow">
+        <h1 class="case-study-hero__title">Hand Gesture Mouse Control</h1>
+        <p class="case-study-hero__meta">Computer Vision · Python · 2024</p>
+        <a href="https://github.com/ShriOg/Hand-Gesture-Mouse-Control" class="case-study-repo" target="_blank" rel="noopener noreferrer">View Source Code <span>→</span></a>
+      </div>
+    </section>
+
+    <div class="container container--narrow">
+      <div class="case-study-image">
+        <div style="width:100%;aspect-ratio:16/9;background:var(--color-surface-elevated);display:flex;align-items:center;justify-content:center;">
+          <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="0.75">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+      </div>
+
+      <article class="case-study-narrative">
+        <div class="case-study-section" data-narrative="problem">
+          <h2 class="case-study-section__title">The Problem</h2>
+          <div class="case-study-section__content">
+            <p>Traditional mouse input requires constant physical contact with hardware, which can lead to repetitive strain injuries during extended computer use. For users with mobility limitations, standard input devices present accessibility barriers.</p>
+            <p>I wanted to explore whether computer vision could provide a natural, touchless alternative for controlling a computer cursor.</p>
+          </div>
+        </div>
+
+        <div class="case-study-section" data-narrative="solution">
+          <h2 class="case-study-section__title">The Approach</h2>
+          <div class="case-study-section__content">
+            <p>The solution uses MediaPipe's hand tracking model to detect and track hand landmarks in real-time through a webcam feed. By mapping specific finger positions and gestures to mouse actions, the system creates an intuitive control interface.</p>
+            <p>Key technical decisions included implementing smoothing algorithms to reduce cursor jitter, establishing clear gesture thresholds for reliable click detection, and optimizing the processing pipeline for low-latency response.</p>
+          </div>
+        </div>
+
+        <div class="case-study-image" data-narrative="visual">
+          <div style="width:100%;aspect-ratio:16/9;background:var(--color-surface-elevated);display:flex;align-items:center;justify-content:center;">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="1">
+              <rect x="2" y="3" width="20" height="14" rx="2"/>
+              <path d="M8 21h8M12 17v4"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="case-study-section" data-narrative="implementation">
+          <h2 class="case-study-section__title">Technical Implementation</h2>
+          <div class="case-study-section__content">
+            <p>The system processes video frames through OpenCV, extracts hand landmarks using MediaPipe, and translates spatial coordinates to screen positions. Index finger position controls cursor movement, while a pinch gesture (thumb to index finger) triggers click events.</p>
+            <p>To achieve smooth cursor movement, I implemented an exponential moving average filter that balances responsiveness with stability. The gesture detection uses distance thresholds with hysteresis to prevent unintended clicks.</p>
+          </div>
+        </div>
+
+        <div class="case-study-section" data-narrative="outcome">
+          <h2 class="case-study-section__title">The Outcome</h2>
+          <div class="case-study-section__content">
+            <p>The final implementation achieves reliable hand tracking at 30+ fps on standard hardware, with cursor movement that feels natural and responsive. The click detection maintains high accuracy while avoiding false positives during normal hand movements.</p>
+            <p>This project deepened my understanding of real-time computer vision systems, signal processing for human-computer interaction, and the importance of thoughtful UX in gesture-based interfaces.</p>
+          </div>
+        </div>
+
+        <div class="case-study-section" data-narrative="tech" style="padding-top: var(--spacing-lg);">
+          <div class="project-card__tech">
+            <span>Python</span>
+            <span>OpenCV</span>
+            <span>MediaPipe</span>
+            <span>PyAutoGUI</span>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <section style="padding: var(--spacing-2xl) 0;">
+      <div class="container container--narrow">
+        <a href="projects.html" class="case-study-back" data-reveal>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to Projects
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__text">© 2025 Anand Shukla</p>
+      <div class="footer__links">
+        <a href="https://github.com/ShriOg" class="footer__link" target="_blank" rel="noopener">GitHub</a>
+        <a href="mailto:shrishukla04@gmail.com" class="footer__link">Email</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

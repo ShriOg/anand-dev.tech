@@ -7,71 +7,81 @@
   <meta name="description" content="Get in touch with Anand Shukla">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="page-wrapper">
-    <nav class="nav-wrapper" id="navbar">
-      <div class="nav">
-        <a href="index.html" class="nav__link">About</a>
-        <a href="projects.html" class="nav__link">Projects</a>
-        <a href="grades.html" class="nav__link">Grades</a>
-        <a href="contact.html" class="nav__link nav__link--active">Contact</a>
-      </div>
-    </nav>
+  <nav class="nav" id="navbar">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo">AS</a>
+      <ul class="nav__links" id="navLinks">
+        <li><a href="index.html" class="nav__link">Home</a></li>
+        <li><a href="projects.html" class="nav__link">Projects</a></li>
+        <li><a href="about.html" class="nav__link">About</a></li>
+        <li><a href="contact.html" class="nav__link nav__link--active">Contact</a></li>
+      </ul>
+      <button class="nav__toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </nav>
 
-    <main>
+  <main class="page-content">
+    <section class="contact-hero">
       <div class="container">
-        <div class="page-title reveal">
-          <h1 class="page-title__text">Get In Touch</h1>
+        <div class="contact-content">
+          <h1 class="contact-title">Get In Touch</h1>
+          <p class="contact-text">I'm always open to discussing new projects, opportunities, or just connecting with fellow developers. Feel free to reach out.</p>
+          
+          <a href="mailto:shrishukla04@gmail.com" class="contact-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></svg>
+            shrishukla04@gmail.com
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left:auto;"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
         </div>
+      </div>
+    </section>
 
-        <div class="contact-grid">
-          <div class="contact-info reveal reveal-delay-1">
-            <h2 class="contact-info__title">Let us Connect</h2>
-            <p class="contact-info__text">
-              I am always excited to discuss new opportunities, collaborate on projects, or simply connect with fellow technology enthusiasts.
-            </p>
-            <div class="contact-links">
-              <a href="mailto:shrishukla04@gmail.com" class="contact-link">
-                <span class="contact-link__icon">✉️</span>
-                <span class="contact-link__text">shrishukla04@gmail.com</span>
-              </a>
-              <a href="https://github.com/ShriOg" class="contact-link" target="_blank">
-                <span class="contact-link__icon">👤</span>
-                <span class="contact-link__text">GitHub: /ShriOg</span>
-              </a>
-            </div>
-          </div>
-
-          <div class="form-card reveal reveal-delay-2">
+    <section style="padding: var(--spacing-xl) 0 var(--spacing-3xl);">
+      <div class="container">
+        <div class="contact-content">
+          <div class="contact-form">
             <form action="https://formspree.io/f/your-form-id" method="POST">
               <div class="form-group">
-                <label for="name">Name</label>
-                <input type="text" id="name" name="name" required>
+                <label class="form-label" for="name">Name</label>
+                <input type="text" id="name" name="name" class="form-input" required>
               </div>
               <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
+                <label class="form-label" for="email">Email</label>
+                <input type="email" id="email" name="email" class="form-input" required>
               </div>
               <div class="form-group">
-                <label for="message">Message</label>
-                <textarea id="message" name="message" required></textarea>
+                <label class="form-label" for="message">Message</label>
+                <textarea id="message" name="message" class="form-textarea" required></textarea>
               </div>
-              <button type="submit" class="form-btn">Send Message</button>
+              <button type="submit" class="form-button">
+                Send Message
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
             </form>
           </div>
         </div>
       </div>
-    </main>
+    </section>
+  </main>
 
-    <footer class="footer">
-      <div class="container">
-        <p class="footer__text">© 2025 Anand Shukla. All rights reserved.</p>
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__text">© 2025 Anand Shukla</p>
+      <div class="footer__links">
+        <a href="https://github.com/ShriOg" class="footer__link" target="_blank" rel="noopener">GitHub</a>
+        <a href="mailto:shrishukla04@gmail.com" class="footer__link">Email</a>
       </div>
-    </footer>
-  </div>
+    </div>
+  </footer>
+
   <script src="script.js"></script>
 </body>
 </html>
