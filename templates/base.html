@@ -1,0 +1,54 @@
+<!-- 
+  BASE TEMPLATE
+  Common structure for all pages
+  Variables: {{title}}, {{description}}, {{bodyClass}}, {{content}}
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{title}} | Anand Dev OS</title>
+  <meta name="description" content="{{description}}">
+  <meta name="theme-color" content="#0a0a0b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Modular CSS -->
+  <link rel="stylesheet" href="{{basePath}}assets/css/variables.css">
+  <link rel="stylesheet" href="{{basePath}}assets/css/base.css">
+  <link rel="stylesheet" href="{{basePath}}assets/css/layout.css">
+  <link rel="stylesheet" href="{{basePath}}assets/css/components.css">
+  <link rel="stylesheet" href="{{basePath}}assets/css/animations.css">
+  <link rel="stylesheet" href="{{basePath}}assets/css/responsive.css">
+  <link rel="stylesheet" href="{{basePath}}assets/css/zoom-transitions.css">
+</head>
+<body class="{{bodyClass}}">
+  <!-- Navigation -->
+  {{navigation}}
+
+  <!-- Main Content -->
+  <main>
+    {{content}}
+  </main>
+
+  <!-- Footer -->
+  {{footer}}
+
+  <!-- Core Scripts -->
+  <script src="{{basePath}}assets/js/main.js"></script>
+  <script src="{{basePath}}assets/js/mobile.js"></script>
+  <!-- Data-driven System -->
+  <script src="{{basePath}}assets/js/data-loader.js"></script>
+  <script src="{{basePath}}assets/js/renderer.js"></script>
+  <script src="{{basePath}}assets/js/router.js"></script>
+  <script src="{{basePath}}assets/js/transitions.js"></script>
+  <script src="{{basePath}}assets/js/gestures.js"></script>
+  <script src="{{basePath}}assets/js/app.js"></script>
+</body>
+</html>

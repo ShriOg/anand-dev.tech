@@ -1,0 +1,408 @@
+{
+  "projects": [
+    {
+      "id": "ai-desktop-assistant",
+      "title": "AI Desktop Assistant",
+      "shortDescription": "A voice-controlled assistant that understands context and executes system commands across Windows, macOS, and Linux.",
+      "longDescription": "Building a voice-controlled assistant that actually understands context and executes system commands across Windows, macOS, and Linux.",
+      "previewImage": null,
+      "previewType": "grid",
+      "techStack": ["Python 3.11", "Pydantic", "SpeechRecognition", "pywin32", "subprocess"],
+      "techStackShort": "Python / NLP",
+      "timeline": "3 months",
+      "role": "Solo Developer",
+      "liveUrl": null,
+      "sourceUrl": "https://github.com/ShriOg/anand-dev.tech/tree/main/projects/ai-assistant",
+      "pageUrl": "/pages/ai-assistant.html",
+      "featured": true,
+      "order": 1,
+      "sections": [
+        {
+          "id": "problem",
+          "title": "Problem Statement",
+          "content": [
+            "Existing voice assistants are either cloud-dependent, platform-locked, or require complex setup. I wanted something that could run locally, understand natural variations of commands, and actually control my computer.",
+            "The core challenge: How do you map fuzzy human language to precise system commands while maintaining context across a conversation?"
+          ]
+        },
+        {
+          "id": "constraints",
+          "title": "Constraints",
+          "type": "list",
+          "content": [
+            "Must run entirely offline after initial setup",
+            "Cross-platform support (Windows, macOS, Linux)",
+            "Response time under 500ms for common commands",
+            "Extensible action system without code changes",
+            "No external API dependencies for core functionality"
+          ]
+        },
+        {
+          "id": "architecture",
+          "title": "Architecture",
+          "type": "diagram",
+          "diagramTitle": "System Overview",
+          "diagram": "Voice Input --> Speech-to-Text --> Intent Parser --> Router\n                                                       |\n                                        +--------------+--------------+\n                                        |              |              |\n                                    Context       Action Schema    Adapter\n                                    Manager       Validator       (OS-specific)\n                                        |              |              |\n                                        +--------------+--------------+\n                                                       |\n                                                   Executor --> System",
+          "content": [
+            "The key insight was separating intent parsing from action execution. The router maintains conversation context while the adapters handle platform-specific implementations."
+          ]
+        },
+        {
+          "id": "tradeoffs",
+          "title": "Tradeoffs",
+          "type": "table",
+          "headers": ["Decision", "Benefit", "Cost"],
+          "rows": [
+            ["Local-first processing", "Privacy, offline capability", "Limited NLP accuracy vs cloud"],
+            ["Schema-based actions", "Type safety, validation", "More boilerplate per action"],
+            ["Adapter pattern for OS", "Clean abstraction", "Maintenance across 3 platforms"]
+          ]
+        },
+        {
+          "id": "failures",
+          "title": "What Failed",
+          "content": [
+            "<strong>First attempt at intent parsing:</strong> Started with regex patterns. Worked for exact matches but completely broke with any variation. \"Open Chrome\" worked, \"launch chrome browser\" didn't.",
+            "<strong>Context management v1:</strong> Stored everything in a flat dictionary. Memory grew unbounded and older context polluted new interactions.",
+            "<strong>Windows adapter initial approach:</strong> Used subprocess for everything. Some commands need COM objects, others need PowerShell. Unified interface was naive."
+          ]
+        },
+        {
+          "id": "outcome",
+          "title": "Final Outcome",
+          "type": "list",
+          "content": [
+            "Working assistant with 50+ supported commands",
+            "Average response time: 180ms",
+            "Intent recognition accuracy: ~85% on varied phrasing",
+            "Clean plugin system for adding new actions",
+            "Documented API for external integrations"
+          ]
+        },
+        {
+          "id": "improvements",
+          "title": "What I Would Improve",
+          "type": "list",
+          "content": [
+            "Add lightweight local LLM option for better intent parsing",
+            "Implement action chaining (e.g., \"open browser and go to github\")",
+            "Better error recovery with suggested alternatives",
+            "Visual feedback system for non-terminal usage"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "particle-system-gestures",
+      "title": "Gesture-Controlled Particles",
+      "shortDescription": "An interactive visual system where hand gestures control particle behavior in real-time using computer vision.",
+      "longDescription": "An interactive visual system where hand gestures control particle behavior in real-time. Exploring the intersection of computer vision and creative coding.",
+      "previewImage": null,
+      "previewType": "particles",
+      "techStack": ["Vanilla JavaScript", "Canvas 2D", "MediaPipe Hands", "requestAnimationFrame"],
+      "techStackShort": "JS / Canvas / MediaPipe",
+      "timeline": "6 weeks",
+      "role": "Solo Developer",
+      "liveUrl": "/projects/particle-system-gestures/index.html",
+      "sourceUrl": "https://github.com/ShriOg/particle-system-guestures",
+      "pageUrl": "/pages/particle-system.html",
+      "featured": true,
+      "order": 2,
+      "sections": [
+        {
+          "id": "problem",
+          "title": "Problem Statement",
+          "content": [
+            "Most interactive demos use mouse/touch input. I wanted to explore how gesture recognition could create more intuitive and expressive interactions.",
+            "The challenge: MediaPipe runs at ~30fps for hand tracking, but smooth particle animation needs 60fps. How do you bridge this gap without visible stuttering?"
+          ]
+        },
+        {
+          "id": "constraints",
+          "title": "Constraints",
+          "type": "list",
+          "content": [
+            "Must run in browser without plugins",
+            "60fps rendering minimum",
+            "Support 500+ simultaneous particles",
+            "Gesture detection latency under 100ms perceived",
+            "Graceful degradation on lower-end devices"
+          ]
+        },
+        {
+          "id": "architecture",
+          "title": "Architecture",
+          "type": "diagram",
+          "diagramTitle": "Pipeline",
+          "diagram": "Camera --> MediaPipe --> Gesture      --> Particle System\n           (30fps)     Interpreter        (60fps)\n                           |                  |\n                      Hand State         Physics Engine\n                      Interpolator       Spatial Hash\n                           |                  |\n                       Smoothed          Optimized\n                       Position          Collision",
+          "content": [
+            "Key innovation: Position interpolation between MediaPipe frames. The gesture interpreter predicts hand position for intermediate frames, creating smooth 60fps interaction from 30fps tracking."
+          ]
+        },
+        {
+          "id": "tradeoffs",
+          "title": "Tradeoffs",
+          "type": "table",
+          "headers": ["Decision", "Benefit", "Cost"],
+          "rows": [
+            ["Canvas 2D over WebGL", "Simpler code, wider support", "Particle limit ~800 vs thousands"],
+            ["Position interpolation", "Smooth 60fps feel", "Slight prediction errors visible"],
+            ["Spatial hashing", "O(n) collision detection", "Memory overhead for grid"]
+          ]
+        },
+        {
+          "id": "failures",
+          "title": "What Failed",
+          "content": [
+            "<strong>Direct MediaPipe coordinates:</strong> Hand jitter made particles shake uncontrollably. Needed velocity-based smoothing with configurable damping.",
+            "<strong>Naive collision detection:</strong> O(n²) killed performance at 300+ particles. Spatial hashing brought it back to 60fps.",
+            "<strong>Gesture recognition complexity:</strong> Started with 10 gestures. Too many false positives. Reduced to 4 reliable gestures with clear visual states."
+          ]
+        },
+        {
+          "id": "outcome",
+          "title": "Final Outcome",
+          "type": "list",
+          "content": [
+            "Smooth 60fps with 500 particles",
+            "4 gesture types: attract, repel, swirl, explode",
+            "Perceived latency under 50ms",
+            "Works on mobile with touch fallback",
+            "Configurable physics parameters via UI"
+          ]
+        },
+        {
+          "id": "improvements",
+          "title": "What I Would Improve",
+          "type": "list",
+          "content": [
+            "WebGL renderer for 10x particle count",
+            "WebWorker for physics calculations",
+            "Custom gesture training for user-defined interactions",
+            "Audio-reactive particle behaviors"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "nowhang",
+      "title": "NowHang",
+      "shortDescription": "A social coordination app that eliminates planning friction by matching real-time availability and interests.",
+      "longDescription": "A social coordination app that makes spontaneous meetups actually happen. Eliminates the back-and-forth of planning by matching real-time availability with shared interests.",
+      "previewImage": null,
+      "previewType": "waves",
+      "techStack": ["React Native", "Firebase", "Cloud Functions", "Real-time DB"],
+      "techStackShort": "Full Stack / Real-time",
+      "timeline": "Ongoing",
+      "role": "Lead Developer",
+      "liveUrl": null,
+      "sourceUrl": "https://github.com/ShriOg/nowhang",
+      "pageUrl": "/pages/nowhang.html",
+      "featured": true,
+      "order": 3,
+      "sections": [
+        {
+          "id": "problem",
+          "title": "Problem Statement",
+          "content": [
+            "Coordinating spontaneous hangouts is friction-heavy. Group chats turn into endless \"when works for you?\" loops. Calendar apps are designed for formal meetings, not casual social time.",
+            "The core question: How do you surface real-time social availability without creating pressure or FOMO?"
+          ]
+        },
+        {
+          "id": "constraints",
+          "title": "Constraints",
+          "type": "list",
+          "content": [
+            "Must feel lighter than scheduling apps",
+            "Real-time status updates without battery drain",
+            "Privacy-respecting location features",
+            "Works with existing friend groups (not social discovery)",
+            "No notification spam"
+          ]
+        },
+        {
+          "id": "architecture",
+          "title": "Architecture",
+          "type": "diagram",
+          "diagramTitle": "System Overview",
+          "diagram": "Mobile App --> Firebase Auth --> Cloud Functions\n     |              |                    |\n     |         Real-time DB        Push Notifications\n     |              |                    |\n     +-----> Status Updates <-----+------+\n     |              |\n  Location    Friend Activity\n  (opt-in)      Feed",
+          "content": [
+            "Real-time sync through Firebase listeners. Location data is anonymized to approximate areas (neighborhood-level) rather than precise coordinates."
+          ]
+        },
+        {
+          "id": "status",
+          "title": "Current Status",
+          "type": "list",
+          "content": [
+            "Core status broadcasting working",
+            "Friend groups with privacy levels",
+            "Push notifications for matches",
+            "Beta testing with 20 users",
+            "Iterating on UX based on feedback"
+          ]
+        },
+        {
+          "id": "improvements",
+          "title": "What I Would Improve",
+          "type": "list",
+          "content": [
+            "Add ML-based activity suggestions",
+            "Calendar integration for auto-availability",
+            "Group status (\"3 of your friends are free\")",
+            "Web companion app"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "grades-dashboard",
+      "title": "Grade Dashboard",
+      "shortDescription": "A personal academic tracker with GPA calculations, grade visualization, and course history management.",
+      "longDescription": "A personal academic tracking system that makes sense of transcript data. Real-time GPA calculations, grade trend visualization, and course organization.",
+      "previewImage": null,
+      "previewType": "grid",
+      "techStack": ["HTML", "CSS", "JavaScript", "LocalStorage"],
+      "techStackShort": "Web / Data Viz",
+      "timeline": "2 weeks",
+      "role": "Solo Developer",
+      "liveUrl": "/pages/grades.html",
+      "sourceUrl": null,
+      "pageUrl": "/pages/grades.html",
+      "featured": false,
+      "order": 4,
+      "sections": [
+        {
+          "id": "problem",
+          "title": "Problem Statement",
+          "content": [
+            "University portals are clunky. I wanted a clean, personal dashboard to track my academic progress with proper GPA calculations and visualizations."
+          ]
+        },
+        {
+          "id": "outcome",
+          "title": "Final Outcome",
+          "type": "list",
+          "content": [
+            "Clean grade entry and management",
+            "Accurate GPA calculations",
+            "Visual grade distribution charts",
+            "LocalStorage persistence"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "gesture-mouse",
+      "title": "Gesture-Controlled Mouse",
+      "shortDescription": "Control your computer's cursor using hand gestures detected through a webcam. Built with MediaPipe and PyAutoGUI.",
+      "longDescription": "A computer vision system that maps hand gestures to mouse controls. Point to move, pinch to click, scroll with two fingers—all through your webcam.",
+      "previewImage": null,
+      "previewType": "grid",
+      "techStack": ["Python 3.11", "OpenCV", "MediaPipe", "PyAutoGUI", "NumPy"],
+      "techStackShort": "Python / CV",
+      "timeline": "4 weeks",
+      "role": "Solo Developer",
+      "liveUrl": null,
+      "sourceUrl": "https://github.com/ShriOg/gesture-mouse",
+      "pageUrl": "/pages/gesture-mouse.html",
+      "featured": false,
+      "order": 5,
+      "sections": [
+        {
+          "id": "problem",
+          "title": "Problem Statement",
+          "content": [
+            "Physical mouse limitations in certain scenarios (presentations, accessibility needs, just wanting to wave at your computer). Gesture control could provide a natural, touchless alternative.",
+            "The challenge: How do you make hand tracking stable enough for precise cursor control without expensive hardware?"
+          ]
+        },
+        {
+          "id": "approach",
+          "title": "Approach",
+          "content": [
+            "Built a pipeline that processes webcam frames through MediaPipe's hand tracking, interprets specific finger configurations as gestures, and translates those into system-level mouse events via PyAutoGUI."
+          ],
+          "type": "list",
+          "listContent": [
+            "Real-time hand landmark detection at 30+ FPS",
+            "Gesture classification based on finger positions and distances",
+            "Exponential smoothing to eliminate jitter",
+            "Debouncing logic to prevent false-positive clicks",
+            "Configurable sensitivity zones and dead zones"
+          ]
+        },
+        {
+          "id": "architecture",
+          "title": "Technical Implementation",
+          "type": "diagram",
+          "diagramTitle": "System Pipeline",
+          "diagram": "Webcam Feed --> OpenCV Frame --> MediaPipe Hands --> Landmark Extraction\n                                                            |\n                                            +---------------+---------------+\n                                            |               |               |\n                                      Gesture          Position         State\n                                      Classifier       Smoother        Machine\n                                            |               |               |\n                                            +---------------+---------------+\n                                                            |\n                                                      PyAutoGUI\n                                                      (System Mouse)",
+          "content": [
+            "The state machine tracks gesture transitions to distinguish intentional actions from noise. Position smoothing uses a weighted moving average with configurable alpha values for responsiveness vs. stability tradeoff."
+          ]
+        },
+        {
+          "id": "gestures",
+          "title": "Gesture Mapping Logic",
+          "type": "table",
+          "headers": ["Gesture", "Detection Method", "Action"],
+          "rows": [
+            ["Index finger extended", "Single fingertip above knuckle", "Cursor movement"],
+            ["Index + Middle pinch", "Fingertip distance < threshold", "Left click"],
+            ["Index + Thumb pinch", "Thumb-index distance collapse", "Right click"],
+            ["Closed fist", "All fingertips below knuckles", "Drag start/stop"],
+            ["Two fingers vertical motion", "Index + Middle Y-delta tracking", "Scroll up/down"]
+          ]
+        },
+        {
+          "id": "performance",
+          "title": "Performance & Stability Considerations",
+          "content": [
+            "<strong>Jitter elimination:</strong> Raw landmark coordinates fluctuate by 5-15 pixels between frames even with a stationary hand. Applied exponential moving average with α=0.3, reducing perceived jitter to <2 pixels.",
+            "<strong>Click debouncing:</strong> Pinch gestures can oscillate near the threshold. Implemented a 150ms cooldown between click events and required gesture stability for 3 consecutive frames before triggering.",
+            "<strong>Frame rate optimization:</strong> MediaPipe processing is GPU-accelerated where available. Added frame skipping option for lower-end systems, maintaining gesture responsiveness at 15 FPS minimum.",
+            "<strong>Safety bounds:</strong> Cursor movement is constrained to screen boundaries with configurable edge buffers to prevent accidental clicks on system UI elements."
+          ]
+        },
+        {
+          "id": "failures",
+          "title": "What Failed",
+          "content": [
+            "<strong>Initial direct mapping:</strong> Mapping hand position directly to screen coordinates made small movements amplify dramatically. Switched to relative movement with adjustable sensitivity multiplier.",
+            "<strong>Complex gesture vocabulary:</strong> Started with 8 gestures. Too many false positives between similar configurations. Reduced to 5 distinct, high-confidence gestures.",
+            "<strong>Single-frame click detection:</strong> Caused double-clicks and phantom inputs. Required temporal consistency (gesture held for N frames) to confirm intent."
+          ]
+        },
+        {
+          "id": "outcome",
+          "title": "Outcome & Learnings",
+          "type": "list",
+          "content": [
+            "Stable cursor control with <50ms perceived latency",
+            "95%+ gesture recognition accuracy under good lighting",
+            "Works reliably at arm's length from standard webcams",
+            "Configurable via CLI flags for sensitivity, smoothing, and detection thresholds",
+            "Clean separation between detection, interpretation, and action layers"
+          ],
+          "additionalContent": [
+            "Key insight: Human-computer interaction via gestures requires extensive filtering and state management. Raw sensor data is never directly usable—the intelligence is in the interpretation layer."
+          ]
+        },
+        {
+          "id": "improvements",
+          "title": "What I Would Improve",
+          "type": "list",
+          "content": [
+            "Add ML-based gesture classification for custom gesture training",
+            "Implement two-hand support for modifier keys (Ctrl, Shift, Alt)",
+            "System tray integration with hotkey toggle",
+            "Calibration wizard for personalized sensitivity",
+            "WebSocket API for integration with other applications"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -5,10 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Hand Gesture Mouse Control | Case Study</title>
   <meta name="description" content="Case study: Building a real-time hand gesture mouse control system using computer vision">
+  <meta name="theme-color" content="#0a0a0b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <!-- Modular CSS -->
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/animations.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+  <link rel="stylesheet" href="../assets/css/zoom-transitions.css">
 </head>
 <body>
   <!-- Particle Canvas -->
@@ -17,7 +27,7 @@
   <!-- Navigation -->
   <nav class="navbar" id="navbar">
     <div class="navbar__pill">
-      <a href="index.html" class="navbar__link">About</a>
+      <a href="../index.html" class="navbar__link">About</a>
       <a href="projects.html" class="navbar__link navbar__link--active">Projects</a>
       <a href="grades.html" class="navbar__link">Grades</a>
       <a href="contact.html" class="navbar__link">Contact</a>
@@ -115,6 +125,15 @@
     </div>
   </footer>
 
-  <script src="script.js"></script>
+  <!-- Core Scripts -->
+  <script src="../assets/js/main.js"></script>
+  <script src="../assets/js/mobile.js"></script>
+  <!-- Data-driven System -->
+  <script src="../assets/js/data-loader.js"></script>
+  <script src="../assets/js/renderer.js"></script>
+  <script src="../assets/js/router.js"></script>
+  <script src="../assets/js/transitions.js"></script>
+  <script src="../assets/js/gestures.js"></script>
+  <script src="../assets/js/app.js"></script>
 </body>
 </html>

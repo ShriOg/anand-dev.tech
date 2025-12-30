@@ -1,0 +1,216 @@
+/* 
+   ANAND DEV OS — Responsive Styles
+   Breakpoint-specific overrides
+*/
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TABLET BREAKPOINT (max-width: 1024px)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  .featured-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .experiments-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .case-study-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MOBILE BREAKPOINT (max-width: 768px)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  /* Typography scaling */
+  h1 { font-size: var(--text-4xl); }
+  h2 { font-size: var(--text-3xl); }
+  h3 { font-size: var(--text-xl); }
+  
+  /* Container padding */
+  .container {
+    padding: 0 var(--space-4);
+  }
+  
+  /* Section spacing */
+  .section {
+    padding: var(--space-16) 0;
+  }
+  
+  /* Navigation */
+  .nav__toggle {
+    display: flex;
+  }
+  
+  .nav__links {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    gap: 0;
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-primary);
+    padding: var(--space-4);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity var(--duration-fast) var(--ease-out),
+                visibility var(--duration-fast) var(--ease-out),
+                transform var(--duration-fast) var(--ease-out);
+  }
+  
+  .nav__links--open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  
+  .nav__link {
+    display: block;
+    padding: var(--space-3) 0;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .nav__link::after {
+    display: none;
+  }
+  
+  .nav__inner {
+    padding: 0 var(--space-4);
+  }
+  
+  /* Grids */
+  .featured-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+  
+  .focus-cards-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+  
+  .projects-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Case study responsive */
+  .case-study__title {
+    font-size: var(--text-3xl);
+  }
+  
+  /* Project preview responsive */
+  .project-preview__info {
+    flex-direction: column;
+  }
+  
+  /* Hire hero responsive */
+  .hire-hero {
+    padding: var(--space-24) 0 var(--space-12);
+  }
+  
+  .hire-hero__title {
+    font-size: var(--text-3xl);
+  }
+  
+  /* Focus overlay mobile */
+  .focus-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+  
+  .focus-overlay__panel {
+    max-width: 100%;
+    max-height: 95vh;
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    border-bottom: none;
+  }
+  
+  .focus-overlay__panel::before {
+    content: "";
+    position: sticky;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    display: block;
+    width: 40px;
+    height: 4px;
+    background: var(--text-muted);
+    border-radius: var(--radius-full);
+    margin: var(--space-3) auto var(--space-2);
+    opacity: 0.5;
+  }
+  
+  .focus-overlay__close {
+    position: fixed;
+    top: var(--space-3);
+    right: var(--space-3);
+    margin: 0;
+    background: var(--bg-tertiary);
+    border-color: var(--border-secondary);
+  }
+  
+  .focus-overlay__content {
+    padding: var(--space-6);
+    padding-top: var(--space-4);
+  }
+  
+  .focus-overlay__title {
+    font-size: var(--text-2xl);
+  }
+  
+  .focus-overlay__summary {
+    font-size: var(--text-sm);
+  }
+  
+  .focus-overlay__actions {
+    flex-direction: column;
+  }
+  
+  .focus-overlay__actions .action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  /* Focus card mobile */
+  .focus-card:hover {
+    transform: none;
+  }
+  
+  .focus-card:active {
+    transform: scale(0.98);
+    transition-duration: 100ms;
+  }
+  
+  /* Action buttons mobile */
+  .focus-card__actions {
+    opacity: 1;
+    transform: translateY(0);
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .action-btn {
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--text-sm);
+    min-height: 44px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SMALL MOBILE BREAKPOINT (max-width: 640px)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+  .featured-grid {
+    gap: var(--space-4);
+  }
+}

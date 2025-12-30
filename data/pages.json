@@ -1,0 +1,80 @@
+{
+  "pages": {
+    "home": {
+      "id": "home",
+      "title": "Anand Dev OS | Developer",
+      "description": "Anand Shukla - Developer building thoughtful systems. Portfolio, Lab, and Learning Log.",
+      "template": "home",
+      "sections": ["hero", "featured-projects"]
+    },
+    "projects": {
+      "id": "projects",
+      "title": "Projects | Anand Dev OS",
+      "description": "Case studies and engineering stories from projects I have built.",
+      "template": "projects-list",
+      "sections": ["header", "projects-grid"]
+    },
+    "ai-assistant": {
+      "id": "ai-assistant",
+      "title": "AI Assistant | Anand Shukla",
+      "description": "Local-first, privacy-respecting AI desktop assistant - A cross-platform Jarvis-style system built with Python.",
+      "template": "project-detail",
+      "projectId": "ai-desktop-assistant"
+    },
+    "particle-system": {
+      "id": "particle-system",
+      "title": "Gesture-Controlled Particles | Anand Shukla",
+      "description": "Interactive particle system controlled by hand gestures using MediaPipe with real-time physics at 60fps.",
+      "template": "project-detail",
+      "projectId": "particle-system-gestures"
+    },
+    "nowhang": {
+      "id": "nowhang",
+      "title": "NowHang | Anand Shukla",
+      "description": "A social coordination app that eliminates planning friction by matching real-time availability and interests.",
+      "template": "project-detail",
+      "projectId": "nowhang"
+    },
+    "gesture-mouse": {
+      "id": "gesture-mouse",
+      "title": "Gesture-Controlled Mouse | Anand Shukla",
+      "description": "Control your computer's cursor using hand gestures detected through a webcam.",
+      "template": "project-detail",
+      "projectId": "gesture-mouse"
+    },
+    "lab": {
+      "id": "lab",
+      "title": "Lab | Anand Dev OS",
+      "description": "Interactive experiments and visualizations.",
+      "template": "lab"
+    },
+    "dev-os": {
+      "id": "dev-os",
+      "title": "Dev OS | Anand Dev OS",
+      "description": "My development environment, tools, and workflows.",
+      "template": "dev-os"
+    },
+    "hire": {
+      "id": "hire",
+      "title": "Hire Me | Anand Dev OS",
+      "description": "Let's work together on your next project.",
+      "template": "hire"
+    }
+  },
+  "routeMap": {
+    "/": "home",
+    "/index.html": "home",
+    "/pages/projects.html": "projects",
+    "/pages/ai-assistant.html": "ai-assistant",
+    "/pages/particle-system.html": "particle-system",
+    "/pages/nowhang.html": "nowhang",
+    "/pages/gesture-mouse.html": "gesture-mouse",
+    "/pages/lab.html": "lab",
+    "/pages/dev-os.html": "dev-os",
+    "/pages/hire.html": "hire"
+  },
+  "redirects": {
+    "/pages/ai-desktop-assistant.html": "/pages/ai-assistant.html",
+    "/pages/particles.html": "/pages/particle-system.html"
+  }
+}
