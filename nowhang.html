@@ -675,6 +675,18 @@
                 }
             });
 
+            // Auto-unlock if coming from hidden.html
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('from') === 'hidden') {
+                isUnlocked = true;
+                lockScreen.classList.add('unlocked');
+                document.body.classList.remove('locked');
+                mainContent.classList.add('visible');
+                backHomeBtn.classList.add('visible');
+                sectionSlider.classList.add('visible');
+                initGallery();
+            }
+
             backHomeBtn.addEventListener('click', function() {
                 window.location.href = '/';
             });

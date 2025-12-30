@@ -267,7 +267,7 @@
       const password = passwordInput?.value;
       
       // Simple hash check (in production, use server-side auth)
-      if (password === 'devos2025') {
+      if (password === 'Abhilasha') {
         passwordGate?.classList.add('password-gate--hidden');
         hiddenContent?.classList.add('hidden-content--visible');
         sessionStorage.setItem('hidden-auth', 'true');
