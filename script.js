@@ -1,13 +1,61 @@
 /**
- * Premium Dark Portfolio - JavaScript
- * Handles particles, scroll animations, and interactions
+ * Nothing-Inspired Portfolio - JavaScript
+ * Minimal, calm, intentional interactions
  */
 
 (function() {
   'use strict';
 
   // ========================================
-  // PARTICLE SYSTEM
+  // MINIMAL INTRO ANIMATION
+  // Plays only on page reload, not internal navigation
+  // ========================================
+  function shouldPlayIntro() {
+    // Check if this is index.html (home page)
+    const isHomePage = window.location.pathname === '/' || 
+                       window.location.pathname.endsWith('index.html') ||
+                       window.location.pathname.endsWith('/');
+    
+    if (!isHomePage) return false;
+    
+    // Check navigation type: reload vs navigate
+    const navEntries = performance.getEntriesByType('navigation');
+    if (navEntries.length > 0) {
+      const navType = navEntries[0].type;
+      // 'reload' = browser refresh, 'navigate' = new page load
+      // 'back_forward' = browser back/forward
+      if (navType === 'reload') return true;
+    }
+    
+    // Check if coming from same site (internal navigation)
+    const referrer = document.referrer;
+    if (referrer) {
+      try {
+        const referrerHost = new URL(referrer).hostname;
+        const currentHost = window.location.hostname;
+        // If referrer is same site, skip intro
+        if (referrerHost === currentHost) return false;
+      } catch (e) {
+        // Invalid referrer, treat as new visit
+      }
+    }
+    
+    // New visit (no referrer or external referrer) - play intro
+    return true;
+  }
+  
+  // Apply intro animation if conditions met
+  if (shouldPlayIntro()) {
+    document.body.classList.add('intro-active');
+    
+    // Remove class after animations complete (allow CSS to clean up)
+    setTimeout(() => {
+      document.body.classList.remove('intro-active');
+    }, 1000);
+  }
+
+  // ========================================
+  // PARTICLE SYSTEM - Subtle & Calm
   // ========================================
   const canvas = document.getElementById('particle-canvas');
   if (canvas) {
@@ -78,7 +126,7 @@
       draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(59, 130, 246, ${this.opacity})`;
+        ctx.fillStyle = `rgba(107, 138, 253, ${this.opacity * 0.6})`;
         ctx.fill();
       }
     }
@@ -86,7 +134,7 @@
     // Initialize particles
     function initParticles() {
       particles = [];
-      const particleCount = Math.min(80, Math.floor((canvas.width * canvas.height) / 15000));
+      const particleCount = Math.min(50, Math.floor((canvas.width * canvas.height) / 20000));
       
       for (let i = 0; i < particleCount; i++) {
         particles.push(new Particle());
@@ -101,12 +149,12 @@
           const dy = particles[i].y - particles[j].y;
           const distance = Math.sqrt(dx * dx + dy * dy);
 
-          if (distance < 120) {
-            const opacity = (1 - distance / 120) * 0.15;
+          if (distance < 100) {
+            const opacity = (1 - distance / 100) * 0.08;
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(59, 130, 246, ${opacity})`;
+            ctx.strokeStyle = `rgba(107, 138, 253, ${opacity})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
@@ -171,20 +219,35 @@
   });
 
   // ========================================
-  // NAVBAR SCROLL BEHAVIOR
+  // SMART NAVBAR SCROLL BEHAVIOR
+  // Hide on scroll down, show on scroll up
   // ========================================
   const navbar = document.getElementById('navbar');
   let lastScrollY = window.scrollY;
   let ticking = false;
+  let scrollTimeout = null;
+  const scrollThreshold = 10; // Minimum scroll distance to trigger
+  const topThreshold = 80; // Always show navbar near top
 
   function updateNavbar() {
     const currentScrollY = window.scrollY;
+    const scrollDelta = currentScrollY - lastScrollY;
 
     if (navbar) {
-      if (currentScrollY > 100) {
-        navbar.style.opacity = currentScrollY > lastScrollY ? '0.5' : '1';
-      } else {
-        navbar.style.opacity = '1';
+      // Always show navbar when near the top of the page
+      if (currentScrollY < topThreshold) {
+        navbar.classList.remove('navbar--hidden');
+        navbar.classList.add('navbar--visible');
+      } 
+      // Scrolling DOWN - hide navbar (only if scrolled enough)
+      else if (scrollDelta > scrollThreshold) {
+        navbar.classList.add('navbar--hidden');
+        navbar.classList.remove('navbar--visible');
+      } 
+      // Scrolling UP - show navbar
+      else if (scrollDelta < -scrollThreshold) {
+        navbar.classList.remove('navbar--hidden');
+        navbar.classList.add('navbar--visible');
       }
     }
 
@@ -192,10 +255,51 @@
     ticking = false;
   }
 
-  window.addEventListener('scroll', () => {
+  // Debounced scroll handler for better performance
+  function onScroll() {
     if (!ticking) {
-      requestAnimationFrame(updateNavbar);
+      // Clear any pending timeout
+      if (scrollTimeout) {
+        clearTimeout(scrollTimeout);
+      }
+      
+      // Use requestAnimationFrame for smooth updates
+      requestAnimationFrame(() => {
+        updateNavbar();
+        ticking = false;
+      });
+      
       ticking = true;
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  
+  // Handle touch events for mobile (better touch scroll detection)
+  let touchStartY = 0;
+  
+  document.addEventListener('touchstart', (e) => {
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+  
+  document.addEventListener('touchmove', (e) => {
+    if (!navbar) return;
+    
+    const touchY = e.touches[0].clientY;
+    const touchDelta = touchStartY - touchY;
+    
+    // Only respond to significant touch movements
+    if (Math.abs(touchDelta) > 20) {
+      if (touchDelta > 0 && window.scrollY > topThreshold) {
+        // Swiping up (scrolling down content)
+        navbar.classList.add('navbar--hidden');
+        navbar.classList.remove('navbar--visible');
+      } else if (touchDelta < 0) {
+        // Swiping down (scrolling up content)
+        navbar.classList.remove('navbar--hidden');
+        navbar.classList.add('navbar--visible');
+      }
+      touchStartY = touchY;
     }
   }, { passive: true });
 
@@ -286,6 +390,31 @@
   });
 
   // ========================================
+  // BUTTON INTERACTION ENHANCEMENT
+  // ========================================
+  const actionButtons = document.querySelectorAll('.btn-action');
+  
+  actionButtons.forEach(btn => {
+    // Add active state for touch devices
+    btn.addEventListener('touchstart', function() {
+      this.classList.add('is-pressed');
+    }, { passive: true });
+    
+    btn.addEventListener('touchend', function() {
+      this.classList.remove('is-pressed');
+    }, { passive: true });
+  });
+
+  // ========================================
+  // DETECT MOBILE DEVICE
+  // ========================================
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+  
+  if (isMobile) {
+    document.body.classList.add('is-mobile');
+  }
+
+  // ========================================
   // TYPED TEXT EFFECT (Optional)
   // ========================================
   const typedElement = document.querySelector('.hero__subtitle');
@@ -299,6 +428,11 @@
   // ========================================
   window.addEventListener('load', () => {
     document.body.classList.add('loaded');
+    
+    // Ensure navbar is visible on load
+    if (navbar) {
+      navbar.classList.add('navbar--visible');
+    }
     
     // Trigger initial reveals for visible elements
     const visibleReveals = document.querySelectorAll('.reveal');

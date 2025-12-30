@@ -5,7 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --color-bg: #050505;
+            --color-accent: #6b8afd;
+            --color-accent-glow: rgba(107, 138, 253, 0.2);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -17,7 +26,7 @@
         }
 
         html, body {
-            background-color: #0a0a0f;
+            background-color: var(--color-bg);
             color: #a0a0b0;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             min-height: 100vh;
@@ -37,6 +46,17 @@
             overflow: hidden;
         }
 
+        /* Particle Canvas */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
         body::before {
             content: '';
             position: fixed;
@@ -48,7 +68,7 @@
                 radial-gradient(ellipse 80% 60% at 50% 0%, rgba(15, 15, 23, 0.8) 0%, transparent 60%),
                 radial-gradient(ellipse 80% 60% at 50% 100%, rgba(15, 15, 23, 0.6) 0%, transparent 50%);
             pointer-events: none;
-            z-index: -1;
+            z-index: 1;
         }
 
         body::after {
@@ -61,7 +81,7 @@
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
             opacity: 0.025;
             pointer-events: none;
-            z-index: -1;
+            z-index: 2;
         }
 
         .lock-screen {
@@ -71,7 +91,7 @@
             right: 0;
             bottom: 0;
             z-index: 9999;
-            background-color: #0a0a0f;
+            background-color: var(--color-bg);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -91,16 +111,34 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 16px;
+            gap: 20px;
+        }
+
+        .lock-icon {
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(107, 138, 253, 0.1);
+            border: 1px solid rgba(107, 138, 253, 0.2);
+            color: var(--color-accent);
+            margin-bottom: 8px;
+        }
+
+        .lock-icon svg {
+            width: 28px;
+            height: 28px;
         }
 
         .lock-input {
             width: 220px;
             padding: 14px 18px;
-            background: #12121c;
-            border: 1px solid #1e1e2e;
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.04);
             border-radius: 12px;
-            color: #a0a0b0;
+            color: #e8e8e8;
             font-family: inherit;
             font-size: 14px;
             outline: none;
@@ -110,16 +148,18 @@
         }
 
         .lock-input::placeholder {
-            color: #4a4a5a;
+            color: #555555;
         }
 
         .lock-input:focus {
-            border-color: #2a2a3e;
-            box-shadow: 0 0 0 3px rgba(42, 42, 62, 0.2);
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px var(--color-accent-glow);
         }
 
         .lock-input.shake {
             animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
         }
 
         @keyframes shake {
@@ -132,21 +172,22 @@
 
         .lock-btn {
             padding: 12px 32px;
-            background: #12121c;
-            border: 1px solid #1e1e2e;
+            background: var(--color-accent);
+            border: none;
             border-radius: 100px;
-            color: #a0a0b0;
+            color: #ffffff;
             font-family: inherit;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+            transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+            box-shadow: 0 0 20px var(--color-accent-glow);
         }
 
         .lock-btn:hover {
-            background: #161622;
-            border-color: #2a2a3e;
-            color: #c0c0d0;
+            background: #5a7bef;
+            transform: translateY(-1px);
+            box-shadow: 0 0 30px var(--color-accent-glow);
         }
 
         .main-content {
@@ -154,6 +195,8 @@
             visibility: hidden;
             transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s,
                         visibility 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+            position: relative;
+            z-index: 10;
         }
 
         .main-content.visible {
@@ -190,10 +233,10 @@
             align-items: center;
             gap: 4px;
             padding: 6px;
-            background: rgba(15, 15, 23, 0.85);
+            background: rgba(10, 10, 10, 0.85);
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid #1e1e2e;
+            border: 1px solid rgba(255, 255, 255, 0.04);
             border-radius: 100px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         }
@@ -203,7 +246,7 @@
             background: transparent;
             border: none;
             border-radius: 100px;
-            color: #6a6a7a;
+            color: #888888;
             font-family: inherit;
             font-size: 13px;
             font-weight: 500;
@@ -212,11 +255,11 @@
         }
 
         .section-slider-btn:hover {
-            color: #a0a0b0;
+            color: #e8e8e8;
         }
 
         .section-slider-btn.active {
-            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            background: var(--color-accent);
             color: #ffffff;
         }
 
@@ -226,12 +269,12 @@
             left: 24px;
             z-index: 500;
             padding: 10px 20px;
-            background: rgba(15, 15, 23, 0.85);
+            background: rgba(10, 10, 10, 0.85);
             backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid #1e1e2e;
+            border: 1px solid rgba(255, 255, 255, 0.04);
             border-radius: 100px;
-            color: #6a6a7a;
+            color: #888888;
             font-family: inherit;
             font-size: 13px;
             font-weight: 500;
@@ -260,9 +303,9 @@
         }
 
         .back-home-btn:hover {
-            background: rgba(22, 22, 34, 0.9);
-            border-color: #2a2a3e;
-            color: #a0a0b0;
+            background: rgba(20, 20, 20, 0.95);
+            border-color: rgba(255, 255, 255, 0.08);
+            color: #e8e8e8;
         }
 
         .container {
@@ -327,8 +370,8 @@
             aspect-ratio: 1 / 1;
             overflow: hidden;
             border-radius: 12px;
-            background: #12121c;
-            border: 1px solid #1e1e2e;
+            background: rgba(13, 13, 13, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.04);
             box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
             opacity: 0;
             transform: translateY(16px);
@@ -347,7 +390,7 @@
         .media-item:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-            border-color: #2a2a3e;
+            border-color: rgba(255, 255, 255, 0.08);
         }
 
         .media-item img,
@@ -542,10 +585,19 @@
     </style>
 </head>
 <body class="locked">
+    <!-- Particle Canvas -->
+    <canvas id="particle-canvas"></canvas>
+
     <div class="lock-screen" id="lockScreen">
         <div class="lock-form">
-            <input type="password" class="lock-input" id="accessInput" autocomplete="off" autofocus>
-            <button class="lock-btn" id="accessBtn">Enter</button>
+            <div class="lock-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
+            <input type="password" class="lock-input" id="accessInput" autocomplete="off" autofocus placeholder="Enter code">
+            <button class="lock-btn" id="accessBtn">Unlock</button>
         </div>
     </div>
 
@@ -556,7 +608,7 @@
         </div>
     </div>
 
-    <button class="back-home-btn" id="backHomeBtn">Back to Home</button>
+    <button class="back-home-btn" id="backHomeBtn">← Home</button>
 
     <div class="main-content" id="mainContent">
         <div class="container">
@@ -856,6 +908,107 @@
                 })();
             }
         })();
+    </script>
+
+    <!-- Particle System -->
+    <script>
+    (function() {
+        const canvas = document.getElementById('particle-canvas');
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: null, y: null, radius: 120 };
+        let animationId;
+        
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        const PARTICLE_COUNT = isMobile ? 40 : 80;
+        
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        function createParticles() {
+            particles = [];
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                const size = Math.random() * 1.5 + 0.5;
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: size,
+                    baseSize: size,
+                    speedX: (Math.random() - 0.5) * 0.2,
+                    speedY: (Math.random() - 0.5) * 0.2,
+                    opacity: Math.random() * 0.3 + 0.1,
+                    hue: Math.random() > 0.7 ? 220 : 0
+                });
+            }
+        }
+        
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(p => {
+                p.x += p.speedX;
+                p.y += p.speedY;
+                
+                if (p.x < 0) p.x = canvas.width;
+                if (p.x > canvas.width) p.x = 0;
+                if (p.y < 0) p.y = canvas.height;
+                if (p.y > canvas.height) p.y = 0;
+                
+                let currentSize = p.baseSize;
+                let currentOpacity = p.opacity;
+                
+                if (mouse.x !== null && !isMobile) {
+                    const dx = mouse.x - p.x;
+                    const dy = mouse.y - p.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < mouse.radius) {
+                        const force = (mouse.radius - dist) / mouse.radius;
+                        p.x -= dx * force * 0.02;
+                        p.y -= dy * force * 0.02;
+                        currentSize = p.baseSize * (1 + force * 0.5);
+                        currentOpacity = p.opacity * (1 + force * 0.3);
+                    }
+                }
+                
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, currentSize, 0, Math.PI * 2);
+                if (p.hue > 0) {
+                    ctx.fillStyle = `hsla(${p.hue}, 60%, 65%, ${currentOpacity})`;
+                } else {
+                    ctx.fillStyle = `rgba(255, 255, 255, ${currentOpacity})`;
+                }
+                ctx.fill();
+            });
+            
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        window.addEventListener('resize', function() {
+            resize();
+            createParticles();
+        });
+        
+        if (!isMobile) {
+            window.addEventListener('mousemove', function(e) {
+                mouse.x = e.clientX;
+                mouse.y = e.clientY;
+            });
+            
+            window.addEventListener('mouseout', function() {
+                mouse.x = null;
+                mouse.y = null;
+            });
+        }
+        
+        resize();
+        createParticles();
+        animate();
+    })();
     </script>
 </body>
 </html>

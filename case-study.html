@@ -11,29 +11,25 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <nav class="nav" id="navbar">
-    <div class="container nav__inner">
-      <a href="index.html" class="nav__logo">AS</a>
-      <ul class="nav__links" id="navLinks">
-        <li><a href="index.html" class="nav__link">Home</a></li>
-        <li><a href="projects.html" class="nav__link">Projects</a></li>
-        <li><a href="about.html" class="nav__link">About</a></li>
-        <li><a href="contact.html" class="nav__link">Contact</a></li>
-      </ul>
-      <button class="nav__toggle" id="navToggle" aria-label="Toggle navigation">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+  <!-- Particle Canvas -->
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar__pill">
+      <a href="index.html" class="navbar__link">About</a>
+      <a href="projects.html" class="navbar__link navbar__link--active">Projects</a>
+      <a href="grades.html" class="navbar__link">Grades</a>
+      <a href="contact.html" class="navbar__link">Contact</a>
     </div>
   </nav>
 
-  <main class="page-content">
-    <section class="case-study-hero">
+  <main>
+    <section class="projects-hero">
       <div class="container container--narrow">
-        <h1 class="case-study-hero__title">Hand Gesture Mouse Control</h1>
-        <p class="case-study-hero__meta">Computer Vision · Python · 2024</p>
-        <a href="https://github.com/ShriOg/Hand-Gesture-Mouse-Control" class="case-study-repo" target="_blank" rel="noopener noreferrer">View Source Code <span>→</span></a>
+        <h1 class="grades-hero__title">Hand Gesture Mouse Control</h1>
+        <p class="projects-hero__subtitle">Computer Vision · Python · 2024</p>
+        <a href="https://github.com/ShriOg/Hand-Gesture-Mouse-Control" class="btn btn--ghost" target="_blank" rel="noopener noreferrer">View Source Code →</a>
       </div>
     </section>
 
