@@ -4,88 +4,200 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Projects | Anand Shukla</title>
-  <meta name="description" content="Projects and work by Anand Shukla">
+  <meta name="description" content="Projects and work by Anand Shukla - Computer Vision, Web Development, and more.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <nav class="nav" id="navbar">
-    <div class="container nav__inner">
-      <a href="index.html" class="nav__logo">AS</a>
-      <ul class="nav__links" id="navLinks">
-        <li><a href="index.html" class="nav__link">Home</a></li>
-        <li><a href="projects.html" class="nav__link nav__link--active">Projects</a></li>
-        <li><a href="about.html" class="nav__link">About</a></li>
-        <li><a href="contact.html" class="nav__link">Contact</a></li>
-      </ul>
-      <button class="nav__toggle" id="navToggle" aria-label="Toggle navigation">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+  <!-- Particle Canvas -->
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar__pill">
+      <a href="index.html" class="navbar__link">About</a>
+      <a href="projects.html" class="navbar__link navbar__link--active">Projects</a>
+      <a href="grades.html" class="navbar__link">Grades</a>
+      <a href="contact.html" class="navbar__link">Contact</a>
     </div>
   </nav>
 
-  <main class="page-content">
-    <section class="projects-page" style="padding-top: var(--spacing-3xl);">
+  <main>
+    <!-- Hero Section -->
+    <section class="projects-hero">
       <div class="container">
-        <div class="section-header" style="opacity:0;transform:translateY(20px);animation:fadeInUp var(--duration-slow) var(--ease-out) 0.1s forwards;">
-          <p class="section-label">Work</p>
-          <h1 class="section-title">Projects</h1>
+        <h1 class="grades-hero__title">Projects</h1>
+        <p class="projects-hero__subtitle">A collection of my work exploring computer vision, web development, and creative coding.</p>
+      </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section class="featured-section" style="padding-top: 0;">
+      <div class="container">
+        <div class="projects-grid">
+          
+          <!-- Project 1: Hand Gesture Mouse Control -->
+          <article class="project-card-large reveal">
+            <div class="project-card-large__content">
+              <div class="project-card-large__icon">🖐️</div>
+              <h3 class="project-card-large__title">Hand Gesture Mouse Control</h3>
+              <p class="project-card-large__description">
+                A computer vision project using Python, OpenCV, and MediaPipe to control mouse cursor with hand gestures. 
+                Features include click, scroll, and drag operations using real-time hand tracking.
+              </p>
+              <div class="project-card-large__tags">
+                <span class="tag">Python</span>
+                <span class="tag">OpenCV</span>
+                <span class="tag">MediaPipe</span>
+                <span class="tag">Computer Vision</span>
+              </div>
+              <a href="https://github.com/ShriOg" target="_blank" rel="noopener" class="project-card-large__link">
+                View on GitHub →
+              </a>
+            </div>
+            <div class="project-card-large__visual">
+              <div class="project-visual">
+                <span class="project-visual__emoji">🖱️</span>
+                <span class="project-visual__emoji project-visual__emoji--secondary">🖐️</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Project 2: 3D Particle System -->
+          <article class="project-card-large reveal">
+            <div class="project-card-large__content">
+              <div class="project-card-large__icon">✨</div>
+              <h3 class="project-card-large__title">Hand-Controlled 3D Particle System</h3>
+              <p class="project-card-large__description">
+                Real-time 3D particle morphing system controlled through hand gestures. 
+                Uses WebGL and Three.js for stunning visual effects with gesture-based interactions.
+              </p>
+              <div class="project-card-large__tags">
+                <span class="tag">Three.js</span>
+                <span class="tag">WebGL</span>
+                <span class="tag">MediaPipe</span>
+                <span class="tag">JavaScript</span>
+              </div>
+              <a href="particle-system-gestures.html" class="project-card-large__link">
+                View Project →
+              </a>
+            </div>
+            <div class="project-card-large__visual">
+              <div class="project-visual project-visual--alt">
+                <span class="project-visual__emoji">🌌</span>
+                <span class="project-visual__emoji project-visual__emoji--secondary">🎨</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Project 3: Portfolio Website -->
+          <article class="project-card-large reveal">
+            <div class="project-card-large__content">
+              <div class="project-card-large__icon">🌐</div>
+              <h3 class="project-card-large__title">Developer Portfolio</h3>
+              <p class="project-card-large__description">
+                A premium dark-themed portfolio website built with vanilla HTML, CSS, and JavaScript. 
+                Features floating particles, smooth animations, and a recruiter-ready design.
+              </p>
+              <div class="project-card-large__tags">
+                <span class="tag">HTML</span>
+                <span class="tag">CSS</span>
+                <span class="tag">JavaScript</span>
+                <span class="tag">Responsive Design</span>
+              </div>
+              <a href="https://github.com/ShriOg/anand-dev.tech" target="_blank" rel="noopener" class="project-card-large__link">
+                View on GitHub →
+              </a>
+            </div>
+            <div class="project-card-large__visual">
+              <div class="project-visual">
+                <span class="project-visual__emoji">💻</span>
+                <span class="project-visual__emoji project-visual__emoji--secondary">🎨</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Project 4: IoT Projects -->
+          <article class="project-card-large reveal">
+            <div class="project-card-large__content">
+              <div class="project-card-large__icon">⚡</div>
+              <h3 class="project-card-large__title">IoT & Hardware Projects</h3>
+              <p class="project-card-large__description">
+                Collection of Internet of Things projects involving Arduino, sensors, and automation. 
+                Building bridges between software and the physical world.
+              </p>
+              <div class="project-card-large__tags">
+                <span class="tag">Arduino</span>
+                <span class="tag">IoT</span>
+                <span class="tag">Sensors</span>
+                <span class="tag">Automation</span>
+              </div>
+              <a href="https://github.com/ShriOg" target="_blank" rel="noopener" class="project-card-large__link">
+                View on GitHub →
+              </a>
+            </div>
+            <div class="project-card-large__visual">
+              <div class="project-visual project-visual--alt">
+                <span class="project-visual__emoji">🔌</span>
+                <span class="project-visual__emoji project-visual__emoji--secondary">🤖</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Project 5: More Coming Soon -->
+          <article class="project-card-large reveal" style="opacity: 0.7;">
+            <div class="project-card-large__content">
+              <div class="project-card-large__icon">🚀</div>
+              <h3 class="project-card-large__title">More Coming Soon</h3>
+              <p class="project-card-large__description">
+                Currently working on new projects exploring machine learning, advanced computer vision, 
+                and creative web applications. Stay tuned for updates!
+              </p>
+              <div class="project-card-large__tags">
+                <span class="tag">In Progress</span>
+                <span class="tag">Machine Learning</span>
+                <span class="tag">Creative Coding</span>
+              </div>
+              <span class="project-card-large__link" style="opacity: 0.5; cursor: default;">
+                Coming Soon
+              </span>
+            </div>
+            <div class="project-card-large__visual">
+              <div class="project-visual">
+                <span class="project-visual__emoji">🔮</span>
+                <span class="project-visual__emoji project-visual__emoji--secondary">✨</span>
+              </div>
+            </div>
+          </article>
+
         </div>
+      </div>
+    </section>
 
-        <div class="projects-list">
-          <a href="case-study.html" class="project-item" style="--index: 0;">
-            <div class="project-item__header">
-              <h2 class="project-item__title">Hand Gesture Mouse Control</h2>
-              <svg class="project-item__arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-            </div>
-            <p class="project-item__description">Real-time computer vision system that translates hand gestures into mouse movements and click actions using MediaPipe hand tracking and OpenCV.</p>
-            <div class="project-item__tech">
-              <span>Python</span>
-              <span>OpenCV</span>
-              <span>MediaPipe</span>
-              <span>Computer Vision</span>
-            </div>
-          </a>
-
-          <a href="particle-system-gestures.html" class="project-item" style="--index: 1;">
-            <div class="project-item__header">
-              <h2 class="project-item__title">Hand-Controlled 3D Particle System</h2>
-              <svg class="project-item__arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-            </div>
-            <p class="project-item__description">A real-time 3D particle morphing system controlled through hand gestures using computer vision and WebGL.</p>
-            <div class="project-item__tech">
-              <span>Three.js</span>
-              <span>MediaPipe</span>
-              <span>WebGL</span>
-              <span>JavaScript</span>
-            </div>
-          </a>
-
-          <div class="project-item" style="--index: 2; cursor: default;">
-            <div class="project-item__header">
-              <h2 class="project-item__title">More Coming Soon</h2>
-              <svg class="project-item__arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.3;"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
-            </div>
-            <p class="project-item__description">Currently working on new projects exploring different areas of software development. Check back for updates.</p>
-            <div class="project-item__tech">
-              <span>In Progress</span>
-            </div>
-          </div>
+    <!-- CTA Section -->
+    <section class="cta-section">
+      <div class="container">
+        <div class="cta-card">
+          <h2 class="cta-card__title">Want to Collaborate?</h2>
+          <p class="cta-card__text">Have an interesting project idea? I'd love to hear about it.</p>
+          <a href="contact.html" class="btn btn--primary btn--large">Get In Touch</a>
         </div>
       </div>
     </section>
   </main>
 
+  <!-- Footer -->
   <footer class="footer">
-    <div class="container footer__inner">
-      <p class="footer__text">© 2025 Anand Shukla</p>
-      <div class="footer__links">
-        <a href="https://github.com/ShriOg" class="footer__link" target="_blank" rel="noopener">GitHub</a>
-        <a href="mailto:shrishukla04@gmail.com" class="footer__link">Email</a>
+    <div class="container">
+      <div class="footer__content">
+        <p class="footer__copyright">© 2025 Anand Shukla. All rights reserved.</p>
+        <div class="footer__links">
+          <a href="https://github.com/ShriOg" target="_blank" rel="noopener" class="footer__link">GitHub</a>
+          <a href="https://instagram.com/shri.og04" target="_blank" rel="noopener" class="footer__link">Instagram</a>
+          <a href="mailto:shrishukla04@gmail.com" class="footer__link">Email</a>
+        </div>
       </div>
     </div>
   </footer>

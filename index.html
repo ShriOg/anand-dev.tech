@@ -4,131 +4,201 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Anand Shukla | Developer</title>
-  <meta name="description" content="Anand Shukla - Developer specializing in Python, Computer Vision, and building thoughtful software solutions.">
+  <meta name="description" content="Anand Shukla - Student Developer specializing in Python, Computer Vision, and building thoughtful software solutions.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <nav class="nav" id="navbar">
-    <div class="container nav__inner">
-      <a href="index.html" class="nav__logo">AS</a>
-      <ul class="nav__links" id="navLinks">
-        <li><a href="index.html" class="nav__link nav__link--active">Home</a></li>
-        <li><a href="projects.html" class="nav__link">Projects</a></li>
-        <li><a href="about.html" class="nav__link">About</a></li>
-        <li><a href="contact.html" class="nav__link">Contact</a></li>
-      </ul>
-      <button class="nav__toggle" id="navToggle" aria-label="Toggle navigation">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+  <!-- Particle Canvas -->
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar__pill">
+      <a href="index.html" class="navbar__link navbar__link--active">About</a>
+      <a href="projects.html" class="navbar__link">Projects</a>
+      <a href="grades.html" class="navbar__link">Grades</a>
+      <a href="contact.html" class="navbar__link">Contact</a>
     </div>
   </nav>
 
-  <main class="page-content">
+  <main>
+    <!-- Hero Section -->
     <section class="hero">
-      <div class="hero__accent"></div>
+      <div class="hero__container">
+        <!-- Avatar with Glowing Ring -->
+        <div class="hero__avatar">
+          <div class="hero__avatar-ring"></div>
+          <div class="hero__avatar-inner">
+            <span class="hero__avatar-initials">AS</span>
+          </div>
+        </div>
+
+        <!-- Name & Title -->
+        <h1 class="hero__name">Anand Shukla</h1>
+        <p class="hero__subtitle">Student Developer | Python & Computer Vision | Tech Enthusiast</p>
+
+        <!-- CTA Buttons -->
+        <div class="hero__buttons">
+          <a href="projects.html" class="btn btn--primary">View Projects</a>
+          <a href="contact.html" class="btn btn--ghost">Get In Touch →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Preview Section -->
+    <section class="about-preview">
       <div class="container">
-        <div class="hero__content">
-          <p class="hero__greeting">Hi, I'm</p>
-          <h1 class="hero__title">Anand Shukla</h1>
-          <p class="hero__subtitle">Developer focused on building clean, purposeful software. Currently exploring computer vision and crafting digital experiences.</p>
-          <div class="hero__links">
-            <a href="https://github.com/ShriOg" class="hero__link" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-            </a>
-            <a href="https://instagram.com/shri.og04" class="hero__link" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-            </a>
-            <a href="mailto:shrishukla04@gmail.com" class="hero__link" aria-label="Email">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 6l-10 7L2 6"/></svg>
-            </a>
+        <div class="about-preview__content">
+          <div class="about-preview__text">
+            <h2 class="section-title">About Me</h2>
+            <p class="about-preview__description">
+              I'm a passionate student developer exploring the intersection of code and creativity. 
+              My journey started with curiosity about how things work, leading me to dive deep into 
+              Python programming and computer vision. I build functional, thoughtfully designed software 
+              that solves real problems.
+            </p>
+          </div>
+          
+          <div class="about-preview__stats">
+            <div class="stat-card">
+              <span class="stat-card__number">15+</span>
+              <span class="stat-card__label">Projects</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-card__number">97%</span>
+              <span class="stat-card__label">Academic</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-card__number">3+</span>
+              <span class="stat-card__label">Years Coding</span>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="featured-project">
+    <!-- Skills Section -->
+    <section class="skills-section">
       <div class="container">
-        <div class="section-header">
-          <p class="section-label">Featured Work</p>
-          <h2 class="section-title">Latest Project</h2>
-        </div>
-        <div class="featured-cards">
-          <a href="particle-system-gestures.html" class="project-card project-card--compact">
-            <div class="project-card__image project-card__image--compact">
-              <div style="width:100%;height:100%;background:var(--color-surface-elevated);display:flex;align-items:center;justify-content:center;">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-muted)" stroke-width="1"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-              </div>
-            </div>
-            <div class="project-card__content">
-              <h3 class="project-card__title">Hand-Controlled 3D Particle System</h3>
-              <p class="project-card__description">A real-time 3D particle morphing system controlled through hand gestures using computer vision and WebGL.</p>
-              <div class="project-card__tech">
-                <span>Three.js</span>
-                <span>MediaPipe</span>
-                <span>WebGL</span>
-                <span>JavaScript</span>
-              </div>
-              <span class="project-card__cta">
-                View Case Study
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </span>
-            </div>
-          </a>
+        <h2 class="section-title section-title--center">Skills & Technologies</h2>
+        <div class="skills-grid">
+          <div class="skill-card">
+            <div class="skill-card__icon">🐍</div>
+            <span class="skill-card__name">Python</span>
+          </div>
+          <div class="skill-card">
+            <div class="skill-card__icon">👁️</div>
+            <span class="skill-card__name">Computer Vision</span>
+          </div>
+          <div class="skill-card">
+            <div class="skill-card__icon">🌐</div>
+            <span class="skill-card__name">Web Development</span>
+          </div>
+          <div class="skill-card">
+            <div class="skill-card__icon">🤖</div>
+            <span class="skill-card__name">Machine Learning</span>
+          </div>
+          <div class="skill-card">
+            <div class="skill-card__icon">📊</div>
+            <span class="skill-card__name">Data Analysis</span>
+          </div>
+          <div class="skill-card">
+            <div class="skill-card__icon">⚡</div>
+            <span class="skill-card__name">IoT Development</span>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="projects-overview">
+    <!-- Featured Projects Preview -->
+    <section class="featured-section">
       <div class="container">
         <div class="section-header">
-          <p class="section-label">More Work</p>
-          <h2 class="section-title">Projects</h2>
+          <h2 class="section-title">Featured Projects</h2>
+          <a href="projects.html" class="section-link">View All →</a>
         </div>
-        <div class="projects-grid">
-          <a href="case-study.html" class="project-card" style="--index: 0;">
-            <div class="project-card__content">
-              <h3 class="project-card__title">Hand Gesture Mouse Control</h3>
-              <p class="project-card__description">Computer vision system translating hand gestures into mouse actions using MediaPipe and OpenCV.</p>
-              <div class="project-card__tech">
-                <span>Python</span>
-                <span>OpenCV</span>
-                <span>MediaPipe</span>
+
+        <div class="featured-projects">
+          <article class="project-card-large">
+            <div class="project-card-large__content">
+              <div class="project-card-large__icon">🖐️</div>
+              <h3 class="project-card-large__title">Hand Gesture Mouse Control</h3>
+              <p class="project-card-large__description">
+                A computer vision project using Python, OpenCV, and MediaPipe to control mouse cursor with hand gestures. 
+                Features include click, scroll, and drag operations using real-time hand tracking.
+              </p>
+              <div class="project-card-large__tags">
+                <span class="tag">Python</span>
+                <span class="tag">OpenCV</span>
+                <span class="tag">MediaPipe</span>
+                <span class="tag">Computer Vision</span>
               </div>
-              <span class="project-card__cta">
-                View Case Study
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </span>
+              <a href="https://github.com/ShriOg" target="_blank" rel="noopener" class="project-card-large__link">
+                View on GitHub →
+              </a>
             </div>
-          </a>
-          <a href="projects.html" class="project-card" style="--index: 1;">
-            <div class="project-card__content">
-              <h3 class="project-card__title">All Projects</h3>
-              <p class="project-card__description">View the complete collection of my work and ongoing explorations.</p>
-              <div class="project-card__tech">
-                <span>Browse All</span>
+            <div class="project-card-large__visual">
+              <div class="project-visual">
+                <span class="project-visual__emoji">🖱️</span>
+                <span class="project-visual__emoji project-visual__emoji--secondary">🖐️</span>
               </div>
-              <span class="project-card__cta">
-                See All Projects
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </span>
             </div>
-          </a>
+          </article>
+
+          <article class="project-card-large">
+            <div class="project-card-large__content">
+              <div class="project-card-large__icon">✨</div>
+              <h3 class="project-card-large__title">3D Particle System</h3>
+              <p class="project-card-large__description">
+                Real-time 3D particle morphing system controlled through hand gestures. 
+                Uses WebGL and Three.js for stunning visual effects with gesture-based interactions.
+              </p>
+              <div class="project-card-large__tags">
+                <span class="tag">Three.js</span>
+                <span class="tag">WebGL</span>
+                <span class="tag">MediaPipe</span>
+                <span class="tag">JavaScript</span>
+              </div>
+              <a href="particle-system-gestures.html" class="project-card-large__link">
+                View Project →
+              </a>
+            </div>
+            <div class="project-card-large__visual">
+              <div class="project-visual project-visual--alt">
+                <span class="project-visual__emoji">🌌</span>
+                <span class="project-visual__emoji project-visual__emoji--secondary">🎨</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+      <div class="container">
+        <div class="cta-card">
+          <h2 class="cta-card__title">Let's Work Together</h2>
+          <p class="cta-card__text">Have a project in mind or just want to connect? I'd love to hear from you.</p>
+          <a href="contact.html" class="btn btn--primary btn--large">Get In Touch</a>
         </div>
       </div>
     </section>
   </main>
 
+  <!-- Footer -->
   <footer class="footer">
-    <div class="container footer__inner">
-      <p class="footer__text">© 2025 Anand Shukla</p>
-      <div class="footer__links">
-        <a href="https://github.com/ShriOg" class="footer__link" target="_blank" rel="noopener">GitHub</a>
-        <a href="mailto:shrishukla04@gmail.com" class="footer__link">Email</a>
+    <div class="container">
+      <div class="footer__content">
+        <p class="footer__copyright">© 2025 Anand Shukla. All rights reserved.</p>
+        <div class="footer__links">
+          <a href="https://github.com/ShriOg" target="_blank" rel="noopener" class="footer__link">GitHub</a>
+          <a href="https://instagram.com/shri.og04" target="_blank" rel="noopener" class="footer__link">Instagram</a>
+          <a href="mailto:shrishukla04@gmail.com" class="footer__link">Email</a>
+        </div>
       </div>
     </div>
   </footer>

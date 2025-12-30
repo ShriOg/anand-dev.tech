@@ -11,32 +11,44 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="page-wrapper">
-    <nav class="nav-wrapper" id="navbar">
-      <div class="nav">
-        <a href="index.html" class="nav__link">About</a>
-        <a href="projects.html" class="nav__link">Projects</a>
-        <a href="grades.html" class="nav__link nav__link--active">Grades</a>
-        <a href="contact.html" class="nav__link">Contact</a>
-      </div>
-    </nav>
+  <!-- Particle Canvas -->
+  <canvas id="particle-canvas"></canvas>
 
-    <main>
+  <!-- Navigation -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar__pill">
+      <a href="index.html" class="navbar__link">About</a>
+      <a href="projects.html" class="navbar__link">Projects</a>
+      <a href="grades.html" class="navbar__link navbar__link--active">Grades</a>
+      <a href="contact.html" class="navbar__link">Contact</a>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="grades-hero">
       <div class="container">
-        <div class="page-title reveal">
-          <h1 class="page-title__text">Academic Performance</h1>
-        </div>
+        <h1 class="grades-hero__title">Academic Performance</h1>
+      </div>
+    </section>
 
-        <div class="overall-card reveal reveal-delay-1">
+    <!-- Grades Section -->
+    <section style="padding-top: 0; position: relative; z-index: 1;">
+      <div class="container">
+        
+        <!-- Overall Score Card -->
+        <div class="overall-card reveal">
           <div class="overall-card__score">97.2%</div>
           <div class="overall-card__label">Overall Average</div>
         </div>
 
+        <!-- Subject Cards Grid -->
         <div class="subjects-grid">
+          
           <div class="subject-card reveal reveal-delay-1">
             <div class="subject-card__header">
               <span class="subject-card__name">Mathematics</span>
-              <span class="subject-card__grade grade-excellent">98%</span>
+              <span class="subject-card__grade">98%</span>
             </div>
             <div class="subject-card__bar">
               <div class="subject-card__fill" style="width: 98%"></div>
@@ -46,7 +58,7 @@
           <div class="subject-card reveal reveal-delay-2">
             <div class="subject-card__header">
               <span class="subject-card__name">Science</span>
-              <span class="subject-card__grade grade-excellent">97%</span>
+              <span class="subject-card__grade">97%</span>
             </div>
             <div class="subject-card__bar">
               <div class="subject-card__fill" style="width: 97%"></div>
@@ -56,7 +68,7 @@
           <div class="subject-card reveal reveal-delay-3">
             <div class="subject-card__header">
               <span class="subject-card__name">English</span>
-              <span class="subject-card__grade grade-excellent">96%</span>
+              <span class="subject-card__grade">96%</span>
             </div>
             <div class="subject-card__bar">
               <div class="subject-card__fill" style="width: 96%"></div>
@@ -66,7 +78,7 @@
           <div class="subject-card reveal reveal-delay-4">
             <div class="subject-card__header">
               <span class="subject-card__name">Computer Science</span>
-              <span class="subject-card__grade grade-excellent">99%</span>
+              <span class="subject-card__grade">99%</span>
             </div>
             <div class="subject-card__bar">
               <div class="subject-card__fill" style="width: 99%"></div>
@@ -76,7 +88,7 @@
           <div class="subject-card reveal reveal-delay-5">
             <div class="subject-card__header">
               <span class="subject-card__name">Social Studies</span>
-              <span class="subject-card__grade grade-excellent">95%</span>
+              <span class="subject-card__grade">95%</span>
             </div>
             <div class="subject-card__bar">
               <div class="subject-card__fill" style="width: 95%"></div>
@@ -86,22 +98,43 @@
           <div class="subject-card reveal reveal-delay-5">
             <div class="subject-card__header">
               <span class="subject-card__name">Hindi</span>
-              <span class="subject-card__grade grade-excellent">98%</span>
+              <span class="subject-card__grade">98%</span>
             </div>
             <div class="subject-card__bar">
               <div class="subject-card__fill" style="width: 98%"></div>
             </div>
           </div>
+
         </div>
       </div>
-    </main>
+    </section>
 
-    <footer class="footer">
+    <!-- Additional Info -->
+    <section class="cta-section" style="padding-top: var(--spacing-2xl);">
       <div class="container">
-        <p class="footer__text">© 2025 Anand Shukla. All rights reserved.</p>
+        <div class="cta-card">
+          <h2 class="cta-card__title">Academic Excellence</h2>
+          <p class="cta-card__text">Maintaining strong academic performance while pursuing my passion for technology and programming.</p>
+          <a href="projects.html" class="btn btn--primary btn--large">View My Projects</a>
+        </div>
       </div>
-    </footer>
-  </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__content">
+        <p class="footer__copyright">© 2025 Anand Shukla. All rights reserved.</p>
+        <div class="footer__links">
+          <a href="https://github.com/ShriOg" target="_blank" rel="noopener" class="footer__link">GitHub</a>
+          <a href="https://instagram.com/shri.og04" target="_blank" rel="noopener" class="footer__link">Instagram</a>
+          <a href="mailto:shrishukla04@gmail.com" class="footer__link">Email</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
   <script src="script.js"></script>
 </body>
 </html>
