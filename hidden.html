@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hidden | Anand Dev OS</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0a0a0b">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .password-gate--hidden { display: none; }
+    .password-form__input--error { border-color: var(--error); animation: shake 0.3s ease-out; }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+  </style>
+</head>
+<body class="page">
+  <nav class="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo">anand<span>.</span>dev</a>
+      <button class="nav__toggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="nav__links">
+        <a href="index.html" class="nav__link">Home</a>
+        <a href="projects.html" class="nav__link">Projects</a>
+        <a href="lab.html" class="nav__link">Lab</a>
+        <a href="dev-os.html" class="nav__link">Dev OS</a>
+        <a href="hire.html" class="nav__link">Hire Me</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Password Gate -->
+  <div class="password-gate" id="password-gate">
+    <form class="password-form" id="password-form">
+      <div class="password-form__icon">🔒</div>
+      <h1 class="password-form__title">Dev Only</h1>
+      <p class="password-form__description">
+        This area contains draft experiments, notes, and future ideas. 
+        Not meant for public consumption.
+      </p>
+      <input 
+        type="password" 
+        class="password-form__input" 
+        id="password-input" 
+        placeholder="Enter password"
+        autocomplete="off"
+        autofocus
+      >
+      <p class="password-form__error" id="password-error">Incorrect password</p>
+      <button type="submit" class="btn btn--primary" style="width: 100%;">Enter</button>
+    </form>
+  </div>
+
+  <!-- Hidden Content -->
+  <main class="hidden-content" id="hidden-content">
+    <div class="container container--narrow">
+      <header class="section-header" style="padding-top: var(--space-24);">
+        <span class="section-header__eyebrow">Hidden</span>
+        <h1 class="section-header__title">Dev Space</h1>
+        <p class="section-header__description">
+          Work in progress. Rough drafts. Half-baked ideas. Things that aren't ready for the world yet.
+        </p>
+      </header>
+
+      <!-- Draft Experiments -->
+      <section class="hidden-section">
+        <h2 class="hidden-section__title">Draft Experiments</h2>
+        
+        <div class="draft-item">
+          <div class="draft-item__header">
+            <h3 class="draft-item__title">WebGL Fluid Simulation</h3>
+            <span class="draft-item__status">WIP</span>
+          </div>
+          <p class="draft-item__description">
+            Experimenting with GPU-accelerated fluid dynamics. Currently fighting with shader compilation 
+            and render target ping-ponging. Performance is nowhere near where it needs to be.
+          </p>
+        </div>
+
+        <div class="draft-item">
+          <div class="draft-item__header">
+            <h3 class="draft-item__title">Audio Visualization System</h3>
+            <span class="draft-item__status">WIP</span>
+          </div>
+          <p class="draft-item__description">
+            Trying to create meaningful visualizations from audio analysis. Web Audio API gives good 
+            frequency data but mapping that to interesting visuals is harder than expected.
+          </p>
+        </div>
+
+        <div class="draft-item">
+          <div class="draft-item__header">
+            <h3 class="draft-item__title">Local LLM Integration</h3>
+            <span class="draft-item__status">WIP</span>
+          </div>
+          <p class="draft-item__description">
+            Testing llama.cpp bindings for the AI assistant project. Model loading is slow and 
+            memory usage is high. Need to figure out quantization and context window management.
+          </p>
+        </div>
+      </section>
+
+      <!-- Notes -->
+      <section class="hidden-section">
+        <h2 class="hidden-section__title">Random Notes</h2>
+        
+        <div class="note-card">
+          <time class="note-card__date">2024-12-29</time>
+          <p class="note-card__content">
+            Need to revisit the particle system connection algorithm. Current approach doesn't 
+            scale well with varying connection distances. Maybe look into k-d trees?
+          </p>
+        </div>
+
+        <div class="note-card">
+          <time class="note-card__date">2024-12-27</time>
+          <p class="note-card__content">
+            Portfolio animation timing feels off. Hero load animation is good but the reveal 
+            animations feel disconnected. Try reducing delay between reveals and making them 
+            more sequential instead of simultaneous.
+          </p>
+        </div>
+
+        <div class="note-card">
+          <time class="note-card__date">2024-12-25</time>
+          <p class="note-card__content">
+            Read about Bézier curves for smooth gesture interpolation. Might be overkill for 
+            current needs but would be interesting to implement. Bookmark: 
+            "A Primer on Bézier Curves" by Pomax.
+          </p>
+        </div>
+
+        <div class="note-card">
+          <time class="note-card__date">2024-12-22</time>
+          <p class="note-card__content">
+            The NowHang notification timing is still wrong. Users are getting pinged too 
+            often or not at all. Need to implement smart batching based on user activity 
+            patterns and time of day.
+          </p>
+        </div>
+
+        <div class="note-card">
+          <time class="note-card__date">2024-12-18</time>
+          <p class="note-card__content">
+            CSS scroll-driven animations are coming. This could replace a lot of the 
+            intersection observer code. Keep an eye on browser support.
+          </p>
+        </div>
+      </section>
+
+      <!-- Future Ideas -->
+      <section class="hidden-section">
+        <h2 class="hidden-section__title">Future Ideas (Unfiltered)</h2>
+        
+        <div class="idea-card">
+          <h4 class="idea-card__title">Procedural Music Generator</h4>
+          <p class="idea-card__description">
+            Generate ambient music based on code activity. Typing triggers notes, errors 
+            create dissonance, successful builds resolve to major chords. Silly? Maybe. Fun? Definitely.
+          </p>
+        </div>
+
+        <div class="idea-card">
+          <h4 class="idea-card__title">Git History Visualization</h4>
+          <p class="idea-card__description">
+            3D visualization of git history where commits are particles, branches are streams, 
+            and merges create collisions. Could be beautiful or a complete mess.
+          </p>
+        </div>
+
+        <div class="idea-card">
+          <h4 class="idea-card__title">Keyboard Heatmap</h4>
+          <p class="idea-card__description">
+            Track which keys I press most while coding. Visualize over time. Might reveal 
+            interesting patterns about coding habits. Or just show that I press backspace too much.
+          </p>
+        </div>
+
+        <div class="idea-card">
+          <h4 class="idea-card__title">AI Pair Programmer Voice</h4>
+          <p class="idea-card__description">
+            Instead of chat-based AI assistance, have a voice that speaks suggestions 
+            out loud. Like having a pair programmer but without the social awkwardness.
+          </p>
+        </div>
+
+        <div class="idea-card">
+          <h4 class="idea-card__title">Code Archaeology Tool</h4>
+          <p class="idea-card__description">
+            Tool that traces the history of a specific line of code. Who wrote it, when, 
+            why (from commit messages), and how many times it's been modified. 
+            Understand code through its history.
+          </p>
+        </div>
+      </section>
+
+      <!-- Personal Reminders -->
+      <section class="hidden-section">
+        <h2 class="hidden-section__title">Reminders to Self</h2>
+        
+        <div class="card" style="padding: var(--space-6);">
+          <ul style="font-size: var(--text-sm); color: var(--text-secondary);">
+            <li style="margin-bottom: var(--space-3); padding-left: var(--space-4); position: relative;">
+              <span style="position: absolute; left: 0; color: var(--accent-primary);">→</span>
+              Ship something small every week. Momentum matters more than perfection.
+            </li>
+            <li style="margin-bottom: var(--space-3); padding-left: var(--space-4); position: relative;">
+              <span style="position: absolute; left: 0; color: var(--accent-primary);">→</span>
+              Write before you code. Clarity of thought leads to clarity of code.
+            </li>
+            <li style="margin-bottom: var(--space-3); padding-left: var(--space-4); position: relative;">
+              <span style="position: absolute; left: 0; color: var(--accent-primary);">→</span>
+              Take breaks. Staring at the problem rarely solves it. Walking does.
+            </li>
+            <li style="margin-bottom: var(--space-3); padding-left: var(--space-4); position: relative;">
+              <span style="position: absolute; left: 0; color: var(--accent-primary);">→</span>
+              Documentation is a gift to future you. Be generous.
+            </li>
+            <li style="padding-left: var(--space-4); position: relative;">
+              <span style="position: absolute; left: 0; color: var(--accent-primary);">→</span>
+              The best code is the code you don't have to write. Simplify first.
+            </li>
+          </ul>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__inner">
+        <div class="footer__links">
+          <a href="https://github.com/anandshukla" class="footer__link" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://linkedin.com/in/anandshukla" class="footer__link" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="mailto:hello@anand.dev" class="footer__link">Email</a>
+        </div>
+        <p class="footer__copyright">© 2025 Anand Shukla. Built with intention.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

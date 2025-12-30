@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dev OS | Anand Dev OS</title>
+  <meta name="description" content="Learning log, idea vault, toolbelt, and documented failures. The operating system of a developer.">
+  <meta name="theme-color" content="#0a0a0b">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="page">
+  <nav class="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo">anand<span>.</span>dev</a>
+      <button class="nav__toggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="nav__links">
+        <a href="index.html" class="nav__link">Home</a>
+        <a href="projects.html" class="nav__link">Projects</a>
+        <a href="lab.html" class="nav__link">Lab</a>
+        <a href="dev-os.html" class="nav__link nav__link--active">Dev OS</a>
+        <a href="hire.html" class="nav__link">Hire Me</a>
+      </div>
+    </div>
+  </nav>
+
+  <main style="padding-top: var(--space-24);">
+    <div class="container container--narrow">
+      <header class="section-header reveal">
+        <span class="section-header__eyebrow">Dev OS</span>
+        <h1 class="section-header__title">The Operating System</h1>
+        <p class="section-header__description">
+          A living document of what I'm learning, thinking, building, and where I've failed. 
+          Updated regularly. Honest always.
+        </p>
+      </header>
+
+      <!-- Tabs -->
+      <div class="dev-os__tabs reveal">
+        <button class="dev-os__tab dev-os__tab--active" data-tab="learning-log">Learning Log</button>
+        <button class="dev-os__tab" data-tab="ideas">Idea Vault</button>
+        <button class="dev-os__tab" data-tab="toolbelt">Toolbelt</button>
+        <button class="dev-os__tab" data-tab="failures">Failures</button>
+      </div>
+
+      <!-- Learning Log -->
+      <section class="dev-os__content dev-os__content--active" id="learning-log">
+        <article class="log-entry">
+          <time class="log-entry__date">2024-12-28</time>
+          <h3 class="log-entry__title">WebSocket vs Server-Sent Events</h3>
+          <p class="log-entry__content">
+            Finally understood when to use each. SSE is perfect for one-way server-to-client streams 
+            (notifications, live feeds). WebSocket for bidirectional (chat, real-time collaboration). 
+            SSE also handles reconnection automatically. Been overusing WebSocket.
+          </p>
+          <div class="log-entry__tags">
+            <span class="log-entry__tag">networking</span>
+            <span class="log-entry__tag">real-time</span>
+          </div>
+        </article>
+
+        <article class="log-entry">
+          <time class="log-entry__date">2024-12-22</time>
+          <h3 class="log-entry__title">Spatial Hashing for Collision Detection</h3>
+          <p class="log-entry__content">
+            Particle system was dying at 300+ particles due to O(n²) collision checks. 
+            Implemented spatial hashing: divide space into grid cells, only check particles in same/adjacent cells. 
+            Went from 15fps to 60fps with 500 particles. Key insight: reduce the search space before optimizing the search.
+          </p>
+          <div class="log-entry__tags">
+            <span class="log-entry__tag">algorithms</span>
+            <span class="log-entry__tag">optimization</span>
+            <span class="log-entry__tag">graphics</span>
+          </div>
+        </article>
+
+        <article class="log-entry">
+          <time class="log-entry__date">2024-12-15</time>
+          <h3 class="log-entry__title">Python Type Hints with Pydantic</h3>
+          <p class="log-entry__content">
+            Started using Pydantic for all data validation. The automatic type coercion and 
+            validation errors are game-changing. Especially useful for parsing API responses 
+            and user input. BaseModel + validator decorators = robust data handling.
+          </p>
+          <div class="log-entry__tags">
+            <span class="log-entry__tag">python</span>
+            <span class="log-entry__tag">types</span>
+          </div>
+        </article>
+
+        <article class="log-entry">
+          <time class="log-entry__date">2024-12-08</time>
+          <h3 class="log-entry__title">CSS Container Queries</h3>
+          <p class="log-entry__content">
+            Finally have native container queries in CSS. Components can now respond to their 
+            container size, not just viewport. Perfect for card layouts that appear in different 
+            contexts. The @container rule + container-type property. Browser support is solid now.
+          </p>
+          <div class="log-entry__tags">
+            <span class="log-entry__tag">css</span>
+            <span class="log-entry__tag">responsive</span>
+          </div>
+        </article>
+
+        <article class="log-entry">
+          <time class="log-entry__date">2024-12-01</time>
+          <h3 class="log-entry__title">MediaPipe Hand Tracking Limitations</h3>
+          <p class="log-entry__content">
+            MediaPipe tracks at ~30fps but my render loop runs at 60fps. Solution: interpolate 
+            hand positions between frames. Track velocity and predict position. Added configurable 
+            smoothing factor to reduce jitter. Hand tracking is good, but the gap between tracking 
+            fps and render fps matters.
+          </p>
+          <div class="log-entry__tags">
+            <span class="log-entry__tag">computer-vision</span>
+            <span class="log-entry__tag">mediapipe</span>
+          </div>
+        </article>
+
+        <article class="log-entry">
+          <time class="log-entry__date">2024-11-24</time>
+          <h3 class="log-entry__title">Git Worktrees</h3>
+          <p class="log-entry__content">
+            Discovered git worktrees for managing multiple branches simultaneously. 
+            Instead of stashing and switching, just have separate directories for each branch. 
+            `git worktree add ../feature-branch feature-branch`. Great for reviewing PRs while 
+            working on something else.
+          </p>
+          <div class="log-entry__tags">
+            <span class="log-entry__tag">git</span>
+            <span class="log-entry__tag">workflow</span>
+          </div>
+        </article>
+      </section>
+
+      <!-- Idea Vault -->
+      <section class="dev-os__content" id="ideas">
+        <div class="idea-card">
+          <h4 class="idea-card__title">Voice-Controlled Code Editor</h4>
+          <p class="idea-card__description">
+            VS Code extension that understands natural language for code navigation and editing. 
+            "Go to the function that handles user authentication" instead of Ctrl+P and remembering file names.
+          </p>
+          <span class="idea-card__status idea-card__status--exploring">Exploring</span>
+        </div>
+
+        <div class="idea-card">
+          <h4 class="idea-card__title">Local-First Todo App</h4>
+          <p class="idea-card__description">
+            Todo app that works offline-first with CRDTs for conflict resolution. 
+            Sync across devices when online, but never depend on server for basic functionality.
+          </p>
+          <span class="idea-card__status idea-card__status--parked">Parked</span>
+        </div>
+
+        <div class="idea-card">
+          <h4 class="idea-card__title">Code Review Trainer</h4>
+          <p class="idea-card__description">
+            Interactive tool that shows code with intentional bugs/issues. User has to find and explain them. 
+            Gamified learning for better code review skills. Track improvement over time.
+          </p>
+          <span class="idea-card__status idea-card__status--exploring">Exploring</span>
+        </div>
+
+        <div class="idea-card">
+          <h4 class="idea-card__title">Dependency Graph Visualizer</h4>
+          <p class="idea-card__description">
+            Tool that visualizes npm/pip dependencies as an interactive graph. 
+            Highlight security vulnerabilities, show package sizes, identify redundant dependencies.
+          </p>
+          <span class="idea-card__status idea-card__status--building">Building</span>
+        </div>
+
+        <div class="idea-card">
+          <h4 class="idea-card__title">Meeting Cost Calculator</h4>
+          <p class="idea-card__description">
+            Chrome extension that shows real-time cost of meetings based on participant salaries. 
+            "This meeting has cost $1,247 so far." Make meeting costs visible.
+          </p>
+          <span class="idea-card__status idea-card__status--parked">Parked</span>
+        </div>
+
+        <div class="idea-card">
+          <h4 class="idea-card__title">AI Code Explainer for Students</h4>
+          <p class="idea-card__description">
+            Paste any code, get line-by-line explanations at your learning level. 
+            Adjustable complexity from "I just started programming" to "I know the basics."
+          </p>
+          <span class="idea-card__status idea-card__status--exploring">Exploring</span>
+        </div>
+      </section>
+
+      <!-- Toolbelt -->
+      <section class="dev-os__content" id="toolbelt">
+        <p style="font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: var(--space-6);">
+          Reusable code patterns, snippets, and utilities I've built or refined. 
+          Battle-tested across multiple projects.
+        </p>
+
+        <div class="tool-card">
+          <div class="tool-card__icon">⚡</div>
+          <div class="tool-card__content">
+            <h4 class="tool-card__title">Debounce/Throttle Utils</h4>
+            <p class="tool-card__description">
+              TypeScript implementations with proper cleanup, cancellation, and edge case handling. 
+              Leading/trailing edge options for throttle.
+            </p>
+            <a href="#" class="tool-card__link">View snippet →</a>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__icon">🔄</div>
+          <div class="tool-card__content">
+            <h4 class="tool-card__title">Retry with Exponential Backoff</h4>
+            <p class="tool-card__description">
+              Async retry wrapper with configurable max attempts, base delay, and jitter. 
+              Essential for unreliable network requests.
+            </p>
+            <a href="#" class="tool-card__link">View snippet →</a>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__icon">📊</div>
+          <div class="tool-card__content">
+            <h4 class="tool-card__title">Simple State Machine</h4>
+            <p class="tool-card__description">
+              Lightweight state machine implementation in Python. Defines states, transitions, 
+              and guards. Great for UI flows and process automation.
+            </p>
+            <a href="#" class="tool-card__link">View snippet →</a>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__icon">🎨</div>
+          <div class="tool-card__content">
+            <h4 class="tool-card__title">CSS Custom Property System</h4>
+            <p class="tool-card__description">
+              Organized CSS variable structure for theming: colors, spacing, typography, shadows. 
+              Dark mode support with prefers-color-scheme.
+            </p>
+            <a href="#" class="tool-card__link">View snippet →</a>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__icon">🔍</div>
+          <div class="tool-card__content">
+            <h4 class="tool-card__title">Intersection Observer Hook</h4>
+            <p class="tool-card__description">
+              React hook for scroll-based animations with proper cleanup. 
+              Configurable threshold, root margin, and callback.
+            </p>
+            <a href="#" class="tool-card__link">View snippet →</a>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card__icon">📝</div>
+          <div class="tool-card__content">
+            <h4 class="tool-card__title">Logger with Context</h4>
+            <p class="tool-card__description">
+              Python logger that automatically includes request ID, user context, and timestamp. 
+              JSON output for structured logging. Log levels with color in dev.
+            </p>
+            <a href="#" class="tool-card__link">View snippet →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Failures -->
+      <section class="dev-os__content" id="failures">
+        <p style="font-size: var(--text-sm); color: var(--text-tertiary); margin-bottom: var(--space-6);">
+          Documenting failures is how I learn. These are real mistakes with real lessons.
+        </p>
+
+        <div class="failure-card">
+          <div class="failure-card__header">
+            <div class="failure-card__icon">✕</div>
+            <h4 class="failure-card__title">Premature Optimization</h4>
+            <span class="failure-card__date">2024-11</span>
+          </div>
+          <p class="failure-card__content">
+            Spent 2 weeks building a custom caching layer for my API before I had any users. 
+            Added Redis, wrote invalidation logic, handled edge cases. Then realized the app 
+            got 10 requests per day. A simple in-memory cache would have been fine. 
+            Built for scale I didn't have.
+          </p>
+          <div class="failure-card__lesson">
+            <span class="failure-card__lesson-label">Lesson</span>
+            Make it work, then make it fast. Measure before optimizing. 
+            "Premature optimization is the root of all evil" isn't just a quote.
+          </div>
+        </div>
+
+        <div class="failure-card">
+          <div class="failure-card__header">
+            <div class="failure-card__icon">✕</div>
+            <h4 class="failure-card__title">Ignored Error Boundaries</h4>
+            <span class="failure-card__date">2024-09</span>
+          </div>
+          <p class="failure-card__content">
+            React app crashed on production because one component threw an error and I had 
+            no error boundaries. Entire app went white. Users thought the site was down. 
+            The actual bug was a null check in a rarely-used feature.
+          </p>
+          <div class="failure-card__lesson">
+            <span class="failure-card__lesson-label">Lesson</span>
+            Always wrap major sections in error boundaries. Fail gracefully. 
+            One broken component shouldn't take down the entire app.
+          </div>
+        </div>
+
+        <div class="failure-card">
+          <div class="failure-card__header">
+            <div class="failure-card__icon">✕</div>
+            <h4 class="failure-card__title">No Migration Strategy</h4>
+            <span class="failure-card__date">2024-07</span>
+          </div>
+          <p class="failure-card__content">
+            Changed database schema without proper migration plan. Had to manually fix 
+            production data at 2am. Some users lost settings. Rushed the fix and introduced 
+            another bug. Cascading failures from one careless change.
+          </p>
+          <div class="failure-card__lesson">
+            <span class="failure-card__lesson-label">Lesson</span>
+            Never modify production schemas without a tested migration script and rollback plan. 
+            Always backup before migrations. 2am debugging is never worth saving 30 minutes of planning.
+          </div>
+        </div>
+
+        <div class="failure-card">
+          <div class="failure-card__header">
+            <div class="failure-card__icon">✕</div>
+            <h4 class="failure-card__title">Feature Creep</h4>
+            <span class="failure-card__date">2024-05</span>
+          </div>
+          <p class="failure-card__content">
+            Started building a simple note-taking app. Added tags. Then folders. Then search. 
+            Then collaboration. Then version history. Then export options. 6 months later, 
+            I had an unfinished, bloated mess that did nothing well. Never shipped.
+          </p>
+          <div class="failure-card__lesson">
+            <span class="failure-card__lesson-label">Lesson</span>
+            Ship the smallest useful thing first. Everything else is an iteration. 
+            A finished simple app beats an unfinished complex one every time.
+          </div>
+        </div>
+
+        <div class="failure-card">
+          <div class="failure-card__header">
+            <div class="failure-card__icon">✕</div>
+            <h4 class="failure-card__title">Trusted User Input</h4>
+            <span class="failure-card__date">2024-03</span>
+          </div>
+          <p class="failure-card__content">
+            Built a form that passed user input directly to an API without sanitization. 
+            Someone submitted a script tag in a name field. Fortunately caught in code review 
+            before production. But I should have known better.
+          </p>
+          <div class="failure-card__lesson">
+            <span class="failure-card__lesson-label">Lesson</span>
+            Never trust user input. Sanitize everything. Validate on client and server. 
+            Use parameterized queries. Security isn't optional.
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__inner">
+        <div class="footer__links">
+          <a href="https://github.com/anandshukla" class="footer__link" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://linkedin.com/in/anandshukla" class="footer__link" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="mailto:hello@anand.dev" class="footer__link">Email</a>
+        </div>
+        <p class="footer__copyright">© 2025 Anand Shukla. Built with intention.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

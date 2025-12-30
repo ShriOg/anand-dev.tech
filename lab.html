@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab | Anand Dev OS</title>
+  <meta name="description" content="Interactive experiments and visual demos exploring systems thinking and creative coding.">
+  <meta name="theme-color" content="#0a0a0b">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="page">
+  <nav class="nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo">anand<span>.</span>dev</a>
+      <button class="nav__toggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="nav__links">
+        <a href="index.html" class="nav__link">Home</a>
+        <a href="projects.html" class="nav__link">Projects</a>
+        <a href="lab.html" class="nav__link nav__link--active">Lab</a>
+        <a href="dev-os.html" class="nav__link">Dev OS</a>
+        <a href="hire.html" class="nav__link">Hire Me</a>
+      </div>
+    </div>
+  </nav>
+
+  <main style="padding-top: var(--space-24);">
+    <div class="container">
+      <header class="section-header reveal">
+        <span class="section-header__eyebrow">Lab</span>
+        <h1 class="section-header__title">Interactive Experiments</h1>
+        <p class="section-header__description">
+          A playground for exploring systems thinking through visual, interactive demos. 
+          Click any experiment card to explore and interact with parameters.
+        </p>
+      </header>
+
+      <!-- Focus Cards Grid for Lab Experiments -->
+      <div class="focus-cards-grid">
+
+        <!-- Card 1: Particle Network -->
+        <article class="focus-card reveal" id="particle-network" data-focus-id="particle-network">
+          <div class="focus-card__preview">
+            <div class="focus-card__preview-visual">
+              <canvas data-preview="particles"></canvas>
+            </div>
+          </div>
+          <div class="focus-card__body">
+            <span class="focus-card__tag">Emergent Systems</span>
+            <h2 class="focus-card__title">Particle Network</h2>
+            <p class="focus-card__description">
+              Explore emergent behavior from simple rules. Particles connect, bounce, and respond to your mouse.
+            </p>
+            <div class="focus-card__meta">
+              <span class="focus-card__meta-item">Type: <span>Interactive Canvas</span></span>
+              <span class="focus-card__meta-item">Controls: <span>Mouse + Sliders</span></span>
+            </div>
+          </div>
+          <div class="focus-card__arrow">→</div>
+
+          <!-- Hidden content template for overlay -->
+          <template class="focus-card__content-template">
+            <header class="focus-overlay__header">
+              <h2 class="focus-overlay__title">Particle Network</h2>
+              <p class="focus-overlay__summary">
+                This particle system demonstrates emergent behavior from simple rules. Move your mouse 
+                to interact with the particles and adjust parameters to see how the system responds.
+              </p>
+            </header>
+
+            <div class="lab-demo" style="margin-bottom: var(--space-8);">
+              <div class="lab-demo__header">
+                <span class="text-mono text-muted" style="font-size: var(--text-xs);">Move mouse to interact</span>
+              </div>
+              <canvas id="lab-canvas-overlay" class="lab-demo__canvas" style="aspect-ratio: 16 / 9;"></canvas>
+              <div class="lab-demo__panel">
+                <div class="lab-demo__control-group">
+                  <div class="lab-demo__label">
+                    <span>Particle Count</span>
+                    <span class="lab-demo__value" id="overlay-particle-count-value">80</span>
+                  </div>
+                  <input type="range" class="range-input" id="overlay-particle-count" min="20" max="200" value="80">
+                </div>
+                <div class="lab-demo__control-group">
+                  <div class="lab-demo__label">
+                    <span>Connection Distance</span>
+                    <span class="lab-demo__value" id="overlay-connection-dist-value">100</span>
+                  </div>
+                  <input type="range" class="range-input" id="overlay-connection-dist" min="50" max="200" value="100">
+                </div>
+                <div class="lab-demo__control-group">
+                  <div class="lab-demo__label">
+                    <span>Particle Speed</span>
+                    <span class="lab-demo__value" id="overlay-particle-speed-value">1</span>
+                  </div>
+                  <input type="range" class="range-input" id="overlay-particle-speed" min="0.1" max="3" step="0.1" value="1">
+                </div>
+              </div>
+            </div>
+
+            <section class="focus-overlay__section">
+              <h3 class="focus-overlay__section-title">How It Works</h3>
+              <div class="focus-overlay__section-content">
+                <p>Each particle in the system follows four simple rules:</p>
+                <ul>
+                  <li>Moves at a constant velocity</li>
+                  <li>Bounces off canvas edges</li>
+                  <li>Connects to nearby particles within a distance threshold</li>
+                  <li>Responds to mouse proximity with repulsion force</li>
+                </ul>
+                <p>Complex network patterns emerge from these simple rules — a fundamental principle in systems thinking and emergence theory.</p>
+              </div>
+            </section>
+          </template>
+        </article>
+
+        <!-- Card 2: Wave Interference -->
+        <article class="focus-card reveal" id="wave-interference" data-focus-id="wave-interference">
+          <div class="focus-card__preview">
+            <div class="focus-card__preview-visual">
+              <canvas data-preview="waves"></canvas>
+            </div>
+          </div>
+          <div class="focus-card__body">
+            <span class="focus-card__tag">Physics Simulation</span>
+            <h2 class="focus-card__title">Wave Interference</h2>
+            <p class="focus-card__description">
+              Visualize constructive and destructive interference patterns from layered sine waves.
+            </p>
+            <div class="focus-card__meta">
+              <span class="focus-card__meta-item">Type: <span>Real-time Animation</span></span>
+              <span class="focus-card__meta-item">Controls: <span>Amplitude, Frequency</span></span>
+            </div>
+          </div>
+          <div class="focus-card__arrow">→</div>
+
+          <!-- Hidden content template for overlay -->
+          <template class="focus-card__content-template">
+            <header class="focus-overlay__header">
+              <h2 class="focus-overlay__title">Wave Interference</h2>
+              <p class="focus-overlay__summary">
+                Multiple sine waves with different phases create interference patterns. 
+                Adjust parameters to see how complex patterns emerge from simple waveforms.
+              </p>
+            </header>
+
+            <div class="lab-demo" style="margin-bottom: var(--space-8);">
+              <div class="lab-demo__header">
+                <span class="text-mono text-muted" style="font-size: var(--text-xs);">Layered sine waves</span>
+              </div>
+              <canvas id="wave-canvas-overlay" class="lab-demo__canvas" style="aspect-ratio: 16 / 9;"></canvas>
+              <div class="lab-demo__panel">
+                <div class="lab-demo__control-group">
+                  <div class="lab-demo__label">
+                    <span>Amplitude</span>
+                    <span class="lab-demo__value" id="overlay-wave-amplitude-value">30</span>
+                  </div>
+                  <input type="range" class="range-input" id="overlay-wave-amplitude" min="10" max="80" value="30">
+                </div>
+                <div class="lab-demo__control-group">
+                  <div class="lab-demo__label">
+                    <span>Frequency</span>
+                    <span class="lab-demo__value" id="overlay-wave-frequency-value">0.02</span>
+                  </div>
+                  <input type="range" class="range-input" id="overlay-wave-frequency" min="0.005" max="0.05" step="0.005" value="0.02">
+                </div>
+                <div class="lab-demo__control-group">
+                  <div class="lab-demo__label">
+                    <span>Speed</span>
+                    <span class="lab-demo__value" id="overlay-wave-speed-value">0.02</span>
+                  </div>
+                  <input type="range" class="range-input" id="overlay-wave-speed" min="0.005" max="0.1" step="0.005" value="0.02">
+                </div>
+              </div>
+            </div>
+
+            <section class="focus-overlay__section">
+              <h3 class="focus-overlay__section-title">The Science</h3>
+              <div class="focus-overlay__section-content">
+                <p>This visualization demonstrates:</p>
+                <ul>
+                  <li>Constructive and destructive interference</li>
+                  <li>How complex patterns emerge from simple waveforms</li>
+                  <li>Real-time parameter manipulation effects</li>
+                </ul>
+                <p>The same principles apply to sound waves, light, and even quantum mechanics.</p>
+              </div>
+            </section>
+          </template>
+        </article>
+
+        <!-- Card 3: Cellular Automaton -->
+        <article class="focus-card reveal" id="cellular-automaton" data-focus-id="cellular-automaton">
+          <div class="focus-card__preview">
+            <div class="focus-card__preview-visual">
+              <canvas data-preview="grid"></canvas>
+            </div>
+          </div>
+          <div class="focus-card__body">
+            <span class="focus-card__tag">Conway's Game of Life</span>
+            <h2 class="focus-card__title">Cellular Automaton</h2>
+            <p class="focus-card__description">
+              A zero-player game where evolution is determined by simple rules. Watch complexity emerge.
+            </p>
+            <div class="focus-card__meta">
+              <span class="focus-card__meta-item">Type: <span>Simulation</span></span>
+              <span class="focus-card__meta-item">Controls: <span>Play, Step, Reset</span></span>
+            </div>
+          </div>
+          <div class="focus-card__arrow">→</div>
+
+          <!-- Hidden content template for overlay -->
+          <template class="focus-card__content-template">
+            <header class="focus-overlay__header">
+              <h2 class="focus-overlay__title">Cellular Automaton</h2>
+              <p class="focus-overlay__summary">
+                Conway's Game of Life — a zero-player game where evolution is determined by the initial state.
+                Click cells to toggle them, then watch the system evolve.
+              </p>
+            </header>
+
+            <div class="lab-demo" style="margin-bottom: var(--space-8);">
+              <div class="lab-demo__header">
+                <div class="lab-demo__controls">
+                  <button class="btn btn--sm btn--secondary" id="overlay-automaton-reset">Reset</button>
+                  <button class="btn btn--sm btn--secondary" id="overlay-automaton-step">Step</button>
+                  <button class="btn btn--sm btn--primary" id="overlay-automaton-play">Play</button>
+                </div>
+              </div>
+              <canvas id="automaton-canvas-overlay" class="lab-demo__canvas" style="aspect-ratio: 1 / 1; max-height: 400px;"></canvas>
+              <div class="lab-demo__panel">
+                <div class="lab-demo__control-group">
+                  <div class="lab-demo__label">
+                    <span>Grid Size</span>
+                    <span class="lab-demo__value" id="overlay-grid-size-value">50</span>
+                  </div>
+                  <input type="range" class="range-input" id="overlay-grid-size" min="20" max="100" value="50">
+                </div>
+                <div class="lab-demo__control-group">
+                  <div class="lab-demo__label">
+                    <span>Initial Density</span>
+                    <span class="lab-demo__value" id="overlay-density-value">30</span>%
+                  </div>
+                  <input type="range" class="range-input" id="overlay-density" min="10" max="60" value="30">
+                </div>
+                <div class="lab-demo__control-group">
+                  <div class="lab-demo__label">
+                    <span>Speed (ms/frame)</span>
+                    <span class="lab-demo__value" id="overlay-speed-value">100</span>
+                  </div>
+                  <input type="range" class="range-input" id="overlay-automaton-speed" min="50" max="500" step="50" value="100">
+                </div>
+              </div>
+            </div>
+
+            <section class="focus-overlay__section">
+              <h3 class="focus-overlay__section-title">The Rules</h3>
+              <div class="focus-overlay__section-content">
+                <ul>
+                  <li>Any live cell with 2-3 neighbors survives</li>
+                  <li>Any dead cell with exactly 3 neighbors becomes alive</li>
+                  <li>All other cells die or stay dead</li>
+                </ul>
+                <p>Simple rules, emergent complexity. A foundational example in systems thinking and computational theory.</p>
+              </div>
+            </section>
+          </template>
+        </article>
+
+      </div><!-- /.focus-cards-grid -->
+
+      <!-- More experiments section -->
+      <section class="section">
+        <div class="card reveal" style="text-align: center; padding: var(--space-12);">
+          <h3 style="font-size: var(--text-xl); margin-bottom: var(--space-4);">More Experiments Coming</h3>
+          <p style="font-size: var(--text-sm); color: var(--text-tertiary); max-width: 400px; margin: 0 auto var(--space-6);">
+            The lab is always evolving. Future experiments will explore physics simulations, 
+            pathfinding algorithms, and neural network visualizations.
+          </p>
+          <a href="dev-os.html#ideas" class="btn btn--secondary">See Ideas in Progress</a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__inner">
+        <div class="footer__links">
+          <a href="https://github.com/anandshukla" class="footer__link" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://linkedin.com/in/anandshukla" class="footer__link" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="mailto:hello@anand.dev" class="footer__link">Email</a>
+        </div>
+        <p class="footer__copyright">© 2025 Anand Shukla. Built with intention.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    // Lab Overlay Canvas Initializations
+    // These run when overlays are opened to initialize the interactive demos
+    
+    (function() {
+      'use strict';
+
+      // Store active demo instances
+      let activeParticleSystem = null;
+      let activeWaveSystem = null;
+      let activeAutomaton = null;
+
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // PARTICLE SYSTEM CLASS (for overlay)
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      class OverlayParticleSystem {
+        constructor(canvas, options = {}) {
+          this.canvas = canvas;
+          this.ctx = canvas.getContext('2d');
+          this.options = {
+            particleCount: options.particleCount || 80,
+            connectionDistance: options.connectionDistance || 100,
+            particleSpeed: options.particleSpeed || 1,
+            mouseRadius: options.mouseRadius || 120,
+            ...options
+          };
+          this.particles = [];
+          this.mouse = { x: null, y: null };
+          this.animationId = null;
+          this.init();
+        }
+
+        init() {
+          this.resize();
+          this.createParticles();
+          this.bindEvents();
+          this.animate();
+        }
+
+        resize() {
+          const rect = this.canvas.getBoundingClientRect();
+          this.canvas.width = rect.width;
+          this.canvas.height = rect.height;
+        }
+
+        createParticles() {
+          this.particles = [];
+          for (let i = 0; i < this.options.particleCount; i++) {
+            this.particles.push({
+              x: Math.random() * this.canvas.width,
+              y: Math.random() * this.canvas.height,
+              vx: (Math.random() - 0.5) * this.options.particleSpeed,
+              vy: (Math.random() - 0.5) * this.options.particleSpeed,
+              radius: Math.random() * 2 + 1
+            });
+          }
+        }
+
+        bindEvents() {
+          this.canvas.addEventListener('mousemove', (e) => {
+            const rect = this.canvas.getBoundingClientRect();
+            this.mouse.x = e.clientX - rect.left;
+            this.mouse.y = e.clientY - rect.top;
+          });
+          this.canvas.addEventListener('mouseleave', () => {
+            this.mouse.x = null;
+            this.mouse.y = null;
+          });
+        }
+
+        update() {
+          this.particles.forEach(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            if (p.x < 0 || p.x > this.canvas.width) p.vx *= -1;
+            if (p.y < 0 || p.y > this.canvas.height) p.vy *= -1;
+
+            if (this.mouse.x !== null) {
+              const dx = p.x - this.mouse.x;
+              const dy = p.y - this.mouse.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              if (dist < this.options.mouseRadius) {
+                const force = (this.options.mouseRadius - dist) / this.options.mouseRadius;
+                p.x += dx * force * 0.03;
+                p.y += dy * force * 0.03;
+              }
+            }
+          });
+        }
+
+        draw() {
+          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+          this.particles.forEach(p => {
+            this.ctx.beginPath();
+            this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            this.ctx.fillStyle = 'rgba(59, 130, 246, 0.8)';
+            this.ctx.fill();
+          });
+
+          this.particles.forEach((p1, i) => {
+            this.particles.slice(i + 1).forEach(p2 => {
+              const dx = p1.x - p2.x;
+              const dy = p1.y - p2.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              if (dist < this.options.connectionDistance) {
+                const opacity = (1 - dist / this.options.connectionDistance) * 0.3;
+                this.ctx.beginPath();
+                this.ctx.moveTo(p1.x, p1.y);
+                this.ctx.lineTo(p2.x, p2.y);
+                this.ctx.strokeStyle = `rgba(59, 130, 246, ${opacity})`;
+                this.ctx.lineWidth = 0.5;
+                this.ctx.stroke();
+              }
+            });
+          });
+        }
+
+        animate() {
+          this.update();
+          this.draw();
+          this.animationId = requestAnimationFrame(() => this.animate());
+        }
+
+        updateOption(key, value) {
+          this.options[key] = value;
+          if (key === 'particleCount') this.createParticles();
+        }
+
+        destroy() {
+          cancelAnimationFrame(this.animationId);
+        }
+      }
+
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // WAVE SYSTEM CLASS (for overlay)
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      class OverlayWaveSystem {
+        constructor(canvas) {
+          this.canvas = canvas;
+          this.ctx = canvas.getContext('2d');
+          this.options = { amplitude: 30, frequency: 0.02, speed: 0.02 };
+          this.time = 0;
+          this.animationId = null;
+          this.init();
+        }
+
+        init() {
+          this.resize();
+          this.animate();
+        }
+
+        resize() {
+          const rect = this.canvas.getBoundingClientRect();
+          this.canvas.width = rect.width;
+          this.canvas.height = rect.height;
+        }
+
+        draw() {
+          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+          const centerY = this.canvas.height / 2;
+          const colors = ['rgba(59, 130, 246, 0.3)', 'rgba(96, 165, 250, 0.2)', 'rgba(147, 197, 253, 0.15)'];
+          
+          for (let w = 0; w < 3; w++) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(0, centerY);
+            for (let x = 0; x <= this.canvas.width; x += 2) {
+              const y = centerY + 
+                Math.sin(x * this.options.frequency + this.time + w * 0.5) * this.options.amplitude * (1 - w * 0.2) +
+                Math.sin(x * this.options.frequency * 0.5 + this.time * 0.7 + w) * this.options.amplitude * 0.5;
+              this.ctx.lineTo(x, y);
+            }
+            this.ctx.lineTo(this.canvas.width, this.canvas.height);
+            this.ctx.lineTo(0, this.canvas.height);
+            this.ctx.closePath();
+            this.ctx.fillStyle = colors[w];
+            this.ctx.fill();
+          }
+          this.time += this.options.speed;
+        }
+
+        animate() {
+          this.draw();
+          this.animationId = requestAnimationFrame(() => this.animate());
+        }
+
+        updateOption(key, value) {
+          this.options[key] = value;
+        }
+
+        destroy() {
+          cancelAnimationFrame(this.animationId);
+        }
+      }
+
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // CELLULAR AUTOMATON CLASS (for overlay)
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      class OverlayCellularAutomaton {
+        constructor(canvas) {
+          this.canvas = canvas;
+          this.ctx = canvas.getContext('2d');
+          this.grid = [];
+          this.gridSize = 50;
+          this.density = 0.3;
+          this.speed = 100;
+          this.playing = false;
+          this.intervalId = null;
+          this.cellSize = 0;
+          this.init();
+        }
+
+        init() {
+          this.resize();
+          this.initGrid();
+          this.draw();
+          this.bindEvents();
+        }
+
+        resize() {
+          const rect = this.canvas.getBoundingClientRect();
+          this.canvas.width = rect.width;
+          this.canvas.height = rect.height;
+          this.cellSize = Math.min(this.canvas.width, this.canvas.height) / this.gridSize;
+        }
+
+        initGrid() {
+          this.grid = [];
+          for (let i = 0; i < this.gridSize; i++) {
+            this.grid[i] = [];
+            for (let j = 0; j < this.gridSize; j++) {
+              this.grid[i][j] = Math.random() < this.density ? 1 : 0;
+            }
+          }
+        }
+
+        countNeighbors(x, y) {
+          let count = 0;
+          for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+              if (i === 0 && j === 0) continue;
+              const nx = (x + i + this.gridSize) % this.gridSize;
+              const ny = (y + j + this.gridSize) % this.gridSize;
+              count += this.grid[nx][ny];
+            }
+          }
+          return count;
+        }
+
+        step() {
+          const newGrid = [];
+          for (let i = 0; i < this.gridSize; i++) {
+            newGrid[i] = [];
+            for (let j = 0; j < this.gridSize; j++) {
+              const neighbors = this.countNeighbors(i, j);
+              if (this.grid[i][j] === 1) {
+                newGrid[i][j] = (neighbors === 2 || neighbors === 3) ? 1 : 0;
+              } else {
+                newGrid[i][j] = (neighbors === 3) ? 1 : 0;
+              }
+            }
+          }
+          this.grid = newGrid;
+          this.draw();
+        }
+
+        draw() {
+          this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+          const offsetX = (this.canvas.width - this.gridSize * this.cellSize) / 2;
+          const offsetY = (this.canvas.height - this.gridSize * this.cellSize) / 2;
+          
+          for (let i = 0; i < this.gridSize; i++) {
+            for (let j = 0; j < this.gridSize; j++) {
+              if (this.grid[i][j] === 1) {
+                this.ctx.fillStyle = 'rgba(59, 130, 246, 0.8)';
+                this.ctx.fillRect(
+                  offsetX + i * this.cellSize + 1,
+                  offsetY + j * this.cellSize + 1,
+                  this.cellSize - 2,
+                  this.cellSize - 2
+                );
+              }
+            }
+          }
+
+          this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+          this.ctx.lineWidth = 1;
+          for (let i = 0; i <= this.gridSize; i++) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(offsetX + i * this.cellSize, offsetY);
+            this.ctx.lineTo(offsetX + i * this.cellSize, offsetY + this.gridSize * this.cellSize);
+            this.ctx.stroke();
+            this.ctx.beginPath();
+            this.ctx.moveTo(offsetX, offsetY + i * this.cellSize);
+            this.ctx.lineTo(offsetX + this.gridSize * this.cellSize, offsetY + i * this.cellSize);
+            this.ctx.stroke();
+          }
+        }
+
+        play() {
+          if (this.playing) {
+            this.playing = false;
+            clearInterval(this.intervalId);
+            return false;
+          } else {
+            this.playing = true;
+            this.intervalId = setInterval(() => this.step(), this.speed);
+            return true;
+          }
+        }
+
+        reset() {
+          if (this.playing) {
+            this.playing = false;
+            clearInterval(this.intervalId);
+          }
+          this.initGrid();
+          this.draw();
+        }
+
+        bindEvents() {
+          this.canvas.addEventListener('click', (e) => {
+            const rect = this.canvas.getBoundingClientRect();
+            const offsetX = (this.canvas.width - this.gridSize * this.cellSize) / 2;
+            const offsetY = (this.canvas.height - this.gridSize * this.cellSize) / 2;
+            const x = Math.floor((e.clientX - rect.left - offsetX) / this.cellSize);
+            const y = Math.floor((e.clientY - rect.top - offsetY) / this.cellSize);
+            if (x >= 0 && x < this.gridSize && y >= 0 && y < this.gridSize) {
+              this.grid[x][y] = this.grid[x][y] ? 0 : 1;
+              this.draw();
+            }
+          });
+        }
+
+        updateOption(key, value) {
+          if (key === 'gridSize') {
+            this.gridSize = value;
+            this.resize();
+            this.reset();
+          } else if (key === 'density') {
+            this.density = value / 100;
+          } else if (key === 'speed') {
+            this.speed = value;
+            if (this.playing) {
+              clearInterval(this.intervalId);
+              this.intervalId = setInterval(() => this.step(), this.speed);
+            }
+          }
+        }
+
+        destroy() {
+          if (this.playing) {
+            clearInterval(this.intervalId);
+          }
+        }
+      }
+
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      // OVERLAY INITIALIZATION HANDLER
+      // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      function initOverlayDemos() {
+        // Initialize particle system if canvas exists
+        const particleCanvas = document.getElementById('lab-canvas-overlay');
+        if (particleCanvas && !activeParticleSystem) {
+          activeParticleSystem = new OverlayParticleSystem(particleCanvas);
+          
+          // Bind controls
+          document.getElementById('overlay-particle-count')?.addEventListener('input', function() {
+            activeParticleSystem.updateOption('particleCount', parseInt(this.value));
+            document.getElementById('overlay-particle-count-value').textContent = this.value;
+          });
+          document.getElementById('overlay-connection-dist')?.addEventListener('input', function() {
+            activeParticleSystem.updateOption('connectionDistance', parseInt(this.value));
+            document.getElementById('overlay-connection-dist-value').textContent = this.value;
+          });
+          document.getElementById('overlay-particle-speed')?.addEventListener('input', function() {
+            activeParticleSystem.updateOption('particleSpeed', parseFloat(this.value));
+            document.getElementById('overlay-particle-speed-value').textContent = this.value;
+          });
+        }
+
+        // Initialize wave system if canvas exists
+        const waveCanvas = document.getElementById('wave-canvas-overlay');
+        if (waveCanvas && !activeWaveSystem) {
+          activeWaveSystem = new OverlayWaveSystem(waveCanvas);
+          
+          // Bind controls
+          document.getElementById('overlay-wave-amplitude')?.addEventListener('input', function() {
+            activeWaveSystem.updateOption('amplitude', parseInt(this.value));
+            document.getElementById('overlay-wave-amplitude-value').textContent = this.value;
+          });
+          document.getElementById('overlay-wave-frequency')?.addEventListener('input', function() {
+            activeWaveSystem.updateOption('frequency', parseFloat(this.value));
+            document.getElementById('overlay-wave-frequency-value').textContent = this.value;
+          });
+          document.getElementById('overlay-wave-speed')?.addEventListener('input', function() {
+            activeWaveSystem.updateOption('speed', parseFloat(this.value));
+            document.getElementById('overlay-wave-speed-value').textContent = this.value;
+          });
+        }
+
+        // Initialize cellular automaton if canvas exists
+        const automatonCanvas = document.getElementById('automaton-canvas-overlay');
+        if (automatonCanvas && !activeAutomaton) {
+          activeAutomaton = new OverlayCellularAutomaton(automatonCanvas);
+          
+          // Bind controls
+          const playBtn = document.getElementById('overlay-automaton-play');
+          playBtn?.addEventListener('click', function() {
+            const isPlaying = activeAutomaton.play();
+            this.textContent = isPlaying ? 'Pause' : 'Play';
+          });
+          document.getElementById('overlay-automaton-step')?.addEventListener('click', function() {
+            activeAutomaton.step();
+          });
+          document.getElementById('overlay-automaton-reset')?.addEventListener('click', function() {
+            activeAutomaton.reset();
+            document.getElementById('overlay-automaton-play').textContent = 'Play';
+          });
+          document.getElementById('overlay-grid-size')?.addEventListener('input', function() {
+            activeAutomaton.updateOption('gridSize', parseInt(this.value));
+            document.getElementById('overlay-grid-size-value').textContent = this.value;
+          });
+          document.getElementById('overlay-density')?.addEventListener('input', function() {
+            activeAutomaton.updateOption('density', parseInt(this.value));
+            document.getElementById('overlay-density-value').textContent = this.value;
+          });
+          document.getElementById('overlay-automaton-speed')?.addEventListener('input', function() {
+            activeAutomaton.updateOption('speed', parseInt(this.value));
+            document.getElementById('overlay-speed-value').textContent = this.value;
+          });
+        }
+      }
+
+      function destroyOverlayDemos() {
+        if (activeParticleSystem) {
+          activeParticleSystem.destroy();
+          activeParticleSystem = null;
+        }
+        if (activeWaveSystem) {
+          activeWaveSystem.destroy();
+          activeWaveSystem = null;
+        }
+        if (activeAutomaton) {
+          activeAutomaton.destroy();
+          activeAutomaton = null;
+        }
+      }
+
+      // Hook into the CardFocusSystem events
+      if (window.cardFocusSystem) {
+        const originalOpen = window.cardFocusSystem.open.bind(window.cardFocusSystem);
+        const originalClose = window.cardFocusSystem.close.bind(window.cardFocusSystem);
+
+        window.cardFocusSystem.open = function(index, updateHash) {
+          originalOpen(index, updateHash);
+          // Small delay to ensure DOM is ready
+          setTimeout(initOverlayDemos, 100);
+        };
+
+        window.cardFocusSystem.close = function(updateHash) {
+          destroyOverlayDemos();
+          originalClose(updateHash);
+        };
+      }
+
+      // Also listen for hash changes to init on direct URL access
+      window.addEventListener('load', () => {
+        if (window.location.hash) {
+          setTimeout(initOverlayDemos, 200);
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

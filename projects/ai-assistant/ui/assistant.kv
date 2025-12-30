@@ -1,0 +1,318 @@
+#:kivy 2.0
+
+#:import get_color_from_hex kivy.utils.get_color_from_hex
+#:import dp kivy.metrics.dp
+#:import Window kivy.core.window.Window
+
+# ============================================
+# COLOR PALETTE
+# ============================================
+#:set COLOR_BG "#0a0a0c"
+#:set COLOR_SURFACE "#131316"
+#:set COLOR_SURFACE_LIGHT "#1a1a1e"
+#:set COLOR_SURFACE_ELEVATED "#202026"
+#:set COLOR_BORDER "#252529"
+#:set COLOR_BORDER_SUBTLE "#1c1c20"
+#:set COLOR_TEXT "#f0f0f3"
+#:set COLOR_TEXT_SECONDARY "#9a9aa0"
+#:set COLOR_TEXT_MUTED "#5a5a62"
+#:set COLOR_ACCENT "#50c8ff"
+#:set COLOR_ACCENT_DIM "#2a6a8a"
+#:set COLOR_ACCENT_GLOW "#50c8ff40"
+#:set COLOR_SUCCESS "#27ca40"
+#:set COLOR_WARNING "#ffbd2e"
+#:set COLOR_WARNING_GLOW "#ffbd2e40"
+#:set COLOR_ERROR "#ff5f56"
+#:set COLOR_USER_BUBBLE "#1e3a4a"
+#:set COLOR_ASSISTANT_BUBBLE "#1a1a1e"
+
+# ============================================
+# MESSAGE BUBBLE
+# ============================================
+<MessageBubble>:
+    orientation: 'vertical'
+    size_hint_y: None
+    height: self.minimum_height
+    padding: [dp(16), dp(8), dp(16), dp(8)]
+    spacing: dp(4)
+    
+    canvas.before:
+        Color:
+            rgba: get_color_from_hex(COLOR_USER_BUBBLE) if self.is_user else get_color_from_hex(COLOR_ASSISTANT_BUBBLE)
+        RoundedRectangle:
+            pos: self.x + (dp(60) if not self.is_user else dp(16)), self.y
+            size: self.width - dp(76), self.height
+            radius: [dp(12), dp(12), dp(12) if self.is_user else dp(4), dp(4) if not self.is_user else dp(12)]
+    
+    BoxLayout:
+        size_hint_y: None
+        height: self.minimum_height
+        padding: [dp(60) if not root.is_user else dp(16), 0, dp(16) if not root.is_user else dp(60), 0]
+        
+        Label:
+            text: root.text
+            font_size: dp(14)
+            color: get_color_from_hex(COLOR_TEXT)
+            text_size: self.width, None
+            size_hint_y: None
+            height: self.texture_size[1]
+            halign: 'left'
+            valign: 'top'
+            markup: True
+
+    BoxLayout:
+        size_hint_y: None
+        height: dp(16)
+        padding: [dp(60) if not root.is_user else dp(16), 0, dp(16) if not root.is_user else dp(60), 0]
+        
+        Label:
+            text: ("You • " if root.is_user else "Assistant • ") + root.timestamp
+            font_size: dp(11)
+            color: get_color_from_hex(COLOR_TEXT_MUTED)
+            halign: 'right' if root.is_user else 'left'
+            size_hint_x: 1
+
+# ============================================
+# STATUS INDICATOR
+# ============================================
+<StatusIndicator>:
+    font_size: dp(12)
+    color: root.status_color if hasattr(root, 'status_color') else get_color_from_hex(COLOR_TEXT_SECONDARY)
+    size_hint: None, None
+    size: self.texture_size[0] + dp(16), dp(24)
+    dot_opacity: 1
+
+# ============================================
+# MIC BUTTON
+# ============================================
+<MicButton>:
+    size_hint: None, None
+    size: dp(48), dp(48)
+    background_color: 0, 0, 0, 0
+    
+    canvas.before:
+        # Outer glow for listening/processing states
+        Color:
+            rgba: list(get_color_from_hex(COLOR_ACCENT)[:3]) + [self.glow_intensity * 0.3] if self.mic_state == 'listening' else (list(get_color_from_hex(COLOR_WARNING)[:3]) + [self.glow_intensity * 0.25] if self.mic_state == 'processing' else [0, 0, 0, 0])
+        RoundedRectangle:
+            pos: self.x - dp(4), self.y - dp(4)
+            size: self.width + dp(8), self.height + dp(8)
+            radius: [dp(28)]
+        
+        # Main button background
+        Color:
+            rgba: get_color_from_hex(COLOR_ACCENT) if self.mic_state == 'listening' else (get_color_from_hex(COLOR_WARNING) if self.mic_state == 'processing' else get_color_from_hex(COLOR_SURFACE_LIGHT))
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(24)]
+        
+        # Border
+        Color:
+            rgba: get_color_from_hex(COLOR_ACCENT) if self.mic_state == 'listening' else (get_color_from_hex(COLOR_WARNING) if self.mic_state == 'processing' else [1, 1, 1, 0.12])
+        Line:
+            rounded_rectangle: self.x, self.y, self.width, self.height, dp(24)
+            width: dp(2) if self.mic_state in ('listening', 'processing') else dp(1)
+    
+    Label:
+        center: root.center
+        text: "🎤"
+        font_size: dp(20)
+        opacity: 1 if root.mic_state not in ('disabled',) else 0.35
+        color: get_color_from_hex(COLOR_BG) if root.mic_state in ('listening', 'processing') else get_color_from_hex(COLOR_TEXT)
+
+# ============================================
+# SEND BUTTON
+# ============================================
+<SendButton@Button>:
+    size_hint: None, None
+    size: dp(48), dp(48)
+    background_color: 0, 0, 0, 0
+    
+    canvas.before:
+        Color:
+            rgba: get_color_from_hex(COLOR_ACCENT)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(24)]
+    
+    Label:
+        center: root.center
+        text: "➤"
+        font_size: dp(18)
+        color: get_color_from_hex(COLOR_BG)
+        bold: True
+
+# ============================================
+# TEXT INPUT
+# ============================================
+<StyledTextInput@TextInput>:
+    background_color: 0, 0, 0, 0
+    foreground_color: get_color_from_hex(COLOR_TEXT)
+    cursor_color: get_color_from_hex(COLOR_ACCENT)
+    hint_text_color: get_color_from_hex(COLOR_TEXT_MUTED)
+    font_size: dp(14)
+    padding: [dp(16), dp(14), dp(16), dp(14)]
+    multiline: False
+    
+    canvas.before:
+        Color:
+            rgba: get_color_from_hex(COLOR_SURFACE)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [dp(24)]
+        Color:
+            rgba: get_color_from_hex(COLOR_BORDER)
+        Line:
+            rounded_rectangle: self.x, self.y, self.width, self.height, dp(24)
+            width: dp(1)
+
+# ============================================
+# MAIN ROOT LAYOUT
+# ============================================
+<AssistantRoot>:
+    orientation: 'vertical'
+    spacing: 0
+    
+    canvas.before:
+        Color:
+            rgba: get_color_from_hex(COLOR_BG)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+    
+    # ========== TOP BAR ==========
+    BoxLayout:
+        size_hint_y: None
+        height: dp(60)
+        padding: [dp(20), dp(12), dp(20), dp(12)]
+        spacing: dp(12)
+        
+        canvas.before:
+            Color:
+                rgba: get_color_from_hex(COLOR_SURFACE)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+            Color:
+                rgba: get_color_from_hex(COLOR_BORDER)
+            Line:
+                points: [self.x, self.y, self.x + self.width, self.y]
+                width: dp(1)
+        
+        # App Icon and Title
+        BoxLayout:
+            spacing: dp(10)
+            size_hint_x: None
+            width: self.minimum_width
+            
+            Label:
+                text: "🤖"
+                font_size: dp(22)
+                size_hint_x: None
+                width: dp(30)
+            
+            Label:
+                text: "AI Assistant"
+                font_size: dp(16)
+                bold: True
+                color: get_color_from_hex(COLOR_TEXT)
+                size_hint_x: None
+                width: self.texture_size[0]
+        
+        Widget:
+        
+        # Status Indicator with animated dot
+        BoxLayout:
+            size_hint_x: None
+            width: self.minimum_width
+            spacing: dp(6)
+            
+            # Animated status dot
+            Widget:
+                size_hint: None, None
+                size: dp(8), dp(8)
+                pos_hint: {'center_y': 0.5}
+                canvas:
+                    Color:
+                        rgba: list(root.status_color[:3]) + [root.ids.status_label.dot_opacity if hasattr(root.ids, 'status_label') else 1]
+                    Ellipse:
+                        pos: self.pos
+                        size: self.size
+            
+            StatusIndicator:
+                id: status_label
+                text: root.status_text.replace("● ", "")
+                font_size: dp(12)
+                color: root.status_color
+                size_hint_x: None
+                width: self.texture_size[0] + dp(4)
+                status: root.mic_state
+    
+    # ========== CONVERSATION AREA ==========
+    BoxLayout:
+        orientation: 'vertical'
+        
+        # Subtle top separator gradient
+        Widget:
+            size_hint_y: None
+            height: dp(1)
+            canvas:
+                Color:
+                    rgba: get_color_from_hex(COLOR_BORDER_SUBTLE)
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+        
+        ScrollView:
+            id: scroll_view
+            do_scroll_x: False
+            bar_width: dp(4)
+            bar_color: get_color_from_hex(COLOR_ACCENT_DIM)
+            bar_inactive_color: get_color_from_hex(COLOR_BORDER)
+            
+            BoxLayout:
+                id: message_container
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+                padding: [0, dp(20), 0, dp(20)]
+                spacing: dp(10)
+    
+    # ========== INPUT BAR ==========
+    BoxLayout:
+        size_hint_y: None
+        height: dp(80)
+        padding: [dp(16), dp(16), dp(16), dp(16)]
+        spacing: dp(12)
+        
+        canvas.before:
+            Color:
+                rgba: get_color_from_hex(COLOR_SURFACE)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+            Color:
+                rgba: get_color_from_hex(COLOR_BORDER)
+            Line:
+                points: [self.x, self.y + self.height, self.x + self.width, self.y + self.height]
+                width: dp(1)
+        
+        # Text Input
+        StyledTextInput:
+            id: input_field
+            hint_text: "Try: 'open notepad', 'time', 'help'..."
+            on_text_validate: root.send_message()
+        
+        # Mic Button
+        MicButton:
+            id: mic_button
+            mic_state: root.mic_state if root.voice_available else 'disabled'
+            on_release: root.on_mic_press()
+            opacity: 1 if root.voice_available else 0.5
+        
+        # Send Button
+        SendButton:
+            on_release: root.send_message()

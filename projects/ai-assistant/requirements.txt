@@ -1,0 +1,49 @@
+# AI Assistant - Dependencies
+# Core requirements (no external dependencies for basic functionality)
+
+# ============================================
+# GUI Interface (Kivy - Modern, Cross-Platform)
+# ============================================
+kivy>=2.2.0
+
+# ============================================
+# Voice Interface - Text-to-Speech (TTS)
+# ============================================
+# Primary TTS engine (cross-platform, offline)
+pyttsx3>=2.90
+
+# ============================================
+# Voice Interface - Speech-to-Text (STT)
+# ============================================
+# Primary STT engine (uses Google API with offline fallback)
+SpeechRecognition>=3.10.0
+
+# Audio input support (required for microphone access)
+PyAudio>=0.2.13
+
+# ============================================
+# Optional: Offline STT with Vosk (fully offline)
+# ============================================
+# vosk>=0.3.45
+# Note: Requires downloading a Vosk model (~50MB for small English model)
+# Download from: https://alphacephei.com/vosk/models
+# Place in ~/.vosk/model or ./model directory
+
+# ============================================
+# Optional: Windows volume control
+# ============================================
+# pycaw>=20230407; sys_platform == "win32"
+# comtypes>=1.2.0; sys_platform == "win32"
+
+# ============================================
+# Optional: Screenshot support (cross-platform fallback)
+# ============================================
+# Pillow>=10.0.0
+
+# ============================================
+# Development
+# ============================================
+# pytest>=7.4.0
+# pytest-cov>=4.1.0
+# black>=23.0.0
+# mypy>=1.5.0
