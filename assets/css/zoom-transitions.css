@@ -171,6 +171,107 @@
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
+   OVERLAY LOADING STATE
+   Loading spinner for dynamically fetched content
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.focus-overlay__loading {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.focus-overlay__loader {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-12);
+}
+
+.focus-overlay__loader-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-secondary);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: focus-overlay-spin 0.8s linear infinite;
+}
+
+@keyframes focus-overlay-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* External content container */
+.focus-overlay__external-content {
+  animation: focus-overlay-fade-in 0.3s ease-out;
+}
+
+.focus-overlay__external-content .container {
+  max-width: 100%;
+  padding: 0;
+}
+
+.focus-overlay__external-content .case-study-hero {
+  padding: var(--space-4) 0 var(--space-6);
+  text-align: left;
+}
+
+.focus-overlay__external-content .case-study-hero__badge {
+  margin-bottom: var(--space-3);
+}
+
+.focus-overlay__external-content .case-study-hero__title {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+}
+
+.focus-overlay__external-content .case-study-hero__subtitle {
+  margin: 0 0 var(--space-4);
+  max-width: none;
+}
+
+.focus-overlay__external-content .case-study-content {
+  padding: var(--space-4) 0;
+}
+
+.focus-overlay__external-content .case-study-section {
+  margin-bottom: var(--space-6);
+}
+
+.focus-overlay__external-content .cta-section {
+  padding: var(--space-6) 0;
+}
+
+.focus-overlay__external-content footer {
+  display: none;
+}
+
+@keyframes focus-overlay-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .focus-overlay__loader-spinner {
+    animation: none;
+    border-top-color: var(--accent-primary);
+    opacity: 0.7;
+  }
+  
+  .focus-overlay__external-content {
+    animation: none;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
    FOCUS CARD HOVER ENHANCEMENTS
    Premium hover effects
    ══════════════════════════════════════════════════════════════════════════ */
@@ -482,5 +583,212 @@ body.focus-overlay-open {
 
   .architecture-diagram__content {
     font-size: var(--text-xs);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PAGE ZOOM TRANSITION SYSTEM
+   Card-to-page navigation with smooth zoom animation
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.page-zoom-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 11, 0);
+  backdrop-filter: blur(0);
+  -webkit-backdrop-filter: blur(0);
+  z-index: 10000;
+  pointer-events: none;
+  transition: 
+    background 450ms cubic-bezier(0.32, 0.72, 0, 1),
+    backdrop-filter 450ms cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: background, backdrop-filter;
+}
+
+.page-zoom-backdrop--active {
+  background: rgba(10, 10, 11, 0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  pointer-events: auto;
+}
+
+.page-zoom-clone {
+  position: fixed;
+  background: var(--bg-secondary, #111113);
+  border: 1px solid var(--border-primary, rgba(255, 255, 255, 0.06));
+  overflow: hidden;
+  z-index: 10001;
+  will-change: transform, border-radius, opacity;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.page-zoom-clone .focus-card__preview {
+  display: block;
+  height: 40%;
+  overflow: hidden;
+}
+
+.page-zoom-clone .focus-card__body {
+  padding: var(--space-4, 1rem);
+}
+
+.page-zoom-clone .focus-card__arrow,
+.page-zoom-clone .focus-card__actions {
+  display: none;
+}
+
+.page-zoom-reverse-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-primary, #0a0a0b);
+  z-index: 10001;
+  will-change: transform, opacity, border-radius;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PROJECT PAGE BACK BUTTON
+   Consistent close/back navigation
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.page-back-btn {
+  position: fixed;
+  top: var(--space-4, 1rem);
+  left: var(--space-4, 1rem);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+  background: var(--bg-glass, rgba(17, 17, 19, 0.8));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-secondary, rgba(255, 255, 255, 0.1));
+  border-radius: var(--radius-full, 9999px);
+  color: var(--text-secondary, #a1a1aa);
+  font-size: var(--text-sm, 0.875rem);
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 200ms ease;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.page-back-btn:hover,
+.page-back-btn:focus {
+  background: var(--bg-glass-hover, rgba(31, 31, 35, 0.9));
+  color: var(--text-primary, #fafafa);
+  border-color: var(--border-hover, rgba(255, 255, 255, 0.15));
+  transform: translateX(-2px);
+}
+
+.page-back-btn:active {
+  transform: scale(0.98);
+}
+
+.page-back-btn__icon {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+.page-back-btn__text {
+  display: inline;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SWIPE INDICATOR
+   Visual feedback for mobile swipe-to-close
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.swipe-indicator {
+  position: fixed;
+  top: var(--space-4, 1rem);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 5px;
+  background: var(--border-secondary, rgba(255, 255, 255, 0.1));
+  border-radius: var(--radius-full, 9999px);
+  z-index: 101;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.swipe-indicator--visible {
+  opacity: 1;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MOBILE PAGE ZOOM OPTIMIZATIONS
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .page-zoom-backdrop {
+    transition-duration: 350ms;
+  }
+
+  .page-zoom-clone {
+    transition-duration: 350ms;
+  }
+
+  .page-back-btn {
+    top: auto;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + var(--space-4, 1rem));
+    left: 50%;
+    transform: translateX(-50%);
+    padding: var(--space-3, 0.75rem) var(--space-6, 1.5rem);
+    box-shadow: var(--shadow-lg, 0 10px 15px rgba(0, 0, 0, 0.3));
+  }
+
+  .page-back-btn:hover {
+    transform: translateX(-50%);
+  }
+
+  .page-back-btn__text {
+    display: none;
+  }
+
+  .swipe-indicator {
+    display: block;
+    opacity: 0.5;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   REDUCED MOTION FOR PAGE ZOOM
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .page-zoom-backdrop,
+  .page-zoom-clone,
+  .page-zoom-reverse-overlay,
+  .page-back-btn {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SAFE AREA SUPPORT
+   For devices with notches and rounded corners
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@supports (padding: env(safe-area-inset-top)) {
+  .page-back-btn {
+    top: calc(env(safe-area-inset-top) + var(--space-4, 1rem));
+    left: calc(env(safe-area-inset-left) + var(--space-4, 1rem));
+  }
+
+  @media (max-width: 768px) {
+    .page-back-btn {
+      top: auto;
+      left: 50%;
+      bottom: calc(env(safe-area-inset-bottom) + var(--space-4, 1rem));
+    }
   }
 }

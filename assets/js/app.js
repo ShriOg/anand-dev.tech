@@ -15,6 +15,12 @@ const App = (function() {
   // Mobile detection
   const isMobile = () => window.innerWidth <= 768;
 
+  // Check if page zoom navigation is enabled (cards navigate to real pages)
+  const usePageNavigation = () => {
+    // If PageZoomTransition is available, use page navigation instead of overlays
+    return typeof PageZoomTransition !== 'undefined';
+  };
+
   /**
    * Initialize the application
    */
@@ -47,11 +53,11 @@ const App = (function() {
     // Render based on page type
     await renderPage(route, projects, siteConfig);
 
-    // Initialize interactions
-    initializeInteractions();
-
-    // Check for deep links
-    handleDeepLink(route);
+    // Initialize interactions (only if not using page navigation)
+    if (!usePageNavigation()) {
+      initializeInteractions();
+      handleDeepLink(route);
+    }
 
     isInitialized = true;
     console.log('[App] Initialized');
@@ -86,8 +92,10 @@ const App = (function() {
         Renderer.renderProjectCards(projects, container, { isFromPages });
       }
       
-      // Initialize the card focus system
-      initCardFocusSystem();
+      // Initialize the card focus system (only if not using page navigation)
+      if (!usePageNavigation()) {
+        initCardFocusSystem();
+      }
     }
   }
 
@@ -107,8 +115,10 @@ const App = (function() {
         Renderer.renderProjectCards(featuredProjects, container, { isFromPages: false });
       }
       
-      // Initialize the card focus system
-      initCardFocusSystem();
+      // Initialize the card focus system (only if not using page navigation)
+      if (!usePageNavigation()) {
+        initCardFocusSystem();
+      }
     }
   }
 
@@ -369,7 +379,7 @@ const App = (function() {
       }
     }
 
-    showOverlay(card, index, contentTemplate, updateHash) {
+    async showOverlay(card, index, contentTemplate, updateHash) {
       // Store scroll position and lock body
       this.scrollPosition = window.scrollY;
       document.body.classList.add('focus-overlay-open');
@@ -384,8 +394,27 @@ const App = (function() {
         c.setAttribute('aria-expanded', i === index ? 'true' : 'false');
       });
 
-      // Populate content
-      this.content.innerHTML = contentTemplate.innerHTML;
+      // Check for external content source
+      const contentSrc = card.dataset.contentSrc;
+      
+      if (contentSrc) {
+        // Show loading state from template
+        this.content.innerHTML = contentTemplate.innerHTML;
+        
+        // Fetch external content
+        try {
+          const content = await this.fetchExternalContent(contentSrc);
+          if (content && this.isOpen && this.currentCardIndex === index) {
+            this.content.innerHTML = content;
+          }
+        } catch (err) {
+          console.error('[App] Failed to load external content:', err);
+          // Keep fallback content from template
+        }
+      } else {
+        // Populate content from inline template
+        this.content.innerHTML = contentTemplate.innerHTML;
+      }
 
       // Show overlay
       this.backdrop.classList.add('focus-overlay-backdrop--active');
@@ -403,6 +432,61 @@ const App = (function() {
       if (this.options.onOpen) {
         this.options.onOpen(card, index);
       }
+    }
+
+    /**
+     * Fetch and parse external HTML content
+     * @param {string} src - Path to HTML file
+     * @returns {Promise<string>} Parsed content HTML
+     */
+    async fetchExternalContent(src) {
+      // Cache for loaded content
+      if (!this._contentCache) this._contentCache = new Map();
+      
+      // Return cached content if available
+      if (this._contentCache.has(src)) {
+        return this._contentCache.get(src);
+      }
+
+      const response = await fetch(src);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${src}: ${response.status}`);
+      }
+
+      const html = await response.text();
+      
+      // Parse the HTML
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      
+      // Extract main content (skip nav, footer, scripts)
+      const main = doc.querySelector('main');
+      if (!main) {
+        throw new Error('No <main> element found in external content');
+      }
+
+      // Clone and process content
+      const content = main.cloneNode(true);
+      
+      // Remove elements that shouldn't be in overlay
+      content.querySelectorAll('.back-link, .navbar, script').forEach(el => el.remove());
+      
+      // Prefix IDs to avoid conflicts
+      content.querySelectorAll('[id]').forEach(el => {
+        el.id = `overlay-${el.id}`;
+      });
+
+      // Wrap in overlay-friendly structure
+      const wrapper = document.createElement('div');
+      wrapper.className = 'focus-overlay__external-content';
+      wrapper.innerHTML = content.innerHTML;
+
+      const finalHTML = wrapper.outerHTML;
+      
+      // Cache the result
+      this._contentCache.set(src, finalHTML);
+
+      return finalHTML;
     }
 
     close(updateHash = true) {

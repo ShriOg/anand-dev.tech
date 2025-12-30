@@ -71,193 +71,521 @@
               <span class="focus-card__meta-item">Role: <span>Solo Developer</span></span>
             </div>
             <div class="focus-card__actions">
-              <a href="#" class="action-btn action-btn--primary action-btn--disabled" aria-disabled="true" tabindex="-1">
-                <span class="action-btn__icon"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></span>
-                View Live
+              <a href="ai-assistant.html" class="action-btn action-btn--secondary">
+                <span class="action-btn__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></span>
+                View Docs
               </a>
               <a href="https://github.com/ShriOg/anand-dev.tech/tree/main/projects/ai-assistant" target="_blank" rel="noopener noreferrer" class="action-btn action-btn--external">
                 <span class="action-btn__icon"><svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></span>
-                View Source
+                Source
               </a>
             </div>
           </div>
           <div class="focus-card__arrow">→</div>
 
-          <!-- Hidden content template for overlay -->
+          <!-- Full content template from ai-assistant.html -->
           <template class="focus-card__content-template">
-            <header class="focus-overlay__header">
-              <div class="focus-overlay__meta">
-                <div class="focus-overlay__meta-item">
-                  <span class="focus-overlay__meta-label">Timeline</span>
-                  <span class="focus-overlay__meta-value">3 months</span>
-                </div>
-                <div class="focus-overlay__meta-item">
-                  <span class="focus-overlay__meta-label">Role</span>
-                  <span class="focus-overlay__meta-value">Solo Developer</span>
-                </div>
-                <div class="focus-overlay__meta-item">
-                  <span class="focus-overlay__meta-label">Stack</span>
-                  <span class="focus-overlay__meta-value">Python, NLP</span>
-                </div>
-              </div>
-              <h2 class="focus-overlay__title">AI Desktop Assistant</h2>
-              <p class="focus-overlay__summary">
-                Building a voice-controlled assistant that actually understands context 
-                and executes system commands across Windows, macOS, and Linux.
+            <style>
+              .case-study-hero {
+                padding: 2rem 0;
+                text-align: center;
+              }
+              .case-study-hero__badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem 1rem;
+                background: rgba(80, 200, 255, 0.1);
+                border: 1px solid rgba(80, 200, 255, 0.2);
+                border-radius: 9999px;
+                font-size: 0.875rem;
+                color: #50c8ff;
+                margin-bottom: 1rem;
+              }
+              .case-study-hero__title {
+                font-size: clamp(1.75rem, 4vw, 2.5rem);
+                font-weight: 700;
+                margin-bottom: 0.75rem;
+                background: linear-gradient(135deg, #f0f0f3 0%, #9a9aa0 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+              }
+              .case-study-hero__subtitle {
+                font-size: 1.1rem;
+                color: #9a9aa0;
+                max-width: 600px;
+                margin: 0 auto 1.5rem;
+                line-height: 1.6;
+              }
+              .case-study-hero__actions {
+                display: flex;
+                gap: 1rem;
+                justify-content: center;
+                flex-wrap: wrap;
+              }
+              .case-study-section {
+                margin-bottom: 2.5rem;
+              }
+              .case-study-section__title {
+                font-size: 1.5rem;
+                font-weight: 600;
+                margin-bottom: 1rem;
+                color: #f0f0f3;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+              }
+              .case-study-section__title::before {
+                content: '';
+                width: 4px;
+                height: 1.25rem;
+                background: linear-gradient(180deg, #50c8ff, #a78bfa);
+                border-radius: 2px;
+              }
+              .case-study-text {
+                color: #9a9aa0;
+                line-height: 1.8;
+                font-size: 1rem;
+              }
+              .case-study-text p {
+                margin-bottom: 0.75rem;
+              }
+              .tech-stack {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+                margin-top: 1rem;
+              }
+              .tech-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.5rem 0.75rem;
+                background: rgba(80, 200, 255, 0.08);
+                border: 1px solid rgba(80, 200, 255, 0.15);
+                border-radius: 6px;
+                font-size: 0.8rem;
+                color: #f0f0f3;
+              }
+              .feature-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                gap: 1rem;
+                margin-top: 1rem;
+              }
+              .feature-card {
+                background: #131316;
+                border: 1px solid rgba(255, 255, 255, 0.06);
+                border-radius: 12px;
+                padding: 1.25rem;
+              }
+              .feature-card__icon {
+                font-size: 1.5rem;
+                margin-bottom: 0.75rem;
+              }
+              .feature-card__title {
+                font-size: 1rem;
+                font-weight: 600;
+                color: #f0f0f3;
+                margin-bottom: 0.5rem;
+              }
+              .feature-card__description {
+                color: #9a9aa0;
+                font-size: 0.875rem;
+                line-height: 1.5;
+              }
+              .terminal-demo {
+                background: #0f0f12;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                overflow: hidden;
+                margin: 1rem 0;
+              }
+              .terminal-header {
+                background: #1a1a1e;
+                padding: 0.6rem 1rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+              }
+              .terminal-dot {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+              }
+              .terminal-dot--red { background: #ff5f56; }
+              .terminal-dot--yellow { background: #ffbd2e; }
+              .terminal-dot--green { background: #27ca40; }
+              .terminal-title {
+                color: #9a9aa0;
+                font-size: 0.75rem;
+                margin-left: 0.5rem;
+              }
+              .terminal-body {
+                padding: 1rem;
+                font-family: 'JetBrains Mono', 'Fira Code', monospace;
+                font-size: 0.8rem;
+                line-height: 1.7;
+              }
+              .terminal-line { margin-bottom: 0.2rem; }
+              .terminal-prompt { color: #50c8ff; }
+              .terminal-input { color: #f0f0f3; }
+              .terminal-output { color: #27ca40; }
+              .terminal-info { color: #9a9aa0; }
+              .architecture-diagram {
+                background: #131316;
+                border: 1px solid rgba(255, 255, 255, 0.06);
+                border-radius: 12px;
+                padding: 1.25rem;
+                margin: 1rem 0;
+                overflow-x: auto;
+              }
+              .architecture-diagram pre {
+                color: #50c8ff;
+                font-family: 'JetBrains Mono', 'Fira Code', monospace;
+                font-size: 0.7rem;
+                line-height: 1.5;
+                margin: 0;
+              }
+              .command-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 1rem;
+                background: #131316;
+                border-radius: 12px;
+                overflow: hidden;
+                font-size: 0.875rem;
+              }
+              .command-table th,
+              .command-table td {
+                padding: 0.75rem 1rem;
+                text-align: left;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+              }
+              .command-table th {
+                background: rgba(80, 200, 255, 0.08);
+                color: #50c8ff;
+                font-weight: 600;
+                font-size: 0.8rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+              }
+              .command-table td { color: #9a9aa0; }
+              .command-table td:first-child {
+                color: #f0f0f3;
+                font-family: 'JetBrains Mono', 'Fira Code', monospace;
+                font-size: 0.8rem;
+              }
+              .command-table tr:last-child td { border-bottom: none; }
+              .safety-list {
+                list-style: none;
+                margin-top: 1rem;
+                padding: 0;
+              }
+              .safety-list li {
+                display: flex;
+                align-items: flex-start;
+                gap: 0.75rem;
+                padding: 0.75rem 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+              }
+              .safety-list li:last-child { border-bottom: none; }
+              .safety-icon { font-size: 1.25rem; flex-shrink: 0; }
+              .safety-content h4 {
+                color: #f0f0f3;
+                font-weight: 600;
+                margin-bottom: 0.25rem;
+                font-size: 0.95rem;
+              }
+              .safety-content p {
+                color: #9a9aa0;
+                font-size: 0.875rem;
+                margin: 0;
+              }
+              .code-block {
+                background: #0f0f12;
+                border: 1px solid rgba(255, 255, 255, 0.06);
+                border-radius: 10px;
+                padding: 1rem;
+                margin: 1rem 0;
+                overflow-x: auto;
+              }
+              .code-block code {
+                font-family: 'JetBrains Mono', 'Fira Code', monospace;
+                font-size: 0.8rem;
+                color: #f0f0f3;
+              }
+              .code-block .comment { color: #5a5a62; }
+              .code-block .command { color: #50c8ff; }
+              .cta-card {
+                background: linear-gradient(135deg, rgba(80, 200, 255, 0.1), rgba(167, 139, 250, 0.1));
+                border: 1px solid rgba(80, 200, 255, 0.2);
+                border-radius: 16px;
+                padding: 2rem;
+                text-align: center;
+                margin-top: 2rem;
+              }
+              .cta-card__title {
+                font-size: 1.5rem;
+                font-weight: 600;
+                color: #f0f0f3;
+                margin-bottom: 0.5rem;
+              }
+              .cta-card__text {
+                color: #9a9aa0;
+                margin-bottom: 1.5rem;
+              }
+            </style>
+
+            <!-- Hero -->
+            <section class="case-study-hero">
+              <span class="case-study-hero__badge">🤖 Desktop Application</span>
+              <h1 class="case-study-hero__title">AI Assistant</h1>
+              <p class="case-study-hero__subtitle">
+                A local-first, privacy-respecting, cross-platform desktop assistant. 
+                Jarvis-style functionality that runs entirely on your machine.
               </p>
-              <div class="focus-overlay__actions">
-                <a href="#" class="action-btn action-btn--primary action-btn--disabled" aria-disabled="true" tabindex="-1">
-                  <span class="action-btn__icon"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></span>
-                  View Live Demo
+              <div class="case-study-hero__actions">
+                <a href="https://github.com/ShriOg/anand-dev.tech/tree/main/projects/ai-assistant" target="_blank" rel="noopener" class="btn btn--primary">
+                  View Source Code
                 </a>
-                <a href="https://github.com/ShriOg/anand-dev.tech/tree/main/projects/ai-assistant" target="_blank" rel="noopener noreferrer" class="action-btn action-btn--external">
-                  <span class="action-btn__icon"><svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></span>
-                  View Source on GitHub
-                </a>
-              </div>
-            </header>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">Problem Statement</h3>
-              <div class="focus-overlay__section-content">
-                <p>
-                  Existing voice assistants are either cloud-dependent, platform-locked, 
-                  or require complex setup. I wanted something that could run locally, 
-                  understand natural variations of commands, and actually control my computer.
-                </p>
-                <p>
-                  The core challenge: How do you map fuzzy human language to precise system commands 
-                  while maintaining context across a conversation?
-                </p>
               </div>
             </section>
 
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">Constraints</h3>
-              <div class="focus-overlay__section-content">
-                <ul>
-                  <li>Must run entirely offline after initial setup</li>
-                  <li>Cross-platform support (Windows, macOS, Linux)</li>
-                  <li>Response time under 500ms for common commands</li>
-                  <li>Extensible action system without code changes</li>
-                  <li>No external API dependencies for core functionality</li>
-                </ul>
+            <!-- Overview -->
+            <div class="case-study-section">
+              <h2 class="case-study-section__title">Overview</h2>
+              <div class="case-study-text">
+                <p>
+                  AI Assistant is a cross-platform desktop application that brings Jarvis-style functionality 
+                  to your computer. Built with a privacy-first architecture, all processing happens locally 
+                  on your machine - no data is ever sent to external servers.
+                </p>
+                <p>
+                  The system features a modular architecture with strict separation of concerns, making it 
+                  easy to extend and maintain. Whether you're opening applications, controlling volume, 
+                  or taking screenshots, every command is processed through a secure, permission-based system.
+                </p>
               </div>
-            </section>
+              <div class="tech-stack">
+                <span class="tech-badge">🐍 Python 3.9+</span>
+                <span class="tech-badge">🖥️ Cross-Platform</span>
+                <span class="tech-badge">🔒 Privacy-First</span>
+                <span class="tech-badge">📴 Offline-Capable</span>
+                <span class="tech-badge">🧩 Modular Design</span>
+              </div>
+            </div>
 
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">Architecture</h3>
-              <div class="focus-overlay__section-content">
-                <div class="architecture-diagram">
-                  <div class="architecture-diagram__title">System Overview</div>
-                  <div class="architecture-diagram__content">
-Voice Input --> Speech-to-Text --> Intent Parser --> Router
-                                                       |
-                                        +--------------+--------------+
-                                        |              |              |
-                                    Context       Action Schema    Adapter
-                                    Manager       Validator       (OS-specific)
-                                        |              |              |
-                                        +--------------+--------------+
-                                                       |
-                                                   Executor --> System</div>
+            <!-- Terminal Demo -->
+            <div class="case-study-section">
+              <h2 class="case-study-section__title">See It In Action</h2>
+              <div class="terminal-demo">
+                <div class="terminal-header">
+                  <span class="terminal-dot terminal-dot--red"></span>
+                  <span class="terminal-dot terminal-dot--yellow"></span>
+                  <span class="terminal-dot terminal-dot--green"></span>
+                  <span class="terminal-title">AI Assistant — CLI</span>
                 </div>
+                <div class="terminal-body">
+                  <div class="terminal-line"><span class="terminal-prompt">🤖 &gt; </span><span class="terminal-input">open notepad</span></div>
+                  <div class="terminal-line"><span class="terminal-output">✅ Opening notepad</span></div>
+                  <div class="terminal-line"><span class="terminal-prompt">🤖 &gt; </span><span class="terminal-input">volume 50</span></div>
+                  <div class="terminal-line"><span class="terminal-output">✅ Volume set to 50%</span></div>
+                  <div class="terminal-line"><span class="terminal-prompt">🤖 &gt; </span><span class="terminal-input">screenshot</span></div>
+                  <div class="terminal-line"><span class="terminal-output">✅ Screenshot saved</span></div>
+                  <div class="terminal-line"><span class="terminal-prompt">🤖 &gt; </span><span class="terminal-input">time</span></div>
+                  <div class="terminal-line"><span class="terminal-output">✅ The time is 10:30 AM</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Architecture -->
+            <div class="case-study-section">
+              <h2 class="case-study-section__title">Architecture</h2>
+              <div class="case-study-text">
                 <p>
-                  The key insight was separating intent parsing from action execution. 
-                  The router maintains conversation context while the adapters handle 
-                  platform-specific implementations.
+                  The system follows a clean, layered architecture that separates concerns and enables 
+                  easy testing and extension.
                 </p>
               </div>
-            </section>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">Tradeoffs</h3>
-              <div class="focus-overlay__section-content">
-                <table class="tradeoff-table">
-                  <thead>
-                    <tr>
-                      <th>Decision</th>
-                      <th>Benefit</th>
-                      <th>Cost</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>Local-first processing</td>
-                      <td>Privacy, offline capability</td>
-                      <td>Limited NLP accuracy vs cloud</td>
-                    </tr>
-                    <tr>
-                      <td>Schema-based actions</td>
-                      <td>Type safety, validation</td>
-                      <td>More boilerplate per action</td>
-                    </tr>
-                    <tr>
-                      <td>Adapter pattern for OS</td>
-                      <td>Clean abstraction</td>
-                      <td>Maintenance across 3 platforms</td>
-                    </tr>
-                  </tbody>
-                </table>
+              <div class="architecture-diagram">
+                <pre>
+┌───────────────────────────────────────────────────┐
+│              Interface Layer                      │
+│          (CLI, Voice, GUI - swappable)           │
+└─────────────────────┬─────────────────────────────┘
+                      ▼
+┌───────────────────────────────────────────────────┐
+│               Core Brain                          │
+│  Intent Parser → Router → Context Manager        │
+└─────────────────────┬─────────────────────────────┘
+                      ▼
+┌───────────────────────────────────────────────────┐
+│           Action Abstraction Layer               │
+│  (OPEN_APP, ADJUST_VOLUME, SCREENSHOT, etc.)    │
+└─────────────────────┬─────────────────────────────┘
+                      ▼
+┌───────────────────────────────────────────────────┐
+│             OS Adapter Layer                      │
+│    Linux    │    Windows    │    macOS          │
+└───────────────────────────────────────────────────┘</pre>
               </div>
-            </section>
+            </div>
 
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">What Failed</h3>
-              <div class="focus-overlay__section-content">
-                <p>
-                  <strong>First attempt at intent parsing:</strong> Started with regex patterns. 
-                  Worked for exact matches but completely broke with any variation. 
-                  "Open Chrome" worked, "launch chrome browser" didn't.
-                </p>
-                <p>
-                  <strong>Context management v1:</strong> Stored everything in a flat dictionary. 
-                  Memory grew unbounded and older context polluted new interactions.
-                </p>
-                <p>
-                  <strong>Windows adapter initial approach:</strong> Used subprocess for everything. 
-                  Some commands need COM objects, others need PowerShell. Unified interface was naive.
-                </p>
+            <!-- Features -->
+            <div class="case-study-section">
+              <h2 class="case-study-section__title">Key Features</h2>
+              <div class="feature-grid">
+                <div class="feature-card">
+                  <div class="feature-card__icon">🔒</div>
+                  <h3 class="feature-card__title">Privacy First</h3>
+                  <p class="feature-card__description">All processing happens locally. No data leaves your machine.</p>
+                </div>
+                <div class="feature-card">
+                  <div class="feature-card__icon">🌍</div>
+                  <h3 class="feature-card__title">Cross-Platform</h3>
+                  <p class="feature-card__description">Works on Linux, Windows, and macOS with OS-specific optimizations.</p>
+                </div>
+                <div class="feature-card">
+                  <div class="feature-card__icon">📴</div>
+                  <h3 class="feature-card__title">Offline Capable</h3>
+                  <p class="feature-card__description">No internet connection required. Perfect for secure environments.</p>
+                </div>
+                <div class="feature-card">
+                  <div class="feature-card__icon">🛡️</div>
+                  <h3 class="feature-card__title">Safe by Design</h3>
+                  <p class="feature-card__description">Confirmation prompts for destructive actions, rate limiting, safe mode.</p>
+                </div>
+                <div class="feature-card">
+                  <div class="feature-card__icon">🧩</div>
+                  <h3 class="feature-card__title">Modular Architecture</h3>
+                  <p class="feature-card__description">Clean separation of concerns. Easy to add new commands.</p>
+                </div>
+                <div class="feature-card">
+                  <div class="feature-card__icon">⚡</div>
+                  <h3 class="feature-card__title">Zero Dependencies</h3>
+                  <p class="feature-card__description">Core works with Python standard library only.</p>
+                </div>
               </div>
-            </section>
+            </div>
 
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">Final Outcome</h3>
-              <div class="focus-overlay__section-content">
-                <ul>
-                  <li>Working assistant with 50+ supported commands</li>
-                  <li>Average response time: 180ms</li>
-                  <li>Intent recognition accuracy: ~85% on varied phrasing</li>
-                  <li>Clean plugin system for adding new actions</li>
-                  <li>Documented API for external integrations</li>
-                </ul>
+            <!-- Commands -->
+            <div class="case-study-section">
+              <h2 class="case-study-section__title">Available Commands</h2>
+              <table class="command-table">
+                <thead>
+                  <tr><th>Command</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>open &lt;app&gt;</td><td>Open an application by name</td></tr>
+                  <tr><td>volume &lt;0-100&gt;</td><td>Set system volume level</td></tr>
+                  <tr><td>mute / unmute</td><td>Mute or unmute system audio</td></tr>
+                  <tr><td>screenshot</td><td>Take and save a screenshot</td></tr>
+                  <tr><td>lock</td><td>Lock the screen</td></tr>
+                  <tr><td>shutdown / restart</td><td>System power options (with confirmation)</td></tr>
+                  <tr><td>time / date</td><td>Get current time or date</td></tr>
+                  <tr><td>battery</td><td>Check battery status</td></tr>
+                  <tr><td>safe mode</td><td>Enable read-only safe mode</td></tr>
+                  <tr><td>help</td><td>Show all available commands</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Safety -->
+            <div class="case-study-section">
+              <h2 class="case-study-section__title">Safety Features</h2>
+              <ul class="safety-list">
+                <li>
+                  <span class="safety-icon">⚠️</span>
+                  <div class="safety-content">
+                    <h4>Confirmation Prompts</h4>
+                    <p>Destructive actions require explicit user confirmation.</p>
+                  </div>
+                </li>
+                <li>
+                  <span class="safety-icon">⏱️</span>
+                  <div class="safety-content">
+                    <h4>Rate Limiting</h4>
+                    <p>Maximum 30 commands per minute with cooldown between commands.</p>
+                  </div>
+                </li>
+                <li>
+                  <span class="safety-icon">🔒</span>
+                  <div class="safety-content">
+                    <h4>Safe Mode</h4>
+                    <p>Listen-only mode that blocks all system-modifying commands.</p>
+                  </div>
+                </li>
+                <li>
+                  <span class="safety-icon">🛑</span>
+                  <div class="safety-content">
+                    <h4>Kill Switch</h4>
+                    <p>Emergency stop that immediately blocks all command execution.</p>
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Getting Started -->
+            <div class="case-study-section">
+              <h2 class="case-study-section__title">Getting Started</h2>
+              <div class="case-study-text">
+                <p>Getting up and running takes just a few commands:</p>
               </div>
-            </section>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">What I Would Improve</h3>
-              <div class="focus-overlay__section-content">
-                <ul>
-                  <li>Add lightweight local LLM option for better intent parsing</li>
-                  <li>Implement action chaining (e.g., "open browser and go to github")</li>
-                  <li>Better error recovery with suggested alternatives</li>
-                  <li>Visual feedback system for non-terminal usage</li>
-                </ul>
+              <div class="code-block">
+                <code>
+                  <span class="comment"># Clone the repository</span><br>
+                  <span class="command">git clone https://github.com/ShriOg/anand-dev.tech.git</span><br>
+                  <span class="command">cd anand-dev.tech/projects/ai-assistant</span><br><br>
+                  <span class="comment"># Run the assistant</span><br>
+                  <span class="command">python main.py</span><br><br>
+                  <span class="comment"># Start in safe mode</span><br>
+                  <span class="command">python main.py --safe-mode</span>
+                </code>
               </div>
-            </section>
+            </div>
 
-            <div class="focus-overlay__tech-stack">
-              <span class="tech-stack__item">Python 3.11</span>
-              <span class="tech-stack__item">Pydantic</span>
-              <span class="tech-stack__item">SpeechRecognition</span>
-              <span class="tech-stack__item">pywin32</span>
-              <span class="tech-stack__item">subprocess</span>
+            <!-- Future Roadmap -->
+            <div class="case-study-section">
+              <h2 class="case-study-section__title">Future Roadmap</h2>
+              <div class="feature-grid">
+                <div class="feature-card">
+                  <div class="feature-card__icon">🎤</div>
+                  <h3 class="feature-card__title">Voice Interface</h3>
+                  <p class="feature-card__description">Wake word detection and speech recognition.</p>
+                </div>
+                <div class="feature-card">
+                  <div class="feature-card__icon">🧠</div>
+                  <h3 class="feature-card__title">Local LLM Integration</h3>
+                  <p class="feature-card__description">Ollama or llama.cpp for advanced NLU.</p>
+                </div>
+                <div class="feature-card">
+                  <div class="feature-card__icon">🖼️</div>
+                  <h3 class="feature-card__title">Desktop GUI</h3>
+                  <p class="feature-card__description">System tray and minimal widget interface.</p>
+                </div>
+                <div class="feature-card">
+                  <div class="feature-card__icon">🔌</div>
+                  <h3 class="feature-card__title">Plugin System</h3>
+                  <p class="feature-card__description">Third-party extensions for custom commands.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="cta-card">
+              <h2 class="cta-card__title">Want to Contribute?</h2>
+              <p class="cta-card__text">This project is open source. Contributions welcome!</p>
+              <a href="https://github.com/ShriOg/anand-dev.tech/tree/main/projects/ai-assistant" target="_blank" rel="noopener" class="btn btn--primary">
+                View on GitHub
+              </a>
             </div>
           </template>
         </article>
 
         <!-- Card 2: Gesture-Controlled Particle System -->
-        <article class="focus-card reveal" id="particle-system-gestures" data-focus-id="particle-system-gestures">
+        <article class="focus-card reveal" id="particle-system-gestures" data-focus-id="particle-system-gestures" data-page-url="../projects/particle-system-gestures/index.html">
           <div class="focus-card__preview">
             <div class="focus-card__preview-visual">
               <canvas data-preview="particles"></canvas>
@@ -456,7 +784,7 @@ Camera --> MediaPipe --> Gesture      --> Particle System
         </article>
 
         <!-- Card 3: NowHang -->
-        <article class="focus-card reveal" id="nowhang" data-focus-id="nowhang">
+<article class="focus-card reveal" id="nowhang" data-focus-id="nowhang" data-page-url="nowhang.html">
           <div class="focus-card__preview">
             <div class="focus-card__preview-visual">
               <canvas data-preview="waves"></canvas>
@@ -622,7 +950,7 @@ Client (PWA) --> WebSocket --> Availability Pool
         </article>
 
         <!-- Card 4: Hand Gesture Mouse Control -->
-        <article class="focus-card reveal" id="hand-gesture-mouse-control" data-focus-id="hand-gesture-mouse-control">
+<article class="focus-card reveal" id="hand-gesture-mouse-control" data-focus-id="hand-gesture-mouse-control" data-page-url="grades.html">
           <div class="focus-card__preview">
             <div class="focus-card__preview-visual">
               <canvas data-preview="grid"></canvas>
@@ -902,5 +1230,7 @@ Webcam Feed --> OpenCV Frame --> MediaPipe Hands --> Landmark Extraction
   <script src="../assets/js/transitions.js"></script>
   <script src="../assets/js/gestures.js"></script>
   <script src="../assets/js/app.js"></script>
+  <!-- Page Zoom Transitions -->
+  <script src="../assets/js/page-zoom.js"></script>
 </body>
 </html>

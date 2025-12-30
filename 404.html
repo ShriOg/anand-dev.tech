@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 | Nothing Found</title>
+  <meta name="description" content="Page not found.">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="robots" content="noindex">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ══════════════════════════════════════════════════════════════════════════
+       NOTHING-STYLE 404 PAGE
+       Minimal, intentional, dot-matrix aesthetic
+       ══════════════════════════════════════════════════════════════════════════ */
+    
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --nothing-bg: #0a0a0a;
+      --nothing-text: #fafafa;
+      --nothing-muted: #525252;
+      --nothing-dim: #262626;
+      --nothing-font: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      background: var(--nothing-bg);
+      color: var(--nothing-text);
+      font-family: var(--nothing-font);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 2rem;
+      text-align: center;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       404 NUMBER
+       ══════════════════════════════════════════════════════════════════════════ */
+    
+    .nothing-404 {
+      font-size: clamp(8rem, 30vw, 20rem);
+      font-weight: 300;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--nothing-text);
+      margin-bottom: 2rem;
+      user-select: none;
+      cursor: default;
+      position: relative;
+      font-variant-numeric: tabular-nums lining-nums;
+    }
+
+    .nothing-404::selection {
+      background: transparent;
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       MESSAGE
+       ══════════════════════════════════════════════════════════════════════════ */
+    
+    .nothing-message {
+      font-size: clamp(0.875rem, 2vw, 1.125rem);
+      font-weight: 400;
+      color: var(--nothing-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      min-height: 1.5em;
+    }
+
+    .nothing-message__text {
+      display: inline;
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       BLINKING CURSOR
+       ══════════════════════════════════════════════════════════════════════════ */
+    
+    .nothing-cursor {
+      display: inline-block;
+      width: 0.6em;
+      height: 1.2em;
+      background: var(--nothing-muted);
+      margin-left: 0.25em;
+      vertical-align: middle;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .nothing-cursor {
+        animation: none;
+        opacity: 1;
+      }
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       NAVIGATION
+       ══════════════════════════════════════════════════════════════════════════ */
+    
+    .nothing-nav {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .nothing-nav__link {
+      color: var(--nothing-dim);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.75rem 1rem;
+      transition: color 0.2s ease;
+      position: relative;
+      min-height: 44px;
+      min-width: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nothing-nav__link:hover,
+    .nothing-nav__link:focus {
+      color: var(--nothing-text);
+      outline: none;
+    }
+
+    .nothing-nav__link:focus-visible {
+      outline: 1px solid var(--nothing-dim);
+      outline-offset: 4px;
+    }
+
+    .nothing-nav__link::after {
+      content: '';
+      position: absolute;
+      bottom: 0.5rem;
+      left: 50%;
+      width: 0;
+      height: 1px;
+      background: var(--nothing-text);
+      transition: width 0.2s ease, left 0.2s ease;
+    }
+
+    .nothing-nav__link:hover::after {
+      width: 100%;
+      left: 0;
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       EASTER EGG
+       ══════════════════════════════════════════════════════════════════════════ */
+    
+    .nothing-easter-egg {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.75rem;
+      color: var(--nothing-dim);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+      pointer-events: none;
+    }
+
+    .nothing-easter-egg--visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       MOBILE OPTIMIZATION
+       ══════════════════════════════════════════════════════════════════════════ */
+    
+    @media (max-width: 480px) {
+      body {
+        padding: 1.5rem;
+      }
+
+      .nothing-404 {
+        margin-bottom: 1.5rem;
+      }
+
+      .nothing-message {
+        margin-bottom: 2.5rem;
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .nothing-nav {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .nothing-nav__link {
+        padding: 1rem 1.5rem;
+      }
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       SUBTLE GRAIN TEXTURE (OPTIONAL)
+       ══════════════════════════════════════════════════════════════════════════ */
+    
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      opacity: 0.02;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ══════════════════════════════════════════════════════════════════════════
+       PARTICLE CANVAS & AMBIENT GLOW
+       ══════════════════════════════════════════════════════════════════════════ */
+    
+    #particles-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .ambient-glow {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      transform: translate(-50%, -50%);
+      transition: opacity 0.5s ease;
+      will-change: transform;
+    }
+
+    .ambient-glow--mouse {
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 60%);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ambient-glow {
+        display: none;
+      }
+      #particles-canvas {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Particle Canvas -->
+  <canvas id="particles-canvas" aria-hidden="true"></canvas>
+  
+  <!-- Ambient Glow (follows mouse) -->
+  <div class="ambient-glow ambient-glow--mouse" id="ambient-glow" aria-hidden="true"></div>
+
+  <!-- 404 Number (Clickable for easter egg) -->
+  <div class="nothing-404" id="nothing-404" role="img" aria-label="404 Error">404</div>
+  
+  <!-- Message with blinking cursor -->
+  <div class="nothing-message">
+    <span class="nothing-message__text" id="nothing-message">This route returns nothing.</span>
+    <span class="nothing-cursor" aria-hidden="true"></span>
+  </div>
+  
+  <!-- Navigation -->
+  <nav class="nothing-nav" aria-label="Main navigation">
+    <a href="index.html" class="nothing-nav__link">Home</a>
+    <a href="pages/projects.html" class="nothing-nav__link">Projects</a>
+  </nav>
+
+  <!-- Hidden Easter Egg -->
+  <div class="nothing-easter-egg" id="nothing-easter-egg" aria-hidden="true">
+    You found the nothing.
+  </div>
+
+  <script>
+    /**
+     * NOTHING 404 PAGE
+     * Random messages, easter egg, minimal interaction
+     */
+    (function() {
+      'use strict';
+
+      // ════════════════════════════════════════════════════════════════════════
+      // RANDOM MESSAGES
+      // ════════════════════════════════════════════════════════════════════════
+
+      const messages = [
+        "This route returns nothing.",
+        "You're not supposed to be here.",
+        "Page not found. System idle.",
+        "Nothing exists at this address.",
+        "This endpoint does nothing.",
+        "404. That's all.",
+        "Looks empty here.",
+        "No data. No page.",
+        "This path leads nowhere.",
+        "Nothing to render.",
+        "Resource unavailable.",
+        "The void stares back.",
+        "Null reference detected.",
+        "Connection to nothing.",
+        "Empty response received."
+      ];
+
+      const easterEggMessages = [
+        "You found the nothing.",
+        "There was nothing here. Now there's less.",
+        "Okay. That was intentional.",
+        "Nothing special. Really.",
+        "You've discovered the absence.",
+        "// TODO: Add something here"
+      ];
+
+      // ════════════════════════════════════════════════════════════════════════
+      // STATE
+      // ════════════════════════════════════════════════════════════════════════
+
+      let clickCount = 0;
+      let keySequence = [];
+      const secretCode = ['n', 'o', 't', 'h', 'i', 'n', 'g'];
+      let easterEggTriggered = false;
+
+      // ════════════════════════════════════════════════════════════════════════
+      // RANDOM MESSAGE
+      // ════════════════════════════════════════════════════════════════════════
+
+      function setRandomMessage() {
+        const messageEl = document.getElementById('nothing-message');
+        if (messageEl) {
+          const randomIndex = Math.floor(Math.random() * messages.length);
+          messageEl.textContent = messages[randomIndex];
+        }
+      }
+
+      // ════════════════════════════════════════════════════════════════════════
+      // EASTER EGG
+      // ════════════════════════════════════════════════════════════════════════
+
+      function triggerEasterEgg() {
+        if (easterEggTriggered) return;
+        easterEggTriggered = true;
+
+        const easterEggEl = document.getElementById('nothing-easter-egg');
+        if (easterEggEl) {
+          // Random easter egg message
+          const randomIndex = Math.floor(Math.random() * easterEggMessages.length);
+          easterEggEl.textContent = easterEggMessages[randomIndex];
+          easterEggEl.classList.add('nothing-easter-egg--visible');
+
+          // Hide after 5 seconds
+          setTimeout(() => {
+            easterEggEl.classList.remove('nothing-easter-egg--visible');
+            // Allow re-triggering after hidden
+            setTimeout(() => {
+              easterEggTriggered = false;
+              clickCount = 0;
+              keySequence = [];
+            }, 500);
+          }, 5000);
+        }
+      }
+
+      // ════════════════════════════════════════════════════════════════════════
+      // CLICK HANDLER (5 clicks on 404)
+      // ════════════════════════════════════════════════════════════════════════
+
+      function handleClick() {
+        clickCount++;
+        
+        if (clickCount >= 5) {
+          triggerEasterEgg();
+        }
+
+        // Reset after 2 seconds of no clicks
+        clearTimeout(window.clickResetTimeout);
+        window.clickResetTimeout = setTimeout(() => {
+          if (!easterEggTriggered) {
+            clickCount = 0;
+          }
+        }, 2000);
+      }
+
+      // ════════════════════════════════════════════════════════════════════════
+      // KEY SEQUENCE HANDLER (type "nothing")
+      // ════════════════════════════════════════════════════════════════════════
+
+      function handleKeyDown(e) {
+        const key = e.key.toLowerCase();
+        
+        // Only track letter keys
+        if (key.length !== 1 || !/[a-z]/.test(key)) {
+          keySequence = [];
+          return;
+        }
+
+        keySequence.push(key);
+
+        // Keep only last N characters
+        if (keySequence.length > secretCode.length) {
+          keySequence.shift();
+        }
+
+        // Check if sequence matches
+        if (keySequence.length === secretCode.length) {
+          const matches = keySequence.every((k, i) => k === secretCode[i]);
+          if (matches) {
+            triggerEasterEgg();
+          }
+        }
+      }
+
+      // ════════════════════════════════════════════════════════════════════════
+      // INITIALIZE
+      // ════════════════════════════════════════════════════════════════════════
+
+      function init() {
+        // Set random message
+        setRandomMessage();
+
+        // Bind 404 click handler
+        const el404 = document.getElementById('nothing-404');
+        if (el404) {
+          el404.addEventListener('click', handleClick);
+          el404.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            handleClick();
+          });
+        }
+
+        // Bind key handler
+        document.addEventListener('keydown', handleKeyDown);
+
+        // Check for reduced motion
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReducedMotion) {
+          const cursor = document.querySelector('.nothing-cursor');
+          if (cursor) {
+            cursor.style.animation = 'none';
+            cursor.style.opacity = '1';
+          }
+        }
+      }
+
+      // Run on DOM ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+    })();
+
+    /**
+     * PARTICLE SYSTEM
+     * Mouse-interactive ambient particles
+     */
+    (function() {
+      'use strict';
+
+      // Check for reduced motion
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReducedMotion) return;
+
+      const canvas = document.getElementById('particles-canvas');
+      if (!canvas) return;
+
+      const ctx = canvas.getContext('2d');
+      
+      // ════════════════════════════════════════════════════════════════════════
+      // CONFIG
+      // ════════════════════════════════════════════════════════════════════════
+      
+      const config = {
+        particleCount: 80,
+        particleSize: { min: 1, max: 2.5 },
+        speed: { min: 0.1, max: 0.4 },
+        opacity: { min: 0.1, max: 0.4 },
+        mouseRadius: 150,
+        mouseForce: 0.08,
+        friction: 0.98,
+        connectionDistance: 120,
+        connectionOpacity: 0.08
+      };
+
+      // ════════════════════════════════════════════════════════════════════════
+      // STATE
+      // ════════════════════════════════════════════════════════════════════════
+      
+      let particles = [];
+      let mouse = { x: null, y: null };
+      let animationId = null;
+
+      // ════════════════════════════════════════════════════════════════════════
+      // PARTICLE CLASS
+      // ════════════════════════════════════════════════════════════════════════
+      
+      class Particle {
+        constructor() {
+          this.reset();
+        }
+
+        reset() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.size = config.particleSize.min + Math.random() * (config.particleSize.max - config.particleSize.min);
+          this.speedX = (Math.random() - 0.5) * (config.speed.max - config.speed.min) + config.speed.min;
+          this.speedY = (Math.random() - 0.5) * (config.speed.max - config.speed.min) + config.speed.min;
+          this.velocityX = 0;
+          this.velocityY = 0;
+          this.opacity = config.opacity.min + Math.random() * (config.opacity.max - config.opacity.min);
+          this.baseOpacity = this.opacity;
+        }
+
+        update() {
+          // Mouse interaction
+          if (mouse.x !== null && mouse.y !== null) {
+            const dx = mouse.x - this.x;
+            const dy = mouse.y - this.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < config.mouseRadius) {
+              const force = (config.mouseRadius - distance) / config.mouseRadius;
+              const angle = Math.atan2(dy, dx);
+              
+              // Push particles away from mouse
+              this.velocityX -= Math.cos(angle) * force * config.mouseForce;
+              this.velocityY -= Math.sin(angle) * force * config.mouseForce;
+              
+              // Increase opacity when near mouse
+              this.opacity = Math.min(this.baseOpacity + force * 0.3, 0.6);
+            } else {
+              this.opacity += (this.baseOpacity - this.opacity) * 0.05;
+            }
+          }
+
+          // Apply friction
+          this.velocityX *= config.friction;
+          this.velocityY *= config.friction;
+
+          // Update position
+          this.x += this.speedX + this.velocityX;
+          this.y += this.speedY + this.velocityY;
+
+          // Wrap around edges
+          if (this.x < -this.size) this.x = canvas.width + this.size;
+          if (this.x > canvas.width + this.size) this.x = -this.size;
+          if (this.y < -this.size) this.y = canvas.height + this.size;
+          if (this.y > canvas.height + this.size) this.y = -this.size;
+        }
+
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(250, 250, 250, ${this.opacity})`;
+          ctx.fill();
+        }
+      }
+
+      // ════════════════════════════════════════════════════════════════════════
+      // CONNECTIONS
+      // ════════════════════════════════════════════════════════════════════════
+      
+      function drawConnections() {
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < config.connectionDistance) {
+              const opacity = config.connectionOpacity * (1 - distance / config.connectionDistance);
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.strokeStyle = `rgba(250, 250, 250, ${opacity})`;
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      // ════════════════════════════════════════════════════════════════════════
+      // ANIMATION LOOP
+      // ════════════════════════════════════════════════════════════════════════
+      
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Update and draw particles
+        particles.forEach(particle => {
+          particle.update();
+          particle.draw();
+        });
+
+        // Draw connections
+        drawConnections();
+
+        animationId = requestAnimationFrame(animate);
+      }
+
+      // ════════════════════════════════════════════════════════════════════════
+      // RESIZE HANDLER
+      // ════════════════════════════════════════════════════════════════════════
+      
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      // ════════════════════════════════════════════════════════════════════════
+      // MOUSE HANDLERS
+      // ════════════════════════════════════════════════════════════════════════
+      
+      function handleMouseMove(e) {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+
+        // Update ambient glow position
+        const glow = document.getElementById('ambient-glow');
+        if (glow) {
+          glow.style.left = mouse.x + 'px';
+          glow.style.top = mouse.y + 'px';
+        }
+      }
+
+      function handleMouseLeave() {
+        mouse.x = null;
+        mouse.y = null;
+      }
+
+      function handleTouchMove(e) {
+        if (e.touches.length > 0) {
+          mouse.x = e.touches[0].clientX;
+          mouse.y = e.touches[0].clientY;
+
+          const glow = document.getElementById('ambient-glow');
+          if (glow) {
+            glow.style.left = mouse.x + 'px';
+            glow.style.top = mouse.y + 'px';
+          }
+        }
+      }
+
+      function handleTouchEnd() {
+        mouse.x = null;
+        mouse.y = null;
+      }
+
+      // ════════════════════════════════════════════════════════════════════════
+      // INITIALIZE
+      // ════════════════════════════════════════════════════════════════════════
+      
+      function initParticles() {
+        resize();
+
+        // Create particles
+        particles = [];
+        for (let i = 0; i < config.particleCount; i++) {
+          particles.push(new Particle());
+        }
+
+        // Start animation
+        animate();
+
+        // Event listeners
+        window.addEventListener('resize', resize);
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseleave', handleMouseLeave);
+        document.addEventListener('touchmove', handleTouchMove, { passive: true });
+        document.addEventListener('touchend', handleTouchEnd);
+
+        // Position ambient glow initially at center
+        const glow = document.getElementById('ambient-glow');
+        if (glow) {
+          glow.style.left = window.innerWidth / 2 + 'px';
+          glow.style.top = window.innerHeight / 2 + 'px';
+        }
+      }
+
+      // Run on DOM ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initParticles);
+      } else {
+        initParticles();
+      }
+    })();
+  </script>
+</body>
+</html>

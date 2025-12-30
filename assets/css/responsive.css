@@ -214,3 +214,347 @@
     gap: var(--space-4);
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MOBILE BOTTOM SHEET NAVIGATION
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.mobile-bottom-sheet__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 11, 0);
+  z-index: 998;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 300ms ease, visibility 300ms ease, background 300ms ease;
+}
+
+.mobile-bottom-sheet__backdrop--visible {
+  opacity: 1;
+  visibility: visible;
+  background: rgba(10, 10, 11, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.mobile-bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-secondary, #111113);
+  border-top: 1px solid var(--border-primary, rgba(255, 255, 255, 0.06));
+  border-radius: var(--radius-2xl, 1.5rem) var(--radius-2xl, 1.5rem) 0 0;
+  z-index: 999;
+  transform: translateY(100%);
+  transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.mobile-bottom-sheet--open {
+  transform: translateY(0);
+}
+
+.mobile-bottom-sheet__handle {
+  width: 40px;
+  height: 4px;
+  background: var(--text-muted, #52525b);
+  border-radius: var(--radius-full, 9999px);
+  margin: var(--space-3, 0.75rem) auto;
+  opacity: 0.5;
+}
+
+.mobile-bottom-sheet__content {
+  padding: var(--space-4, 1rem);
+  padding-bottom: calc(var(--space-8, 2rem) + env(safe-area-inset-bottom, 0));
+}
+
+.mobile-bottom-sheet__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1, 0.25rem);
+}
+
+.mobile-bottom-sheet__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  padding: var(--space-4, 1rem);
+  color: var(--text-secondary, #a1a1aa);
+  text-decoration: none;
+  font-size: var(--text-base, 1rem);
+  font-weight: 500;
+  border-radius: var(--radius-lg, 0.75rem);
+  transition: background 150ms ease, color 150ms ease;
+  min-height: 48px;
+}
+
+.mobile-bottom-sheet__link:hover,
+.mobile-bottom-sheet__link:focus {
+  background: var(--bg-tertiary, #18181b);
+  color: var(--text-primary, #fafafa);
+}
+
+.mobile-bottom-sheet__link--active {
+  color: var(--accent-primary, #3b82f6);
+  background: var(--accent-subtle, rgba(59, 130, 246, 0.08));
+}
+
+.mobile-bottom-sheet__link-icon {
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+}
+
+.mobile-bottom-sheet__link-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MOBILE PROJECT MODAL
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.mobile-project-modal {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-primary, #0a0a0b);
+  z-index: 1000;
+  transform: translateY(100%);
+  transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1), opacity 350ms ease;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-project-modal--open {
+  transform: translateY(0);
+}
+
+.mobile-project-modal__header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4, 1rem);
+  padding-top: calc(env(safe-area-inset-top, 0) + var(--space-4, 1rem));
+  background: var(--bg-primary, #0a0a0b);
+  border-bottom: 1px solid var(--border-primary, rgba(255, 255, 255, 0.06));
+  z-index: 10;
+}
+
+.mobile-project-modal__handle {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 0) + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 4px;
+  background: var(--text-muted, #52525b);
+  border-radius: var(--radius-full, 9999px);
+  opacity: 0.5;
+}
+
+.mobile-project-modal__title {
+  font-size: var(--text-lg, 1.125rem);
+  font-weight: 600;
+  color: var(--text-primary, #fafafa);
+  text-align: center;
+  flex: 1;
+  padding: 0 var(--space-4, 1rem);
+}
+
+.mobile-project-modal__close {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary, #a1a1aa);
+  font-size: 1.5rem;
+  cursor: pointer;
+  border-radius: var(--radius-full, 9999px);
+  transition: background 150ms ease, color 150ms ease;
+}
+
+.mobile-project-modal__close:hover,
+.mobile-project-modal__close:focus {
+  background: var(--bg-tertiary, #18181b);
+  color: var(--text-primary, #fafafa);
+}
+
+.mobile-project-modal__content {
+  padding: var(--space-6, 1.5rem);
+  padding-bottom: calc(var(--space-16, 4rem) + env(safe-area-inset-bottom, 0));
+}
+
+/* Mobile Modal Sections */
+.mobile-modal-section {
+  margin-bottom: var(--space-6, 1.5rem);
+}
+
+.mobile-modal-section__title {
+  font-size: var(--text-lg, 1.125rem);
+  font-weight: 600;
+  color: var(--text-primary, #fafafa);
+  margin-bottom: var(--space-3, 0.75rem);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+}
+
+.mobile-modal-section__title::before {
+  content: '';
+  width: 3px;
+  height: 1.25em;
+  background: var(--accent-primary, #3b82f6);
+  border-radius: 2px;
+}
+
+.mobile-modal-section__content {
+  color: var(--text-secondary, #a1a1aa);
+  font-size: var(--text-sm, 0.875rem);
+  line-height: 1.6;
+}
+
+.mobile-modal-section__content p {
+  margin-bottom: var(--space-3, 0.75rem);
+}
+
+.mobile-modal-section__content ul {
+  list-style: none;
+  padding: 0;
+}
+
+.mobile-modal-section__content li {
+  position: relative;
+  padding-left: var(--space-5, 1.25rem);
+  margin-bottom: var(--space-2, 0.5rem);
+}
+
+.mobile-modal-section__content li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  width: 5px;
+  height: 5px;
+  background: var(--accent-primary, #3b82f6);
+  border-radius: 50%;
+}
+
+/* Mobile Modal Actions */
+.mobile-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 0.75rem);
+  margin-top: var(--space-6, 1.5rem);
+  padding-top: var(--space-6, 1.5rem);
+  border-top: 1px solid var(--border-primary, rgba(255, 255, 255, 0.06));
+}
+
+.mobile-modal-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4, 1rem);
+  border-radius: var(--radius-lg, 0.75rem);
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 150ms ease;
+  min-height: 48px;
+}
+
+.mobile-modal-action--primary {
+  background: var(--accent-primary, #3b82f6);
+  color: white;
+}
+
+.mobile-modal-action--secondary {
+  background: var(--bg-tertiary, #18181b);
+  color: var(--text-primary, #fafafa);
+  border: 1px solid var(--border-secondary, rgba(255, 255, 255, 0.1));
+}
+
+.mobile-modal-action--disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TAP RIPPLE EFFECT
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.mobile-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(0);
+  animation: mobile-ripple-animation 400ms ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes mobile-ripple-animation {
+  to {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DESKTOP RECOMMENDED BADGE
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.mobile-desktop-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1, 0.25rem) var(--space-2, 0.5rem);
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: var(--radius-sm, 0.375rem);
+  font-size: 0.625rem;
+  color: var(--warning, #f59e0b);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-left: var(--space-2, 0.5rem);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BODY STATES
+   ══════════════════════════════════════════════════════════════════════════ */
+
+body.mobile-menu-open,
+body.mobile-modal-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   NAV TOGGLE ANIMATION
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.nav__toggle--active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.nav__toggle--active span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav__toggle--active span:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Hidden nav on scroll */
+.nav--hidden {
+  transform: translateY(-100%);
+}
+
+.nav {
+  transition: transform 300ms ease;
+}
+
