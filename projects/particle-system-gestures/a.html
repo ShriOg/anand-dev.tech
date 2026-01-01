@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hand-Controlled 3D Particle System | Case Study</title>
+  <meta name="description" content="A real-time 3D particle morphing system controlled through hand gestures using computer vision and WebGL.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-bg: #0a0a0b;
+      --color-surface: #111113;
+      --color-border: rgba(255, 255, 255, 0.08);
+      --color-text: #fafafa;
+      --color-text-secondary: #a1a1aa;
+      --color-text-muted: #71717a;
+      --color-accent: #3b82f6;
+      --spacing-xs: 0.5rem;
+      --spacing-sm: 1rem;
+      --spacing-md: 1.5rem;
+      --spacing-lg: 2.5rem;
+      --spacing-xl: 4rem;
+      --spacing-2xl: 6rem;
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 16px;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 var(--spacing-md);
+    }
+
+    .hero {
+      padding: var(--spacing-2xl) 0 var(--spacing-xl);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .hero__back {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      font-size: 0.875rem;
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-lg);
+      transition: color 300ms var(--ease-out);
+    }
+
+    .hero__back:hover {
+      color: var(--color-text-secondary);
+    }
+
+    .hero__title {
+      font-size: clamp(1.75rem, 5vw, 2.5rem);
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .hero__summary {
+      font-size: 1.1rem;
+      color: var(--color-text-secondary);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .hero__tech {
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+      color: var(--color-text-muted);
+    }
+
+    .content {
+      padding: var(--spacing-xl) 0;
+    }
+
+    .section {
+      margin-bottom: var(--spacing-xl);
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 800ms var(--ease-out), transform 800ms var(--ease-out);
+    }
+
+    .section.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .section__label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .section__title {
+      font-size: 1.25rem;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      margin-bottom: var(--spacing-md);
+      color: var(--color-text);
+    }
+
+    .section__content {
+      color: var(--color-text-secondary);
+      font-size: 1rem;
+    }
+
+    .section__content p {
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .section__content p:last-child {
+      margin-bottom: 0;
+    }
+
+    .subsection {
+      margin-top: var(--spacing-lg);
+      padding-left: var(--spacing-md);
+      border-left: 1px solid var(--color-border);
+    }
+
+    .subsection__title {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--color-text);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .subsection__content {
+      font-size: 0.95rem;
+      color: var(--color-text-secondary);
+    }
+
+    .mapping-list {
+      list-style: none;
+      margin-top: var(--spacing-md);
+    }
+
+    .mapping-list li {
+      display: flex;
+      align-items: baseline;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-xs);
+      font-size: 0.95rem;
+    }
+
+    .mapping-list__gesture {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--color-text);
+      min-width: 140px;
+    }
+
+    .mapping-list__effect {
+      color: var(--color-text-secondary);
+    }
+
+    .actions {
+      padding: var(--spacing-xl) 0 var(--spacing-2xl);
+      border-top: 1px solid var(--color-border);
+    }
+
+    .actions__links {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-sm);
+    }
+
+    .actions__link {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      font-size: 1rem;
+      color: var(--color-text-secondary);
+      transition: color 300ms var(--ease-out);
+    }
+
+    .actions__link:hover {
+      color: var(--color-accent);
+    }
+
+    .actions__link span {
+      transition: transform 300ms var(--ease-out);
+    }
+
+    .actions__link:hover span {
+      transform: translateX(4px);
+    }
+
+    @media (min-width: 640px) {
+      .actions__links {
+        flex-direction: row;
+        gap: var(--spacing-lg);
+      }
+
+      .mapping-list li {
+        gap: var(--spacing-md);
+      }
+    }
+
+    @media (max-width: 639px) {
+      .hero {
+        padding: var(--spacing-xl) 0 var(--spacing-lg);
+      }
+
+      .section {
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .subsection {
+        padding-left: var(--spacing-sm);
+      }
+
+      .mapping-list__gesture {
+        min-width: 120px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .section,
+      .screenshots {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+
+      .screenshots__img {
+        transition: none;
+      }
+    }
+
+    .screenshots {
+      margin-bottom: var(--spacing-xl);
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 800ms var(--ease-out), transform 800ms var(--ease-out);
+    }
+
+    .screenshots.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .screenshots[hidden] {
+      display: none;
+    }
+
+    .screenshots__title {
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--color-text-muted);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .screenshots__grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--spacing-sm);
+    }
+
+    .screenshots__item {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-md);
+      background: var(--color-surface);
+      aspect-ratio: 16 / 10;
+    }
+
+    .screenshots__img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 400ms var(--ease-out), filter 400ms var(--ease-out);
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      .screenshots__item:hover .screenshots__img {
+        transform: scale(1.03);
+        filter: contrast(1.05);
+      }
+    }
+
+    @media (min-width: 480px) {
+      .screenshots__grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 768px) {
+      .screenshots__grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--spacing-md);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <div class="container">
+        <a href="../../index.html" class="hero__back">← Back to Portfolio</a>
+        <h1 class="hero__title">Hand-Controlled 3D Particle System</h1>
+        <p class="hero__summary">A real-time 3D particle morphing system controlled through hand gestures using computer vision and WebGL.</p>
+        <p class="hero__tech">Three.js · MediaPipe Hands · JavaScript · WebGL</p>
+      </div>
+    </section>
+
+    <article class="content">
+      <div class="container">
+        <section class="section">
+          <p class="section__label">Problem</p>
+          <h2 class="section__title">Why Gesture Control</h2>
+          <div class="section__content">
+            <p>Traditional input devices—mouse, keyboard, touchpad—are precise but disconnected. They require translation between physical movement and on-screen action. This abstraction works for productivity software, but creative and visual applications suffer.</p>
+            <p>Gesture-based interaction removes that layer. Your hand becomes the controller. Movement maps directly to visual change. The challenge is making this technically viable: hand tracking is computationally expensive, gesture recognition is noisy, and real-time 3D rendering demands consistent frame rates.</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="section__label">Solution</p>
+          <h2 class="section__title">Architecture Overview</h2>
+          <div class="section__content">
+            <p>The system uses MediaPipe Hands for real-time hand landmark detection directly in the browser. Twenty-one 3D landmarks per hand are extracted from webcam input at 30+ fps. These landmarks are then mapped to control parameters for a Three.js particle system.</p>
+            <p>Rather than using raw landmark positions—which produces jittery, unusable results—the system implements temporal smoothing and interpolation. Each control parameter maintains a target value and eases toward it over multiple frames. This creates fluid, responsive motion without sacrificing precision.</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="section__label">Technical</p>
+          <h2 class="section__title">How It Works</h2>
+          <div class="section__content">
+            <div class="subsection">
+              <h3 class="subsection__title">Hand Tracking Pipeline</h3>
+              <p class="subsection__content">MediaPipe processes each video frame through a palm detection model, then a hand landmark model. The result is 21 3D coordinates per hand, normalized to image space. These coordinates are converted to world-space positions relative to the particle system's coordinate system.</p>
+            </div>
+            <div class="subsection">
+              <h3 class="subsection__title">Gesture Recognition</h3>
+              <p class="subsection__content">Gestures are derived from landmark relationships, not classification models. Pinch detection measures the distance between thumb tip and index finger tip. Hand openness is calculated from the average distance of fingertips from the palm center. This geometric approach is fast, deterministic, and easy to tune.</p>
+            </div>
+            <div class="subsection">
+              <h3 class="subsection__title">Particle Morphing</h3>
+              <p class="subsection__content">The particle system renders several thousand points using Three.js BufferGeometry. Each particle's position, color, and size are computed in a vertex shader based on control parameters. Morphing between shapes uses linear interpolation of base positions, allowing smooth transitions between sphere, cube, and plane formations.</p>
+            </div>
+            <div class="subsection">
+              <h3 class="subsection__title">Performance</h3>
+              <p class="subsection__content">GPU instancing handles particle rendering efficiently. Hand tracking runs in a Web Worker to avoid blocking the main thread. Frame timing is monitored, and particle count dynamically adjusts if performance drops below target. The system maintains 60 fps on mid-range hardware.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="section__label">Interaction</p>
+          <h2 class="section__title">Gesture Mappings</h2>
+          <div class="section__content">
+            <p>Control mappings were chosen for intuitiveness. Each gesture produces a result that feels physically connected to the action.</p>
+            <ul class="mapping-list">
+              <li>
+                <span class="mapping-list__gesture">Pinch</span>
+                <span class="mapping-list__effect">Controls particle scale—closing fingers shrinks the system</span>
+              </li>
+              <li>
+                <span class="mapping-list__gesture">Hand Position</span>
+                <span class="mapping-list__effect">Moves the particle system in 3D space</span>
+              </li>
+              <li>
+                <span class="mapping-list__gesture">Horizontal Motion</span>
+                <span class="mapping-list__effect">Shifts color hue across the spectrum</span>
+              </li>
+              <li>
+                <span class="mapping-list__gesture">Hand Rotation</span>
+                <span class="mapping-list__effect">Rotates the particle formation</span>
+              </li>
+            </ul>
+            <p style="margin-top: var(--spacing-md);">These mappings require no explanation to users. The relationship between action and effect is immediately apparent.</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <p class="section__label">Challenges</p>
+          <h2 class="section__title">Problems Solved</h2>
+          <div class="section__content">
+            <p><strong>Gesture noise.</strong> Raw hand tracking data is noisy. Small variations in landmark positions cause visible jitter. The solution is exponential smoothing with adaptive parameters—faster response for large movements, heavier smoothing for fine control.</p>
+            <p><strong>Performance balance.</strong> Hand tracking and particle rendering both demand GPU resources. Running them simultaneously required careful profiling. Moving hand tracking off the main thread and using requestAnimationFrame properly eliminated frame drops.</p>
+            <p><strong>Control precision.</strong> Making gestures feel responsive without being twitchy took iteration. Dead zones around neutral positions prevent accidental activation. Velocity-based sensitivity scaling allows both broad strokes and fine adjustments.</p>
+          </div>
+        </section>
+
+        <section class="screenshots" id="screenshots" hidden data-project="particle-system-gestures">
+          <p class="screenshots__title">Screenshots</p>
+          <div class="screenshots__grid" id="screenshotsGrid"></div>
+        </section>
+
+        <section class="section">
+          <p class="section__label">Result</p>
+          <h2 class="section__title">What This Demonstrates</h2>
+          <div class="section__content">
+            <p>The project successfully combines real-time computer vision with WebGL rendering in a browser environment. Hand gestures provide intuitive, immediate control over a complex visual system. Performance remains consistent across devices.</p>
+            <p>Technically, this demonstrates proficiency in: browser-based ML inference, 3D graphics programming, performance optimization, and interaction design. The architecture is modular—the gesture detection system can be repurposed for other applications.</p>
+          </div>
+        </section>
+      </div>
+    </article>
+
+    <footer class="actions">
+      <div class="container">
+        <div class="actions__links">
+          <a href="assets/particle-system.html" class="actions__link" target="_blank" rel="noopener">
+            Open Live Demo <span>→</span>
+          </a>
+          <a href="https://github.com/ShriOg/particle-system-guestures" class="actions__link" target="_blank" rel="noopener">
+            View Source Code <span>→</span>
+          </a>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    (function() {
+      var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      function loadScreenshots() {
+        var container = document.getElementById('screenshots');
+        var grid = document.getElementById('screenshotsGrid');
+        if (!container || !grid) return;
+
+        var projectSlug = container.dataset.project;
+        var basePath = 'assets/projects/' + projectSlug + '/';
+        var formats = ['png', 'jpg', 'jpeg', 'webp'];
+        var maxImages = 9;
+        var loadedCount = 0;
+        var checkedFirst = false;
+
+        function tryLoadImage(index, formatIndex) {
+          if (index > maxImages) return;
+          if (formatIndex >= formats.length) {
+            if (index === 1 && loadedCount === 0) {
+              container.setAttribute('hidden', '');
+            }
+            return;
+          }
+
+          var ext = formats[formatIndex];
+          var img = new Image();
+          var src = basePath + index + '.' + ext;
+
+          img.onload = function() {
+            loadedCount++;
+
+            var item = document.createElement('div');
+            item.className = 'screenshots__item';
+
+            var imgEl = document.createElement('img');
+            imgEl.className = 'screenshots__img';
+            imgEl.src = src;
+            imgEl.alt = 'Hand-Controlled 3D Particle System screenshot ' + index;
+            imgEl.loading = 'lazy';
+
+            item.appendChild(imgEl);
+            grid.appendChild(item);
+
+            container.removeAttribute('hidden');
+            tryLoadImage(index + 1, 0);
+          };
+
+          img.onerror = function() {
+            tryLoadImage(index, formatIndex + 1);
+          };
+
+          img.src = src;
+        }
+
+        tryLoadImage(1, 0);
+      }
+
+      loadScreenshots();
+
+      if (reducedMotion) {
+        document.querySelectorAll('.section, .screenshots').forEach(function(el) {
+          el.classList.add('is-visible');
+        });
+        return;
+      }
+
+      var elements = document.querySelectorAll('.section, .screenshots');
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.15,
+        rootMargin: '0px 0px -40px 0px'
+      });
+
+      elements.forEach(function(el, index) {
+        el.style.transitionDelay = (index * 60) + 'ms';
+        observer.observe(el);
+      });
+    })();
+  </script>
+</body>
+</html>
