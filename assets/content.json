@@ -1,11 +1,86 @@
 {
+  "site": {
+    "name": "Anand Dev",
+    "tagline": "Developer building systems that think.",
+    "logo": {
+      "text": "anand",
+      "highlight": ".",
+      "suffix": "dev"
+    }
+  },
+
+  "meta": {
+    "title": "Anand Dev OS | Developer",
+    "description": "Anand Shukla - Developer building thoughtful systems. Portfolio, Lab, and Learning Log.",
+    "themeColor": "#0a0a0b",
+    "ogImage": "/assets/images/og-image.png"
+  },
+
+  "author": {
+    "name": "Anand Shukla",
+    "title": "Developer",
+    "tagline": "Developer building systems that think.",
+    "description": "Focused on Python, computer vision, and making complex things feel simple.",
+    "philosophy": "Build to understand. Ship to learn. Document everything.",
+    "email": "hello@anand.dev",
+    "github": "https://github.com/ShriOg",
+    "linkedin": "https://linkedin.com/in/anandshukla",
+    "availability": "Available for projects"
+  },
+
+  "navigation": [
+    { "id": "home", "label": "Home", "href": "/", "status": "active" },
+    { "id": "projects", "label": "Projects", "href": "/pages/projects/", "status": "active" },
+    { "id": "lab", "label": "Lab", "href": "/pages/lab/", "status": "active" },
+    { "id": "dev-os", "label": "Dev OS", "href": "/pages/dev-os/", "status": "active" },
+    { "id": "hire", "label": "Hire Me", "href": "/pages/hire/", "status": "active" }
+  ],
+
+  "hero": {
+    "eyebrow": "Available for projects",
+    "title": "Anand Shukla",
+    "subtitle": "Developer building systems that think. Focused on Python, computer vision, and making complex things feel simple.",
+    "philosophy": "Build to understand. Ship to learn. Document everything.",
+    "cta": {
+      "primary": { "label": "View Projects", "href": "/pages/projects/" },
+      "secondary": { "label": "Work With Me", "href": "/pages/hire/" }
+    }
+  },
+
+  "sections": {
+    "featuredProjects": {
+      "eyebrow": "Featured Work",
+      "title": "Selected Projects"
+    },
+    "projects": {
+      "eyebrow": "Projects",
+      "title": "Engineering Stories",
+      "description": "Not just what I built, but how I thought through problems, what failed, and what I learned along the way. Click any card to explore the full case study."
+    },
+    "skills": {
+      "categories": [
+        {
+          "title": "Languages",
+          "items": ["Python", "JavaScript", "TypeScript", "HTML/CSS", "SQL"]
+        },
+        {
+          "title": "Domains",
+          "items": ["Computer Vision", "Machine Learning", "Systems Design", "Web Development"]
+        },
+        {
+          "title": "Tools",
+          "items": ["Git", "VS Code", "Docker", "Linux", "MediaPipe", "OpenCV"]
+        }
+      ]
+    }
+  },
+
   "projects": [
     {
       "id": "ai-desktop-assistant",
       "title": "AI Desktop Assistant",
       "shortDescription": "A voice-controlled assistant that understands context and executes system commands across Windows, macOS, and Linux.",
       "longDescription": "Building a voice-controlled assistant that actually understands context and executes system commands across Windows, macOS, and Linux.",
-      "previewImage": null,
       "previewType": "grid",
       "techStack": ["Python 3.11", "Pydantic", "SpeechRecognition", "pywin32", "subprocess"],
       "techStackShort": "Python / NLP",
@@ -13,7 +88,8 @@
       "role": "Solo Developer",
       "liveUrl": null,
       "sourceUrl": "https://github.com/ShriOg/anand-dev.tech/tree/main/projects/ai-assistant",
-      "pageUrl": "/pages/ai-assistant.html",
+      "pageUrl": "/pages/ai-assistant/",
+      "status": "active",
       "featured": true,
       "order": 1,
       "sections": [
@@ -97,7 +173,6 @@
       "title": "Gesture-Controlled Particles",
       "shortDescription": "An interactive visual system where hand gestures control particle behavior in real-time using computer vision.",
       "longDescription": "An interactive visual system where hand gestures control particle behavior in real-time. Exploring the intersection of computer vision and creative coding.",
-      "previewImage": null,
       "previewType": "particles",
       "techStack": ["Vanilla JavaScript", "Canvas 2D", "MediaPipe Hands", "requestAnimationFrame"],
       "techStackShort": "JS / Canvas / MediaPipe",
@@ -105,7 +180,8 @@
       "role": "Solo Developer",
       "liveUrl": "/projects/particle-system-gestures/index.html",
       "sourceUrl": "https://github.com/ShriOg/particle-system-guestures",
-      "pageUrl": "/pages/particle-system.html",
+      "pageUrl": "/pages/particle-system/",
+      "status": "active",
       "featured": true,
       "order": 2,
       "sections": [
@@ -189,7 +265,6 @@
       "title": "NowHang",
       "shortDescription": "A social coordination app that eliminates planning friction by matching real-time availability and interests.",
       "longDescription": "A social coordination app that makes spontaneous meetups actually happen. Eliminates the back-and-forth of planning by matching real-time availability with shared interests.",
-      "previewImage": null,
       "previewType": "waves",
       "techStack": ["React Native", "Firebase", "Cloud Functions", "Real-time DB"],
       "techStackShort": "Full Stack / Real-time",
@@ -197,7 +272,8 @@
       "role": "Lead Developer",
       "liveUrl": null,
       "sourceUrl": "https://github.com/ShriOg/nowhang",
-      "pageUrl": "/pages/nowhang.html",
+      "pageUrl": "/pages/nowhang/",
+      "status": "experimental",
       "featured": true,
       "order": 3,
       "sections": [
@@ -261,15 +337,15 @@
       "title": "Grade Dashboard",
       "shortDescription": "A personal academic tracker with GPA calculations, grade visualization, and course history management.",
       "longDescription": "A personal academic tracking system that makes sense of transcript data. Real-time GPA calculations, grade trend visualization, and course organization.",
-      "previewImage": null,
       "previewType": "grid",
       "techStack": ["HTML", "CSS", "JavaScript", "LocalStorage"],
       "techStackShort": "Web / Data Viz",
       "timeline": "2 weeks",
       "role": "Solo Developer",
-      "liveUrl": "/pages/grades.html",
+      "liveUrl": "/pages/grades/",
       "sourceUrl": null,
-      "pageUrl": "/pages/grades.html",
+      "pageUrl": "/pages/grades/",
+      "status": "active",
       "featured": false,
       "order": 4,
       "sections": [
@@ -298,7 +374,6 @@
       "title": "Gesture-Controlled Mouse",
       "shortDescription": "Control your computer's cursor using hand gestures detected through a webcam. Built with MediaPipe and PyAutoGUI.",
       "longDescription": "A computer vision system that maps hand gestures to mouse controls. Point to move, pinch to click, scroll with two fingers—all through your webcam.",
-      "previewImage": null,
       "previewType": "grid",
       "techStack": ["Python 3.11", "OpenCV", "MediaPipe", "PyAutoGUI", "NumPy"],
       "techStackShort": "Python / CV",
@@ -306,7 +381,8 @@
       "role": "Solo Developer",
       "liveUrl": null,
       "sourceUrl": "https://github.com/ShriOg/gesture-mouse",
-      "pageUrl": "/pages/gesture-mouse.html",
+      "pageUrl": "/pages/gesture-mouse/",
+      "status": "active",
       "featured": false,
       "order": 5,
       "sections": [
@@ -357,16 +433,6 @@
           ]
         },
         {
-          "id": "performance",
-          "title": "Performance & Stability Considerations",
-          "content": [
-            "<strong>Jitter elimination:</strong> Raw landmark coordinates fluctuate by 5-15 pixels between frames even with a stationary hand. Applied exponential moving average with α=0.3, reducing perceived jitter to <2 pixels.",
-            "<strong>Click debouncing:</strong> Pinch gestures can oscillate near the threshold. Implemented a 150ms cooldown between click events and required gesture stability for 3 consecutive frames before triggering.",
-            "<strong>Frame rate optimization:</strong> MediaPipe processing is GPU-accelerated where available. Added frame skipping option for lower-end systems, maintaining gesture responsiveness at 15 FPS minimum.",
-            "<strong>Safety bounds:</strong> Cursor movement is constrained to screen boundaries with configurable edge buffers to prevent accidental clicks on system UI elements."
-          ]
-        },
-        {
           "id": "failures",
           "title": "What Failed",
           "content": [
@@ -404,5 +470,23 @@
         }
       ]
     }
-  ]
+  ],
+
+  "footer": {
+    "links": [
+      { "label": "GitHub", "href": "https://github.com/ShriOg", "external": true },
+      { "label": "LinkedIn", "href": "https://linkedin.com/in/anandshukla", "external": true },
+      { "label": "Email", "href": "mailto:hello@anand.dev", "external": false }
+    ],
+    "copyright": "© 2025 Anand Shukla. Built with intention."
+  },
+
+  "icons": {
+    "play": "<svg viewBox=\"0 0 24 24\"><polygon points=\"5 3 19 12 5 21 5 3\"></polygon></svg>",
+    "github": "<svg viewBox=\"0 0 24 24\"><path d=\"M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22\"></path></svg>",
+    "external": "<svg viewBox=\"0 0 24 24\"><path d=\"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6\"></path><polyline points=\"15 3 21 3 21 9\"></polyline><line x1=\"10\" y1=\"14\" x2=\"21\" y2=\"3\"></line></svg>",
+    "docs": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline><line x1=\"16\" y1=\"13\" x2=\"8\" y2=\"13\"></line><line x1=\"16\" y1=\"17\" x2=\"8\" y2=\"17\"></line><polyline points=\"10 9 9 9 8 9\"></polyline></svg>",
+    "arrow": "→",
+    "close": "×"
+  }
 }

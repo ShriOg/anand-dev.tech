@@ -453,18 +453,18 @@ const PageZoomTransition = (function() {
   }
 
   function getPageUrlFromId(projectId) {
-    // Map common project IDs to their page URLs
+    // Map common project IDs to their page URLs (folder-based, no .html)
     const pageMap = {
-      'ai-desktop-assistant': 'ai-assistant.html',
-      'ai-assistant': 'ai-assistant.html',
-      'particle-system-gestures': 'particle-system-gestures.html',
-      'particle-system': 'particle-system-gestures.html',
-      'nowhang': 'nowhang.html',
-      'grades': 'grades.html',
-      'case-study': 'case-study.html'
+      'ai-desktop-assistant': 'ai-assistant/',
+      'ai-assistant': 'ai-assistant/',
+      'particle-system-gestures': 'particle-system-gestures/',
+      'particle-system': 'particle-system-gestures/',
+      'nowhang': 'nowhang/',
+      'grades': 'grades/',
+      'case-study': 'case-study/'
     };
 
-    return pageMap[projectId] || `${projectId}.html`;
+    return pageMap[projectId] || `${projectId}/`;
   }
 
   // ════════════════════════════════════════════════════════════════════════════

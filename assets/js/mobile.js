@@ -98,28 +98,43 @@
 
     getNavLinks() {
       const path = window.location.pathname;
-      const currentPage = path.split('/').pop() || 'index.html';
+      const pathSegments = path.split('/').filter(Boolean);
       const isInPagesFolder = path.includes('/pages/');
       const isInProjectsFolder = path.includes('/projects/');
       
+      // Detect current page from folder structure
+      let currentPage = '';
+      if (isInPagesFolder) {
+        // pages/projects/ or pages/projects/index.html -> 'projects'
+        const pagesIndex = pathSegments.indexOf('pages');
+        if (pagesIndex >= 0 && pathSegments[pagesIndex + 1]) {
+          currentPage = pathSegments[pagesIndex + 1];
+        }
+      } else if (path === '/' || path.endsWith('/index.html') || pathSegments.length === 0) {
+        currentPage = 'home';
+      }
+      
       let homeHref, pagesPrefix;
       if (isInPagesFolder) {
-        homeHref = '../index.html';
-        pagesPrefix = '';
+        // Inside pages/*/index.html - go up two levels
+        homeHref = '../../';
+        pagesPrefix = '../';
       } else if (isInProjectsFolder) {
-        homeHref = '../../index.html';
+        // Inside projects/* - go up appropriate levels
+        homeHref = '../../';
         pagesPrefix = '../../pages/';
       } else {
-        homeHref = 'index.html';
+        // At root
+        homeHref = './';
         pagesPrefix = 'pages/';
       }
 
       const links = [
-        { href: homeHref, page: 'index.html', label: 'Home', icon: this.getIcon('home') },
-        { href: pagesPrefix + 'projects.html', page: 'projects.html', label: 'Projects', icon: this.getIcon('projects') },
-        { href: pagesPrefix + 'lab.html', page: 'lab.html', label: 'Lab', icon: this.getIcon('lab') },
-        { href: pagesPrefix + 'dev-os.html', page: 'dev-os.html', label: 'Dev OS', icon: this.getIcon('devos') },
-        { href: pagesPrefix + 'hire.html', page: 'hire.html', label: 'Hire Me', icon: this.getIcon('contact') }
+        { href: homeHref, page: 'home', label: 'Home', icon: this.getIcon('home') },
+        { href: pagesPrefix + 'projects/', page: 'projects', label: 'Projects', icon: this.getIcon('projects') },
+        { href: pagesPrefix + 'lab/', page: 'lab', label: 'Lab', icon: this.getIcon('lab') },
+        { href: pagesPrefix + 'dev-os/', page: 'dev-os', label: 'Dev OS', icon: this.getIcon('devos') },
+        { href: pagesPrefix + 'hire/', page: 'hire', label: 'Hire Me', icon: this.getIcon('contact') }
       ];
 
       return links.map(link => `

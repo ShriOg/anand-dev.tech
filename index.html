@@ -21,684 +21,74 @@
   <link rel="stylesheet" href="assets/css/zoom-transitions.css">
 </head>
 <body class="page">
-  <!-- Navigation -->
+  <!-- Navigation - Content injected from content.json -->
   <nav class="nav">
     <div class="nav__inner">
-      <a href="index.html" class="nav__logo">anand<span>.</span>dev</a>
+      <a href="./" class="nav__logo" data-content="logo"></a>
       <button class="nav__toggle" aria-label="Toggle menu">
         <span></span>
         <span></span>
         <span></span>
       </button>
-      <div class="nav__links">
-        <a href="index.html" class="nav__link nav__link--active">Home</a>
-        <a href="pages/projects.html" class="nav__link">Projects</a>
-        <a href="pages/lab.html" class="nav__link">Lab</a>
-        <a href="pages/dev-os.html" class="nav__link">Dev OS</a>
-        <a href="pages/hire.html" class="nav__link">Hire Me</a>
+      <div class="nav__links" data-content="nav-links">
+        <!-- Navigation links injected dynamically -->
       </div>
     </div>
   </nav>
 
-  <!-- Hero Section -->
+  <!-- Hero Section - Content injected from content.json -->
   <section class="hero">
     <div class="hero__bg">
       <canvas id="particles-canvas"></canvas>
     </div>
     <div class="container">
       <div class="hero__content">
-        <div class="hero__eyebrow">Available for projects</div>
+        <div class="hero__eyebrow" data-content="hero-eyebrow"></div>
         <h1 class="hero__title">
-          <span>Anand Shukla</span>
+          <span data-content="hero-title"></span>
         </h1>
-        <p class="hero__subtitle">
-          Developer building systems that think. Focused on Python, computer vision, and making complex things feel simple.
-        </p>
-        <p class="hero__philosophy">
-          Build to understand. Ship to learn. Document everything.
-        </p>
+        <p class="hero__subtitle" data-content="hero-subtitle"></p>
+        <p class="hero__philosophy" data-content="hero-philosophy"></p>
         <div class="hero__cta">
-          <a href="pages/projects.html" class="btn btn--primary">View Projects</a>
-          <a href="pages/hire.html" class="btn btn--secondary">Work With Me</a>
+          <a href="#" class="btn btn--primary" data-content="hero-cta-primary"></a>
+          <a href="#" class="btn btn--secondary" data-content="hero-cta-secondary"></a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Featured Projects -->
+  <!-- Featured Projects - Content injected from content.json -->
   <section class="featured-projects">
     <div class="container">
       <div class="featured-projects__header reveal">
-        <span class="featured-projects__eyebrow">Featured Work</span>
-        <h2 class="featured-projects__title">Selected Projects</h2>
+        <span class="featured-projects__eyebrow" data-content="featured-eyebrow"></span>
+        <h2 class="featured-projects__title" data-content="featured-title"></h2>
       </div>
 
-      <!-- Featured Projects Grid - Uses shared CardFocusSystem -->
-      <div class="focus-cards-grid featured-grid">
-        
-        <!-- Card 1: AI Desktop Assistant -->
-        <article class="focus-card reveal" id="ai-desktop-assistant" data-focus-id="ai-desktop-assistant" data-page-url="pages/ai-assistant.html">
-          <div class="focus-card__preview">
-            <div class="focus-card__preview-visual">
-              <canvas data-preview="grid"></canvas>
-            </div>
-          </div>
-          <div class="focus-card__body">
-            <span class="focus-card__tag">Python / NLP</span>
-            <h2 class="focus-card__title">AI Desktop Assistant</h2>
-            <p class="focus-card__description">
-              A modular voice-controlled assistant with intent parsing, context awareness, and cross-platform adapters.
-            </p>
-            <div class="focus-card__meta">
-              <span class="focus-card__meta-item">Timeline: <span>3 months</span></span>
-              <span class="focus-card__meta-item">Role: <span>Solo Developer</span></span>
-            </div>
-            <div class="focus-card__actions">
-              <a href="#" class="action-btn action-btn--primary action-btn--disabled" aria-disabled="true" tabindex="-1">
-                <span class="action-btn__icon"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></span>
-                View Live
-              </a>
-              <a href="https://github.com/ShriOg/anand-dev.tech/tree/main/projects/ai-assistant" target="_blank" rel="noopener noreferrer" class="action-btn action-btn--external">
-                <span class="action-btn__icon"><svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></span>
-                View Source
-              </a>
-            </div>
-          </div>
-          <div class="focus-card__arrow">→</div>
-
-          <!-- Hidden content template for overlay -->
-          <template class="focus-card__content-template">
-            <header class="focus-overlay__header">
-              <div class="focus-overlay__meta">
-                <div class="focus-overlay__meta-item">
-                  <span class="focus-overlay__meta-label">Timeline</span>
-                  <span class="focus-overlay__meta-value">3 months</span>
-                </div>
-                <div class="focus-overlay__meta-item">
-                  <span class="focus-overlay__meta-label">Role</span>
-                  <span class="focus-overlay__meta-value">Solo Developer</span>
-                </div>
-                <div class="focus-overlay__meta-item">
-                  <span class="focus-overlay__meta-label">Stack</span>
-                  <span class="focus-overlay__meta-value">Python, NLP</span>
-                </div>
-              </div>
-              <h2 class="focus-overlay__title">AI Desktop Assistant</h2>
-              <p class="focus-overlay__summary">
-                Building a voice-controlled assistant that actually understands context 
-                and executes system commands across Windows, macOS, and Linux.
-              </p>
-              <div class="focus-overlay__actions">
-                <a href="#" class="action-btn action-btn--primary action-btn--disabled" aria-disabled="true" tabindex="-1">
-                  <span class="action-btn__icon"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></span>
-                  View Live Demo
-                </a>
-                <a href="https://github.com/ShriOg/anand-dev.tech/tree/main/projects/ai-assistant" target="_blank" rel="noopener noreferrer" class="action-btn action-btn--external">
-                  <span class="action-btn__icon"><svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></span>
-                  View Source on GitHub
-                </a>
-              </div>
-            </header>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">Problem Statement</h3>
-              <div class="focus-overlay__section-content">
-                <p>
-                  Existing voice assistants are either cloud-dependent, platform-locked, 
-                  or require complex setup. I wanted something that could run locally, 
-                  understand natural variations of commands, and actually control my computer.
-                </p>
-                <p>
-                  The core challenge: How do you map fuzzy human language to precise system commands 
-                  while maintaining context across a conversation?
-                </p>
-              </div>
-            </section>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">Constraints</h3>
-              <div class="focus-overlay__section-content">
-                <ul>
-                  <li>Must run entirely offline after initial setup</li>
-                  <li>Cross-platform support (Windows, macOS, Linux)</li>
-                  <li>Response time under 500ms for common commands</li>
-                  <li>Extensible action system without code changes</li>
-                  <li>No external API dependencies for core functionality</li>
-                </ul>
-              </div>
-            </section>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">Architecture</h3>
-              <div class="focus-overlay__section-content">
-                <div class="architecture-diagram">
-                  <div class="architecture-diagram__title">System Overview</div>
-                  <div class="architecture-diagram__content">
-Voice Input --> Speech-to-Text --> Intent Parser --> Router
-                                                       |
-                                        +--------------+--------------+
-                                        |              |              |
-                                    Context       Action Schema    Adapter
-                                    Manager       Validator       (OS-specific)
-                                        |              |              |
-                                        +--------------+--------------+
-                                                       |
-                                                   Executor --> System</div>
-                </div>
-                <p>
-                  The key insight was separating intent parsing from action execution. 
-                  The router maintains conversation context while the adapters handle 
-                  platform-specific implementations.
-                </p>
-              </div>
-            </section>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">Tradeoffs</h3>
-              <div class="focus-overlay__section-content">
-                <table class="tradeoff-table">
-                  <thead>
-                    <tr>
-                      <th>Decision</th>
-                      <th>Benefit</th>
-                      <th>Cost</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>Local-first processing</td>
-                      <td>Privacy, offline capability</td>
-                      <td>Limited NLP accuracy vs cloud</td>
-                    </tr>
-                    <tr>
-                      <td>Schema-based actions</td>
-                      <td>Type safety, validation</td>
-                      <td>More boilerplate per action</td>
-                    </tr>
-                    <tr>
-                      <td>Adapter pattern for OS</td>
-                      <td>Clean abstraction</td>
-                      <td>Maintenance across 3 platforms</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">What Failed</h3>
-              <div class="focus-overlay__section-content">
-                <p>
-                  <strong>First attempt at intent parsing:</strong> Started with regex patterns. 
-                  Worked for exact matches but completely broke with any variation. 
-                  "Open Chrome" worked, "launch chrome browser" didn't.
-                </p>
-                <p>
-                  <strong>Context management v1:</strong> Stored everything in a flat dictionary. 
-                  Memory grew unbounded and older context polluted new interactions.
-                </p>
-                <p>
-                  <strong>Windows adapter initial approach:</strong> Used subprocess for everything. 
-                  Some commands need COM objects, others need PowerShell. Unified interface was naive.
-                </p>
-              </div>
-            </section>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">Final Outcome</h3>
-              <div class="focus-overlay__section-content">
-                <ul>
-                  <li>Working assistant with 50+ supported commands</li>
-                  <li>Average response time: 180ms</li>
-                  <li>Intent recognition accuracy: ~85% on varied phrasing</li>
-                  <li>Clean plugin system for adding new actions</li>
-                  <li>Documented API for external integrations</li>
-                </ul>
-              </div>
-            </section>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">What I Would Improve</h3>
-              <div class="focus-overlay__section-content">
-                <ul>
-                  <li>Add lightweight local LLM option for better intent parsing</li>
-                  <li>Implement action chaining (e.g., "open browser and go to github")</li>
-                  <li>Better error recovery with suggested alternatives</li>
-                  <li>Visual feedback system for non-terminal usage</li>
-                </ul>
-              </div>
-            </section>
-
-            <div class="focus-overlay__tech-stack">
-              <span class="tech-stack__item">Python 3.11</span>
-              <span class="tech-stack__item">Pydantic</span>
-              <span class="tech-stack__item">SpeechRecognition</span>
-              <span class="tech-stack__item">pywin32</span>
-              <span class="tech-stack__item">subprocess</span>
-            </div>
-          </template>
-        </article>
-
-        <!-- Card 2: Gesture-Controlled Particle System -->
-        <article class="focus-card reveal reveal--delay-1" id="particle-system-gestures" data-focus-id="particle-system-gestures" data-page-url="projects/particle-system-gestures/index.html">
-          <div class="focus-card__preview">
-            <div class="focus-card__preview-visual">
-              <canvas data-preview="particles"></canvas>
-            </div>
-          </div>
-          <div class="focus-card__body">
-            <span class="focus-card__tag">JS / Canvas / MediaPipe</span>
-            <h2 class="focus-card__title">Gesture-Controlled Particles</h2>
-            <p class="focus-card__description">
-              Interactive particle system controlled by hand gestures using MediaPipe with real-time physics at 60fps.
-            </p>
-            <div class="focus-card__meta">
-              <span class="focus-card__meta-item">Timeline: <span>6 weeks</span></span>
-              <span class="focus-card__meta-item">Role: <span>Solo Developer</span></span>
-            </div>
-            <div class="focus-card__actions">
-              <a href="projects/particle-system-gestures/index.html" target="_blank" rel="noopener" class="action-btn action-btn--primary">
-                <span class="action-btn__icon"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></span>
-                View Live
-              </a>
-              <a href="https://github.com/ShriOg/particle-system-guestures" target="_blank" rel="noopener noreferrer" class="action-btn action-btn--external">
-                <span class="action-btn__icon"><svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></span>
-                View Source
-              </a>
-            </div>
-          </div>
-          <div class="focus-card__arrow">→</div>
-
-          <!-- Hidden content template for overlay -->
-          <template class="focus-card__content-template">
-            <header class="focus-overlay__header">
-              <div class="focus-overlay__meta">
-                <div class="focus-overlay__meta-item">
-                  <span class="focus-overlay__meta-label">Timeline</span>
-                  <span class="focus-overlay__meta-value">6 weeks</span>
-                </div>
-                <div class="focus-overlay__meta-item">
-                  <span class="focus-overlay__meta-label">Role</span>
-                  <span class="focus-overlay__meta-value">Solo Developer</span>
-                </div>
-                <div class="focus-overlay__meta-item">
-                  <span class="focus-overlay__meta-label">Stack</span>
-                  <span class="focus-overlay__meta-value">JS, Canvas, MediaPipe</span>
-                </div>
-              </div>
-              <h2 class="focus-overlay__title">Gesture-Controlled Particle System</h2>
-              <p class="focus-overlay__summary">
-                An interactive visual system where hand gestures control particle behavior 
-                in real-time. Exploring the intersection of computer vision and creative coding.
-              </p>
-              <div class="focus-overlay__actions">
-                <a href="projects/particle-system-gestures/index.html" target="_blank" rel="noopener" class="action-btn action-btn--primary action-btn--large">
-                  <span class="action-btn__icon"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></span>
-                  View Live Demo
-                </a>
-                <a href="https://github.com/ShriOg/particle-system-guestures" target="_blank" rel="noopener noreferrer" class="action-btn action-btn--external action-btn--large">
-                  <span class="action-btn__icon"><svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></span>
-                  View Source Code
-                </a>
-              </div>
-            </header>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">Problem Statement</h3>
-              <div class="focus-overlay__section-content">
-                <p>
-                  Most interactive demos use mouse/touch input. I wanted to explore how 
-                  gesture recognition could create more intuitive and expressive interactions.
-                </p>
-                <p>
-                  The challenge: MediaPipe runs at ~30fps for hand tracking, but smooth 
-                  particle animation needs 60fps. How do you bridge this gap without 
-                  visible stuttering?
-                </p>
-              </div>
-            </section>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">Constraints</h3>
-              <div class="focus-overlay__section-content">
-                <ul>
-                  <li>Must run in browser without plugins</li>
-                  <li>60fps rendering minimum</li>
-                  <li>Support 500+ simultaneous particles</li>
-                  <li>Gesture detection latency under 100ms perceived</li>
-                  <li>Graceful degradation on lower-end devices</li>
-                </ul>
-              </div>
-            </section>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">Architecture</h3>
-              <div class="focus-overlay__section-content">
-                <div class="architecture-diagram">
-                  <div class="architecture-diagram__title">Pipeline</div>
-                  <div class="architecture-diagram__content">
-Camera --> MediaPipe --> Gesture      --> Particle System
-           (30fps)     Interpreter        (60fps)
-                           |                  |
-                      Hand State         Physics Engine
-                      Interpolator       Spatial Hash
-                           |                  |
-                       Smoothed          Optimized
-                       Position          Collision</div>
-                </div>
-                <p>
-                  Key innovation: Position interpolation between MediaPipe frames. 
-                  The gesture interpreter predicts hand position for intermediate frames, 
-                  creating smooth 60fps interaction from 30fps tracking.
-                </p>
-              </div>
-            </section>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">Tradeoffs</h3>
-              <div class="focus-overlay__section-content">
-                <table class="tradeoff-table">
-                  <thead>
-                    <tr>
-                      <th>Decision</th>
-                      <th>Benefit</th>
-                      <th>Cost</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>Canvas 2D over WebGL</td>
-                      <td>Simpler code, wider support</td>
-                      <td>Particle limit ~800 vs thousands</td>
-                    </tr>
-                    <tr>
-                      <td>Position interpolation</td>
-                      <td>Smooth 60fps feel</td>
-                      <td>Slight prediction errors visible</td>
-                    </tr>
-                    <tr>
-                      <td>Spatial hashing</td>
-                      <td>O(n) collision detection</td>
-                      <td>Memory overhead for grid</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">What Failed</h3>
-              <div class="focus-overlay__section-content">
-                <p>
-                  <strong>Direct MediaPipe coordinates:</strong> Hand jitter made particles 
-                  shake uncontrollably. Needed velocity-based smoothing with configurable damping.
-                </p>
-                <p>
-                  <strong>Naive collision detection:</strong> O(n²) killed performance at 
-                  300+ particles. Spatial hashing brought it back to 60fps.
-                </p>
-                <p>
-                  <strong>Gesture recognition complexity:</strong> Started with 10 gestures. 
-                  Too many false positives. Reduced to 4 reliable gestures with clear visual states.
-                </p>
-              </div>
-            </section>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">Final Outcome</h3>
-              <div class="focus-overlay__section-content">
-                <ul>
-                  <li>Smooth 60fps with 500 particles</li>
-                  <li>4 gesture types: attract, repel, swirl, explode</li>
-                  <li>Perceived latency under 50ms</li>
-                  <li>Works on mobile with touch fallback</li>
-                  <li>Configurable physics parameters via UI</li>
-                </ul>
-              </div>
-            </section>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">What I Would Improve</h3>
-              <div class="focus-overlay__section-content">
-                <ul>
-                  <li>WebGL renderer for 10x particle count</li>
-                  <li>WebWorker for physics calculations</li>
-                  <li>Custom gesture training for user-defined interactions</li>
-                  <li>Audio-reactive particle behaviors</li>
-                </ul>
-              </div>
-            </section>
-
-            <div class="focus-overlay__tech-stack">
-              <span class="tech-stack__item">Vanilla JavaScript</span>
-              <span class="tech-stack__item">Canvas 2D</span>
-              <span class="tech-stack__item">MediaPipe Hands</span>
-              <span class="tech-stack__item">requestAnimationFrame</span>
-            </div>
-          </template>
-        </article>
-
-        <!-- Card 3: NowHang -->
-        <article class="focus-card reveal reveal--delay-2" id="nowhang" data-focus-id="nowhang">
-          <div class="focus-card__preview">
-            <div class="focus-card__preview-visual">
-              <canvas data-preview="waves"></canvas>
-            </div>
-          </div>
-          <div class="focus-card__body">
-            <span class="focus-card__tag">Full Stack / Real-time</span>
-            <h2 class="focus-card__title">NowHang</h2>
-            <p class="focus-card__description">
-              Spontaneous social coordination app for real-time hangout matching with smart availability features.
-            </p>
-            <div class="focus-card__meta">
-              <span class="focus-card__meta-item">Timeline: <span>Ongoing</span></span>
-              <span class="focus-card__meta-item">Role: <span>Lead Developer</span></span>
-            </div>
-            <div class="focus-card__actions">
-              <span class="action-btn action-btn--disabled" aria-disabled="true">
-                <span class="action-btn__icon"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></span>
-                Coming Soon
-              </span>
-              <a href="https://github.com/ShriOg/nowhang" target="_blank" rel="noopener noreferrer" class="action-btn action-btn--external">
-                <span class="action-btn__icon"><svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></span>
-                View Source
-              </a>
-            </div>
-          </div>
-          <div class="focus-card__arrow">→</div>
-
-          <!-- Hidden content template for overlay -->
-          <template class="focus-card__content-template">
-            <header class="focus-overlay__header">
-              <div class="focus-overlay__meta">
-                <div class="focus-overlay__meta-item">
-                  <span class="focus-overlay__meta-label">Timeline</span>
-                  <span class="focus-overlay__meta-value">Ongoing</span>
-                </div>
-                <div class="focus-overlay__meta-item">
-                  <span class="focus-overlay__meta-label">Role</span>
-                  <span class="focus-overlay__meta-value">Lead Developer</span>
-                </div>
-                <div class="focus-overlay__meta-item">
-                  <span class="focus-overlay__meta-label">Stack</span>
-                  <span class="focus-overlay__meta-value">Full Stack</span>
-                </div>
-              </div>
-              <h2 class="focus-overlay__title">NowHang</h2>
-              <p class="focus-overlay__summary">
-                A social coordination app that eliminates the friction of planning hangouts 
-                by matching real-time availability and interests.
-              </p>
-              <div class="focus-overlay__actions">
-                <span class="action-btn action-btn--disabled action-btn--large" aria-disabled="true">
-                  <span class="action-btn__icon"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg></span>
-                  Demo Coming Soon
-                </span>
-                <a href="https://github.com/ShriOg/nowhang" target="_blank" rel="noopener noreferrer" class="action-btn action-btn--external action-btn--large">
-                  <span class="action-btn__icon"><svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg></span>
-                  View Source Code
-                </a>
-              </div>
-            </header>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">Problem Statement</h3>
-              <div class="focus-overlay__section-content">
-                <p>
-                  Group chats devolve into endless "when are you free?" threads. 
-                  Calendar apps are for scheduled events, not spontaneous hangouts. 
-                  There's no good tool for "I'm free right now, who else is?"
-                </p>
-                <p>
-                  The challenge: Real-time availability matching with minimal user friction. 
-                  People won't open an app just to say they're free unless it's dead simple.
-                </p>
-              </div>
-            </section>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">Constraints</h3>
-              <div class="focus-overlay__section-content">
-                <ul>
-                  <li>One-tap availability broadcast</li>
-                  <li>Real-time matching (sub-second updates)</li>
-                  <li>Privacy-first: location only when explicitly shared</li>
-                  <li>Works with small friend groups (5-20 people)</li>
-                  <li>Minimal notification fatigue</li>
-                </ul>
-              </div>
-            </section>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">Architecture</h3>
-              <div class="focus-overlay__section-content">
-                <div class="architecture-diagram">
-                  <div class="architecture-diagram__title">Real-time Matching</div>
-                  <div class="architecture-diagram__content">
-Client (PWA) --> WebSocket --> Availability Pool
-                                     |
-                              Matching Engine
-                              (Interest + Time + Location)
-                                     |
-                              Push Notification
-                              Service</div>
-                </div>
-                <p>
-                  WebSocket connection stays alive when app is foregrounded. 
-                  Background sync handles availability expiration. 
-                  Matching runs on write, not polling.
-                </p>
-              </div>
-            </section>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">What Failed</h3>
-              <div class="focus-overlay__section-content">
-                <p>
-                  <strong>Activity categories v1:</strong> Too many options paralyzed users. 
-                  Reduced from 20 categories to 5 broad types with optional details.
-                </p>
-                <p>
-                  <strong>Always-on availability:</strong> Users forgot to turn it off, 
-                  leading to unwanted notifications. Added auto-expiry with adjustable duration.
-                </p>
-                <p>
-                  <strong>Group size assumptions:</strong> Designed for large networks initially. 
-                  Pivoted to close friends focus after user feedback showed that's what people wanted.
-                </p>
-              </div>
-            </section>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">Current Status</h3>
-              <div class="focus-overlay__section-content">
-                <ul>
-                  <li>MVP live with 50 beta users</li>
-                  <li>Average session: 12 seconds to broadcast availability</li>
-                  <li>Match rate: 34% of broadcasts result in a hangout</li>
-                  <li>Iterating on notification timing and matching algorithm</li>
-                </ul>
-              </div>
-            </section>
-
-            <section class="focus-overlay__section">
-              <h3 class="focus-overlay__section-title">What I Would Improve</h3>
-              <div class="focus-overlay__section-content">
-                <ul>
-                  <li>Smart suggestions based on past hangout patterns</li>
-                  <li>Calendar integration for automatic availability detection</li>
-                  <li>Group availability visualization</li>
-                  <li>Venue suggestions based on group location midpoint</li>
-                </ul>
-              </div>
-            </section>
-
-            <div class="focus-overlay__tech-stack">
-              <span class="tech-stack__item">React</span>
-              <span class="tech-stack__item">Node.js</span>
-              <span class="tech-stack__item">WebSocket</span>
-              <span class="tech-stack__item">PostgreSQL</span>
-              <span class="tech-stack__item">PWA</span>
-            </div>
-          </template>
-        </article>
-      </div>
-
-      <div class="reveal reveal--delay-3" style="text-align: center; margin-top: var(--space-12);">
-        <a href="pages/projects.html" class="btn btn--ghost">View All Projects</a>
+      <!-- Featured Projects Grid - Rendered dynamically from content.json -->
+      <div class="focus-cards-grid featured-grid" data-content="featured-projects">
+        <!-- Project cards injected dynamically -->
       </div>
     </div>
   </section>
 
-  <!-- Skills Section -->
+  <!-- Skills Section - Content injected from content.json -->
   <section class="skills-section">
     <div class="container">
-      <div class="skills-grid">
-        <div class="skill-category reveal">
-          <h3 class="skill-category__title">Languages</h3>
-          <div class="skill-category__list">
-            <span class="skill-tag">Python</span>
-            <span class="skill-tag">JavaScript</span>
-            <span class="skill-tag">TypeScript</span>
-            <span class="skill-tag">HTML/CSS</span>
-            <span class="skill-tag">SQL</span>
-          </div>
-        </div>
-        <div class="skill-category reveal reveal--delay-1">
-          <h3 class="skill-category__title">Domains</h3>
-          <div class="skill-category__list">
-            <span class="skill-tag">Computer Vision</span>
-            <span class="skill-tag">Machine Learning</span>
-            <span class="skill-tag">Systems Design</span>
-            <span class="skill-tag">Web Development</span>
-          </div>
-        </div>
-        <div class="skill-category reveal reveal--delay-2">
-          <h3 class="skill-category__title">Tools</h3>
-          <div class="skill-category__list">
-            <span class="skill-tag">Git</span>
-            <span class="skill-tag">VS Code</span>
-            <span class="skill-tag">Docker</span>
-            <span class="skill-tag">Linux</span>
-            <span class="skill-tag">MediaPipe</span>
-            <span class="skill-tag">OpenCV</span>
-          </div>
-        </div>
+      <div class="skills-grid" data-content="skills-grid">
+        <!-- Skill categories injected dynamically -->
       </div>
     </div>
   </section>
 
-  <!-- Footer -->
+  <!-- Footer - Content injected from content.json -->
   <footer class="footer">
     <div class="container">
       <div class="footer__inner">
-        <div class="footer__links">
-          <a href="https://github.com/ShriOg" class="footer__link" target="_blank" rel="noopener">GitHub</a>
-          <a href="https://linkedin.com/in/anandshukla" class="footer__link" target="_blank" rel="noopener">LinkedIn</a>
-          <a href="mailto:hello@anand.dev" class="footer__link">Email</a>
+        <div class="footer__links" data-content="footer-links">
+          <!-- Footer links injected dynamically -->
         </div>
-        <p class="footer__copyright"> 2025 Anand Shukla. Built with intention.</p>
+        <p class="footer__copyright" data-content="footer-copyright"></p>
       </div>
     </div>
   </footer>
@@ -706,14 +96,12 @@ Client (PWA) --> WebSocket --> Availability Pool
   <!-- Core Scripts -->
   <script src="assets/js/main.js"></script>
   <script src="assets/js/mobile.js"></script>
-  <!-- Data-driven System -->
-  <script src="assets/js/data-loader.js"></script>
-  <script src="assets/js/renderer.js"></script>
-  <script src="assets/js/router.js"></script>
+  <!-- Content Loader - Single Source of Truth -->
+  <script src="assets/js/content-loader.js"></script>
+  <!-- Interactions & Transitions -->
   <script src="assets/js/transitions.js"></script>
   <script src="assets/js/gestures.js"></script>
   <script src="assets/js/app.js"></script>
-  <!-- Page Zoom Transitions -->
   <script src="assets/js/page-zoom.js"></script>
 </body>
 </html>

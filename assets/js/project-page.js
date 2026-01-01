@@ -29,27 +29,32 @@
   function isProjectPage() {
     const path = window.location.pathname;
     // Check if we're on a project detail page (not the projects list)
-    return path.includes('/pages/') && 
-           !path.includes('projects.html') && 
-           !path.includes('lab.html') &&
-           !path.includes('hire.html') &&
-           !path.includes('contact.html') &&
-           !path.includes('dev-os.html');
+    // With folder-based routing: /pages/ai-assistant/ is a project page
+    // but /pages/projects/, /pages/lab/, etc. are NOT
+    const mainPages = ['projects', 'lab', 'hire', 'contact', 'dev-os', 'hidden'];
+    const pathSegments = path.split('/').filter(Boolean);
+    
+    if (!path.includes('/pages/')) return false;
+    
+    const pagesIndex = pathSegments.indexOf('pages');
+    const pageName = pathSegments[pagesIndex + 1];
+    
+    return pageName && !mainPages.includes(pageName);
   }
 
   function getBackUrl() {
     // Try to get referrer first
     const referrer = document.referrer;
     if (referrer && referrer.includes(window.location.host)) {
-      // Check if referrer is projects page
-      if (referrer.includes('projects.html') || referrer.includes('index.html') || !referrer.includes('/pages/')) {
+      // Check if referrer is projects page or home
+      if (referrer.includes('/projects') || referrer.endsWith('/') || !referrer.includes('/pages/')) {
         return referrer;
       }
     }
     
     // Default to projects page
     const isInPages = window.location.pathname.includes('/pages/');
-    return isInPages ? 'projects.html' : 'pages/projects.html';
+    return isInPages ? '../projects/' : 'pages/projects/';
   }
 
   // ════════════════════════════════════════════════════════════════════════════

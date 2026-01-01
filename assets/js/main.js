@@ -654,10 +654,26 @@
   // 
   // ACTIVE NAV LINK
   // 
-  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+  const path = window.location.pathname;
+  const pathSegments = path.split('/').filter(Boolean);
+  let currentPage = 'home';
+  
+  // Detect current page from folder-based URL
+  if (path.includes('/pages/')) {
+    const pagesIndex = pathSegments.indexOf('pages');
+    if (pagesIndex >= 0 && pathSegments[pagesIndex + 1]) {
+      currentPage = pathSegments[pagesIndex + 1];
+    }
+  } else if (pathSegments.length > 0 && pathSegments[pathSegments.length - 1].includes('.html')) {
+    currentPage = pathSegments[pathSegments.length - 1].replace('.html', '');
+  }
+  
   document.querySelectorAll('.nav__link').forEach(link => {
     const href = link.getAttribute('href');
-    if (href === currentPage || (currentPage === '' && href === 'index.html')) {
+    // Match folder-based URLs (e.g., href="../projects/" matches currentPage="projects")
+    const hrefPage = href.replace(/^\.\.\/|^\.\//g, '').replace(/\/$/, '').split('/').pop();
+    if (hrefPage === currentPage || 
+        (currentPage === 'home' && (href === './' || href === '../../' || href.endsWith('index.html')))) {
       link.classList.add('nav__link--active');
     }
   });

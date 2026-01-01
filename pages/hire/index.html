@@ -12,29 +12,29 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <!-- Modular CSS -->
-  <link rel="stylesheet" href="../assets/css/variables.css">
-  <link rel="stylesheet" href="../assets/css/base.css">
-  <link rel="stylesheet" href="../assets/css/layout.css">
-  <link rel="stylesheet" href="../assets/css/components.css">
-  <link rel="stylesheet" href="../assets/css/animations.css">
-  <link rel="stylesheet" href="../assets/css/responsive.css">
-  <link rel="stylesheet" href="../assets/css/zoom-transitions.css">
+  <link rel="stylesheet" href="../../assets/css/variables.css">
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/layout.css">
+  <link rel="stylesheet" href="../../assets/css/components.css">
+  <link rel="stylesheet" href="../../assets/css/animations.css">
+  <link rel="stylesheet" href="../../assets/css/responsive.css">
+  <link rel="stylesheet" href="../../assets/css/zoom-transitions.css">
 </head>
 <body class="page">
   <nav class="nav">
     <div class="nav__inner">
-      <a href="../index.html" class="nav__logo">anand<span>.</span>dev</a>
+      <a href="../../" class="nav__logo">anand<span>.</span>dev</a>
       <button class="nav__toggle" aria-label="Toggle menu">
         <span></span>
         <span></span>
         <span></span>
       </button>
       <div class="nav__links">
-        <a href="../index.html" class="nav__link">Home</a>
-        <a href="projects.html" class="nav__link">Projects</a>
-        <a href="lab.html" class="nav__link">Lab</a>
-        <a href="dev-os.html" class="nav__link">Dev OS</a>
-        <a href="hire.html" class="nav__link nav__link--active">Hire Me</a>
+        <a href="../../" class="nav__link">Home</a>
+        <a href="../../projects/" class="nav__link">Projects</a>
+        <a href="../lab/" class="nav__link">Lab</a>
+        <a href="../dev-os/" class="nav__link">Dev OS</a>
+        <a href="../hire/" class="nav__link nav__link--active">Hire Me</a>
       </div>
     </div>
   </nav>
@@ -200,7 +200,7 @@
               <h4 style="font-size: var(--text-base); font-weight: 600; margin-bottom: var(--space-2);">Continuous Learning</h4>
               <p style="font-size: var(--text-sm); color: var(--text-secondary);">
                 Technology moves fast. I keep up by building, breaking, and documenting. 
-                Check my <a href="dev-os.html" style="color: var(--accent-primary);">Dev OS</a> for what I'm currently learning.
+                Check my <a href="../dev-os/" style="color: var(--accent-primary);">Dev OS</a> for what I'm currently learning.
               </p>
             </div>
           </div>
@@ -261,14 +261,13 @@
   </footer>
 
   <!-- Core Scripts -->
-  <script src="../assets/js/main.js"></script>
-  <script src="../assets/js/mobile.js"></script>
-  <!-- Data-driven System -->
-  <script src="../assets/js/data-loader.js"></script>
-  <script src="../assets/js/renderer.js"></script>
-  <script src="../assets/js/router.js"></script>
-  <script src="../assets/js/transitions.js"></script>
-  <script src="../assets/js/gestures.js"></script>
-  <script src="../assets/js/app.js"></script>
+  <script src="../../assets/js/main.js"></script>
+  <script src="../../assets/js/mobile.js"></script>
+  <!-- Content Loader - Single Source of Truth -->
+  <script src="../../assets/js/content-loader.js"></script>
+  <!-- Interactions & Transitions -->
+  <script src="../../assets/js/transitions.js"></script>
+  <script src="../../assets/js/gestures.js"></script>
+  <script src="../../assets/js/app.js"></script>
 </body>
 </html>
