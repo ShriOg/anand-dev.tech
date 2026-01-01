@@ -7,30 +7,14 @@
    BASE MOBILE STYLES (Default - Mobile First)
    ══════════════════════════════════════════════════════════════════════════ */
 
+/* On mobile, nav__links is hidden - mobile.js creates bottom sheet navigation */
 .nav__links {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  flex-direction: column;
-  gap: 0;
-  background: var(--bg-glass);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border-primary);
-  padding: var(--space-4);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-10px);
-  transition: opacity var(--duration-fast) var(--ease-out),
-              visibility var(--duration-fast) var(--ease-out),
-              transform var(--duration-fast) var(--ease-out);
+  display: none;
 }
 
+/* On mobile, hide nav__links--open state too (bottom sheet is used instead) */
 .nav__links--open {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
+  display: none;
 }
 
 .nav__link {

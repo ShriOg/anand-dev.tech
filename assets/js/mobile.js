@@ -97,17 +97,33 @@
     },
 
     getNavLinks() {
-      const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+      const path = window.location.pathname;
+      const currentPage = path.split('/').pop() || 'index.html';
+      const isInPagesFolder = path.includes('/pages/');
+      const isInProjectsFolder = path.includes('/projects/');
+      
+      let homeHref, pagesPrefix;
+      if (isInPagesFolder) {
+        homeHref = '../index.html';
+        pagesPrefix = '';
+      } else if (isInProjectsFolder) {
+        homeHref = '../../index.html';
+        pagesPrefix = '../../pages/';
+      } else {
+        homeHref = 'index.html';
+        pagesPrefix = 'pages/';
+      }
+
       const links = [
-        { href: 'index.html', label: 'Home', icon: this.getIcon('home') },
-        { href: 'projects.html', label: 'Projects', icon: this.getIcon('projects') },
-        { href: 'lab.html', label: 'Lab', icon: this.getIcon('lab') },
-        { href: 'dev-os.html', label: 'Dev OS', icon: this.getIcon('devos') },
-        { href: 'hire.html', label: 'Hire Me', icon: this.getIcon('contact') }
+        { href: homeHref, page: 'index.html', label: 'Home', icon: this.getIcon('home') },
+        { href: pagesPrefix + 'projects.html', page: 'projects.html', label: 'Projects', icon: this.getIcon('projects') },
+        { href: pagesPrefix + 'lab.html', page: 'lab.html', label: 'Lab', icon: this.getIcon('lab') },
+        { href: pagesPrefix + 'dev-os.html', page: 'dev-os.html', label: 'Dev OS', icon: this.getIcon('devos') },
+        { href: pagesPrefix + 'hire.html', page: 'hire.html', label: 'Hire Me', icon: this.getIcon('contact') }
       ];
 
       return links.map(link => `
-        <a href="${link.href}" class="mobile-bottom-sheet__link ${link.href === currentPage ? 'mobile-bottom-sheet__link--active' : ''}">
+        <a href="${link.href}" class="mobile-bottom-sheet__link ${link.page === currentPage ? 'mobile-bottom-sheet__link--active' : ''}">
           <span class="mobile-bottom-sheet__link-icon">${link.icon}</span>
           ${link.label}
         </a>

@@ -41,13 +41,18 @@
     }
   }, { passive: true });
 
+  // Only enable hamburger menu toggle on non-mobile (mobile.js handles mobile nav via bottom sheet)
+  const isMobileDevice = () => window.innerWidth <= 768;
+  
   navToggle?.addEventListener('click', function() {
+    if (isMobileDevice()) return; // mobile.js handles mobile navigation
     this.classList.toggle('nav__toggle--active');
     navLinks?.classList.toggle('nav__links--open');
   });
 
   document.querySelectorAll('.nav__link').forEach(link => {
     link.addEventListener('click', () => {
+      if (isMobileDevice()) return;
       navToggle?.classList.remove('nav__toggle--active');
       navLinks?.classList.remove('nav__links--open');
     });
