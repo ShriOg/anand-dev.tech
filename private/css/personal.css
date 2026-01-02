@@ -679,6 +679,8 @@ html, body {
   border-radius: var(--radius-lg);
   background: var(--bg-elevated);
   border: 1px solid var(--border-subtle);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .her-message.user .her-message-content {
@@ -697,6 +699,7 @@ html, body {
   color: var(--text-primary);
   white-space: pre-wrap;
   word-break: break-word;
+  text-shadow: none;
 }
 
 .her-message-time {
@@ -1158,6 +1161,13 @@ html, body {
   
   .her-message {
     max-width: 90%;
+  }
+  
+  .her-message-text,
+  .her-message-bubble {
+    text-shadow: none !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   .her-toast-container {
@@ -1986,12 +1996,16 @@ html, body {
   line-height: 1.6;
   word-break: break-word;
   white-space: pre-wrap;
+  text-shadow: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .her-message-user .her-message-bubble {
   background: var(--her-accent);
   color: #0a0a0a;
   border-bottom-right-radius: 4px;
+  text-shadow: none;
 }
 
 .her-message-assistant .her-message-bubble {
@@ -1999,6 +2013,7 @@ html, body {
   border: 1px solid rgba(232, 164, 184, 0.2);
   color: var(--text-primary);
   border-bottom-left-radius: 4px;
+  text-shadow: none;
 }
 
 .her-message-bubble.error {
@@ -2254,6 +2269,24 @@ html, body {
   color: var(--text-primary);
 }
 
+.her-chat-viewer-platform-badge {
+  font-size: var(--text-xs);
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+}
+
+.platform-whatsapp .her-chat-viewer-platform-badge {
+  background: rgba(37, 211, 102, 0.15);
+  color: #25d366;
+}
+
+.platform-instagram .her-chat-viewer-platform-badge {
+  background: rgba(225, 48, 108, 0.15);
+  color: #e1306c;
+}
+
 .her-chat-viewer-toggle {
   display: flex;
   align-items: center;
@@ -2334,12 +2367,89 @@ html, body {
   font-size: var(--text-sm);
 }
 
-/* WhatsApp Style Messages */
-.her-chat-viewer-whatsapp .her-chat-msg {
+/* Generic Message Bubble Base */
+.her-chat-msg {
   max-width: 75%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 12px;
+  font-size: var(--text-sm);
+  line-height: 1.4;
   animation: none;
+  text-shadow: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+/* Role-based alignment - LEFT */
+.msg-left {
+  align-self: flex-start;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border-bottom-left-radius: 4px;
+}
+
+/* Role-based alignment - RIGHT */
+.msg-right {
+  align-self: flex-end;
+  background: var(--her-accent-subtle);
+  color: var(--text-primary);
+  border-bottom-right-radius: 4px;
+}
+
+/* Platform: WhatsApp */
+.platform-whatsapp .her-chat-msg {
+  border-radius: 8px;
+}
+
+.platform-whatsapp .msg-left {
+  background: #202c33;
+  color: #e9edef;
+  border-bottom-left-radius: 2px;
+}
+
+.platform-whatsapp .msg-right {
+  background: #005c4b;
+  color: #e9edef;
+  border-bottom-right-radius: 2px;
+}
+
+.platform-whatsapp .her-chat-msg-time {
+  display: none;
+}
+
+/* Platform: Instagram */
+.platform-instagram .her-chat-msg {
+  border-radius: 22px;
+  padding: var(--space-3) var(--space-4);
+}
+
+.platform-instagram .msg-left {
+  background: #262626;
+  color: #fafafa;
+}
+
+.platform-instagram .msg-right {
+  background: linear-gradient(135deg, #405de6, #5851db, #833ab4, #c13584, #e1306c);
+  color: white;
+}
+
+.platform-instagram .her-chat-msg-time {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  text-align: right;
+}
+
+/* Message grouping */
+.her-chat-msg.group-start {
+  margin-top: var(--space-3);
+}
+
+.her-chat-msg-content {
+  word-break: break-word;
+}
+
+/* Legacy classes for backward compatibility */
 .wa-bubble {
   padding: var(--space-2) var(--space-3);
   border-radius: 8px;
@@ -2363,16 +2473,7 @@ html, body {
 }
 
 .wa-bubble .her-chat-msg-time {
-  font-size: 10px;
-  color: rgba(233, 237, 239, 0.5);
-  margin-top: 2px;
-  text-align: right;
-}
-
-/* Instagram Style Messages */
-.her-chat-viewer-instagram .her-chat-msg {
-  max-width: 70%;
-  animation: none;
+  display: none;
 }
 
 .ig-bubble {
@@ -2395,16 +2496,9 @@ html, body {
 }
 
 .ig-bubble .her-chat-msg-time {
-  display: none;
-}
-
-/* Message grouping */
-.her-chat-msg.group-start {
-  margin-top: var(--space-3);
-}
-
-.her-chat-msg-content {
-  word-break: break-word;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 4px;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -2419,6 +2513,22 @@ html, body {
 .her-import-tabs {
   display: flex;
   gap: var(--space-2);
+}
+
+.her-import-method-btns {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.her-btn-file {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+}
+
+.her-btn-file svg {
+  flex-shrink: 0;
 }
 
 .her-import-tab {
@@ -2508,6 +2618,105 @@ html, body {
 .her-btn-secondary:hover {
   background: var(--bg-hover);
   color: var(--text-primary);
+}
+
+.her-select {
+  padding: var(--space-3);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+.her-select:focus {
+  outline: none;
+  border-color: var(--her-accent-dim);
+}
+
+.her-import-step-indicator {
+  display: flex;
+  gap: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+.her-step {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  padding: var(--space-2) 0;
+}
+
+.her-step.active {
+  color: var(--her-accent);
+  font-weight: 500;
+}
+
+.her-step.completed {
+  color: var(--success);
+}
+
+.her-import-summary {
+  display: flex;
+  gap: var(--space-4);
+  padding: var(--space-3);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+}
+
+.her-import-stat {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.her-role-preview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  margin-top: var(--space-2);
+}
+
+.her-role-preview-left,
+.her-role-preview-right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.her-role-label {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.her-preview-bubble {
+  padding: var(--space-2) var(--space-3);
+  border-radius: 12px;
+  font-size: var(--text-sm);
+  max-width: 120px;
+}
+
+.her-preview-bubble.left {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  align-self: flex-start;
+}
+
+.her-preview-bubble.right {
+  background: var(--her-accent-subtle);
+  color: var(--text-primary);
+  align-self: flex-end;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -2657,6 +2866,16 @@ html, body {
   .her-chat-viewer {
     min-height: 350px;
     margin-top: var(--space-4);
+  }
+  
+  .her-chat-msg {
+    max-width: 85%;
+    text-shadow: none !important;
+  }
+  
+  .platform-whatsapp .her-chat-msg,
+  .platform-instagram .her-chat-msg {
+    text-shadow: none !important;
   }
   
   /* Training form mobile */

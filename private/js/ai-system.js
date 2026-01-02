@@ -1207,13 +1207,14 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
 
 // ═══════════════════════════════════════════════════════════
 // IMPORTED CHAT VIEWER SYSTEM
-// WhatsApp + Instagram DM Style Chat Viewer
+// Generic, Data-Driven Chat Viewer
+// Supports ANY WhatsApp or Instagram chat import
 // READ-ONLY - For training reference only
 // ═══════════════════════════════════════════════════════════
 const ImportedChatViewer = {
   chats: [],
   currentChat: null,
-  viewerStyle: 'whatsapp', // 'whatsapp' or 'instagram'
+  senderMapping: {},
   
   async init() {
     if (typeof PSDatabase !== 'undefined') {
@@ -1224,14 +1225,7 @@ const ImportedChatViewer = {
   },
   
   bindEvents() {
-    // Import chat button
     document.getElementById('importChatBtn')?.addEventListener('click', () => this.showImportModal());
-    
-    // Style toggle
-    document.getElementById('chatViewerStyleToggle')?.addEventListener('change', (e) => {
-      this.viewerStyle = e.target.checked ? 'instagram' : 'whatsapp';
-      this.renderCurrentChat();
-    });
   },
   
   async loadChats() {
@@ -1277,7 +1271,6 @@ const ImportedChatViewer = {
       </div>
     `).join('');
     
-    // Bind events
     grid.querySelectorAll('.her-imported-chat-card').forEach(card => {
       card.addEventListener('click', (e) => {
         if (!e.target.classList.contains('her-chat-card-delete')) {
@@ -1294,8 +1287,56 @@ const ImportedChatViewer = {
     });
   },
   
+  detectParticipants(messages) {
+    const senders = new Map();
+    messages.forEach(msg => {
+      const sender = msg.senderName || msg.sender || 'unknown';
+      senders.set(sender, (senders.get(sender) || 0) + 1);
+    });
+    return Array.from(senders.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([name]) => name);
+  },
+  
+  buildSenderMapping(messages) {
+    const participants = this.detectParticipants(messages);
+    const mapping = {};
+    
+    const userIndicators = ['you', 'me', 'user'];
+    let rightAssigned = false;
+    
+    participants.forEach((name, index) => {
+      const lowerName = name.toLowerCase();
+      const isUser = userIndicators.some(ind => lowerName === ind || lowerName.includes(ind));
+      
+      if (isUser && !rightAssigned) {
+        mapping[name] = 'right';
+        rightAssigned = true;
+      } else if (index === 0 && !rightAssigned) {
+        mapping[name] = 'right';
+        rightAssigned = true;
+      } else {
+        mapping[name] = 'left';
+      }
+    });
+    
+    return mapping;
+  },
+  
+  getSenderRole(msg) {
+    const sender = msg.senderName || msg.sender || 'unknown';
+    return this.senderMapping[sender] || 'left';
+  },
+  
   selectChat(chatId) {
     this.currentChat = this.chats.find(c => c.id === chatId);
+    if (this.currentChat) {
+      if (this.currentChat.roleMapping) {
+        this.senderMapping = this.currentChat.roleMapping;
+      } else if (this.currentChat.messages) {
+        this.senderMapping = this.buildSenderMapping(this.currentChat.messages);
+      }
+    }
     this.renderChatsList();
     this.renderCurrentChat();
   },
@@ -1308,62 +1349,45 @@ const ImportedChatViewer = {
     }
     
     const messages = this.currentChat.messages || [];
-    const isWhatsApp = this.viewerStyle === 'whatsapp';
+    const platform = this.currentChat.platform || 'whatsapp';
     
-    viewer.className = `her-chat-viewer her-chat-viewer-${this.viewerStyle}`;
+    viewer.className = `her-chat-viewer platform-${platform}`;
     
     viewer.innerHTML = `
       <div class="her-chat-viewer-header">
         <span class="her-chat-viewer-name">${this.escapeHtml(this.currentChat.name || 'Chat')}</span>
-        <div class="her-chat-viewer-toggle">
-          <span class="${!isWhatsApp ? 'active' : ''}">IG</span>
-          <label class="her-toggle">
-            <input type="checkbox" id="chatViewerStyleToggle" ${!isWhatsApp ? 'checked' : ''}>
-            <span class="her-toggle-slider"></span>
-          </label>
-          <span class="${isWhatsApp ? 'active' : ''}">WA</span>
-        </div>
+        <span class="her-chat-viewer-platform-badge">${platform === 'whatsapp' ? 'WhatsApp' : 'Instagram'}</span>
       </div>
       <div class="her-chat-viewer-messages">
-        ${this.renderMessages(messages, isWhatsApp)}
+        ${this.renderMessages(messages, platform)}
       </div>
     `;
     
-    // Re-bind style toggle
-    document.getElementById('chatViewerStyleToggle')?.addEventListener('change', (e) => {
-      this.viewerStyle = e.target.checked ? 'whatsapp' : 'instagram';
-      this.renderCurrentChat();
-    });
-    
-    // Auto-scroll to bottom
     const messagesEl = viewer.querySelector('.her-chat-viewer-messages');
     if (messagesEl) {
       messagesEl.scrollTop = messagesEl.scrollHeight;
     }
   },
   
-  renderMessages(messages, isWhatsApp) {
+  renderMessages(messages, platform) {
     if (!messages || messages.length === 0) {
       return '<p class="her-chat-viewer-empty">No messages</p>';
     }
     
-    let lastSender = null;
+    const isWhatsApp = platform === 'whatsapp';
+    let lastRole = null;
     
-    return messages.map((msg, idx) => {
-      const isUser = msg.sender === 'user' || msg.isUser;
-      const isGroupStart = msg.sender !== lastSender;
-      lastSender = msg.sender;
+    return messages.map((msg) => {
+      const role = this.getSenderRole(msg);
+      const isGroupStart = role !== lastRole;
+      lastRole = role;
       
-      const bubbleClass = isWhatsApp 
-        ? `wa-bubble ${isUser ? 'wa-user' : 'wa-other'}`
-        : `ig-bubble ${isUser ? 'ig-user' : 'ig-other'}`;
-      
-      const groupClass = isGroupStart ? 'group-start' : '';
+      const showTimestamp = !isWhatsApp && msg.timestamp;
       
       return `
-        <div class="her-chat-msg ${bubbleClass} ${groupClass}">
+        <div class="her-chat-msg msg-${role}${isGroupStart ? ' group-start' : ''}">
           <div class="her-chat-msg-content">${this.escapeHtml(msg.content || msg.text || '')}</div>
-          ${msg.timestamp ? `<span class="her-chat-msg-time">${this.formatMessageTime(msg.timestamp)}</span>` : ''}
+          ${showTimestamp ? `<span class="her-chat-msg-time">${this.formatMessageTime(msg.timestamp)}</span>` : ''}
         </div>
       `;
     }).join('');
@@ -1376,51 +1400,97 @@ const ImportedChatViewer = {
     
     if (!modal || !body) return;
     
+    this.importState = {
+      step: 1,
+      platform: 'whatsapp',
+      name: '',
+      rawText: '',
+      messages: [],
+      participants: [],
+      roleMapping: {}
+    };
+    
     title.textContent = 'Import Chat';
+    this.renderImportStep1(body, modal);
+    modal.classList.add('active');
+  },
+  
+  renderImportStep1(body, modal) {
     body.innerHTML = `
       <div class="her-import-form">
+        <div class="her-import-step-indicator">
+          <span class="her-step active">1. Paste Chat</span>
+          <span class="her-step">2. Assign Roles</span>
+        </div>
+        
         <div class="her-import-tabs">
-          <button class="her-import-tab active" data-platform="whatsapp">WhatsApp</button>
-          <button class="her-import-tab" data-platform="instagram">Instagram</button>
+          <button class="her-import-tab ${this.importState.platform === 'whatsapp' ? 'active' : ''}" data-platform="whatsapp">WhatsApp</button>
+          <button class="her-import-tab ${this.importState.platform === 'instagram' ? 'active' : ''}" data-platform="instagram">Instagram</button>
         </div>
         
         <div class="her-form-group">
           <label>Chat Name</label>
-          <input type="text" id="importChatName" class="her-input" placeholder="e.g., Our Chat">
+          <input type="text" id="importChatName" class="her-input" placeholder="e.g., Our Chat" value="${this.escapeHtml(this.importState.name)}">
         </div>
         
         <div class="her-form-group">
-          <label>Paste Chat Export</label>
-          <textarea id="importChatText" class="her-textarea" rows="10" 
-            placeholder="Paste your exported chat here...&#10;&#10;WhatsApp format:&#10;1/1/24, 10:30 AM - You: Hey!&#10;1/1/24, 10:31 AM - Her: Hiii!&#10;&#10;Instagram format:&#10;You: Hey there&#10;username: Hello!"></textarea>
+          <label>Import Method</label>
+          <div class="her-import-method-btns">
+            <button class="her-btn her-btn-secondary her-btn-file" id="selectFileBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+              Select from Device
+            </button>
+            <input type="file" id="importFileInput" accept=".txt,.text" style="display:none">
+          </div>
+        </div>
+        
+        <div class="her-form-group">
+          <label>Or Paste Chat Export</label>
+          <textarea id="importChatText" class="her-textarea" rows="8" 
+            placeholder="Paste your exported chat here...&#10;&#10;Format: DD/MM/YY, HH:MM am/pm - Name: Message&#10;&#10;Example:&#10;21/06/25, 12:47 pm - Person A: Hello!&#10;21/06/25, 12:48 pm - Person B: Hey there!">${this.escapeHtml(this.importState.rawText)}</textarea>
         </div>
         
         <div class="her-form-actions">
           <button class="her-btn her-btn-secondary" id="cancelImportBtn">Cancel</button>
-          <button class="her-btn her-btn-primary" id="confirmImportBtn">Import</button>
+          <button class="her-btn her-btn-primary" id="nextStepBtn">Next →</button>
         </div>
       </div>
     `;
     
-    modal.classList.add('active');
+    document.getElementById('selectFileBtn')?.addEventListener('click', () => {
+      document.getElementById('importFileInput')?.click();
+    });
     
-    // Platform tabs
-    let selectedPlatform = 'whatsapp';
+    document.getElementById('importFileInput')?.addEventListener('change', (e) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          const textarea = document.getElementById('importChatText');
+          if (textarea && evt.target?.result) {
+            textarea.value = evt.target.result;
+          }
+        };
+        reader.readAsText(file);
+      }
+    });
+    
     body.querySelectorAll('.her-import-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         body.querySelectorAll('.her-import-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        selectedPlatform = tab.dataset.platform;
+        this.importState.platform = tab.dataset.platform;
       });
     });
     
-    // Cancel
     document.getElementById('cancelImportBtn')?.addEventListener('click', () => {
       modal.classList.remove('active');
     });
     
-    // Confirm import
-    document.getElementById('confirmImportBtn')?.addEventListener('click', async () => {
+    document.getElementById('nextStepBtn')?.addEventListener('click', () => {
       const name = document.getElementById('importChatName')?.value.trim();
       const text = document.getElementById('importChatText')?.value.trim();
       
@@ -1429,19 +1499,104 @@ const ImportedChatViewer = {
         return;
       }
       
-      const messages = this.parseChat(text, selectedPlatform);
+      this.importState.name = name;
+      this.importState.rawText = text;
+      this.importState.messages = this.parseStandardFormat(text);
       
-      if (messages.length === 0) {
-        alert('Could not parse any messages. Check the format.');
+      if (this.importState.messages.length === 0) {
+        alert('Could not parse any messages. Check the format:\nDD/MM/YY, HH:MM am/pm - Name: Message');
         return;
       }
       
+      this.importState.participants = this.detectParticipants(this.importState.messages);
+      
+      if (this.importState.participants.length < 2) {
+        alert('Need at least 2 participants to assign roles.');
+        return;
+      }
+      
+      this.importState.step = 2;
+      this.renderImportStep2(body, modal);
+    });
+  },
+  
+  renderImportStep2(body, modal) {
+    const participants = this.importState.participants;
+    
+    body.innerHTML = `
+      <div class="her-import-form">
+        <div class="her-import-step-indicator">
+          <span class="her-step completed">1. Paste Chat ✓</span>
+          <span class="her-step active">2. Assign Roles</span>
+        </div>
+        
+        <div class="her-import-summary">
+          <span class="her-import-stat">${this.importState.messages.length} messages</span>
+          <span class="her-import-stat">${participants.length} participants</span>
+        </div>
+        
+        <div class="her-form-group">
+          <label>LEFT Side (Other Person)</label>
+          <select id="leftParticipant" class="her-select">
+            ${participants.map((p, i) => `<option value="${this.escapeHtml(p)}" ${i === 0 ? 'selected' : ''}>${this.escapeHtml(p)}</option>`).join('')}
+          </select>
+        </div>
+        
+        <div class="her-form-group">
+          <label>RIGHT Side (You)</label>
+          <select id="rightParticipant" class="her-select">
+            ${participants.map((p, i) => `<option value="${this.escapeHtml(p)}" ${i === 1 ? 'selected' : ''}>${this.escapeHtml(p)}</option>`).join('')}
+          </select>
+        </div>
+        
+        <div class="her-role-preview">
+          <div class="her-role-preview-left">
+            <span class="her-role-label">LEFT</span>
+            <div class="her-preview-bubble left">Sample message</div>
+          </div>
+          <div class="her-role-preview-right">
+            <span class="her-role-label">RIGHT</span>
+            <div class="her-preview-bubble right">Sample message</div>
+          </div>
+        </div>
+        
+        <div class="her-form-actions">
+          <button class="her-btn her-btn-secondary" id="backStepBtn">← Back</button>
+          <button class="her-btn her-btn-primary" id="confirmImportBtn">Import Chat</button>
+        </div>
+      </div>
+    `;
+    
+    document.getElementById('backStepBtn')?.addEventListener('click', () => {
+      this.importState.step = 1;
+      this.renderImportStep1(body, modal);
+    });
+    
+    document.getElementById('confirmImportBtn')?.addEventListener('click', async () => {
+      const leftParticipant = document.getElementById('leftParticipant')?.value;
+      const rightParticipant = document.getElementById('rightParticipant')?.value;
+      
+      if (leftParticipant === rightParticipant) {
+        alert('Please select different participants for LEFT and RIGHT');
+        return;
+      }
+      
+      const roleMapping = {};
+      this.importState.participants.forEach(p => {
+        if (p === rightParticipant) {
+          roleMapping[p] = 'right';
+        } else {
+          roleMapping[p] = 'left';
+        }
+      });
+      
       await this.saveChat({
         id: crypto.randomUUID(),
-        name: name || 'Imported Chat',
-        platform: selectedPlatform,
-        messages,
-        messageCount: messages.length,
+        name: this.importState.name || 'Imported Chat',
+        platform: this.importState.platform,
+        messages: this.importState.messages,
+        messageCount: this.importState.messages.length,
+        roleMapping: roleMapping,
         importedAt: Date.now()
       });
       
@@ -1450,46 +1605,44 @@ const ImportedChatViewer = {
     });
   },
   
-  parseChat(text, platform) {
-    const lines = text.split('\n').filter(l => l.trim());
+  parseStandardFormat(text) {
+    const lines = text.split('\n');
     const messages = [];
+    const standardRegex = /^(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s*(\d{1,2}:\d{2}(?::\d{2})?\s*(?:am|pm)?)\s*-\s*([^:]+):\s*(.+)$/i;
     
-    if (platform === 'whatsapp') {
-      // WhatsApp format: "1/1/24, 10:30 AM - Name: Message"
-      const waRegex = /^(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s*(\d{1,2}:\d{2}(?:\s*[AP]M)?)\s*-\s*([^:]+):\s*(.+)$/i;
+    let currentMessage = null;
+    
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      if (!trimmed) return;
       
-      lines.forEach(line => {
-        const match = line.match(waRegex);
-        if (match) {
-          const [, date, time, sender, content] = match;
-          const isUser = sender.toLowerCase().includes('you') || sender.toLowerCase() === 'me';
-          messages.push({
-            sender: isUser ? 'user' : 'other',
-            isUser,
-            content: content.trim(),
-            timestamp: `${date} ${time}`
-          });
+      const match = trimmed.match(standardRegex);
+      if (match) {
+        if (currentMessage) {
+          messages.push(currentMessage);
         }
-      });
-    } else {
-      // Instagram format: "username: message" or "You: message"
-      const igRegex = /^([^:]+):\s*(.+)$/;
-      
-      lines.forEach(line => {
-        const match = line.match(igRegex);
-        if (match) {
-          const [, sender, content] = match;
-          const isUser = sender.toLowerCase() === 'you' || sender.toLowerCase() === 'me';
-          messages.push({
-            sender: isUser ? 'user' : 'other',
-            isUser,
-            content: content.trim()
-          });
-        }
-      });
+        const [, date, time, sender, content] = match;
+        currentMessage = {
+          senderName: sender.trim(),
+          content: content.trim(),
+          date: date.trim(),
+          time: time.trim(),
+          timestamp: `${date.trim()} ${time.trim()}`
+        };
+      } else if (currentMessage) {
+        currentMessage.content += '\n' + trimmed;
+      }
+    });
+    
+    if (currentMessage) {
+      messages.push(currentMessage);
     }
     
     return messages;
+  },
+  
+  parseChat(text, platform) {
+    return this.parseStandardFormat(text);
   },
   
   async saveChat(chat) {
@@ -1508,6 +1661,9 @@ const ImportedChatViewer = {
       
       if (this.currentChat?.id === chatId) {
         this.currentChat = this.chats[0] || null;
+        if (this.currentChat?.messages) {
+          this.senderMapping = this.buildSenderMapping(this.currentChat.messages);
+        }
       }
       
       this.render();
