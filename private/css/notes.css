@@ -1,0 +1,327 @@
+/* ═══════════════════════════════════════════════════════════
+   PRIVATE SPACE - NOTES
+   ═══════════════════════════════════════════════════════════ */
+
+/* Notes Layout */
+.ps-notes {
+  display: flex;
+  height: 100%;
+  gap: var(--ps-space-4);
+}
+
+/* Notes Sidebar */
+.ps-notes-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--ps-border-subtle);
+}
+
+.ps-notes-sidebar-header {
+  padding: var(--ps-space-4);
+  border-bottom: 1px solid var(--ps-border-subtle);
+}
+
+.ps-notes-search {
+  width: 100%;
+}
+
+.ps-notes-actions {
+  display: flex;
+  gap: var(--ps-space-2);
+  margin-top: var(--ps-space-3);
+}
+
+.ps-notes-tree {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--ps-space-2);
+}
+
+/* Folder Structure */
+.ps-folder {
+  margin-bottom: var(--ps-space-1);
+}
+
+.ps-folder-header {
+  display: flex;
+  align-items: center;
+  gap: var(--ps-space-2);
+  padding: var(--ps-space-2) var(--ps-space-3);
+  border-radius: var(--ps-radius-md);
+  font-size: var(--ps-text-sm);
+  color: var(--ps-text-secondary);
+  cursor: pointer;
+  transition: background var(--ps-duration-fast) var(--ps-ease-default);
+}
+
+.ps-folder-header:hover {
+  background: var(--ps-bg-hover);
+}
+
+.ps-folder-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--ps-text-muted);
+  transition: transform var(--ps-duration-fast) var(--ps-ease-default);
+}
+
+.ps-folder.open .ps-folder-icon {
+  transform: rotate(90deg);
+}
+
+.ps-folder-name {
+  flex: 1;
+}
+
+.ps-folder-count {
+  font-size: var(--ps-text-xs);
+  color: var(--ps-text-muted);
+}
+
+.ps-folder-items {
+  display: none;
+  padding-left: var(--ps-space-6);
+}
+
+.ps-folder.open .ps-folder-items {
+  display: block;
+}
+
+/* Note Item */
+.ps-note-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ps-space-2);
+  padding: var(--ps-space-2) var(--ps-space-3);
+  border-radius: var(--ps-radius-md);
+  cursor: pointer;
+  transition: background var(--ps-duration-fast) var(--ps-ease-default);
+}
+
+.ps-note-item:hover {
+  background: var(--ps-bg-hover);
+}
+
+.ps-note-item.active {
+  background: var(--ps-accent-muted);
+}
+
+.ps-note-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--ps-text-muted);
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.ps-note-item.active .ps-note-icon {
+  color: var(--ps-accent-text);
+}
+
+.ps-note-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ps-note-title {
+  font-size: var(--ps-text-sm);
+  color: var(--ps-text-primary);
+  font-weight: var(--ps-weight-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ps-note-preview {
+  font-size: var(--ps-text-xs);
+  color: var(--ps-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: var(--ps-space-1);
+}
+
+.ps-note-date {
+  font-size: var(--ps-text-xs);
+  color: var(--ps-text-muted);
+}
+
+/* Notes Editor */
+.ps-notes-editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ps-editor-header {
+  padding: var(--ps-space-4);
+  border-bottom: 1px solid var(--ps-border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ps-editor-title-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-size: var(--ps-text-lg);
+  font-weight: var(--ps-weight-semibold);
+  color: var(--ps-text-primary);
+  padding: 0;
+}
+
+.ps-editor-title-input:focus {
+  outline: none;
+}
+
+.ps-editor-title-input::placeholder {
+  color: var(--ps-text-muted);
+}
+
+.ps-editor-actions {
+  display: flex;
+  gap: var(--ps-space-2);
+}
+
+.ps-editor-meta {
+  padding: var(--ps-space-3) var(--ps-space-4);
+  border-bottom: 1px solid var(--ps-border-subtle);
+  display: flex;
+  align-items: center;
+  gap: var(--ps-space-4);
+}
+
+.ps-editor-folder-select {
+  display: flex;
+  align-items: center;
+  gap: var(--ps-space-2);
+  font-size: var(--ps-text-sm);
+  color: var(--ps-text-secondary);
+}
+
+.ps-editor-tags {
+  display: flex;
+  align-items: center;
+  gap: var(--ps-space-2);
+  flex: 1;
+}
+
+.ps-editor-tags-label {
+  font-size: var(--ps-text-sm);
+  color: var(--ps-text-muted);
+}
+
+.ps-editor-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ps-space-2);
+}
+
+.ps-editor-tag-input {
+  background: transparent;
+  border: none;
+  font-size: var(--ps-text-xs);
+  color: var(--ps-text-primary);
+  width: 80px;
+  padding: var(--ps-space-1);
+}
+
+.ps-editor-tag-input:focus {
+  outline: none;
+}
+
+.ps-editor-tag-input::placeholder {
+  color: var(--ps-text-muted);
+}
+
+/* Markdown Editor */
+.ps-editor-content {
+  flex: 1;
+  padding: var(--ps-space-4);
+  overflow-y: auto;
+}
+
+.ps-markdown-editor {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  background: transparent;
+  border: none;
+  color: var(--ps-text-primary);
+  font-family: var(--ps-font-sans);
+  font-size: var(--ps-text-sm);
+  line-height: var(--ps-leading-relaxed);
+  resize: none;
+}
+
+.ps-markdown-editor:focus {
+  outline: none;
+}
+
+.ps-markdown-editor::placeholder {
+  color: var(--ps-text-muted);
+}
+
+/* Save Status */
+.ps-save-status {
+  display: flex;
+  align-items: center;
+  gap: var(--ps-space-2);
+  font-size: var(--ps-text-xs);
+  color: var(--ps-text-muted);
+}
+
+.ps-save-status-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.ps-save-status.saving .ps-save-status-icon {
+  animation: ps-spin 1s linear infinite;
+}
+
+@keyframes ps-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.ps-save-status.saved {
+  color: var(--ps-success);
+}
+
+/* Note AI Actions */
+.ps-note-ai-actions {
+  display: flex;
+  gap: var(--ps-space-2);
+  padding: var(--ps-space-3) var(--ps-space-4);
+  border-top: 1px solid var(--ps-border-subtle);
+  background: var(--ps-bg-secondary);
+}
+
+.ps-note-ai-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--ps-space-2);
+  padding: var(--ps-space-2) var(--ps-space-3);
+  background: var(--ps-bg-tertiary);
+  border: 1px solid var(--ps-border-subtle);
+  border-radius: var(--ps-radius-md);
+  font-size: var(--ps-text-xs);
+  color: var(--ps-text-secondary);
+  transition: all var(--ps-duration-fast) var(--ps-ease-default);
+}
+
+.ps-note-ai-btn:hover {
+  background: var(--ps-bg-hover);
+  border-color: var(--ps-border-default);
+  color: var(--ps-text-primary);
+}
+
+.ps-note-ai-btn svg {
+  width: 14px;
+  height: 14px;
+}

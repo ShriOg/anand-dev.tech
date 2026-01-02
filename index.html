@@ -103,5 +103,38 @@
   <script src="assets/js/gestures.js"></script>
   <script src="assets/js/app.js"></script>
   <script src="assets/js/page-zoom.js"></script>
+  
+  <!-- Secret Entry -->
+  <script>
+    (function() {
+      // 1. Keyboard shortcut: Ctrl+Shift+P
+      document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.shiftKey && e.key === 'P') {
+          e.preventDefault();
+          window.location.href = '/private/';
+        }
+      });
+
+      // 2. Hidden link: Click logo 5 times
+      let clickCount = 0;
+      let clickTimer = null;
+      const logo = document.querySelector('.nav__logo');
+      
+      if (logo) {
+        logo.addEventListener('click', function(e) {
+          clickCount++;
+          
+          if (clickTimer) clearTimeout(clickTimer);
+          clickTimer = setTimeout(() => { clickCount = 0; }, 2000);
+          
+          if (clickCount >= 5) {
+            e.preventDefault();
+            clickCount = 0;
+            window.location.href = '/private/';
+          }
+        });
+      }
+    })();
+  </script>
 </body>
 </html>

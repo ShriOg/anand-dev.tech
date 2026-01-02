@@ -1,0 +1,200 @@
+/* ═══════════════════════════════════════════════════════════
+   PRIVATE SPACE - CSS VARIABLES
+   Nothing OS Inspired × Calm × Minimal
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* ─────────────────────────────────
+     COLOR PALETTE - Nothing OS Deep Black
+     ───────────────────────────────── */
+  --ps-bg-primary: #000000;
+  --ps-bg-secondary: #0a0a0a;
+  --ps-bg-tertiary: #111111;
+  --ps-bg-elevated: #151515;
+  --ps-bg-hover: rgba(255, 255, 255, 0.025);
+  --ps-bg-active: rgba(255, 255, 255, 0.04);
+  
+  /* Surface Colors - Soft Matte */
+  --ps-surface-1: #080808;
+  --ps-surface-2: #0c0c0c;
+  --ps-surface-3: #121212;
+  --ps-surface-glass: rgba(255, 255, 255, 0.015);
+  --ps-surface-overlay: rgba(0, 0, 0, 0.92);
+  
+  /* Text Colors - Clean Hierarchy */
+  --ps-text-primary: rgba(255, 255, 255, 0.92);
+  --ps-text-secondary: rgba(255, 255, 255, 0.58);
+  --ps-text-tertiary: rgba(255, 255, 255, 0.36);
+  --ps-text-muted: rgba(255, 255, 255, 0.22);
+  --ps-text-disabled: rgba(255, 255, 255, 0.1);
+  
+  /* Professional Mode Accent - Neutral Warm White */
+  --ps-accent: #d4d4d4;
+  --ps-accent-dim: #a8a8a8;
+  --ps-accent-hover: #ffffff;
+  --ps-accent-subtle: rgba(255, 255, 255, 0.08);
+  --ps-accent-muted: rgba(255, 255, 255, 0.05);
+  --ps-accent-text: #ffffff;
+  --ps-accent-glow: rgba(255, 255, 255, 0.06);
+  
+  /* Her Mode Pink Accent - Warm Blush */
+  --ps-her-accent: #e8a4b8;
+  --ps-her-accent-dim: #d98fa5;
+  --ps-her-accent-hover: #f0bcc8;
+  --ps-her-accent-subtle: rgba(232, 164, 184, 0.12);
+  --ps-her-accent-muted: rgba(232, 164, 184, 0.08);
+  --ps-her-accent-text: #f5d5de;
+  --ps-her-accent-glow: rgba(232, 164, 184, 0.12);
+  
+  /* Semantic Colors - Muted */
+  --ps-success: #4ade80;
+  --ps-success-muted: rgba(74, 222, 128, 0.08);
+  --ps-warning: #facc15;
+  --ps-warning-muted: rgba(250, 204, 21, 0.08);
+  --ps-error: #f87171;
+  --ps-danger: #f87171;
+  --ps-error-muted: rgba(248, 113, 113, 0.08);
+  --ps-info: #60a5fa;
+  --ps-info-muted: rgba(96, 165, 250, 0.08);
+  
+  /* Border Colors - Whisper Thin */
+  --ps-border-subtle: rgba(255, 255, 255, 0.04);
+  --ps-border-default: rgba(255, 255, 255, 0.06);
+  --ps-border-strong: rgba(255, 255, 255, 0.1);
+  --ps-border-focus: rgba(255, 255, 255, 0.15);
+  
+  /* ─────────────────────────────────
+     SPACING SCALE - 8px Rhythm
+     ───────────────────────────────── */
+  --ps-space-0: 0;
+  --ps-space-1: 0.25rem;
+  --ps-space-2: 0.5rem;
+  --ps-space-3: 0.75rem;
+  --ps-space-4: 1rem;
+  --ps-space-5: 1.25rem;
+  --ps-space-6: 1.5rem;
+  --ps-space-8: 2rem;
+  --ps-space-10: 2.5rem;
+  --ps-space-12: 3rem;
+  --ps-space-16: 4rem;
+  --ps-space-20: 5rem;
+  
+  /* ─────────────────────────────────
+     TYPOGRAPHY - Breathing Text
+     ───────────────────────────────── */
+  --ps-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --ps-font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  
+  --ps-text-xs: 0.6875rem;
+  --ps-text-sm: 0.8125rem;
+  --ps-text-base: 0.9375rem;
+  --ps-text-lg: 1.0625rem;
+  --ps-text-xl: 1.25rem;
+  --ps-text-2xl: 1.5rem;
+  --ps-text-3xl: 2rem;
+  --ps-text-4xl: 2.5rem;
+  
+  --ps-leading-none: 1;
+  --ps-leading-tight: 1.2;
+  --ps-leading-snug: 1.375;
+  --ps-leading-normal: 1.5;
+  --ps-leading-relaxed: 1.65;
+  --ps-leading-loose: 1.85;
+  
+  --ps-weight-normal: 400;
+  --ps-weight-medium: 500;
+  --ps-weight-semibold: 600;
+  --ps-weight-bold: 700;
+  
+  --ps-tracking-tighter: -0.03em;
+  --ps-tracking-tight: -0.015em;
+  --ps-tracking-normal: 0;
+  --ps-tracking-wide: 0.025em;
+  --ps-tracking-wider: 0.05em;
+  
+  /* ─────────────────────────────────
+     BORDER RADIUS - Soft Architecture
+     ───────────────────────────────── */
+  --ps-radius-sm: 0.375rem;
+  --ps-radius-md: 0.625rem;
+  --ps-radius-lg: 0.875rem;
+  --ps-radius-xl: 1.125rem;
+  --ps-radius-2xl: 1.5rem;
+  --ps-radius-full: 9999px;
+  
+  /* ─────────────────────────────────
+     SHADOWS - Layered Elevation
+     ───────────────────────────────── */
+  --ps-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --ps-shadow-sm: 
+    0 1px 3px rgba(0, 0, 0, 0.25),
+    0 1px 2px rgba(0, 0, 0, 0.2);
+  --ps-shadow-md: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    0 2px 4px -2px rgba(0, 0, 0, 0.25);
+  --ps-shadow-lg: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.35),
+    0 4px 6px -4px rgba(0, 0, 0, 0.3);
+  --ps-shadow-xl: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.4),
+    0 8px 10px -6px rgba(0, 0, 0, 0.35);
+  --ps-shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  --ps-shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+  --ps-shadow-lift: 
+    0 4px 12px rgba(0, 0, 0, 0.25),
+    0 2px 4px rgba(0, 0, 0, 0.2);
+  
+  /* ─────────────────────────────────
+     TRANSITIONS - Calm, Intentional Motion
+     ───────────────────────────────── */
+  --ps-duration-instant: 50ms;
+  --ps-duration-fast: 180ms;
+  --ps-duration-normal: 320ms;
+  --ps-duration-slow: 480ms;
+  --ps-duration-slower: 700ms;
+  
+  --ps-ease-default: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ps-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ps-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ps-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ps-ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ps-ease-smooth: cubic-bezier(0.45, 0, 0.15, 1);
+  
+  /* ─────────────────────────────────
+     LAYOUT DIMENSIONS
+     ───────────────────────────────── */
+  --ps-sidebar-width: 260px;
+  --ps-sidebar-collapsed: 72px;
+  --ps-ai-panel-width: 400px;
+  --ps-header-height: 56px;
+  --ps-mobile-nav-height: 72px;
+  
+  /* ─────────────────────────────────
+     Z-INDEX SCALE
+     ───────────────────────────────── */
+  --ps-z-base: 0;
+  --ps-z-dropdown: 100;
+  --ps-z-sticky: 200;
+  --ps-z-overlay: 300;
+  --ps-z-modal: 400;
+  --ps-z-lock: 500;
+  --ps-z-toast: 600;
+}
+
+/* Focus Mode - Deeper & Quieter */
+[data-focus-mode="true"] {
+  --ps-bg-primary: #050506;
+  --ps-text-primary: rgba(255, 255, 255, 0.85);
+  --ps-text-secondary: rgba(255, 255, 255, 0.5);
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ps-duration-instant: 0ms;
+    --ps-duration-fast: 0ms;
+    --ps-duration-normal: 0ms;
+    --ps-duration-slow: 0ms;
+    --ps-duration-slower: 0ms;
+  }
+}
