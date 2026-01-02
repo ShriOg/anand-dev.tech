@@ -426,23 +426,41 @@ const HerApp = {
       return;
     }
     
-    container.innerHTML = this.currentSession.messages.map(msg => {
+    let lastRole = null;
+    
+    container.innerHTML = this.currentSession.messages.map((msg, idx) => {
       const isUser = msg.role === 'user';
       const time = new Date(msg.timestamp).toLocaleTimeString('en-US', { 
         hour: 'numeric', 
         minute: '2-digit' 
       });
       
+      const nextRole = this.currentSession.messages[idx + 1]?.role;
+      const isGroupStart = msg.role !== lastRole;
+      const isGroupEnd = msg.role !== nextRole;
+      lastRole = msg.role;
+      
+      const groupClasses = `${isGroupStart ? 'group-start' : ''} ${isGroupEnd ? 'group-end' : ''}`;
+      
       return `
-        <div class="her-message ${msg.role}">
-          <div class="her-message-avatar">${isUser ? '👤' : '💕'}</div>
-          <div class="her-message-content">
-            <div class="her-message-text">${this.escapeHtml(msg.content)}</div>
-            <div class="her-message-time">${time}</div>
-          </div>
+        <div class="her-message her-message-${msg.role} ${groupClasses}">
+          <div class="her-message-bubble ${msg.error ? 'error' : ''}">${this.formatMessage(msg.content)}</div>
+          <div class="her-message-time">${time}</div>
         </div>
       `;
     }).join('');
+  },
+  
+  formatMessage(content) {
+    if (!content) return '';
+    return content
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\n/g, '<br>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*([^*]+)\*/g, '<em>$1</em>');
   },
   
   showTyping() {
@@ -450,13 +468,16 @@ const HerApp = {
     const container = document.getElementById('chatMessages');
     if (!container) return;
     
+    // Remove empty state if present
+    const emptyEl = container.querySelector('.her-chat-empty');
+    if (emptyEl) emptyEl.style.display = 'none';
+    
     const typingEl = document.createElement('div');
-    typingEl.className = 'her-message assistant';
+    typingEl.className = 'her-message her-message-assistant her-typing-indicator';
     typingEl.id = 'typingIndicator';
     typingEl.innerHTML = `
-      <div class="her-message-avatar">💕</div>
-      <div class="her-message-content">
-        <div class="her-typing-indicator">
+      <div class="her-message-bubble">
+        <div class="her-typing-dots">
           <span></span><span></span><span></span>
         </div>
       </div>
@@ -484,9 +505,17 @@ const HerApp = {
   },
   
   // ═══════════════════════════════════════════════════════════
-  // AI RESPONSE GENERATION
+  // AI RESPONSE GENERATION - Uses AISystem for Her Mode
   // ═══════════════════════════════════════════════════════════
   async generateResponse(userMessage) {
+    // Delegate to AISystem if available for improved emotional intelligence
+    if (typeof AISystem !== 'undefined' && AISystem.generateHerResponse) {
+      const emotion = AISystem.detectEmotion(userMessage);
+      await AISystem.simulateEmotionalPacing(emotion, 50, 'her');
+      return AISystem.generateHerResponse(userMessage, emotion);
+    }
+    
+    // Fallback to legacy response generation
     await this.delay(800 + Math.random() * 1200);
     
     const msg = userMessage.toLowerCase();
@@ -673,29 +702,37 @@ const HerApp = {
   },
   
   openTrainingModal() {
-    document.getElementById('modalTitle').textContent = 'Training Data';
+    document.getElementById('modalTitle').textContent = 'Style Training';
     
     document.getElementById('modalBody').innerHTML = `
       <p style="color: var(--text-tertiary); font-size: 0.8125rem; margin-bottom: 1.5rem;">
-        Add examples to customize how She responds. These shape the AI's personality.
+        Add examples to train Her Mode's conversational style. These shape how She responds - the TONE and PACING, not the exact words.
       </p>
       
-      <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;">
-        <div>
-          <label style="display: block; font-size: 0.8125rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Your Input</label>
-          <textarea id="trainingInput" rows="2" placeholder="What you might say..." style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-default); border-radius: 0.625rem; color: var(--text-primary); font-family: var(--font-sans); font-size: 0.875rem; resize: vertical;"></textarea>
-        </div>
-        <div>
-          <label style="display: block; font-size: 0.8125rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Her Response</label>
-          <textarea id="trainingOutput" rows="3" placeholder="How She should respond..." style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-default); border-radius: 0.625rem; color: var(--text-primary); font-family: var(--font-sans); font-size: 0.875rem; resize: vertical;"></textarea>
+      <div class="her-training-form">
+        <div class="her-training-form-row">
+          <div class="her-form-group">
+            <label>What I Say</label>
+            <textarea id="trainingInput" class="her-textarea" rows="2" placeholder="e.g., feeling low today..."></textarea>
+          </div>
+          <div class="her-form-group">
+            <label>How She Should Respond</label>
+            <textarea id="trainingOutput" class="her-textarea" rows="2" placeholder="e.g., Aww baby... kya hua? 🥺"></textarea>
+          </div>
         </div>
         <button class="her-btn her-btn-primary" onclick="HerApp.addTrainingData()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
           Add Training Example
         </button>
       </div>
       
-      <div id="trainingList">
-        ${this.renderTrainingList()}
+      <div class="her-training-list">
+        <h4>Training Examples</h4>
+        <div id="trainingList">
+          ${this.renderTrainingList()}
+        </div>
       </div>
     `;
     
@@ -704,16 +741,16 @@ const HerApp = {
   
   renderTrainingList() {
     if (this.trainingData.length === 0) {
-      return '<p style="color: var(--text-muted); font-size: 0.75rem; text-align: center;">No training data yet</p>';
+      return '<p style="color: var(--text-muted); font-size: 0.8125rem; text-align: center; padding: 1rem;">No training examples yet. Add examples above to shape Her Mode\'s style.</p>';
     }
     
     return this.trainingData.map(data => `
-      <div style="padding: 1rem; background: var(--bg-tertiary); border-radius: 0.5rem; margin-bottom: 0.5rem;">
-        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem;">Input:</div>
-        <div style="font-size: 0.8125rem; margin-bottom: 0.75rem;">${this.escapeHtml(data.input)}</div>
-        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem;">Response:</div>
-        <div style="font-size: 0.8125rem; color: var(--her-accent);">${this.escapeHtml(data.output)}</div>
-        <button onclick="HerApp.deleteTrainingData('${data.id}')" style="margin-top: 0.75rem; padding: 0.25rem 0.5rem; background: transparent; border: 1px solid var(--error); border-radius: 0.25rem; color: var(--error); font-size: 0.6875rem; cursor: pointer;">Delete</button>
+      <div class="her-training-item">
+        <div class="her-training-item-content">
+          <div class="her-training-item-input">You: "${this.escapeHtml(data.input)}"</div>
+          <div class="her-training-item-output">She: "${this.escapeHtml(data.output)}"</div>
+        </div>
+        <button class="her-training-item-delete" onclick="HerApp.deleteTrainingData('${data.id}')" title="Remove">×</button>
       </div>
     `).join('');
   },
@@ -766,61 +803,79 @@ const HerApp = {
   },
   
   // ═══════════════════════════════════════════════════════════
-  // IMPORT CHATS
+  // IMPORT CHATS - Delegates to ImportedChatViewer
   // ═══════════════════════════════════════════════════════════
   openImportModal() {
+    // Use ImportedChatViewer if available
+    if (typeof ImportedChatViewer !== 'undefined' && ImportedChatViewer.showImportModal) {
+      ImportedChatViewer.showImportModal();
+      return;
+    }
+    
+    // Fallback modal
     document.getElementById('modalTitle').textContent = 'Import Chat';
     
     document.getElementById('modalBody').innerHTML = `
       <p style="color: var(--text-tertiary); font-size: 0.8125rem; margin-bottom: 1.5rem;">
-        Import conversations from WhatsApp or Instagram
+        Import conversations from WhatsApp or Instagram for style reference.
       </p>
       
-      <div style="display: flex; flex-direction: column; gap: 1rem;">
-        <div>
-          <label style="display: block; font-size: 0.8125rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Platform</label>
-          <select id="importPlatform" style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-default); border-radius: 0.625rem; color: var(--text-primary); font-size: 0.875rem;">
-            <option value="whatsapp">WhatsApp</option>
-            <option value="instagram">Instagram</option>
-          </select>
+      <div class="her-import-form">
+        <div class="her-import-tabs">
+          <button class="her-import-tab active" data-platform="whatsapp" onclick="HerApp.selectImportPlatform(this)">WhatsApp</button>
+          <button class="her-import-tab" data-platform="instagram" onclick="HerApp.selectImportPlatform(this)">Instagram</button>
         </div>
         
-        <div>
-          <label style="display: block; font-size: 0.8125rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Contact Name</label>
-          <input type="text" id="importName" placeholder="Their name" style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-default); border-radius: 0.625rem; color: var(--text-primary); font-size: 0.875rem;">
+        <div class="her-form-group">
+          <label>Chat Name</label>
+          <input type="text" id="importName" class="her-input" placeholder="e.g., Our Chat">
         </div>
         
-        <div>
-          <label style="display: block; font-size: 0.8125rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Paste Chat Export</label>
-          <textarea id="importContent" rows="8" placeholder="Paste the exported chat text here..." style="width: 100%; padding: 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-default); border-radius: 0.625rem; color: var(--text-primary); font-family: var(--font-sans); font-size: 0.875rem; resize: vertical;"></textarea>
+        <div class="her-form-group">
+          <label>Paste Chat Export</label>
+          <textarea id="importContent" class="her-textarea" rows="10" 
+            placeholder="Paste your exported chat here...&#10;&#10;WhatsApp format:&#10;1/1/24, 10:30 AM - You: Hey!&#10;1/1/24, 10:31 AM - Her: Hiii!&#10;&#10;Instagram format:&#10;You: Hey there&#10;username: Hello!"></textarea>
         </div>
         
-        <button class="her-btn her-btn-primary" onclick="HerApp.importChat()">
-          Import Chat
-        </button>
+        <div class="her-form-actions">
+          <button class="her-btn her-btn-secondary" onclick="HerApp.closeModal()">Cancel</button>
+          <button class="her-btn her-btn-primary" onclick="HerApp.importChat()">Import Chat</button>
+        </div>
       </div>
     `;
     
+    this.importPlatform = 'whatsapp';
     this.openModal();
   },
   
+  selectImportPlatform(btn) {
+    document.querySelectorAll('.her-import-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    this.importPlatform = btn.dataset.platform;
+  },
+  
   async importChat() {
-    const platform = document.getElementById('importPlatform')?.value;
     const name = document.getElementById('importName')?.value?.trim();
     const content = document.getElementById('importContent')?.value?.trim();
+    const platform = this.importPlatform || 'whatsapp';
     
-    if (!name || !content) {
-      this.toast('Please fill all fields', 'error');
+    if (!content) {
+      this.toast('Please paste chat content', 'error');
       return;
     }
     
-    // Parse chat (simplified)
+    // Parse chat based on platform
     const messages = this.parseChatExport(platform, content);
+    
+    if (messages.length === 0) {
+      this.toast('Could not parse any messages. Check the format.', 'error');
+      return;
+    }
     
     const importedChat = {
       id: crypto.randomUUID(),
       platform,
-      name,
+      name: name || 'Imported Chat',
       messages,
       messageCount: messages.length,
       importedAt: Date.now()
@@ -830,29 +885,83 @@ const HerApp = {
       await Database.add('imported_chats', importedChat);
       this.closeModal();
       this.toast(`Imported ${messages.length} messages`, 'success');
-      this.loadImportedChats();
+      
+      // Refresh ImportedChatViewer if available
+      if (typeof ImportedChatViewer !== 'undefined') {
+        await ImportedChatViewer.loadChats();
+        ImportedChatViewer.render();
+      } else {
+        this.loadImportedChats();
+      }
     } catch (e) {
       this.toast('Failed to import chat', 'error');
     }
   },
   
   parseChatExport(platform, content) {
-    const lines = content.split('\n');
+    const lines = content.split('\n').filter(l => l.trim());
     const messages = [];
     
-    for (const line of lines) {
-      if (line.trim()) {
-        messages.push({
-          content: line.trim(),
-          timestamp: Date.now()
-        });
-      }
+    if (platform === 'whatsapp') {
+      // WhatsApp format: "1/1/24, 10:30 AM - Name: Message"
+      const waRegex = /^(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s*(\d{1,2}:\d{2}(?:\s*[AP]M)?)\s*-\s*([^:]+):\s*(.+)$/i;
+      
+      lines.forEach(line => {
+        const match = line.match(waRegex);
+        if (match) {
+          const [, date, time, sender, text] = match;
+          const isUser = sender.toLowerCase().includes('you') || sender.toLowerCase() === 'me';
+          messages.push({
+            sender: isUser ? 'user' : 'other',
+            isUser,
+            content: text.trim(),
+            timestamp: `${date} ${time}`
+          });
+        }
+      });
+    } else {
+      // Instagram format: "username: message" or "You: message"
+      const igRegex = /^([^:]+):\s*(.+)$/;
+      
+      lines.forEach(line => {
+        const match = line.match(igRegex);
+        if (match) {
+          const [, sender, text] = match;
+          const isUser = sender.toLowerCase() === 'you' || sender.toLowerCase() === 'me';
+          messages.push({
+            sender: isUser ? 'user' : 'other',
+            isUser,
+            content: text.trim()
+          });
+        }
+      });
+    }
+    
+    // Fallback: if no messages parsed, treat each line as a message
+    if (messages.length === 0) {
+      lines.forEach((line, idx) => {
+        if (line.trim()) {
+          messages.push({
+            sender: idx % 2 === 0 ? 'user' : 'other',
+            isUser: idx % 2 === 0,
+            content: line.trim()
+          });
+        }
+      });
     }
     
     return messages;
   },
   
   async loadImportedChats() {
+    // Delegate to ImportedChatViewer if available
+    if (typeof ImportedChatViewer !== 'undefined') {
+      await ImportedChatViewer.loadChats();
+      ImportedChatViewer.render();
+      return;
+    }
+    
+    // Fallback rendering
     if (typeof Database === 'undefined') return;
     
     try {
