@@ -8,11 +8,53 @@
 const AIAssistant = {
   isOpen: false,
   currentProject: null,
-  activeTab: 'analyze',
+  activeTab: 'actions',
   
   // AI Provider - Uses Gemini API (free tier)
   API_KEY_STORAGE: 'pro_ai_api_key',
   apiKey: null,
+  
+  // ════════════════════════════════════════════════════════════
+  // REPAIR FALLBACK STATE (NOT FEEDBACK)
+  // ════════════════════════════════════════════════════════════
+  // Fallback responses are for RECOVERY, not conversational replies.
+  // A fallback message triggers ONLY ONCE per failure event.
+  // After triggering, normal logic resumes. Fallback MUST NOT repeat.
+  // ════════════════════════════════════════════════════════════
+  fallbackState: {
+    triggered: false,
+    lastFailureId: null,
+    lastAction: null
+  },
+  
+  // Check if fallback can be triggered (prevents repetition)
+  canTriggerFallback(action, failureId) {
+    // If same failure for same action, don't repeat fallback
+    if (this.fallbackState.triggered && 
+        this.fallbackState.lastFailureId === failureId &&
+        this.fallbackState.lastAction === action) {
+      return false;
+    }
+    return true;
+  },
+  
+  // Mark fallback as triggered
+  markFallbackTriggered(action, failureId) {
+    this.fallbackState = {
+      triggered: true,
+      lastFailureId: failureId,
+      lastAction: action
+    };
+  },
+  
+  // Reset fallback state (call on successful API response)
+  resetFallbackState() {
+    this.fallbackState = {
+      triggered: false,
+      lastFailureId: null,
+      lastAction: null
+    };
+  },
   
   // ═══════════════════════════════════════════════════════════
   // INITIALIZATION
@@ -21,6 +63,8 @@ const AIAssistant = {
     this.loadApiKey();
     this.bindEvents();
     this.injectPanelHTML();
+    // Open panel by default
+    this.openPanel();
   },
   
   loadApiKey() {
@@ -129,6 +173,9 @@ const AIAssistant = {
   
   loadTabContent(tab) {
     switch(tab) {
+      case 'actions':
+        // Actions tab is handled by AIActions module
+        break;
       case 'analyze':
         this.loadPortfolioAnalysis();
         break;
@@ -868,39 +915,84 @@ const AIAssistant = {
   },
   
   // ═══════════════════════════════════════════════════════════
-  // AI API CALL
+  // AI API CALL - Uses shared AIService backend
   // ═══════════════════════════════════════════════════════════
   async callAI(action, data) {
-    // If no API key, use local heuristics
-    if (!this.apiKey) {
+    // ═══════════════════════════════════════════════════════════════
+    // AI-FIRST: Try shared backend service FIRST
+    // Local fallback is ONLY for failures, not as default
+    // ═══════════════════════════════════════════════════════════════
+    
+    // Try shared AI backend first (secure, no exposed keys)
+    if (typeof AIService !== 'undefined' && AIService.isAvailable()) {
+      try {
+        const result = await AIService.action('professional', action, data);
+        
+        if (result.success && result.response) {
+          // Success - reset fallback state
+          this.resetFallbackState();
+          console.log('[AI Assistant] Backend AI response received');
+          return result.response;
+        }
+        
+        throw new Error(result.error || 'Empty response from backend');
+        
+      } catch (backendError) {
+        console.warn('[AI Assistant] Backend AI failed:', backendError.message);
+        // Fall through to legacy/fallback
+      }
+    }
+    
+    // Legacy: Try direct API if key is configured (deprecated)
+    if (this.apiKey) {
+      try {
+        const prompt = this.buildPrompt(action, data);
+        
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${this.apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 500
+            }
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error('API request failed');
+        }
+        
+        const result = await response.json();
+        const aiResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
+        
+        if (aiResponse) {
+          this.resetFallbackState();
+          return aiResponse;
+        }
+        
+        throw new Error('Empty response');
+        
+      } catch (e) {
+        console.warn('[AI Assistant] Legacy API error:', e);
+        // Fall through to local fallback
+      }
+    }
+    
+    // ════════════════════════════════════════════════════════════
+    // REPAIR FALLBACK (NOT FEEDBACK)
+    // API error - trigger fallback ONCE per failure type
+    // ════════════════════════════════════════════════════════════
+    const failureId = `api-error-${Date.now()}`;
+    if (this.canTriggerFallback(action, failureId)) {
+      this.markFallbackTriggered(action, failureId);
+      console.log('[AI Assistant] Using local fallback');
       return this.localAIFallback(action, data);
     }
     
-    try {
-      const prompt = this.buildPrompt(action, data);
-      
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${this.apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 500
-          }
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error('API request failed');
-      }
-      
-      const result = await response.json();
-      return result.candidates?.[0]?.content?.parts?.[0]?.text || this.localAIFallback(action, data);
-    } catch (e) {
-      console.warn('AI API error:', e);
-      return this.localAIFallback(action, data);
-    }
+    // Fallback already triggered - return last known good result or empty
+    return data.description || '';
   },
   
   buildPrompt(action, data) {
@@ -978,6 +1070,13 @@ Respond with ONLY the optimized description, no explanations.`
     return prompts[action] || prompts.improve_description;
   },
   
+  // ════════════════════════════════════════════════════════════
+  // LOCAL AI FALLBACK (REPAIR MODE)
+  // ════════════════════════════════════════════════════════════
+  // This is part of the REPAIR FALLBACK system.
+  // It provides heuristic-based improvements when API is unavailable.
+  // This fallback triggers ONCE per failure - not as a default reply.
+  // ════════════════════════════════════════════════════════════
   localAIFallback(action, data) {
     // Simple heuristic-based improvements when API is unavailable
     const desc = data.description || '';

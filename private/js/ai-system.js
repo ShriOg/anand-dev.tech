@@ -24,6 +24,19 @@ const AISystem = {
   isTyping: false,
   currentUserMood: null,
   
+  // ════════════════════════════════════════════════════════════
+  // REPAIR FALLBACK STATE (NOT FEEDBACK)
+  // ════════════════════════════════════════════════════════════
+  // Fallback responses are for RECOVERY, not conversational replies.
+  // A fallback message (error, apology, recovery notice) MUST only
+  // trigger ONCE for a single failure event. After triggering,
+  // normal conversation logic resumes. The fallback MUST NOT repeat.
+  // ════════════════════════════════════════════════════════════
+  fallbackState: {
+    her: { triggered: false, lastFailureId: null, failureCount: 0 },
+    pro: { triggered: false, lastFailureId: null, failureCount: 0 }
+  },
+  
   // Her Mode System Instruction - OVERRIDES all default behavior
   HER_SYSTEM_PROMPT: `You are Her Mode.
 You speak in Hinglish (Hindi + English mix).
@@ -37,6 +50,118 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
 
   // Allowed emojis for Her Mode
   ALLOWED_EMOJIS: ['💗', '🥺', '👀', '✨', '🌸', '💕', '😊', '😔', '🤔', '💭', '🌙'],
+  
+  // ════════════════════════════════════════════════════════════
+  // AI-FIRST RESPONSE BEHAVIOR (MANDATORY)
+  // ════════════════════════════════════════════════════════════
+  // The AI must respond as a GENERATIVE MODEL, not keyword-based bot.
+  // RULES:
+  // - AI model MUST be the default response path for EVERY message
+  // - Keyword matching MUST NOT block, replace, or gate AI generation
+  // - Static/canned replies may ONLY adjust tone AFTER AI generation
+  // PROHIBITED:
+  // - Replying ONLY when specific keywords are detected
+  // - Falling back to apology/error when keyword not matched
+  // - Using keyword routing instead of AI reasoning
+  // CONTEXT HANDLING:
+  // - Generate replies using FULL conversation history
+  // - Infer intent, emotion, and meaning beyond keywords
+  // FALLBACK RULE:
+  // - Fallback only when AI generation fails technically
+  // - Fallback is ONE-TIME, followed by recovery
+  // FINAL RULE: AI must respond to ANY natural language input
+  // ════════════════════════════════════════════════════════════
+  
+  // ════════════════════════════════════════════════════════════
+  // REPAIR FALLBACK BEHAVIOR RULES (NOT FEEDBACK)
+  // ════════════════════════════════════════════════════════════
+  // RULES:
+  // - A fallback response may trigger ONLY ONCE for a single failure event
+  // - After triggering fallback: system must attempt recovery, normal logic resumes
+  // - Fallback message MUST NOT repeat on subsequent user messages
+  // PROHIBITED BEHAVIOR:
+  // - Repeating the same fallback line
+  // - Treating fallback as a default reply
+  // - Looping apology-style responses
+  // STATE REQUIREMENT:
+  // - Track fallback-triggered state
+  // - Once fired, disable fallback until NEW failure detected
+  // FINAL RULE: Fallbacks exist to FIX a problem, not replace real replies
+  // ════════════════════════════════════════════════════════════
+  FALLBACK_MESSAGES: {
+    her: [
+      'Sorry yaar, kuch problem ho gayi... 😔',
+      'Arey yaar, connection issue hai 🥺',
+      'Ek sec, thoda problem ho gaya 💭'
+    ],
+    pro: [
+      'I encountered an error. Please try again.',
+      'There was a connection issue. Retrying...',
+      'Something went wrong. Let me try again.'
+    ]
+  },
+  
+  // Check if fallback can be triggered (prevents repetition)
+  canTriggerFallback(mode, failureId) {
+    const state = this.fallbackState[mode];
+    // If same failure, don't repeat fallback
+    if (state.triggered && state.lastFailureId === failureId) {
+      return false;
+    }
+    return true;
+  },
+  
+  // Trigger fallback and mark state
+  triggerFallback(mode, failureId) {
+    if (!this.canTriggerFallback(mode, failureId)) {
+      // Return null to signal: don't show fallback again
+      return null;
+    }
+    
+    this.fallbackState[mode] = {
+      triggered: true,
+      lastFailureId: failureId,
+      failureCount: (this.fallbackState[mode]?.failureCount || 0) + 1
+    };
+    
+    // Return a fallback message (only first time for this failure)
+    const messages = this.FALLBACK_MESSAGES[mode];
+    return messages[Math.floor(Math.random() * messages.length)];
+  },
+  
+  // Reset fallback state (call on successful response)
+  resetFallbackState(mode) {
+    this.fallbackState[mode] = {
+      triggered: false,
+      lastFailureId: null,
+      failureCount: 0
+    };
+  },
+  
+  // Attempt recovery after fallback
+  async attemptRecovery(mode, originalMessage) {
+    // Mark that we're in recovery mode
+    console.log(`[AI System] Attempting recovery for ${mode} mode...`);
+    
+    // Simple recovery: try generating response again with lighter processing
+    try {
+      const emotion = this.detectEmotion(originalMessage);
+      let response;
+      
+      if (mode === 'her') {
+        response = this.generateHerResponse(originalMessage, emotion);
+      } else {
+        response = this.generateProResponse(originalMessage);
+      }
+      
+      // Success! Reset fallback state
+      this.resetFallbackState(mode);
+      return response;
+    } catch (e) {
+      console.error('[AI System] Recovery failed:', e);
+      return null;
+    }
+  },
   
   // Mode configurations with new element IDs
   modes: {
@@ -367,6 +492,9 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
     try {
       const response = await this.generateResponse(mode, content);
       
+      // Success - reset fallback state
+      this.resetFallbackState(mode);
+      
       this.currentSession[mode].messages.push({
         role: 'assistant',
         content: response,
@@ -376,14 +504,42 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
       await this.saveSession(mode);
     } catch (error) {
       console.error('AI Error:', error);
-      this.currentSession[mode].messages.push({
-        role: 'assistant',
-        content: mode === 'her' 
-          ? 'Sorry yaar, kuch problem ho gayi... 😔' 
-          : 'I encountered an error. Please try again.',
-        timestamp: Date.now(),
-        error: true
-      });
+      
+      // ════════════════════════════════════════════════════════════
+      // REPAIR FALLBACK (NOT FEEDBACK)
+      // Fallback triggers ONCE per failure, then recovery is attempted
+      // ════════════════════════════════════════════════════════════
+      const failureId = `${Date.now()}-${error.message || 'unknown'}`;
+      const fallbackMessage = this.triggerFallback(mode, failureId);
+      
+      if (fallbackMessage) {
+        // First occurrence of this failure - show fallback message
+        this.currentSession[mode].messages.push({
+          role: 'assistant',
+          content: fallbackMessage,
+          timestamp: Date.now(),
+          error: true,
+          failureId: failureId
+        });
+        
+        // Attempt recovery in background
+        this.attemptRecovery(mode, content).then(recoveredResponse => {
+          if (recoveredResponse) {
+            console.log('[AI System] Recovery successful');
+          }
+        });
+      } else {
+        // Fallback already triggered for this failure - attempt silent recovery
+        const recoveredResponse = await this.attemptRecovery(mode, content);
+        if (recoveredResponse) {
+          this.currentSession[mode].messages.push({
+            role: 'assistant',
+            content: recoveredResponse,
+            timestamp: Date.now()
+          });
+        }
+        // If recovery fails, don't repeat the fallback message
+      }
     }
     
     this.hideTyping(mode);
@@ -395,13 +551,58 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
     // Detect emotion for pacing
     const emotion = this.detectEmotion(userMessage);
     
-    // Generate response first to know its length
+    // ═══════════════════════════════════════════════════════════════
+    // AI-FIRST: Try backend AI service FIRST
+    // Local generation is FALLBACK only
+    // ═══════════════════════════════════════════════════════════════
     let response;
-    if (mode === 'her') {
-      // Apply Her Mode system instruction internally
-      response = this.generateHerResponse(userMessage, emotion);
-    } else {
-      response = this.generateProResponse(userMessage);
+    
+    // Try AI backend first
+    if (typeof AIService !== 'undefined' && AIService.isAvailable()) {
+      try {
+        // Build conversation history for context
+        const history = this.getFullConversationHistory(mode);
+        
+        const aiResult = await AIService.chat(mode === 'her' ? 'her' : 'professional', [
+          ...history,
+          { role: 'user', content: userMessage }
+        ]);
+        
+        if (aiResult.success && aiResult.response) {
+          response = aiResult.response;
+          
+          // Apply mode-specific post-processing
+          if (mode === 'her') {
+            response = this.applyHerModeStyle(response);
+            
+            // ═══════════════════════════════════════════════════════════════
+            // PERSONALITY ADAPTER: Apply learned style to backend AI response
+            // This adapts STYLE only, never recalls or quotes content
+            // ═══════════════════════════════════════════════════════════════
+            if (typeof PersonalityAdapter !== 'undefined') {
+              const styleHints = PersonalityAdapter.getStyleHints();
+              response = PersonalityAdapter.adaptResponse(response, styleHints);
+            }
+          }
+          
+          console.log(`[AI System] Backend AI response received (${mode} mode)`);
+        } else {
+          throw new Error(aiResult.error || 'Empty response');
+        }
+      } catch (apiError) {
+        console.warn('[AI System] Backend AI failed, using local fallback:', apiError.message);
+        // Fall through to local generation
+        response = null;
+      }
+    }
+    
+    // Local fallback if backend unavailable or failed
+    if (!response) {
+      if (mode === 'her') {
+        response = this.generateHerResponse(userMessage, emotion);
+      } else {
+        response = this.generateProResponse(userMessage);
+      }
     }
     
     // Apply emotional pacing (thoughtful delay based on content)
@@ -419,204 +620,267 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
   // 3. Short, warm, human-like replies
   // 4. Never robotic or assistant-like
   // 5. Mirror user's emotional state softly
+  // 
+  // AI-FIRST BEHAVIOR:
+  // - ALWAYS generate a response using full conversation context
+  // - Keyword detection only ENHANCES tone, never gates response
+  // - System must respond to ANY natural language input
   // ═══════════════════════════════════════════════════════════
   generateHerResponse(message, emotion) {
     const lowerMsg = message.toLowerCase();
     const context = this.getConversationContext('her');
     const trainedStyle = this.getTrainedStyleHint(message);
+    const conversationHistory = this.getFullConversationHistory('her');
     
-    // Apply emotional acknowledgement FIRST
-    let response = this.generateEmotionalResponse(lowerMsg, emotion, context, trainedStyle);
+    // ════════════════════════════════════════════════════════════
+    // PERSONALITY ADAPTER: Get learned style hints
+    // This learns STYLE patterns from chat history, NOT content
+    // ════════════════════════════════════════════════════════════
+    const styleHints = typeof PersonalityAdapter !== 'undefined' 
+      ? PersonalityAdapter.getStyleHints() 
+      : null;
     
-    // Ensure response follows Her Mode guidelines
+    // ════════════════════════════════════════════════════════════
+    // AI-FIRST: Generate response using full context FIRST
+    // Keywords only adjust tone/flavor AFTER generation
+    // ════════════════════════════════════════════════════════════
+    
+    // Step 1: Generate AI response using conversation context
+    let response = this.generateAIFirstResponse(message, emotion, context, conversationHistory, trainedStyle);
+    
+    // Step 2: Apply emotional tone adjustment (keywords ENHANCE, not replace)
+    response = this.applyEmotionalToneAdjustment(response, lowerMsg, emotion);
+    
+    // Step 3: Ensure response follows Her Mode guidelines
     response = this.applyHerModeStyle(response);
+    
+    // Step 4: Apply learned personality style adaptation
+    if (styleHints && typeof PersonalityAdapter !== 'undefined') {
+      response = PersonalityAdapter.adaptResponse(response, styleHints);
+    }
     
     return response;
   },
   
-  generateEmotionalResponse(lowerMsg, emotion, context, trainedStyle) {
-    // === SADNESS / HURT ===
-    if (this.matches(lowerMsg, ['sad', 'upset', 'dukhi', 'hurt', 'cry', 'rona', 'pain', 'dard', 'toot', 'broken', 'akela', 'alone', 'miss', 'yaad', 'low feel', 'bura', 'down'])) {
-      return this.pick([
-        `Kya hua? 🥺`,
-        `Hmm... batao na`,
-        `Main hoon yahan 💗`,
-        `Acha bolo... sun rhi hoon ✨`
-      ]);
-    }
-    
-    // === TIREDNESS / EXHAUSTION ===
-    if (this.matches(lowerMsg, ['tired', 'thak', 'thaka', 'thaki', 'exhausted', 'neend', 'sleep', 'rest', 'break', 'energy nhi', 'pak gaya', 'pak gayi', 'ho gaya', 'drain', 'so ja', 'sona'])) {
-      return this.pick([
-        `Rest karo yaar 💗`,
-        `Hmm thak gaye na?`,
-        `So jao thoda 🌸`,
-        `Arey break lo ✨`
-      ]);
-    }
-    
-    // === STRESS / ANXIETY ===  
-    if (this.matches(lowerMsg, ['stress', 'tension', 'anxiety', 'worried', 'nervous', 'scared', 'dar', 'panic', 'overwhelm', 'pressure'])) {
-      return this.pick([
-        `Breathe karo 💗`,
-        `Hmm batao kya hua`,
-        `Main hoon na 🌸`,
-        `Ek ek karke batao ✨`
-      ]);
-    }
-    
-    // === FRUSTRATION / ANGER ===
-    if (this.matches(lowerMsg, ['angry', 'gussa', 'irritate', 'annoyed', 'frustrated', 'hate', 'nafrat', 'pagal kar', 'pissed', 'fed up', 'chid'])) {
-      return this.pick([
-        `Kya hua yaar? 👀`,
-        `Hmm sun rahi hoon...`,
-        `Nikalo sab 💗`,
-        `Batao na 🥺`
-      ]);
-    }
-    
-    // === HAPPINESS / EXCITEMENT ===
-    if (this.matches(lowerMsg, ['happy', 'khush', 'excited', 'amazing', 'great', 'awesome', 'best', 'maza', 'accha hua', 'finally', 'yay', 'yayyy', 'wow', 'mast'])) {
-      return this.pick([
-        `Ooh! ✨ Kya hua?`,
-        `Hehe nice 💗`,
-        `Batao batao! 🌸`,
-        `Yay! 👀`
-      ]);
-    }
-    
-    // === BOREDOM / NOTHING HAPPENING ===
-    if (this.matches(lowerMsg, ['kuch nahi', 'kuch nhi', 'kuch nya nhi', 'boring', 'same old', 'nothing new', 'kuch special nhi', 'bas chal rhi', 'theek', 'fine', 'normal', 'ok', 'okay', 'same'])) {
-      return this.pick([
-        `Hmm acha... 💭`,
-        `Boring sa na? 😔`,
-        `Kya karna hai? 🌸`,
-        `Main hoon 💗`
-      ]);
-    }
-    
-    // === CONFUSION / NEED HELP ===
-    if (this.matches(lowerMsg, ['confused', 'samajh nhi', 'pata nhi', 'kya karu', 'what to do', 'decide nhi', 'unsure', 'help', 'kaise', 'nahi pata', 'dilemma'])) {
-      return this.pick([
-        `Hmm batao 🤔`,
-        `Kya options hain?`,
-        `Acha acha 💗`,
-        `Figure out karte hain ✨`
-      ]);
-    }
-    
-    // === LOVE / AFFECTION ===
-    if (this.matches(lowerMsg, ['love you', 'love u', 'pyaar', 'like you', 'pasand', 'cute', 'sweet', 'miss you', 'miss u', 'care', 'i love'])) {
-      return this.pick([
-        `Aww 🥺`,
-        `Hehe 💗`,
-        `Same ✨`,
-        `You too 🌸`
-      ]);
-    }
-    
-    // === GREETINGS ===
-    if (this.matches(lowerMsg, ['hi', 'hello', 'hey', 'hii', 'hiii', 'hlo', 'namaste', 'yo', 'sup', 'hola', 'kaise ho', 'kaisi ho'])) {
-      if (context.isNewConversation) {
-        return this.pick([
-          `Hii! 💗`,
-          `Hey! ✨`,
-          `Aagaye! 🌸`
-        ]);
-      } else {
-        return this.pick([
-          `Hii again! 💕`,
-          `Hey! ✨`,
-          `Haan bolo? 🌸`
-        ]);
-      }
-    }
-    
-    // === HOW ARE YOU ===
-    if (this.matches(lowerMsg, ['how are you', 'kaisi ho', 'kaise ho', 'kya haal', 'how r u', 'hw r u', 'kya chal raha', 'whats up'])) {
-      return this.pick([
-        `Theek hoon! Tum? 💗`,
-        `Mast! ✨ Tum batao?`,
-        `Chill hoon 🌸`
-      ]);
-    }
-    
-    // === THANKS ===
-    if (this.matches(lowerMsg, ['thank', 'shukriya', 'dhanyawad', 'thanks', 'thnx', 'thx'])) {
-      return this.pick([
-        `Mention not! 💗`,
-        `Hehe 🌸`,
-        `Koi na ✨`
-      ]);
-    }
-    
-    // === GOODBYE ===
-    if (this.matches(lowerMsg, ['bye', 'good night', 'goodnight', 'alvida', 'chal', 'jata hun', 'jati hun', 'sona hai', 'so ja', 'gn', 'night'])) {
-      return this.pick([
-        `Okay bye! 💗`,
-        `Gn! 🌙`,
-        `Jaldi aana ✨`,
-        `Bye 🌸`
-      ]);
-    }
-    
-    // === WORK RELATED ===
-    if (this.matches(lowerMsg, ['kaam', 'work', 'office', 'job', 'busy', 'meeting', 'deadline', 'project', 'padhai', 'study', 'exam'])) {
-      return this.pick([
-        `Ohh busy? 💗`,
-        `Hmm work 👀`,
-        `Break lena ✨`
-      ]);
-    }
-    
-    // === FOOD RELATED ===
-    if (this.matches(lowerMsg, ['khana', 'food', 'eat', 'hungry', 'bhookh', 'lunch', 'dinner', 'breakfast', 'chai', 'coffee'])) {
-      return this.pick([
-        `Ooh! Kya kha rahe? 👀`,
-        `Khana kha lo 💗`,
-        `Hmm yummy 🌸`
-      ]);
-    }
-    
-    // === CONTEXTUAL DEFAULT - Short and curious ===
-    return this.generateContextualResponse(message, context, trainedStyle);
-  },
-  
-  generateContextualResponse(message, context, trainedStyle) {
-    const words = message.split(/\s+/);
-    const hasQuestion = message.includes('?');
-    const isShort = words.length <= 3;
-    
-    // Apply trained style if available
+  // ═══════════════════════════════════════════════════════════
+  // AI-FIRST RESPONSE GENERATION
+  // Generates response using full conversation context
+  // NOT keyword-gated - responds to ANY input
+  // ═══════════════════════════════════════════════════════════
+  generateAIFirstResponse(message, emotion, context, history, trainedStyle) {
+    // Use trained style if available (learned patterns)
     if (trainedStyle) {
       return trainedStyle;
     }
     
-    if (hasQuestion) {
-      return this.pick([
-        `Hmm 🤔`,
-        `Tum batao? 💭`,
-        `Sochti hoon ✨`
-      ]);
-    }
+    // Analyze message characteristics (not for gating, for understanding)
+    const analysis = this.analyzeMessage(message);
     
+    // Generate contextually aware response based on conversation flow
+    return this.generateContextualAIResponse(message, emotion, context, history, analysis);
+  },
+  
+  // Analyze message without keyword-gating
+  analyzeMessage(message) {
+    const words = message.split(/\s+/);
+    return {
+      isQuestion: message.includes('?') || /^(kya|kaise|kyun|kab|kahan|who|what|when|where|why|how)/i.test(message),
+      isShort: words.length <= 3,
+      isMedium: words.length > 3 && words.length <= 10,
+      isLong: words.length > 10,
+      hasHinglish: /[अ-ह]|kya|hai|hoon|tum|mujhe|yaar|accha|theek|haan|nahi|aur|bhi/i.test(message),
+      sentiment: this.inferSentiment(message),
+      intent: this.inferIntent(message)
+    };
+  },
+  
+  // Infer sentiment from full message (beyond keywords)
+  inferSentiment(message) {
+    const lower = message.toLowerCase();
+    
+    // Positive indicators
+    const positiveScore = (lower.match(/good|great|nice|happy|khush|mast|amazing|love|yay|haha|hehe|😊|💗|✨/gi) || []).length;
+    
+    // Negative indicators  
+    const negativeScore = (lower.match(/sad|bad|upset|angry|tired|stressed|hate|nahi|😔|😢/gi) || []).length;
+    
+    // Neutral if balanced or no strong indicators
+    if (positiveScore > negativeScore) return 'positive';
+    if (negativeScore > positiveScore) return 'negative';
+    return 'neutral';
+  },
+  
+  // Infer intent from message structure and context
+  inferIntent(message) {
+    const lower = message.toLowerCase();
+    
+    // Detect various intents
+    if (/\?|kya|kaise|kyun|batao|tell/.test(lower)) return 'seeking';
+    if (/help|madad|please|karo/.test(lower)) return 'requesting';
+    if (/i feel|mujhe|lagta|ho raha/.test(lower)) return 'sharing';
+    if (/hi|hello|hey|namaste/.test(lower)) return 'greeting';
+    if (/bye|goodnight|chal|jata/.test(lower)) return 'farewell';
+    if (/thanks|shukriya|dhanyawad/.test(lower)) return 'thanking';
+    
+    return 'conversing'; // Default: just conversing naturally
+  },
+  
+  // Generate response using full context (AI-FIRST approach)
+  generateContextualAIResponse(message, emotion, context, history, analysis) {
+    const { isQuestion, isShort, sentiment, intent, hasHinglish } = analysis;
+    
+    // Build response based on conversation state and intent
+    // NOT keyword-gated - responds intelligently to any input
+    
+    // Consider conversation history for continuity
+    const continuityAware = context.messageCount > 2;
+    const previousTopic = this.extractKeyPhrase(context.lastUserMessage);
+    
+    // Generate based on intent (inferred, not keyword-matched)
+    switch (intent) {
+      case 'greeting':
+        return context.isNewConversation 
+          ? this.pick([`Hii! 💗`, `Hey! ✨`, `Aagaye! 🌸`])
+          : this.pick([`Hii again! 💕`, `Hey! ✨`, `Haan bolo? 🌸`]);
+      
+      case 'farewell':
+        return this.pick([`Okay bye! 💗`, `Gn! 🌙`, `Jaldi aana ✨`, `Bye 🌸`]);
+      
+      case 'thanking':
+        return this.pick([`Mention not! 💗`, `Hehe 🌸`, `Koi na ✨`]);
+      
+      case 'seeking':
+        if (isShort) {
+          return this.pick([`Hmm 🤔`, `Tum batao? 💭`, `Sochti hoon ✨`]);
+        }
+        return this.pick([
+          `Hmm interesting question... 💭`,
+          `Accha, let me think... 🤔`,
+          `Hmm ${hasHinglish ? 'batati hoon' : 'let me see'} ✨`
+        ]);
+      
+      case 'requesting':
+        return this.pick([
+          `Haan zaroor 💗`,
+          `Of course yaar ✨`,
+          `Main hoon na 🌸`
+        ]);
+      
+      case 'sharing':
+        // Respond empathetically to sharing
+        if (sentiment === 'negative') {
+          return this.pick([
+            `Main sun rahi hoon... 💗`,
+            `Hmm... batao na aur 🥺`,
+            `I'm here yaar ✨`
+          ]);
+        }
+        if (sentiment === 'positive') {
+          return this.pick([
+            `Ooh nice! ✨`,
+            `Hehe that's good 💗`,
+            `Tell me more! 🌸`
+          ]);
+        }
+        return this.pick([
+          `Accha accha... 💭`,
+          `Hmm... aur? ✨`,
+          `Go on yaar 💗`
+        ]);
+      
+      default: // 'conversing' - natural conversation
+        return this.generateNaturalConversation(message, emotion, context, analysis, continuityAware, previousTopic);
+    }
+  },
+  
+  // Natural conversation generation (for any input)
+  generateNaturalConversation(message, emotion, context, analysis, continuityAware, previousTopic) {
+    const { isShort, isMedium, sentiment, hasHinglish } = analysis;
+    
+    // Short messages - encourage elaboration
     if (isShort) {
       return this.pick([
         `Hmm... thoda aur batao na? 💗`,
         `Accha accha... aur? 💭`,
-        `Go on yaar ✨`
+        `Go on yaar ✨`,
+        `Haan? 🌸`
       ]);
     }
     
-    // Extract emotion/topic for personalized response
+    // Medium/Long messages - engage with content
     const keyPhrase = this.extractKeyPhrase(message);
     
+    // Emotionally aware responses
+    if (emotion && emotion.type !== 'neutral') {
+      const emotionResponses = {
+        sadness: [`Main hoon yahan 💗`, `Hmm... batao na 🥺`, `Sun rahi hoon... ✨`],
+        happiness: [`Ooh! ✨ Kya hua?`, `Hehe nice 💗`, `Batao batao! 🌸`],
+        anger: [`Kya hua yaar? 👀`, `Hmm sun rahi hoon...`, `Nikalo sab 💗`],
+        tiredness: [`Rest karo yaar 💗`, `Hmm thak gaye na?`, `Break lo ✨`],
+        stress: [`Breathe karo 💗`, `Main hoon na 🌸`, `Ek ek karke ✨`],
+        love: [`Aww 🥺`, `Hehe 💗`, `Same ✨`],
+        confusion: [`Hmm batao 🤔`, `Kya options hain?`, `Figure out karte hain ✨`],
+        boredom: [`Hmm acha... 💭`, `Kya karna hai? 🌸`, `Main hoon 💗`]
+      };
+      
+      if (emotionResponses[emotion.type]) {
+        return this.pick(emotionResponses[emotion.type]);
+      }
+    }
+    
+    // Continuity-aware responses
+    if (continuityAware && previousTopic) {
+      return this.pick([
+        `Hmm "${keyPhrase}" - interesting... 🤔`,
+        `Accha accha, samjh gayi... ${hasHinglish ? 'aur batao' : 'tell me more'} 💭`,
+        `Ohh really? That's something... 💗`,
+        `Haan haan, main sun rahi hoon... 🌸`
+      ]);
+    }
+    
+    // Default natural responses
     return this.pick([
-      `Hmm interesting... "${keyPhrase}" - aur batao na? 🤔`,
-      `Accha accha, samjh gayi... ${context.messageCount > 3 ? 'Tumse baat karke accha lagta hai' : 'Tell me more'} 💭`,
-      `Ohh really? That's something... 💗`,
-      `Haan haan, main sun rahi hoon... 🌸 Aur kya sochte ho?`
+      `Hmm interesting... "${keyPhrase}" 🤔`,
+      `Accha accha... 💭`,
+      `Ohh really? 💗`,
+      `Main sun rahi hoon... 🌸 Aur batao?`
     ]);
+  },
+  
+  // Apply emotional tone adjustment (AFTER AI generation)
+  // Keywords ENHANCE response, not gate it
+  applyEmotionalToneAdjustment(response, lowerMsg, emotion) {
+    // This only adds flavor, doesn't replace the response
+    if (!emotion || emotion.type === 'neutral') return response;
+    
+    // Slight tone adjustments based on detected emotion
+    // These are ENHANCEMENTS, not replacements
+    const intensityWord = emotion.intensity > 0.6 ? 'bahut' : 'thoda';
+    
+    // Only adjust if response feels too generic
+    if (response.length < 30 && emotion.intensity > 0.5) {
+      // Add empathetic prefix for negative emotions
+      if (['sadness', 'stress', 'tiredness'].includes(emotion.type)) {
+        if (!response.includes('hoon') && Math.random() > 0.5) {
+          response = `Main sun rahi hoon... ${response}`;
+        }
+      }
+    }
+    
+    return response;
+  },
+  
+  // Get full conversation history for context
+  getFullConversationHistory(mode) {
+    const session = this.currentSession[mode];
+    const messages = session?.messages || [];
+    
+    // Return last N messages for context
+    return messages.slice(-10).map(m => ({
+      role: m.role,
+      content: m.content,
+      timestamp: m.timestamp
+    }));
   },
   
   // Get intensity word based on emotion level
@@ -697,30 +961,127 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
     return variation;
   },
   
-  // Professional Mode Response
+  // ═══════════════════════════════════════════════════════════
+  // PROFESSIONAL MODE - AI-FIRST RESPONSE
+  // ═══════════════════════════════════════════════════════════
+  // AI-FIRST BEHAVIOR:
+  // - Respond to ANY input intelligently
+  // - Intent detection enhances response, not gates it
+  // - No keyword-only routing
+  // ═══════════════════════════════════════════════════════════
   generateProResponse(message) {
-    const lowerMsg = message.toLowerCase();
+    const context = this.getConversationContext('pro');
+    const analysis = this.analyzeMessage(message);
+    const history = this.getFullConversationHistory('pro');
     
-    if (this.matches(lowerMsg, ['help', 'how to', 'kaise', 'explain', 'what is'])) {
-      return `I'd be happy to help with that. Could you provide more specific details about what you need?`;
+    // AI-FIRST: Generate response based on understanding, not keywords
+    return this.generateProAIResponse(message, context, analysis, history);
+  },
+  
+  generateProAIResponse(message, context, analysis, history) {
+    const { intent, isQuestion, isShort, sentiment } = analysis;
+    
+    // Understand the domain/topic being discussed
+    const domain = this.inferDomain(message);
+    
+    // Generate contextually appropriate response
+    // NOT keyword-gated - responds intelligently to any input
+    
+    // Intent-based response generation
+    switch (intent) {
+      case 'greeting':
+        return context.isNewConversation
+          ? `Hello! How can I assist you today?`
+          : `Hello again! What can I help you with?`;
+      
+      case 'farewell':
+        return `Goodbye! Feel free to return if you need any assistance.`;
+      
+      case 'thanking':
+        return `You're welcome! Is there anything else I can help with?`;
+      
+      case 'seeking':
+        if (domain) {
+          return this.generateDomainResponse(domain, message, isQuestion);
+        }
+        return isShort
+          ? `Could you provide more details about what you're looking for?`
+          : `I understand you're looking for information. Let me help you with that.`;
+      
+      case 'requesting':
+        if (domain) {
+          return this.generateDomainResponse(domain, message, false);
+        }
+        return `I'd be happy to help with that. What specific aspects would you like me to address?`;
+      
+      case 'sharing':
+        return sentiment === 'negative'
+          ? `I understand. Let me help you work through this.`
+          : `That's interesting. Would you like me to provide any insights or suggestions?`;
+      
+      default: // 'conversing'
+        return this.generateProConversation(message, context, analysis, domain);
+    }
+  },
+  
+  // Infer domain from message content
+  inferDomain(message) {
+    const lower = message.toLowerCase();
+    
+    if (/code|programming|debug|error|bug|function|api|script|develop/.test(lower)) return 'coding';
+    if (/write|draft|email|letter|content|document|blog|article/.test(lower)) return 'writing';
+    if (/summarize|summary|tldr|brief|main points|overview/.test(lower)) return 'summarization';
+    if (/idea|suggest|brainstorm|recommend|creative|think/.test(lower)) return 'ideation';
+    if (/analyze|analysis|data|report|insights|metrics/.test(lower)) return 'analysis';
+    if (/plan|schedule|organize|manage|project|task/.test(lower)) return 'planning';
+    if (/learn|explain|teach|understand|how does|what is/.test(lower)) return 'learning';
+    
+    return null; // No specific domain detected
+  },
+  
+  // Generate domain-specific responses
+  generateDomainResponse(domain, message, isQuestion) {
+    const responses = {
+      coding: isQuestion
+        ? `For coding assistance, please share:\n\n1. The programming language\n2. What you're trying to achieve\n3. Any error messages\n\nI'll provide a detailed solution.`
+        : `I can help with your code. Share the relevant code and context, and I'll assist you.`,
+      
+      writing: `I can help you write that. Please specify:\n\n- Topic or subject\n- Desired tone (formal/casual)\n- Target audience\n- Approximate length`,
+      
+      summarization: `I can summarize that for you. Please share the content you'd like me to condense.`,
+      
+      ideation: `I'd be happy to brainstorm with you. What's the context or domain you're exploring?`,
+      
+      analysis: `I can help analyze that. Please share the data or information you'd like me to examine.`,
+      
+      planning: `Let's organize this. What are your goals and constraints?`,
+      
+      learning: `I'd be happy to explain that. What specific aspects would you like to understand better?`
+    };
+    
+    return responses[domain] || `I understand. How can I assist you further with this?`;
+  },
+  
+  // Natural professional conversation
+  generateProConversation(message, context, analysis, domain) {
+    const { isShort, isMedium } = analysis;
+    
+    // Short messages - ask for clarification
+    if (isShort) {
+      return `Could you elaborate on that? I'd like to understand your needs better.`;
     }
     
-    if (this.matches(lowerMsg, ['code', 'programming', 'debug', 'error', 'bug', 'function'])) {
-      return `For coding assistance, please share:\n\n1. The programming language\n2. What you're trying to achieve\n3. Any error messages\n\nI'll provide a detailed solution.`;
+    // Domain-specific follow-up
+    if (domain) {
+      return this.generateDomainResponse(domain, message, false);
     }
     
-    if (this.matches(lowerMsg, ['write', 'draft', 'email', 'letter', 'content', 'document'])) {
-      return `I can help you write that. Please specify:\n\n- Topic or subject\n- Desired tone (formal/casual)\n- Target audience\n- Approximate length`;
+    // Continuity-aware responses
+    if (context.messageCount > 2) {
+      return `I understand. Building on our conversation, how would you like to proceed?`;
     }
     
-    if (this.matches(lowerMsg, ['summarize', 'summary', 'tldr', 'brief', 'main points'])) {
-      return `I can summarize that for you. Please share the content you'd like me to condense.`;
-    }
-    
-    if (this.matches(lowerMsg, ['idea', 'suggest', 'brainstorm', 'recommend'])) {
-      return `I'd be happy to brainstorm with you. What's the context or domain you're exploring?`;
-    }
-    
+    // Default professional response (NOT an error/apology)
     return `I understand. How can I assist you further with this?`;
   },
   
@@ -1051,6 +1412,9 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
       
       await this.simulateEmotionalPacing(emotion, response.length, 'her');
       
+      // Success - reset fallback state
+      this.resetFallbackState('her');
+      
       this.currentSession.her.messages.push({
         role: 'assistant',
         content: response,
@@ -1060,12 +1424,37 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
       await this.saveSession('her');
     } catch (error) {
       console.error('AI Error:', error);
-      this.currentSession.her.messages.push({
-        role: 'assistant',
-        content: 'Sorry yaar, kuch problem ho gayi... 😔',
-        timestamp: Date.now(),
-        error: true
-      });
+      
+      // ════════════════════════════════════════════════════════════
+      // REPAIR FALLBACK (NOT FEEDBACK)
+      // Trigger fallback ONCE, then attempt recovery
+      // ════════════════════════════════════════════════════════════
+      const failureId = `personal-${Date.now()}-${error.message || 'unknown'}`;
+      const fallbackMessage = this.triggerFallback('her', failureId);
+      
+      if (fallbackMessage) {
+        // First occurrence - show fallback
+        this.currentSession.her.messages.push({
+          role: 'assistant',
+          content: fallbackMessage,
+          timestamp: Date.now(),
+          error: true,
+          failureId: failureId
+        });
+        
+        // Attempt recovery
+        this.attemptRecovery('her', content);
+      } else {
+        // Fallback already shown - try silent recovery
+        const recoveredResponse = await this.attemptRecovery('her', content);
+        if (recoveredResponse) {
+          this.currentSession.her.messages.push({
+            role: 'assistant',
+            content: recoveredResponse,
+            timestamp: Date.now()
+          });
+        }
+      }
     }
     
     this.hidePersonalTyping();

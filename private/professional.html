@@ -147,13 +147,49 @@
       <!-- Main AI View -->
       <div class="ai-main-view" id="aiMainView">
         <div class="ai-tabs">
-          <button class="ai-tab active" data-tab="analyze">Analyze</button>
+          <button class="ai-tab active" data-tab="actions">Actions</button>
+          <button class="ai-tab" data-tab="analyze">Analyze</button>
           <button class="ai-tab" data-tab="seo">SEO</button>
           <button class="ai-tab" data-tab="recruiter">Recruiter</button>
           <button class="ai-tab" data-tab="skills">Skills</button>
         </div>
 
-        <div class="ai-tab-content active" id="ai-content-analyze">
+        <!-- Actions Chat Interface -->
+        <div class="ai-tab-content active" id="ai-content-actions">
+          <div class="ai-actions-chat">
+            <div class="ai-chat-messages" id="aiChatMessages">
+              <div class="ai-chat-message ai-chat-bot">
+                <div class="ai-chat-avatar">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/>
+                    <path d="M2 12l10 5 10-5"/>
+                  </svg>
+                </div>
+                <div class="ai-chat-content">
+                  <p>Hi! I can help you manage your projects. Try commands like:</p>
+                  <div class="ai-chat-suggestions">
+                    <button class="ai-suggestion-btn" onclick="AIActions.handleSuggestion('list all projects')">List all projects</button>
+                    <button class="ai-suggestion-btn" onclick="AIActions.handleSuggestion('add new project')">Add new project</button>
+                    <button class="ai-suggestion-btn" onclick="AIActions.handleSuggestion('show nav links')">Show nav links</button>
+                    <button class="ai-suggestion-btn" onclick="AIActions.handleSuggestion('help')">Show all commands</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="ai-chat-input-area">
+              <input type="text" class="ai-chat-input" id="aiChatInput" placeholder="Type a command or ask a question..." autocomplete="off">
+              <button class="ai-chat-send" id="aiChatSend" title="Send">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"/>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="ai-tab-content" id="ai-content-analyze">
           <div class="ai-loading">
             <div class="ai-loading-spinner"></div>
             <span>Loading analysis...</span>
@@ -544,7 +580,9 @@
   </nav>
 
   <script src="js/database.js"></script>
+  <script src="js/ai-service.js"></script>
   <script src="js/professional-app.js"></script>
   <script src="js/ai-assistant.js"></script>
+  <script src="js/ai-actions.js"></script>
 </body>
 </html>
