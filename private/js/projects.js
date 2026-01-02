@@ -51,24 +51,6 @@ const PSProjects = (function() {
             </button>
           </div>
           
-          <!-- Pinned: NowHang -->
-          <div class="ps-pinned-project">
-            <a href="/pages/nowhang/" class="ps-project-item pinned" target="_blank">
-              <div class="ps-project-item-color" style="background: linear-gradient(135deg, #ec4899, #f43f5e)"></div>
-              <div class="ps-project-item-content">
-                <div class="ps-project-item-name">
-                  <span>💝</span> NowHang
-                </div>
-                <div class="ps-project-item-meta">
-                  <span>Special Project</span>
-                </div>
-              </div>
-              <svg class="ps-external-icon" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            </a>
-          </div>
-          
-          <div class="ps-projects-divider"></div>
-          
           <div class="ps-projects-list">
             ${renderProjectList()}
           </div>

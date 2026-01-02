@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Professional Space</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/professional.css">
+</head>
+<body>
+  <!-- Auth Check Overlay -->
+  <div class="auth-check" id="authCheck">
+    <div class="auth-check-content">
+      <div class="auth-spinner"></div>
+      <p>Verifying session...</p>
+    </div>
+  </div>
+
+  <!-- Main App -->
+  <div class="pro-app" id="proApp">
+    <!-- Sidebar -->
+    <aside class="pro-sidebar" id="sidebar">
+      <div class="pro-sidebar-header">
+        <a href="index.html" class="pro-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+          <span>Professional</span>
+        </a>
+        <button class="pro-sidebar-toggle" id="sidebarToggle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="pro-nav">
+        <div class="pro-nav-section">
+          <span class="pro-nav-label">Website Control</span>
+        </div>
+        
+        <button class="pro-nav-item active" data-section="projects">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+          <span>Projects</span>
+        </button>
+        
+        <button class="pro-nav-item" data-section="navigation">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+          <span>Navigation</span>
+        </button>
+        
+        <button class="pro-nav-item" data-section="pages">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+          <span>Pages</span>
+        </button>
+        
+        <button class="pro-nav-item" data-section="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+          <span>Site Settings</span>
+        </button>
+      </nav>
+
+      <div class="pro-sidebar-footer">
+        <a href="index.html" class="pro-nav-item pro-nav-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+          <span>Back to Dashboard</span>
+        </a>
+        
+        <button class="pro-nav-item pro-nav-lock" id="lockBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <span>Lock</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- AI Panel Toggle -->
+    <button class="ai-panel-toggle" id="aiPanelToggle" title="AI Assistant">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+      <span class="ai-toggle-label">AI</span>
+    </button>
+
+    <!-- AI Panel -->
+    <aside class="ai-panel" id="aiPanel">
+      <div class="ai-panel-header">
+        <div class="ai-panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+          <span>AI Assistant</span>
+        </div>
+        <button class="ai-panel-close" id="aiPanelClose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- API Key Setup -->
+      <div class="ai-setup-view" id="aiSetupView" style="display: none;">
+        <div class="ai-setup-content">
+          <h4>Setup AI</h4>
+          <p>Enter your Gemini API key to enable AI features. Get one free at <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a></p>
+          <input type="password" class="ai-input" id="aiApiKeyInput" placeholder="AIza...">
+          <button class="ai-btn ai-btn-primary ai-btn-full" id="aiSaveApiKey">Save API Key</button>
+          <p class="ai-hint">API key stored locally. Skip for basic features.</p>
+          <button class="ai-btn ai-btn-secondary ai-btn-full" onclick="AIAssistant.hideApiKeySetup()">Skip for now</button>
+        </div>
+      </div>
+
+      <!-- Main AI View -->
+      <div class="ai-main-view" id="aiMainView">
+        <div class="ai-tabs">
+          <button class="ai-tab active" data-tab="analyze">Analyze</button>
+          <button class="ai-tab" data-tab="seo">SEO</button>
+          <button class="ai-tab" data-tab="recruiter">Recruiter</button>
+          <button class="ai-tab" data-tab="skills">Skills</button>
+        </div>
+
+        <div class="ai-tab-content active" id="ai-content-analyze">
+          <div class="ai-loading">
+            <div class="ai-loading-spinner"></div>
+            <span>Loading analysis...</span>
+          </div>
+        </div>
+
+        <div class="ai-tab-content" id="ai-content-seo">
+          <div class="ai-loading">
+            <div class="ai-loading-spinner"></div>
+            <span>Loading SEO data...</span>
+          </div>
+        </div>
+
+        <div class="ai-tab-content" id="ai-content-recruiter">
+          <div class="ai-loading">
+            <div class="ai-loading-spinner"></div>
+            <span>Loading recruiter view...</span>
+          </div>
+        </div>
+
+        <div class="ai-tab-content" id="ai-content-skills">
+          <div class="ai-loading">
+            <div class="ai-loading-spinner"></div>
+            <span>Loading skills map...</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="pro-main">
+      <!-- Projects Section -->
+      <section class="pro-section active" id="section-projects">
+        <div class="pro-section-header">
+          <div class="pro-section-title-group">
+            <h2 class="pro-section-title">Projects Manager</h2>
+            <p class="pro-section-subtitle">Manage your portfolio projects</p>
+          </div>
+          <div class="pro-section-actions">
+            <button class="pro-btn pro-btn-secondary" id="syncProjectsBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"/>
+                <polyline points="1 20 1 14 7 14"/>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+              </svg>
+              Sync
+            </button>
+            <button class="pro-btn pro-btn-primary" id="newProjectBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              New Project
+            </button>
+          </div>
+        </div>
+        
+        <div class="pro-workspace">
+          <div class="pro-filters">
+            <div class="pro-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input type="text" class="pro-search-input" id="projectsSearch" placeholder="Search projects...">
+            </div>
+            <select class="pro-select" id="projectsFilter">
+              <option value="all">All Status</option>
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+              <option value="hidden">Hidden</option>
+            </select>
+          </div>
+          
+          <div class="pro-projects-grid" id="projectsGrid">
+            <!-- Projects loaded dynamically -->
+          </div>
+          
+          <div class="pro-empty-state" id="projectsEmpty" style="display: none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            </svg>
+            <h3>No projects yet</h3>
+            <p>Create your first project to get started</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Navigation Section -->
+      <section class="pro-section" id="section-navigation">
+        <div class="pro-section-header">
+          <div class="pro-section-title-group">
+            <h2 class="pro-section-title">Navigation Manager</h2>
+            <p class="pro-section-subtitle">Configure website navigation links</p>
+          </div>
+          <div class="pro-section-actions">
+            <button class="pro-btn pro-btn-secondary" id="syncNavBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"/>
+                <polyline points="1 20 1 14 7 14"/>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+              </svg>
+              Sync
+            </button>
+            <button class="pro-btn pro-btn-primary" id="newNavBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Add Link
+            </button>
+          </div>
+        </div>
+        
+        <div class="pro-workspace">
+          <div class="pro-nav-list" id="navList">
+            <!-- Navigation links loaded dynamically -->
+          </div>
+          
+          <div class="pro-empty-state" id="navEmpty" style="display: none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+            <h3>No navigation links</h3>
+            <p>Add links to configure your site navigation</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pages Section -->
+      <section class="pro-section" id="section-pages">
+        <div class="pro-section-header">
+          <div class="pro-section-title-group">
+            <h2 class="pro-section-title">Pages Manager</h2>
+            <p class="pro-section-subtitle">Manage public and hidden pages</p>
+          </div>
+          <div class="pro-section-actions">
+            <button class="pro-btn pro-btn-secondary" id="syncPagesBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="23 4 23 10 17 10"/>
+                <polyline points="1 20 1 14 7 14"/>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+              </svg>
+              Sync
+            </button>
+            <button class="pro-btn pro-btn-primary" id="newPageBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19"/>
+                <line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Add Page
+            </button>
+          </div>
+        </div>
+        
+        <div class="pro-workspace">
+          <div class="pro-pages-container">
+            <div class="pro-pages-section">
+              <div class="pro-pages-header">
+                <h3>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                  </svg>
+                  Public Pages
+                </h3>
+                <span class="pro-pages-count" id="publicPagesCount">0</span>
+              </div>
+              <div class="pro-pages-list" id="publicPagesList">
+                <!-- Public pages loaded dynamically -->
+              </div>
+            </div>
+            
+            <div class="pro-pages-section">
+              <div class="pro-pages-header">
+                <h3>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  </svg>
+                  Hidden Pages
+                </h3>
+                <span class="pro-pages-count hidden" id="hiddenPagesCount">0</span>
+              </div>
+              <div class="pro-pages-list" id="hiddenPagesList">
+                <!-- Hidden pages loaded dynamically -->
+              </div>
+            </div>
+          </div>
+          
+          <div class="pro-empty-state" id="pagesEmpty" style="display: none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+            <h3>No pages configured</h3>
+            <p>Add pages to manage your site structure</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Site Settings Section -->
+      <section class="pro-section" id="section-settings">
+        <div class="pro-section-header">
+          <div class="pro-section-title-group">
+            <h2 class="pro-section-title">Site Settings</h2>
+            <p class="pro-section-subtitle">Configure your website identity and appearance</p>
+          </div>
+          <div class="pro-section-actions">
+            <button class="pro-btn pro-btn-primary" id="saveSettingsBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+              </svg>
+              Save Changes
+            </button>
+          </div>
+        </div>
+        
+        <div class="pro-workspace">
+          <div class="pro-settings-panel">
+            <!-- Identity -->
+            <div class="pro-settings-section">
+              <h3 class="pro-settings-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                Site Identity
+              </h3>
+              <div class="pro-settings-grid">
+                <div class="pro-field">
+                  <label class="pro-label">Site Name</label>
+                  <input type="text" class="pro-input" id="siteName" placeholder="Your Site Name">
+                </div>
+                <div class="pro-field">
+                  <label class="pro-label">Tagline</label>
+                  <input type="text" class="pro-input" id="siteTagline" placeholder="Short description">
+                </div>
+                <div class="pro-field pro-field-full">
+                  <label class="pro-label">Author Bio</label>
+                  <textarea class="pro-textarea" id="authorBio" rows="3" placeholder="About you..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Social Links -->
+            <div class="pro-settings-section">
+              <h3 class="pro-settings-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                </svg>
+                Social Links
+              </h3>
+              <div class="pro-settings-grid">
+                <div class="pro-field">
+                  <label class="pro-label">GitHub</label>
+                  <input type="url" class="pro-input" id="socialGithub" placeholder="https://github.com/username">
+                </div>
+                <div class="pro-field">
+                  <label class="pro-label">LinkedIn</label>
+                  <input type="url" class="pro-input" id="socialLinkedin" placeholder="https://linkedin.com/in/username">
+                </div>
+                <div class="pro-field">
+                  <label class="pro-label">Twitter/X</label>
+                  <input type="url" class="pro-input" id="socialTwitter" placeholder="https://x.com/username">
+                </div>
+                <div class="pro-field">
+                  <label class="pro-label">Instagram</label>
+                  <input type="url" class="pro-input" id="socialInstagram" placeholder="https://instagram.com/username">
+                </div>
+                <div class="pro-field">
+                  <label class="pro-label">Email</label>
+                  <input type="email" class="pro-input" id="socialEmail" placeholder="you@example.com">
+                </div>
+              </div>
+            </div>
+
+            <!-- Appearance -->
+            <div class="pro-settings-section">
+              <h3 class="pro-settings-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="5"/>
+                  <line x1="12" y1="1" x2="12" y2="3"/>
+                  <line x1="12" y1="21" x2="12" y2="23"/>
+                  <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                  <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                  <line x1="1" y1="12" x2="3" y2="12"/>
+                  <line x1="21" y1="12" x2="23" y2="12"/>
+                </svg>
+                Appearance
+              </h3>
+              <div class="pro-settings-grid">
+                <div class="pro-field">
+                  <label class="pro-label">Accent Color</label>
+                  <input type="color" class="pro-color-input" id="accentColor" value="#6366f1">
+                </div>
+                <div class="pro-field">
+                  <label class="pro-label">Theme Mode</label>
+                  <select class="pro-select" id="themeMode">
+                    <option value="dark">Dark</option>
+                    <option value="light">Light</option>
+                    <option value="system">System</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- SEO -->
+            <div class="pro-settings-section">
+              <h3 class="pro-settings-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                SEO & Meta
+              </h3>
+              <div class="pro-settings-grid">
+                <div class="pro-field pro-field-full">
+                  <label class="pro-label">Meta Description</label>
+                  <textarea class="pro-textarea" id="metaDescription" rows="2" placeholder="Site description for search engines..."></textarea>
+                </div>
+                <div class="pro-field pro-field-full">
+                  <label class="pro-label">Keywords</label>
+                  <input type="text" class="pro-input" id="metaKeywords" placeholder="keyword1, keyword2, keyword3">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="pro-toast-container" id="toastContainer"></div>
+
+  <!-- Modal Overlay -->
+  <div class="pro-modal-overlay" id="modalOverlay">
+    <div class="pro-modal" id="modalContent">
+      <div class="pro-modal-header">
+        <h3 id="modalTitle">Modal</h3>
+        <button class="pro-modal-close" id="modalClose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="pro-modal-body" id="modalBody">
+        <!-- Modal content loaded dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Navigation -->
+  <nav class="pro-mobile-nav" id="mobileNav">
+    <button class="pro-mobile-nav-item active" data-section="projects">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+      </svg>
+      <span>Projects</span>
+    </button>
+    <button class="pro-mobile-nav-item" data-section="navigation">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+      <span>Nav</span>
+    </button>
+    <button class="pro-mobile-nav-item" data-section="pages">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+      <span>Pages</span>
+    </button>
+    <button class="pro-mobile-nav-item" data-section="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+      </svg>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <script src="js/database.js"></script>
+  <script src="js/professional-app.js"></script>
+  <script src="js/ai-assistant.js"></script>
+</body>
+</html>

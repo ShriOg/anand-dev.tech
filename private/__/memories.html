@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memories | She</title>
+  <link rel="stylesheet" href="../css/personal.css">
+  <style>
+    .memories-container {
+      padding: 1.5rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .memory-card {
+      background: var(--bg-secondary);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border-default);
+      transition: border-color 0.2s ease;
+    }
+    
+    .memory-card:hover {
+      border-color: var(--her-accent-muted);
+    }
+    
+    .memory-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+    
+    .memory-date {
+      font-size: 0.75rem;
+      color: var(--her-accent);
+      background: var(--her-accent-subtle);
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+    }
+    
+    .memory-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .memory-action-btn {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: transparent;
+      border: 1px solid var(--border-default);
+      color: var(--text-tertiary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.875rem;
+    }
+    
+    .memory-action-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+    }
+    
+    .memory-action-btn.delete:hover {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: var(--error);
+      color: var(--error);
+    }
+    
+    .memory-title {
+      font-size: 1.125rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+    }
+    
+    .memory-content {
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+    
+    .memory-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .memory-tag {
+      font-size: 0.6875rem;
+      padding: 0.25rem 0.5rem;
+      background: var(--bg-tertiary);
+      border-radius: 0.25rem;
+      color: var(--text-tertiary);
+    }
+    
+    .no-memories {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-muted);
+    }
+    
+    .no-memories-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    
+    /* Add Memory Form */
+    .add-memory-form {
+      background: var(--bg-secondary);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border: 1px solid var(--her-accent-muted);
+    }
+    
+    .add-memory-form h3 {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--her-accent);
+      margin-bottom: 1rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .form-label {
+      display: block;
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+    
+    .form-input,
+    .form-textarea {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      border-radius: 0.625rem;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.875rem;
+      transition: border-color 0.2s ease;
+    }
+    
+    .form-input:focus,
+    .form-textarea:focus {
+      outline: none;
+      border-color: var(--her-accent);
+    }
+    
+    .form-textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    
+    .memories-filter {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+      padding: 0.5rem 1rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 2rem;
+      color: var(--text-secondary);
+      font-size: 0.8125rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: var(--her-accent-subtle);
+      border-color: var(--her-accent-muted);
+      color: var(--her-accent);
+    }
+  </style>
+</head>
+<body>
+  <!-- Auth Check -->
+  <div id="authCheck" class="auth-checking">
+    <div class="auth-checking-spinner"></div>
+  </div>
+  
+  <!-- Ambient Background -->
+  <div class="her-ambient-bg">
+    <div class="her-ambient-orb her-ambient-orb-1"></div>
+    <div class="her-ambient-orb her-ambient-orb-2"></div>
+    <div class="her-ambient-orb her-ambient-orb-3"></div>
+  </div>
+  
+  <!-- Main App -->
+  <div id="memoriesApp" class="her-app">
+    <!-- Header -->
+    <header class="her-header">
+      <div class="her-header-left">
+        <a href="../personal.html" class="her-back-btn">← Back</a>
+        <h1 class="her-header-title">Memories</h1>
+      </div>
+      <div class="her-header-right">
+        <button class="her-btn her-btn-primary" id="addMemoryBtn">
+          <span>+ New Memory</span>
+        </button>
+      </div>
+    </header>
+    
+    <!-- Content -->
+    <main class="her-main" style="padding: 0;">
+      <div class="memories-container">
+        <!-- Add Memory Form (hidden by default) -->
+        <div id="addMemoryForm" class="add-memory-form" style="display: none;">
+          <h3>💭 Save a Memory</h3>
+          <div class="form-group">
+            <label class="form-label">Title</label>
+            <input type="text" id="memoryTitle" class="form-input" placeholder="What's this memory about?">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Memory</label>
+            <textarea id="memoryContent" class="form-textarea" placeholder="Describe the moment, feelings, details..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tags (comma separated)</label>
+            <input type="text" id="memoryTags" class="form-input" placeholder="love, happy, date, special">
+          </div>
+          <div class="form-actions">
+            <button class="her-btn her-btn-secondary" onclick="MemoriesApp.hideAddForm()">Cancel</button>
+            <button class="her-btn her-btn-primary" onclick="MemoriesApp.saveMemory()">Save Memory</button>
+          </div>
+        </div>
+        
+        <!-- Filter -->
+        <div class="memories-filter" id="memoriesFilter">
+          <button class="filter-btn active" data-filter="all">All</button>
+        </div>
+        
+        <!-- Memories List -->
+        <div id="memoriesList"></div>
+        
+        <!-- Empty State -->
+        <div id="noMemories" class="no-memories" style="display: none;">
+          <div class="no-memories-icon">💝</div>
+          <p>No memories saved yet</p>
+          <p style="font-size: 0.8125rem; margin-top: 0.5rem; color: var(--text-tertiary);">
+            Save your special moments here
+          </p>
+          <button class="her-btn her-btn-primary" style="margin-top: 1.5rem;" onclick="MemoriesApp.showAddForm()">
+            Save First Memory
+          </button>
+        </div>
+      </div>
+    </main>
+    
+    <!-- Toast Container -->
+    <div id="toastContainer" class="her-toast-container"></div>
+  </div>
+  
+  <script src="../js/database.js"></script>
+  <script>
+    const MemoriesApp = {
+      SESSION_KEY: 'ps_session_active',
+      memories: [],
+      currentFilter: 'all',
+      allTags: [],
+      
+      async init() {
+        if (sessionStorage.getItem(this.SESSION_KEY) !== 'true') {
+          window.location.href = '../index.html';
+          return;
+        }
+        
+        document.getElementById('authCheck').classList.add('hidden');
+        document.getElementById('memoriesApp').classList.add('visible');
+        
+        await Database.init();
+        await this.loadMemories();
+        this.bindEvents();
+      },
+      
+      bindEvents() {
+        document.getElementById('addMemoryBtn')?.addEventListener('click', () => this.showAddForm());
+      },
+      
+      async loadMemories() {
+        try {
+          this.memories = await Database.getAll('memories') || [];
+          this.memories.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+          this.extractTags();
+          this.renderFilters();
+          this.renderMemories();
+        } catch (e) {
+          this.memories = [];
+          this.renderMemories();
+        }
+      },
+      
+      extractTags() {
+        const tagSet = new Set();
+        this.memories.forEach(m => {
+          (m.tags || []).forEach(t => tagSet.add(t.toLowerCase()));
+        });
+        this.allTags = Array.from(tagSet).sort();
+      },
+      
+      renderFilters() {
+        const container = document.getElementById('memoriesFilter');
+        container.innerHTML = `
+          <button class="filter-btn ${this.currentFilter === 'all' ? 'active' : ''}" data-filter="all" onclick="MemoriesApp.setFilter('all')">All</button>
+          ${this.allTags.map(tag => `
+            <button class="filter-btn ${this.currentFilter === tag ? 'active' : ''}" data-filter="${tag}" onclick="MemoriesApp.setFilter('${tag}')">${tag}</button>
+          `).join('')}
+        `;
+      },
+      
+      setFilter(filter) {
+        this.currentFilter = filter;
+        this.renderFilters();
+        this.renderMemories();
+      },
+      
+      renderMemories() {
+        const container = document.getElementById('memoriesList');
+        const empty = document.getElementById('noMemories');
+        
+        let filtered = this.memories;
+        if (this.currentFilter !== 'all') {
+          filtered = this.memories.filter(m => 
+            (m.tags || []).some(t => t.toLowerCase() === this.currentFilter)
+          );
+        }
+        
+        if (filtered.length === 0) {
+          container.innerHTML = '';
+          empty.style.display = this.memories.length === 0 ? 'block' : 'none';
+          if (this.memories.length > 0 && filtered.length === 0) {
+            container.innerHTML = `
+              <div style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                No memories with this tag
+              </div>
+            `;
+          }
+          return;
+        }
+        
+        empty.style.display = 'none';
+        container.innerHTML = filtered.map(memory => `
+          <div class="memory-card">
+            <div class="memory-header">
+              <span class="memory-date">${this.formatDate(memory.createdAt)}</span>
+              <div class="memory-actions">
+                <button class="memory-action-btn" onclick="MemoriesApp.editMemory('${memory.id}')" title="Edit">✏️</button>
+                <button class="memory-action-btn delete" onclick="MemoriesApp.deleteMemory('${memory.id}')" title="Delete">🗑️</button>
+              </div>
+            </div>
+            <h3 class="memory-title">${this.escapeHtml(memory.title || 'Untitled')}</h3>
+            <p class="memory-content">${this.escapeHtml(memory.content || '')}</p>
+            ${memory.tags && memory.tags.length > 0 ? `
+              <div class="memory-tags">
+                ${memory.tags.map(tag => `<span class="memory-tag">${this.escapeHtml(tag)}</span>`).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `).join('');
+      },
+      
+      showAddForm() {
+        document.getElementById('addMemoryForm').style.display = 'block';
+        document.getElementById('memoryTitle').value = '';
+        document.getElementById('memoryContent').value = '';
+        document.getElementById('memoryTags').value = '';
+        document.getElementById('memoryTitle').focus();
+      },
+      
+      hideAddForm() {
+        document.getElementById('addMemoryForm').style.display = 'none';
+      },
+      
+      async saveMemory() {
+        const title = document.getElementById('memoryTitle')?.value?.trim();
+        const content = document.getElementById('memoryContent')?.value?.trim();
+        const tagsInput = document.getElementById('memoryTags')?.value?.trim();
+        
+        if (!title || !content) {
+          this.toast('Please fill title and memory', 'error');
+          return;
+        }
+        
+        const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
+        
+        try {
+          await Database.add('memories', {
+            id: crypto.randomUUID(),
+            title,
+            content,
+            tags,
+            createdAt: Date.now()
+          });
+          
+          this.hideAddForm();
+          await this.loadMemories();
+          this.toast('Memory saved 💕', 'success');
+        } catch (e) {
+          this.toast('Failed to save memory', 'error');
+        }
+      },
+      
+      editMemory(id) {
+        // Find and populate form
+        const memory = this.memories.find(m => m.id === id);
+        if (!memory) return;
+        
+        document.getElementById('addMemoryForm').style.display = 'block';
+        document.getElementById('memoryTitle').value = memory.title || '';
+        document.getElementById('memoryContent').value = memory.content || '';
+        document.getElementById('memoryTags').value = (memory.tags || []).join(', ');
+        
+        // Store editing state
+        this.editingId = id;
+        
+        // Temporarily change save button behavior
+        const saveBtn = document.querySelector('.add-memory-form .her-btn-primary');
+        saveBtn.textContent = 'Update Memory';
+        saveBtn.onclick = () => this.updateMemory();
+      },
+      
+      async updateMemory() {
+        if (!this.editingId) return;
+        
+        const title = document.getElementById('memoryTitle')?.value?.trim();
+        const content = document.getElementById('memoryContent')?.value?.trim();
+        const tagsInput = document.getElementById('memoryTags')?.value?.trim();
+        
+        if (!title || !content) {
+          this.toast('Please fill title and memory', 'error');
+          return;
+        }
+        
+        const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [];
+        
+        const existing = this.memories.find(m => m.id === this.editingId);
+        if (!existing) return;
+        
+        try {
+          await Database.put('memories', {
+            ...existing,
+            title,
+            content,
+            tags,
+            updatedAt: Date.now()
+          });
+          
+          this.editingId = null;
+          this.hideAddForm();
+          
+          // Reset button
+          const saveBtn = document.querySelector('.add-memory-form .her-btn-primary');
+          saveBtn.textContent = 'Save Memory';
+          saveBtn.onclick = () => this.saveMemory();
+          
+          await this.loadMemories();
+          this.toast('Memory updated', 'success');
+        } catch (e) {
+          this.toast('Failed to update', 'error');
+        }
+      },
+      
+      async deleteMemory(id) {
+        if (!confirm('Delete this memory forever?')) return;
+        
+        try {
+          await Database.delete('memories', id);
+          await this.loadMemories();
+          this.toast('Memory deleted', 'success');
+        } catch (e) {
+          this.toast('Failed to delete', 'error');
+        }
+      },
+      
+      toast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `her-toast ${type}`;
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.classList.add('hiding');
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      },
+      
+      escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      },
+      
+      formatDate(ts) {
+        return ts ? new Date(ts).toLocaleDateString('en-US', { 
+          weekday: 'short',
+          month: 'short', 
+          day: 'numeric', 
+          year: 'numeric' 
+        }) : '';
+      }
+    };
+    
+    document.addEventListener('DOMContentLoaded', () => MemoriesApp.init());
+  </script>
+</body>
+</html>

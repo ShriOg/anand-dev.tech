@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Journal | She</title>
+  <link rel="stylesheet" href="../css/personal.css">
+  <style>
+    .journal-container {
+      padding: 1.5rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    /* Today's Entry */
+    .journal-today {
+      background: var(--bg-secondary);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid var(--her-accent-muted);
+    }
+    
+    .journal-today-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .journal-today-title {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--her-accent);
+    }
+    
+    .journal-today-date {
+      font-size: 0.8125rem;
+      color: var(--text-tertiary);
+    }
+    
+    .journal-prompt {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      font-style: italic;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background: var(--bg-tertiary);
+      border-radius: 0.75rem;
+      border-left: 3px solid var(--her-accent);
+    }
+    
+    .journal-textarea {
+      width: 100%;
+      min-height: 200px;
+      padding: 1rem;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      border-radius: 0.75rem;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.9375rem;
+      line-height: 1.7;
+      resize: vertical;
+      transition: border-color 0.2s ease;
+    }
+    
+    .journal-textarea:focus {
+      outline: none;
+      border-color: var(--her-accent);
+    }
+    
+    .journal-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1rem;
+    }
+    
+    .journal-char-count {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    
+    .journal-save-status {
+      font-size: 0.75rem;
+      color: var(--success);
+    }
+    
+    /* Past Entries */
+    .journal-history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .journal-history-title {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    
+    .journal-entry {
+      background: var(--bg-secondary);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid var(--border-default);
+      transition: border-color 0.2s ease;
+    }
+    
+    .journal-entry:hover {
+      border-color: var(--her-accent-muted);
+    }
+    
+    .journal-entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+    
+    .journal-entry-date {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--her-accent);
+    }
+    
+    .journal-entry-day {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+    }
+    
+    .journal-entry-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .journal-entry-btn {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: transparent;
+      border: 1px solid var(--border-default);
+      color: var(--text-tertiary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.75rem;
+    }
+    
+    .journal-entry-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+    }
+    
+    .journal-entry-btn.delete:hover {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: var(--error);
+      color: var(--error);
+    }
+    
+    .journal-entry-content {
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+    
+    .journal-entry-content.collapsed {
+      max-height: 150px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .journal-entry-content.collapsed::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background: linear-gradient(transparent, var(--bg-secondary));
+    }
+    
+    .journal-entry-expand {
+      margin-top: 0.75rem;
+      background: none;
+      border: none;
+      color: var(--her-accent);
+      font-size: 0.8125rem;
+      cursor: pointer;
+      padding: 0;
+    }
+    
+    .journal-entry-expand:hover {
+      text-decoration: underline;
+    }
+    
+    .no-entries {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: var(--text-muted);
+    }
+    
+    .no-entries-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    
+    /* Prompts */
+    .journal-prompts {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    
+    .prompt-btn {
+      padding: 0.5rem 0.75rem;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      border-radius: 1rem;
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .prompt-btn:hover {
+      background: var(--her-accent-subtle);
+      border-color: var(--her-accent-muted);
+      color: var(--her-accent);
+    }
+  </style>
+</head>
+<body>
+  <!-- Auth Check -->
+  <div id="authCheck" class="auth-checking">
+    <div class="auth-checking-spinner"></div>
+  </div>
+  
+  <!-- Ambient Background -->
+  <div class="her-ambient-bg">
+    <div class="her-ambient-orb her-ambient-orb-1"></div>
+    <div class="her-ambient-orb her-ambient-orb-2"></div>
+    <div class="her-ambient-orb her-ambient-orb-3"></div>
+  </div>
+  
+  <!-- Main App -->
+  <div id="journalApp" class="her-app">
+    <!-- Header -->
+    <header class="her-header">
+      <div class="her-header-left">
+        <a href="../personal.html" class="her-back-btn">← Back</a>
+        <h1 class="her-header-title">Daily Journal</h1>
+      </div>
+    </header>
+    
+    <!-- Content -->
+    <main class="her-main" style="padding: 0;">
+      <div class="journal-container">
+        <!-- Today's Entry -->
+        <div class="journal-today">
+          <div class="journal-today-header">
+            <div class="journal-today-title">📝 Today's Entry</div>
+            <div class="journal-today-date" id="todayDate"></div>
+          </div>
+          
+          <!-- Random Prompt -->
+          <div class="journal-prompt" id="dailyPrompt">
+            What made you smile today?
+          </div>
+          
+          <!-- Quick Prompts -->
+          <div class="journal-prompts">
+            <button class="prompt-btn" onclick="JournalApp.setPrompt('What made you smile today?')">😊 Smile</button>
+            <button class="prompt-btn" onclick="JournalApp.setPrompt('What are you grateful for?')">🙏 Grateful</button>
+            <button class="prompt-btn" onclick="JournalApp.setPrompt('How do you feel right now?')">💭 Feelings</button>
+            <button class="prompt-btn" onclick="JournalApp.setPrompt('What did you learn today?')">📚 Learning</button>
+            <button class="prompt-btn" onclick="JournalApp.setPrompt('What would make tomorrow great?')">✨ Tomorrow</button>
+          </div>
+          
+          <textarea id="journalTextarea" class="journal-textarea" placeholder="Start writing..."></textarea>
+          
+          <div class="journal-actions">
+            <span class="journal-char-count" id="charCount">0 characters</span>
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+              <span class="journal-save-status" id="saveStatus"></span>
+              <button class="her-btn her-btn-primary" onclick="JournalApp.saveEntry()">Save Entry</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Past Entries -->
+        <div class="journal-history-header">
+          <h3 class="journal-history-title">Past Entries</h3>
+        </div>
+        
+        <div id="journalHistory"></div>
+        <div id="noEntries" class="no-entries" style="display: none;">
+          <div class="no-entries-icon">📖</div>
+          <p>No journal entries yet</p>
+          <p style="font-size: 0.8125rem; margin-top: 0.5rem; color: var(--text-tertiary);">
+            Start writing your daily thoughts
+          </p>
+        </div>
+      </div>
+    </main>
+    
+    <!-- Toast Container -->
+    <div id="toastContainer" class="her-toast-container"></div>
+  </div>
+  
+  <script src="../js/database.js"></script>
+  <script>
+    const JournalApp = {
+      SESSION_KEY: 'ps_session_active',
+      entries: [],
+      todayEntry: null,
+      autoSaveTimer: null,
+      
+      prompts: [
+        "What made you smile today?",
+        "What are you grateful for?",
+        "How do you feel right now?",
+        "What did you learn today?",
+        "What would make tomorrow great?",
+        "Who made your day better?",
+        "What challenged you today?",
+        "What are you looking forward to?",
+        "What's something kind you did?",
+        "What memory from today do you want to keep?",
+        "How did you take care of yourself?",
+        "What made you proud today?",
+        "What do you need to let go of?",
+        "What surprised you today?",
+        "What do you wish you said?"
+      ],
+      
+      async init() {
+        if (sessionStorage.getItem(this.SESSION_KEY) !== 'true') {
+          window.location.href = '../index.html';
+          return;
+        }
+        
+        document.getElementById('authCheck').classList.add('hidden');
+        document.getElementById('journalApp').classList.add('visible');
+        
+        await Database.init();
+        
+        // Set today's date
+        const today = new Date();
+        document.getElementById('todayDate').textContent = today.toLocaleDateString('en-US', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric'
+        });
+        
+        // Random prompt
+        this.setRandomPrompt();
+        
+        await this.loadEntries();
+        this.bindEvents();
+      },
+      
+      bindEvents() {
+        const textarea = document.getElementById('journalTextarea');
+        
+        textarea?.addEventListener('input', () => {
+          this.updateCharCount();
+          this.schedulAutoSave();
+        });
+      },
+      
+      setRandomPrompt() {
+        const prompt = this.prompts[Math.floor(Math.random() * this.prompts.length)];
+        document.getElementById('dailyPrompt').textContent = prompt;
+      },
+      
+      setPrompt(prompt) {
+        document.getElementById('dailyPrompt').textContent = prompt;
+      },
+      
+      updateCharCount() {
+        const textarea = document.getElementById('journalTextarea');
+        const count = textarea?.value?.length || 0;
+        document.getElementById('charCount').textContent = `${count} characters`;
+      },
+      
+      schedulAutoSave() {
+        if (this.autoSaveTimer) {
+          clearTimeout(this.autoSaveTimer);
+        }
+        
+        this.autoSaveTimer = setTimeout(() => {
+          this.autoSave();
+        }, 2000);
+      },
+      
+      async autoSave() {
+        const content = document.getElementById('journalTextarea')?.value?.trim();
+        if (!content) return;
+        
+        await this.saveEntry(true);
+      },
+      
+      async loadEntries() {
+        try {
+          this.entries = await Database.getAll('journal') || [];
+          this.entries.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+          
+          // Check for today's entry
+          const today = new Date().toISOString().split('T')[0];
+          this.todayEntry = this.entries.find(e => e.date === today);
+          
+          if (this.todayEntry) {
+            document.getElementById('journalTextarea').value = this.todayEntry.content || '';
+            this.updateCharCount();
+          }
+          
+          this.renderHistory();
+        } catch (e) {
+          this.entries = [];
+          this.renderHistory();
+        }
+      },
+      
+      async saveEntry(isAutoSave = false) {
+        const content = document.getElementById('journalTextarea')?.value?.trim();
+        
+        if (!content) {
+          if (!isAutoSave) this.toast('Write something first', 'error');
+          return;
+        }
+        
+        const today = new Date().toISOString().split('T')[0];
+        
+        const entry = {
+          id: this.todayEntry?.id || crypto.randomUUID(),
+          date: today,
+          content,
+          timestamp: Date.now()
+        };
+        
+        try {
+          if (this.todayEntry) {
+            await Database.put('journal', entry);
+          } else {
+            await Database.add('journal', entry);
+          }
+          
+          this.todayEntry = entry;
+          
+          if (isAutoSave) {
+            document.getElementById('saveStatus').textContent = 'Auto-saved';
+            setTimeout(() => {
+              document.getElementById('saveStatus').textContent = '';
+            }, 2000);
+          } else {
+            await this.loadEntries();
+            this.toast('Entry saved 💕', 'success');
+          }
+        } catch (e) {
+          if (!isAutoSave) this.toast('Failed to save', 'error');
+        }
+      },
+      
+      renderHistory() {
+        const container = document.getElementById('journalHistory');
+        const empty = document.getElementById('noEntries');
+        
+        // Skip today's entry, show past entries
+        const today = new Date().toISOString().split('T')[0];
+        const history = this.entries.filter(e => e.date !== today).slice(0, 30);
+        
+        if (history.length === 0) {
+          container.innerHTML = '';
+          empty.style.display = 'block';
+          return;
+        }
+        
+        empty.style.display = 'none';
+        container.innerHTML = history.map(entry => {
+          const isLong = (entry.content?.length || 0) > 500;
+          
+          return `
+            <div class="journal-entry">
+              <div class="journal-entry-header">
+                <div>
+                  <div class="journal-entry-date">${this.formatDate(entry.date)}</div>
+                  <div class="journal-entry-day">${this.getDayName(entry.date)}</div>
+                </div>
+                <div class="journal-entry-actions">
+                  <button class="journal-entry-btn delete" onclick="JournalApp.deleteEntry('${entry.id}')" title="Delete">×</button>
+                </div>
+              </div>
+              <div class="journal-entry-content ${isLong ? 'collapsed' : ''}" id="content-${entry.id}">
+                ${this.escapeHtml(entry.content || '')}
+              </div>
+              ${isLong ? `
+                <button class="journal-entry-expand" onclick="JournalApp.toggleExpand('${entry.id}')">
+                  Read more
+                </button>
+              ` : ''}
+            </div>
+          `;
+        }).join('');
+      },
+      
+      toggleExpand(id) {
+        const content = document.getElementById(`content-${id}`);
+        const btn = content?.nextElementSibling;
+        
+        if (content?.classList.contains('collapsed')) {
+          content.classList.remove('collapsed');
+          if (btn) btn.textContent = 'Show less';
+        } else {
+          content?.classList.add('collapsed');
+          if (btn) btn.textContent = 'Read more';
+        }
+      },
+      
+      async deleteEntry(id) {
+        if (!confirm('Delete this journal entry?')) return;
+        
+        try {
+          await Database.delete('journal', id);
+          
+          if (this.todayEntry?.id === id) {
+            this.todayEntry = null;
+            document.getElementById('journalTextarea').value = '';
+            this.updateCharCount();
+          }
+          
+          await this.loadEntries();
+          this.toast('Entry deleted', 'success');
+        } catch (e) {
+          this.toast('Failed to delete', 'error');
+        }
+      },
+      
+      toast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `her-toast ${type}`;
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.classList.add('hiding');
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      },
+      
+      escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      },
+      
+      formatDate(dateStr) {
+        if (!dateStr) return '';
+        const date = new Date(dateStr + 'T00:00:00');
+        return date.toLocaleDateString('en-US', { 
+          month: 'long', 
+          day: 'numeric',
+          year: 'numeric'
+        });
+      },
+      
+      getDayName(dateStr) {
+        if (!dateStr) return '';
+        const date = new Date(dateStr + 'T00:00:00');
+        return date.toLocaleDateString('en-US', { weekday: 'long' });
+      }
+    };
+    
+    document.addEventListener('DOMContentLoaded', () => JournalApp.init());
+  </script>
+</body>
+</html>

@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Videos | She</title>
+  <link rel="stylesheet" href="../css/personal.css">
+  <style>
+    .videos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      padding: 1.5rem;
+    }
+    
+    .video-card {
+      position: relative;
+      background: var(--bg-secondary);
+      border-radius: 1rem;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      border: 1px solid var(--border-default);
+    }
+    
+    .video-card:hover {
+      transform: scale(1.02);
+      border-color: var(--her-accent-muted);
+    }
+    
+    .video-card-thumbnail {
+      position: relative;
+      aspect-ratio: 16/9;
+      background: var(--bg-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .video-card-thumbnail video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .video-card-play {
+      position: absolute;
+      width: 4rem;
+      height: 4rem;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+      transition: transform 0.2s ease;
+    }
+    
+    .video-card:hover .video-card-play {
+      transform: scale(1.1);
+      background: var(--her-accent);
+    }
+    
+    .video-card-info {
+      padding: 1rem;
+    }
+    
+    .video-card-title {
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+    }
+    
+    .video-card-meta {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+    }
+    
+    .video-card-delete {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.6);
+      border: none;
+      color: white;
+      cursor: pointer;
+      opacity: 0;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+    
+    .video-card:hover .video-card-delete {
+      opacity: 1;
+    }
+    
+    .video-card-delete:hover {
+      background: var(--error);
+    }
+    
+    .no-videos {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-muted);
+    }
+    
+    .no-videos-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    
+    .upload-input {
+      display: none;
+    }
+    
+    /* Video Player Modal */
+    .video-player-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.95);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 2rem;
+    }
+    
+    .video-player-modal.visible {
+      display: flex;
+    }
+    
+    .video-player-close {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    
+    .video-player-close:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    .video-player-container {
+      max-width: 90%;
+      max-height: 80vh;
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+    
+    .video-player-container video {
+      max-width: 100%;
+      max-height: 80vh;
+      border-radius: 0.5rem;
+    }
+    
+    .video-player-title {
+      color: white;
+      margin-top: 1.5rem;
+      text-align: center;
+      font-size: 1rem;
+    }
+    
+    /* Upload Progress */
+    .upload-progress {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 0.75rem;
+      padding: 1rem 1.5rem;
+      display: none;
+      align-items: center;
+      gap: 1rem;
+      z-index: 100;
+    }
+    
+    .upload-progress.visible {
+      display: flex;
+    }
+    
+    .upload-spinner {
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 2px solid var(--border-default);
+      border-top-color: var(--her-accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    @media (max-width: 768px) {
+      .videos-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Auth Check -->
+  <div id="authCheck" class="auth-checking">
+    <div class="auth-checking-spinner"></div>
+  </div>
+  
+  <!-- Ambient Background -->
+  <div class="her-ambient-bg">
+    <div class="her-ambient-orb her-ambient-orb-1"></div>
+    <div class="her-ambient-orb her-ambient-orb-2"></div>
+    <div class="her-ambient-orb her-ambient-orb-3"></div>
+  </div>
+  
+  <!-- Main App -->
+  <div id="videosApp" class="her-app">
+    <!-- Header -->
+    <header class="her-header">
+      <div class="her-header-left">
+        <a href="../personal.html" class="her-back-btn">← Back</a>
+        <h1 class="her-header-title">Videos</h1>
+      </div>
+      <div class="her-header-right">
+        <input type="file" id="uploadInput" class="upload-input" accept="video/*" multiple>
+        <button class="her-btn her-btn-primary" id="uploadBtn">
+          <span>Upload</span>
+        </button>
+      </div>
+    </header>
+    
+    <!-- Content -->
+    <main class="her-main" style="padding: 0;">
+      <div id="videosGrid" class="videos-grid"></div>
+      <div id="noVideos" class="no-videos" style="display: none;">
+        <div class="no-videos-icon">🎬</div>
+        <p>No videos yet</p>
+        <p style="font-size: 0.8125rem; margin-top: 0.5rem; color: var(--text-tertiary);">
+          Upload your special video moments
+        </p>
+        <button class="her-btn her-btn-primary" style="margin-top: 1.5rem;" onclick="VideosApp.triggerUpload()">
+          Upload First Video
+        </button>
+      </div>
+    </main>
+    
+    <!-- Video Player Modal -->
+    <div id="videoPlayer" class="video-player-modal">
+      <button class="video-player-close" onclick="VideosApp.closePlayer()">×</button>
+      <div class="video-player-container">
+        <video id="playerVideo" controls></video>
+      </div>
+      <div id="playerTitle" class="video-player-title"></div>
+    </div>
+    
+    <!-- Upload Progress -->
+    <div id="uploadProgress" class="upload-progress">
+      <div class="upload-spinner"></div>
+      <span id="uploadStatus">Uploading...</span>
+    </div>
+    
+    <!-- Toast Container -->
+    <div id="toastContainer" class="her-toast-container"></div>
+  </div>
+  
+  <script src="../js/database.js"></script>
+  <script>
+    const VideosApp = {
+      SESSION_KEY: 'ps_session_active',
+      videos: [],
+      currentVideo: null,
+      
+      async init() {
+        if (sessionStorage.getItem(this.SESSION_KEY) !== 'true') {
+          window.location.href = '../index.html';
+          return;
+        }
+        
+        document.getElementById('authCheck').classList.add('hidden');
+        document.getElementById('videosApp').classList.add('visible');
+        
+        await Database.init();
+        await this.loadVideos();
+        this.bindEvents();
+      },
+      
+      bindEvents() {
+        document.getElementById('uploadBtn')?.addEventListener('click', () => this.triggerUpload());
+        document.getElementById('uploadInput')?.addEventListener('change', (e) => this.handleUpload(e));
+        
+        document.getElementById('videoPlayer')?.addEventListener('click', (e) => {
+          if (e.target === document.getElementById('videoPlayer')) this.closePlayer();
+        });
+        
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && document.getElementById('videoPlayer')?.classList.contains('visible')) {
+            this.closePlayer();
+          }
+        });
+      },
+      
+      async loadVideos() {
+        try {
+          this.videos = await Database.getAll('videos') || [];
+          this.videos.sort((a, b) => (b.uploadedAt || 0) - (a.uploadedAt || 0));
+          this.renderVideos();
+        } catch (e) {
+          this.videos = [];
+          this.renderVideos();
+        }
+      },
+      
+      renderVideos() {
+        const grid = document.getElementById('videosGrid');
+        const empty = document.getElementById('noVideos');
+        
+        if (this.videos.length === 0) {
+          grid.innerHTML = '';
+          empty.style.display = 'block';
+          return;
+        }
+        
+        empty.style.display = 'none';
+        grid.innerHTML = this.videos.map((video, index) => `
+          <div class="video-card" onclick="VideosApp.playVideo(${index})">
+            <div class="video-card-thumbnail">
+              <video src="${video.data}" muted preload="metadata"></video>
+              <div class="video-card-play">▶</div>
+            </div>
+            <div class="video-card-info">
+              <div class="video-card-title">${this.escapeHtml(video.title || video.name || 'Untitled')}</div>
+              <div class="video-card-meta">${this.formatDate(video.uploadedAt)}</div>
+            </div>
+            <button class="video-card-delete" onclick="event.stopPropagation(); VideosApp.deleteVideo('${video.id}')">×</button>
+          </div>
+        `).join('');
+      },
+      
+      triggerUpload() {
+        document.getElementById('uploadInput')?.click();
+      },
+      
+      async handleUpload(e) {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+        
+        this.showProgress();
+        let uploaded = 0;
+        
+        for (const file of files) {
+          if (!file.type.startsWith('video/')) continue;
+          
+          try {
+            document.getElementById('uploadStatus').textContent = `Uploading ${file.name}...`;
+            
+            const data = await this.readFileAsDataURL(file);
+            
+            await Database.add('videos', {
+              id: crypto.randomUUID(),
+              name: file.name,
+              title: file.name.replace(/\.[^/.]+$/, ''),
+              data,
+              size: file.size,
+              uploadedAt: Date.now()
+            });
+            uploaded++;
+          } catch (err) {
+            console.warn('Upload error:', err);
+          }
+        }
+        
+        e.target.value = '';
+        this.hideProgress();
+        await this.loadVideos();
+        
+        if (uploaded > 0) {
+          this.toast(`Uploaded ${uploaded} video${uploaded > 1 ? 's' : ''}`, 'success');
+        }
+      },
+      
+      readFileAsDataURL(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      },
+      
+      showProgress() {
+        document.getElementById('uploadProgress').classList.add('visible');
+      },
+      
+      hideProgress() {
+        document.getElementById('uploadProgress').classList.remove('visible');
+      },
+      
+      playVideo(index) {
+        const video = this.videos[index];
+        if (!video) return;
+        
+        this.currentVideo = video;
+        
+        const playerVideo = document.getElementById('playerVideo');
+        playerVideo.src = video.data;
+        document.getElementById('playerTitle').textContent = video.title || video.name || 'Untitled';
+        
+        document.getElementById('videoPlayer').classList.add('visible');
+        playerVideo.play();
+      },
+      
+      closePlayer() {
+        const playerVideo = document.getElementById('playerVideo');
+        playerVideo.pause();
+        playerVideo.src = '';
+        document.getElementById('videoPlayer').classList.remove('visible');
+        this.currentVideo = null;
+      },
+      
+      async deleteVideo(id) {
+        if (!confirm('Delete this video?')) return;
+        
+        try {
+          await Database.delete('videos', id);
+          await this.loadVideos();
+          this.toast('Video deleted', 'success');
+        } catch (e) {
+          this.toast('Failed to delete', 'error');
+        }
+      },
+      
+      toast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `her-toast ${type}`;
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.classList.add('hiding');
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      },
+      
+      escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      },
+      
+      formatDate(ts) {
+        return ts ? new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+      }
+    };
+    
+    document.addEventListener('DOMContentLoaded', () => VideosApp.init());
+  </script>
+</body>
+</html>

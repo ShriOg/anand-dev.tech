@@ -6,7 +6,7 @@
  */
 
 const DB_NAME = 'PrivateSpaceDB';
-const DB_VERSION = 1;
+const DB_VERSION = 3; // Bumped for images, videos, imported_chats
 
 const STORES = {
   PROJECTS: 'projects',
@@ -16,7 +16,14 @@ const STORES = {
   HER_CHATS: 'her_mode_chats',
   PRO_CHATS: 'professional_mode_chats',
   HER_TRAINING: 'her_training_data',
-  MEMORIES: 'memories'
+  MEMORIES: 'memories',
+  // Rituals stores
+  JOURNAL: 'journal',
+  MOOD: 'mood',
+  // Media stores (v3)
+  IMAGES: 'images',
+  VIDEOS: 'videos',
+  IMPORTED_CHATS: 'imported_chats'
 };
 
 let db = null;
@@ -87,6 +94,46 @@ async function initDatabase() {
         const memStore = database.createObjectStore(STORES.MEMORIES, { keyPath: 'id' });
         memStore.createIndex('category', 'category', { unique: false });
         memStore.createIndex('createdAt', 'createdAt', { unique: false });
+      }
+      
+      // ═══════════════════════════════════════════════════════════
+      // RITUALS STORES (v2)
+      // ═══════════════════════════════════════════════════════════
+      
+      // Journal entries (Daily Entry)
+      if (!database.objectStoreNames.contains(STORES.JOURNAL)) {
+        const journalStore = database.createObjectStore(STORES.JOURNAL, { keyPath: 'id' });
+        journalStore.createIndex('date', 'date', { unique: false });
+      }
+      
+      // Mood tracking
+      if (!database.objectStoreNames.contains(STORES.MOOD)) {
+        const moodStore = database.createObjectStore(STORES.MOOD, { keyPath: 'id' });
+        moodStore.createIndex('date', 'date', { unique: false });
+        moodStore.createIndex('mood', 'mood', { unique: false });
+      }
+      
+      // ═══════════════════════════════════════════════════════════
+      // MEDIA STORES (v3)
+      // ═══════════════════════════════════════════════════════════
+      
+      // Images gallery
+      if (!database.objectStoreNames.contains(STORES.IMAGES)) {
+        const imagesStore = database.createObjectStore(STORES.IMAGES, { keyPath: 'id' });
+        imagesStore.createIndex('uploadedAt', 'uploadedAt', { unique: false });
+      }
+      
+      // Videos gallery
+      if (!database.objectStoreNames.contains(STORES.VIDEOS)) {
+        const videosStore = database.createObjectStore(STORES.VIDEOS, { keyPath: 'id' });
+        videosStore.createIndex('uploadedAt', 'uploadedAt', { unique: false });
+      }
+      
+      // Imported chats (WhatsApp, Instagram)
+      if (!database.objectStoreNames.contains(STORES.IMPORTED_CHATS)) {
+        const importedStore = database.createObjectStore(STORES.IMPORTED_CHATS, { keyPath: 'id' });
+        importedStore.createIndex('platform', 'platform', { unique: false });
+        importedStore.createIndex('importedAt', 'importedAt', { unique: false });
       }
     };
   });

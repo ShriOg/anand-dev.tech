@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photos | She</title>
+  <link rel="stylesheet" href="../css/personal.css">
+  <style>
+    .images-header-actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    
+    .images-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      padding: 1.5rem;
+    }
+    
+    .image-card {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 1rem;
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--bg-tertiary);
+      transition: transform 0.2s ease;
+    }
+    
+    .image-card:hover {
+      transform: scale(1.02);
+    }
+    
+    .image-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .image-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 1rem;
+    }
+    
+    .image-card:hover .image-card-overlay {
+      opacity: 1;
+    }
+    
+    .image-card-caption {
+      color: white;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    
+    .image-card-date {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+    }
+    
+    .image-card-delete {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.5);
+      border: none;
+      color: white;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .image-card:hover .image-card-delete {
+      opacity: 1;
+    }
+    
+    .no-images {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-muted);
+    }
+    
+    .no-images-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    
+    .upload-input {
+      display: none;
+    }
+    
+    /* Lightbox */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.95);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    
+    .lightbox.visible {
+      display: flex;
+    }
+    
+    .lightbox-close {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    
+    .lightbox-close:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    .lightbox-image {
+      max-width: 90%;
+      max-height: 80vh;
+      border-radius: 0.5rem;
+    }
+    
+    .lightbox-caption {
+      color: white;
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+    
+    .lightbox-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: white;
+      font-size: 1.25rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    
+    .lightbox-nav:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    
+    .lightbox-prev {
+      left: 1.5rem;
+    }
+    
+    .lightbox-next {
+      right: 1.5rem;
+    }
+    
+    @media (max-width: 768px) {
+      .images-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        padding: 1rem;
+      }
+      
+      .image-card-overlay {
+        opacity: 1;
+        background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 30%);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Auth Check -->
+  <div id="authCheck" class="auth-checking">
+    <div class="auth-checking-spinner"></div>
+  </div>
+  
+  <!-- Ambient Background -->
+  <div class="her-ambient-bg">
+    <div class="her-ambient-orb her-ambient-orb-1"></div>
+    <div class="her-ambient-orb her-ambient-orb-2"></div>
+    <div class="her-ambient-orb her-ambient-orb-3"></div>
+  </div>
+  
+  <!-- Main App -->
+  <div id="imagesApp" class="her-app">
+    <!-- Header -->
+    <header class="her-header">
+      <div class="her-header-left">
+        <a href="../personal.html" class="her-back-btn">← Back</a>
+        <h1 class="her-header-title">Photos</h1>
+      </div>
+      <div class="her-header-right images-header-actions">
+        <input type="file" id="uploadInput" class="upload-input" accept="image/*" multiple>
+        <button class="her-btn her-btn-primary" id="uploadBtn">
+          <span>Upload</span>
+        </button>
+      </div>
+    </header>
+    
+    <!-- Content -->
+    <main class="her-main" style="padding: 0;">
+      <div id="imagesGrid" class="images-grid"></div>
+      <div id="noImages" class="no-images" style="display: none;">
+        <div class="no-images-icon">📷</div>
+        <p>No photos yet</p>
+        <p style="font-size: 0.8125rem; margin-top: 0.5rem; color: var(--text-tertiary);">
+          Upload your special moments
+        </p>
+        <button class="her-btn her-btn-primary" style="margin-top: 1.5rem;" onclick="ImagesApp.triggerUpload()">
+          Upload First Photo
+        </button>
+      </div>
+    </main>
+    
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox">
+      <button class="lightbox-close" onclick="ImagesApp.closeLightbox()">×</button>
+      <button class="lightbox-nav lightbox-prev" onclick="ImagesApp.prevImage()">‹</button>
+      <button class="lightbox-nav lightbox-next" onclick="ImagesApp.nextImage()">›</button>
+      <img id="lightboxImage" class="lightbox-image" src="" alt="">
+      <div id="lightboxCaption" class="lightbox-caption"></div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div id="toastContainer" class="her-toast-container"></div>
+    
+    <!-- Modal -->
+    <div id="modalOverlay" class="her-modal-overlay">
+      <div class="her-modal">
+        <div class="her-modal-header">
+          <h2 class="her-modal-title" id="modalTitle"></h2>
+          <button class="her-modal-close" id="modalClose">×</button>
+        </div>
+        <div class="her-modal-body" id="modalBody"></div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="../js/database.js"></script>
+  <script>
+    const ImagesApp = {
+      SESSION_KEY: 'ps_session_active',
+      images: [],
+      currentIndex: 0,
+      
+      async init() {
+        if (sessionStorage.getItem(this.SESSION_KEY) !== 'true') {
+          window.location.href = '../index.html';
+          return;
+        }
+        
+        document.getElementById('authCheck').classList.add('hidden');
+        document.getElementById('imagesApp').classList.add('visible');
+        
+        await Database.init();
+        await this.loadImages();
+        this.bindEvents();
+      },
+      
+      bindEvents() {
+        document.getElementById('uploadBtn')?.addEventListener('click', () => this.triggerUpload());
+        document.getElementById('uploadInput')?.addEventListener('change', (e) => this.handleUpload(e));
+        
+        document.getElementById('lightbox')?.addEventListener('click', (e) => {
+          if (e.target === document.getElementById('lightbox')) this.closeLightbox();
+        });
+        
+        document.addEventListener('keydown', (e) => {
+          if (document.getElementById('lightbox')?.classList.contains('visible')) {
+            if (e.key === 'Escape') this.closeLightbox();
+            if (e.key === 'ArrowLeft') this.prevImage();
+            if (e.key === 'ArrowRight') this.nextImage();
+          }
+        });
+        
+        document.getElementById('modalOverlay')?.addEventListener('click', (e) => {
+          if (e.target === document.getElementById('modalOverlay')) this.closeModal();
+        });
+        document.getElementById('modalClose')?.addEventListener('click', () => this.closeModal());
+      },
+      
+      async loadImages() {
+        try {
+          this.images = await Database.getAll('images') || [];
+          this.images.sort((a, b) => (b.uploadedAt || 0) - (a.uploadedAt || 0));
+          this.renderImages();
+        } catch (e) {
+          this.images = [];
+          this.renderImages();
+        }
+      },
+      
+      renderImages() {
+        const grid = document.getElementById('imagesGrid');
+        const empty = document.getElementById('noImages');
+        
+        if (this.images.length === 0) {
+          grid.innerHTML = '';
+          empty.style.display = 'block';
+          return;
+        }
+        
+        empty.style.display = 'none';
+        grid.innerHTML = this.images.map((img, index) => `
+          <div class="image-card" onclick="ImagesApp.openLightbox(${index})">
+            <img src="${img.data}" alt="${this.escapeHtml(img.caption || '')}">
+            <div class="image-card-overlay">
+              <div class="image-card-caption">${this.escapeHtml(img.caption || 'Untitled')}</div>
+              <div class="image-card-date">${this.formatDate(img.uploadedAt)}</div>
+            </div>
+            <button class="image-card-delete" onclick="event.stopPropagation(); ImagesApp.deleteImage('${img.id}')">×</button>
+          </div>
+        `).join('');
+      },
+      
+      triggerUpload() {
+        document.getElementById('uploadInput')?.click();
+      },
+      
+      async handleUpload(e) {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+        
+        let uploaded = 0;
+        
+        for (const file of files) {
+          if (!file.type.startsWith('image/')) continue;
+          
+          try {
+            const data = await this.readFileAsDataURL(file);
+            
+            await Database.add('images', {
+              id: crypto.randomUUID(),
+              name: file.name,
+              caption: '',
+              data,
+              uploadedAt: Date.now()
+            });
+            uploaded++;
+          } catch (err) {
+            console.warn('Upload error:', err);
+          }
+        }
+        
+        e.target.value = '';
+        await this.loadImages();
+        
+        if (uploaded > 0) {
+          this.toast(`Uploaded ${uploaded} photo${uploaded > 1 ? 's' : ''}`, 'success');
+        }
+      },
+      
+      readFileAsDataURL(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      },
+      
+      openLightbox(index) {
+        this.currentIndex = index;
+        const img = this.images[index];
+        if (!img) return;
+        
+        document.getElementById('lightboxImage').src = img.data;
+        document.getElementById('lightboxCaption').textContent = img.caption || '';
+        document.getElementById('lightbox').classList.add('visible');
+      },
+      
+      closeLightbox() {
+        document.getElementById('lightbox').classList.remove('visible');
+      },
+      
+      prevImage() {
+        this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+        this.openLightbox(this.currentIndex);
+      },
+      
+      nextImage() {
+        this.currentIndex = (this.currentIndex + 1) % this.images.length;
+        this.openLightbox(this.currentIndex);
+      },
+      
+      async deleteImage(id) {
+        if (!confirm('Delete this photo?')) return;
+        
+        try {
+          await Database.delete('images', id);
+          await this.loadImages();
+          this.toast('Photo deleted', 'success');
+        } catch (e) {
+          this.toast('Failed to delete', 'error');
+        }
+      },
+      
+      openModal() {
+        document.getElementById('modalOverlay')?.classList.add('visible');
+      },
+      
+      closeModal() {
+        document.getElementById('modalOverlay')?.classList.remove('visible');
+      },
+      
+      toast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `her-toast ${type}`;
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.classList.add('hiding');
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      },
+      
+      escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      },
+      
+      formatDate(ts) {
+        return ts ? new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+      }
+    };
+    
+    document.addEventListener('DOMContentLoaded', () => ImagesApp.init());
+  </script>
+</body>
+</html>

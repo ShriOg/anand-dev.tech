@@ -3,774 +3,847 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0a0a0f">
+  <meta name="theme-color" content="#000000">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="robots" content="noindex, nofollow">
   <title>Private Space</title>
   
-  <link rel="stylesheet" href="css/variables.css">
-  <link rel="stylesheet" href="css/base.css">
-  <link rel="stylesheet" href="css/layout.css">
-  <link rel="stylesheet" href="css/components.css">
-  <link rel="stylesheet" href="css/lock-screen.css">
-  <link rel="stylesheet" href="css/chat.css">
-  <link rel="stylesheet" href="css/notes.css">
-  <link rel="stylesheet" href="css/images.css">
-  <link rel="stylesheet" href="css/log.css">
-  <link rel="stylesheet" href="css/memory.css">
-  <link rel="stylesheet" href="css/projects.css">
-  <link rel="stylesheet" href="css/settings.css">
-  <link rel="stylesheet" href="css/focus-mode.css">
-  <link rel="stylesheet" href="css/mobile.css">
-  <link rel="stylesheet" href="css/admin.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --bg-primary: #000000;
+      --bg-secondary: #060606;
+      --bg-elevated: #0a0a0a;
+      --bg-card: #080808;
+      --text-primary: rgba(255, 255, 255, 0.92);
+      --text-secondary: rgba(255, 255, 255, 0.55);
+      --text-muted: rgba(255, 255, 255, 0.32);
+      --border-subtle: rgba(255, 255, 255, 0.05);
+      --border-hover: rgba(255, 255, 255, 0.1);
+      --accent-pro: #c8c8c8;
+      --accent-her: #e8a4b8;
+      --error: #ef6b6b;
+      --radius-md: 0.75rem;
+      --radius-lg: 1rem;
+      --radius-xl: 1.25rem;
+      --radius-2xl: 1.5rem;
+      --transition-fast: 0.2s ease;
+      --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    html, body {
+      height: 100%;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    
+    /* ═══════════════════════════════════════════════════════════
+       LOCK SCREEN
+       ═══════════════════════════════════════════════════════════ */
+    .lock-screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-primary);
+      z-index: 1000;
+      opacity: 1;
+      visibility: visible;
+      transition: opacity var(--transition-slow), visibility var(--transition-slow);
+    }
+    
+    .lock-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    
+    .lock-content {
+      text-align: center;
+      width: 100%;
+      max-width: 340px;
+      padding: 2rem 1.5rem;
+    }
+    
+    .lock-icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 1.75rem;
+      opacity: 0.35;
+    }
+    
+    .lock-icon svg {
+      width: 100%;
+      height: 100%;
+      stroke: var(--text-secondary);
+    }
+    
+    .lock-title {
+      font-size: 1.375rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    
+    .lock-subtitle {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+    
+    .lock-form {
+      display: flex;
+      gap: 0.625rem;
+    }
+    
+    .lock-input-wrapper {
+      flex: 1;
+      position: relative;
+    }
+    
+    .lock-input {
+      width: 100%;
+      padding: 0.875rem 1rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    
+    .lock-input::placeholder {
+      color: var(--text-muted);
+    }
+    
+    .lock-input:focus {
+      border-color: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.02);
+    }
+    
+    .lock-input.shake {
+      animation: shake 0.5s ease;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+    
+    .lock-btn {
+      width: 50px;
+      height: 50px;
+      flex-shrink: 0;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition-fast);
+    }
+    
+    .lock-btn:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--border-hover);
+    }
+    
+    .lock-btn:active {
+      transform: scale(0.96);
+    }
+    
+    .lock-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .lock-error {
+      margin-top: 1rem;
+      font-size: 0.8125rem;
+      color: var(--error);
+      min-height: 1.25rem;
+    }
+    
+    .lock-hint {
+      margin-top: 2.5rem;
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+    }
+    
+    /* ═══════════════════════════════════════════════════════════
+       DASHBOARD
+       ═══════════════════════════════════════════════════════════ */
+    .dashboard {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      padding-bottom: 5rem;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: 
+        opacity var(--transition-slow) 0.1s, 
+        visibility var(--transition-slow) 0.1s,
+        transform var(--transition-slow) 0.1s;
+    }
+    
+    .dashboard.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .dashboard-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    
+    .dashboard-label {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.875rem;
+    }
+    
+    .dashboard-title {
+      font-size: 1.75rem;
+      font-weight: 300;
+      letter-spacing: -0.025em;
+      color: var(--text-primary);
+    }
+    
+    /* ═══════════════════════════════════════════════════════════
+       MODE CARDS
+       ═══════════════════════════════════════════════════════════ */
+    .mode-cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+      width: 100%;
+      max-width: 640px;
+    }
+    
+    .mode-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-2xl);
+      padding: 2rem 1.75rem;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      overflow: hidden;
+      transition: 
+        transform var(--transition-smooth),
+        border-color var(--transition-smooth),
+        box-shadow var(--transition-smooth);
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .mode-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, var(--card-glow, transparent) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity var(--transition-smooth);
+      pointer-events: none;
+    }
+    
+    .mode-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-hover);
+      box-shadow: 0 16px 48px -12px rgba(0, 0, 0, 0.6);
+    }
+    
+    .mode-card:hover::before {
+      opacity: 1;
+    }
+    
+    .mode-card:active {
+      transform: translateY(-1px) scale(0.99);
+    }
+    
+    .mode-card.professional {
+      --card-glow: rgba(200, 200, 200, 0.04);
+    }
+    
+    .mode-card.personal {
+      --card-glow: rgba(232, 164, 184, 0.08);
+    }
+    
+    .mode-icon {
+      font-size: 2.25rem;
+      margin-bottom: 1.25rem;
+      display: block;
+      line-height: 1;
+    }
+    
+    .mode-title {
+      font-size: 1.125rem;
+      font-weight: 500;
+      margin-bottom: 0.625rem;
+      letter-spacing: -0.01em;
+    }
+    
+    .mode-description {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+    
+    .mode-card.professional .mode-title {
+      color: var(--accent-pro);
+    }
+    
+    .mode-card.personal .mode-title {
+      color: var(--accent-her);
+    }
+    
+    /* ═══════════════════════════════════════════════════════════
+       FOOTER ACTIONS
+       ═══════════════════════════════════════════════════════════ */
+    .dashboard-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(to top, var(--bg-primary) 60%, transparent);
+      pointer-events: none;
+    }
+    
+    .footer-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all var(--transition-fast);
+      pointer-events: auto;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .footer-btn:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--border-hover);
+      color: var(--text-primary);
+    }
+    
+    .footer-btn:active {
+      transform: scale(0.97);
+    }
+    
+    .footer-btn svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+    
+    /* ═══════════════════════════════════════════════════════════
+       AMBIENT BACKGROUND
+       ═══════════════════════════════════════════════════════════ */
+    .ambient {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      overflow: hidden;
+    }
+    
+    .ambient-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.12;
+      animation: float 25s ease-in-out infinite;
+    }
+    
+    .ambient-orb.pro {
+      width: 350px;
+      height: 350px;
+      background: var(--accent-pro);
+      top: -120px;
+      left: -100px;
+    }
+    
+    .ambient-orb.her {
+      width: 280px;
+      height: 280px;
+      background: var(--accent-her);
+      bottom: -80px;
+      right: -60px;
+      animation-delay: -12s;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(25px, -25px) scale(1.03); }
+      66% { transform: translate(-15px, 15px) scale(0.97); }
+    }
+    
+    /* ═══════════════════════════════════════════════════════════
+       UTILITY
+       ═══════════════════════════════════════════════════════════ */
+    .spin {
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    /* ═══════════════════════════════════════════════════════════
+       RESPONSIVE - TABLET
+       ═══════════════════════════════════════════════════════════ */
+    @media (max-width: 768px) {
+      .dashboard {
+        padding: 2rem 1.25rem;
+        padding-bottom: 5.5rem;
+      }
+      
+      .dashboard-header {
+        margin-bottom: 2rem;
+      }
+      
+      .dashboard-title {
+        font-size: 1.5rem;
+      }
+      
+      .mode-cards {
+        gap: 1rem;
+        max-width: 520px;
+      }
+      
+      .mode-card {
+        padding: 1.75rem 1.5rem;
+      }
+      
+      .mode-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+      }
+      
+      .mode-title {
+        font-size: 1.0625rem;
+      }
+      
+      .mode-description {
+        font-size: 0.8125rem;
+      }
+    }
+    
+    /* ═══════════════════════════════════════════════════════════
+       RESPONSIVE - MOBILE
+       ═══════════════════════════════════════════════════════════ */
+    @media (max-width: 540px) {
+      .dashboard {
+        justify-content: flex-start;
+        padding-top: 4rem;
+        padding-bottom: 6rem;
+      }
+      
+      .dashboard-header {
+        margin-bottom: 2rem;
+      }
+      
+      .dashboard-label {
+        font-size: 0.625rem;
+      }
+      
+      .dashboard-title {
+        font-size: 1.375rem;
+      }
+      
+      .mode-cards {
+        grid-template-columns: 1fr;
+        gap: 0.875rem;
+        max-width: 100%;
+      }
+      
+      .mode-card {
+        padding: 1.5rem 1.25rem;
+        border-radius: var(--radius-xl);
+      }
+      
+      .mode-card:hover {
+        transform: none;
+        box-shadow: none;
+      }
+      
+      .mode-card:active {
+        transform: scale(0.985);
+        background: var(--bg-secondary);
+      }
+      
+      .mode-icon {
+        font-size: 1.75rem;
+        margin-bottom: 0.875rem;
+      }
+      
+      .mode-title {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      .mode-description {
+        font-size: 0.75rem;
+        line-height: 1.5;
+      }
+      
+      .dashboard-footer {
+        padding: 1rem;
+      }
+      
+      .footer-btn {
+        padding: 0.5rem 0.875rem;
+        font-size: 0.6875rem;
+        border-radius: 0.625rem;
+      }
+      
+      .footer-btn svg {
+        width: 12px;
+        height: 12px;
+      }
+      
+      .ambient-orb.pro {
+        width: 250px;
+        height: 250px;
+        top: -80px;
+        left: -80px;
+        filter: blur(100px);
+      }
+      
+      .ambient-orb.her {
+        width: 200px;
+        height: 200px;
+        bottom: -60px;
+        right: -40px;
+        filter: blur(100px);
+      }
+    }
+    
+    /* ═══════════════════════════════════════════════════════════
+       RESPONSIVE - SMALL MOBILE
+       ═══════════════════════════════════════════════════════════ */
+    @media (max-width: 360px) {
+      .dashboard {
+        padding: 3rem 1rem 5.5rem;
+      }
+      
+      .lock-content {
+        padding: 1.5rem 1rem;
+      }
+      
+      .lock-title {
+        font-size: 1.25rem;
+      }
+      
+      .lock-input {
+        padding: 0.75rem 0.875rem;
+        font-size: 0.9375rem;
+      }
+      
+      .lock-btn {
+        width: 46px;
+        height: 46px;
+      }
+      
+      .mode-card {
+        padding: 1.25rem 1rem;
+      }
+      
+      .mode-icon {
+        font-size: 1.5rem;
+      }
+      
+      .mode-title {
+        font-size: 0.9375rem;
+      }
+      
+      .mode-description {
+        font-size: 0.6875rem;
+      }
+    }
+  </style>
 </head>
 <body>
+  <!-- Ambient Background -->
+  <div class="ambient">
+    <div class="ambient-orb pro"></div>
+    <div class="ambient-orb her"></div>
+  </div>
+
   <!-- Lock Screen -->
-  <div class="ps-lock-screen active" id="lockScreen">
-    <div class="ps-lock-content">
-      <div class="ps-lock-logo">
+  <div class="lock-screen" id="lockScreen">
+    <div class="lock-content">
+      <div class="lock-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
           <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
           <circle cx="12" cy="16" r="1"/>
         </svg>
       </div>
-      <h1 class="ps-lock-title">Private Space</h1>
-      <p class="ps-lock-subtitle">Enter password to unlock</p>
+      <h1 class="lock-title">Private Space</h1>
+      <p class="lock-subtitle">Enter password to unlock</p>
       
-      <div class="ps-lock-form">
-        <div class="ps-lock-input-wrapper">
-          <input type="password" 
-                 class="ps-lock-input" 
-                 id="passwordInput" 
-                 placeholder="Password"
-                 autocomplete="off"
-                 autofocus>
-          <button type="button" class="ps-show-password" id="showPasswordBtn" onclick="togglePasswordVisibility()">
-            <svg class="eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-            <svg class="eye-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
-              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
-              <line x1="1" y1="1" x2="23" y2="23"/>
-            </svg>
-          </button>
+      <form class="lock-form" id="lockForm" onsubmit="return false;">
+        <div class="lock-input-wrapper">
+          <input type="password" class="lock-input" id="passwordInput" placeholder="Password" autocomplete="off" autofocus>
         </div>
-        <button class="ps-lock-btn" id="unlockBtn">
+        <button type="submit" class="lock-btn" id="unlockBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="9 18 15 12 9 6"/>
           </svg>
         </button>
-      </div>
+      </form>
       
-      <script>
-        function togglePasswordVisibility() {
-          const input = document.getElementById('passwordInput');
-          const btn = document.getElementById('showPasswordBtn');
-          const eyeOpen = btn.querySelector('.eye-open');
-          const eyeClosed = btn.querySelector('.eye-closed');
-          
-          if (input.type === 'password') {
-            input.type = 'text';
-            eyeOpen.style.display = 'none';
-            eyeClosed.style.display = 'block';
-          } else {
-            input.type = 'password';
-            eyeOpen.style.display = 'block';
-            eyeClosed.style.display = 'none';
+      <div class="lock-error" id="lockError"></div>
+      
+      <div class="lock-hint">
+        All data encrypted locally
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="dashboard" id="dashboard">
+    <header class="dashboard-header">
+      <div class="dashboard-label">Private Space</div>
+      <h1 class="dashboard-title">Choose Your World</h1>
+    </header>
+    
+    <div class="mode-cards">
+      <a href="professional.html" class="mode-card professional" id="cardProfessional">
+        <span class="mode-icon">🧠</span>
+        <h2 class="mode-title">Professional Space</h2>
+        <p class="mode-description">Website control, projects, navigation, pages, and site settings.</p>
+      </a>
+      
+      <a href="personal.html" class="mode-card personal" id="cardPersonal">
+        <span class="mode-icon">💖</span>
+        <h2 class="mode-title">Personal Space</h2>
+        <p class="mode-description">Her AI, photos, videos, memories, daily rituals, and mood tracking.</p>
+      </a>
+    </div>
+    
+    <footer class="dashboard-footer">
+      <a href="/" class="footer-btn" id="btnHome">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <span>Return to Home</span>
+      </a>
+      
+      <button class="footer-btn" id="btnLock">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <span>Lock</span>
+      </button>
+    </footer>
+  </div>
+
+  <script>
+    /**
+     * Private Space Dashboard
+     * 
+     * AUTHENTICATION POLICY:
+     * - Auth state exists ONLY in memory (this.unlocked variable)
+     * - On page refresh, state is lost → lock screen shown
+     * - sessionStorage is used ONLY for cross-page navigation within single session
+     * - sessionStorage is CLEARED on this page load before auth check
+     */
+    const Dashboard = {
+      // In-memory auth state (lost on refresh)
+      unlocked: false,
+      
+      // Storage keys
+      SESSION_KEY: 'ps_session_active',
+      HASH_STORAGE_KEY: 'ps_auth_hash',
+      
+      // Default password hash (SHA-256)
+      DEFAULT_HASH: '2e2c2c5e6de58479ac00c9ce456c25745fb949153b87c55718a73294497f1489',
+      
+      init() {
+        // CRITICAL: Clear session on page load (forces re-auth on refresh)
+        sessionStorage.removeItem(this.SESSION_KEY);
+        
+        // Always start locked
+        this.unlocked = false;
+        this.showLockScreen();
+        this.bindEvents();
+      },
+      
+      bindEvents() {
+        // Form submission
+        document.getElementById('lockForm').addEventListener('submit', (e) => {
+          e.preventDefault();
+          this.unlock();
+        });
+        
+        // Lock button
+        document.getElementById('btnLock').addEventListener('click', () => {
+          this.lock();
+        });
+        
+        // Prevent navigation if not unlocked
+        document.getElementById('cardProfessional').addEventListener('click', (e) => {
+          if (!this.unlocked) {
+            e.preventDefault();
+            this.showLockScreen();
           }
+        });
+        
+        document.getElementById('cardPersonal').addEventListener('click', (e) => {
+          if (!this.unlocked) {
+            e.preventDefault();
+            this.showLockScreen();
+          }
+        });
+      },
+      
+      showLockScreen() {
+        document.getElementById('lockScreen').classList.remove('hidden');
+        document.getElementById('dashboard').classList.remove('visible');
+        
+        // Clear and focus input
+        const input = document.getElementById('passwordInput');
+        if (input) {
+          input.value = '';
+          setTimeout(() => input.focus(), 100);
         }
-      </script>
+      },
       
-      <div class="ps-lock-error" id="lockError"></div>
+      showDashboard() {
+        document.getElementById('lockScreen').classList.add('hidden');
+        document.getElementById('dashboard').classList.add('visible');
+      },
       
-      <div class="ps-lock-hint">
-        <span>All data encrypted locally</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Main Application -->
-  <div class="ps-app" id="mainApp">
-    <!-- Sidebar -->
-    <aside class="ps-sidebar" id="sidebar">
-      <div class="ps-sidebar-header">
-        <div class="ps-logo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-            <path d="M2 17l10 5 10-5"/>
-            <path d="M2 12l10 5 10-5"/>
-          </svg>
-          <span class="ps-logo-text">Private</span>
-        </div>
-        <button class="ps-sidebar-toggle" id="sidebarToggle" onclick="PSUI.toggleSidebar()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="15 18 9 12 15 6"/>
-          </svg>
-        </button>
-      </div>
-
-      <nav class="ps-nav">
-        <div class="ps-nav-section">
-          <span class="ps-nav-section-label">Personal</span>
-        </div>
+      async computeHash(input) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(input);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      },
+      
+      getStoredHash() {
+        return localStorage.getItem(this.HASH_STORAGE_KEY) || this.DEFAULT_HASH;
+      },
+      
+      async unlock() {
+        const input = document.getElementById('passwordInput');
+        const btn = document.getElementById('unlockBtn');
+        const errorEl = document.getElementById('lockError');
+        const password = input?.value?.trim();
         
-        <button class="ps-nav-item active" data-section="chat" onclick="PSUI.navigateTo('chat')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-          </svg>
-          <span class="ps-nav-label">Her Mode</span>
-        </button>
+        // Clear previous error
+        errorEl.textContent = '';
         
-        <button class="ps-nav-item" data-section="pro-chat" onclick="PSUI.navigateTo('pro-chat')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-            <line x1="8" y1="21" x2="16" y2="21"/>
-            <line x1="12" y1="17" x2="12" y2="21"/>
-          </svg>
-          <span class="ps-nav-label">Pro Mode</span>
-        </button>
+        // Validate input
+        if (!password) {
+          input.classList.add('shake');
+          setTimeout(() => input.classList.remove('shake'), 500);
+          errorEl.textContent = 'Please enter password';
+          return;
+        }
         
-        <button class="ps-nav-item" data-section="notes" onclick="PSUI.navigateTo('notes')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/>
-          </svg>
-          <span class="ps-nav-label">Notes</span>
-        </button>
+        // Show loading state
+        btn.disabled = true;
+        btn.innerHTML = '<svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="12"/></svg>';
         
-        <button class="ps-nav-item" data-section="images" onclick="PSUI.navigateTo('images')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5"/>
-            <polyline points="21 15 16 10 5 21"/>
-          </svg>
-          <span class="ps-nav-label">Images</span>
-        </button>
+        // Verify password
+        const inputHash = await this.computeHash(password);
+        const storedHash = this.getStoredHash();
         
-        <button class="ps-nav-item" data-section="log" onclick="PSUI.navigateTo('log')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-            <line x1="16" y1="2" x2="16" y2="6"/>
-            <line x1="8" y1="2" x2="8" y2="6"/>
-            <line x1="3" y1="10" x2="21" y2="10"/>
-          </svg>
-          <span class="ps-nav-label">Log</span>
-        </button>
+        if (inputHash !== storedHash) {
+          // Failed
+          input.classList.add('shake');
+          setTimeout(() => input.classList.remove('shake'), 500);
+          errorEl.textContent = 'Incorrect password';
+          input.value = '';
+          input.focus();
+          btn.disabled = false;
+          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>';
+          return;
+        }
         
-        <button class="ps-nav-item" data-section="memory" onclick="PSUI.navigateTo('memory')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"/>
-            <circle cx="12" cy="14" r="2"/>
-            <path d="M12 16v2"/>
-          </svg>
-          <span class="ps-nav-label">Memory</span>
-        </button>
+        // Success - set in-memory state
+        this.unlocked = true;
         
-        <div class="ps-nav-section">
-          <span class="ps-nav-section-label">Website Control</span>
-        </div>
+        // Set session flag for sub-page navigation only
+        sessionStorage.setItem(this.SESSION_KEY, 'true');
         
-        <button class="ps-nav-item" data-section="projects" onclick="PSUI.navigateTo('projects')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-            <line x1="12" y1="22.08" x2="12" y2="12"/>
-          </svg>
-          <span class="ps-nav-label">Projects</span>
-        </button>
+        // Show dashboard
+        this.showDashboard();
         
-        <button class="ps-nav-item" data-section="navigation" onclick="PSUI.navigateTo('navigation')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="3" y1="12" x2="21" y2="12"/>
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <line x1="3" y1="18" x2="21" y2="18"/>
-          </svg>
-          <span class="ps-nav-label">Navigation</span>
-        </button>
+        // Reset button
+        input.value = '';
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>';
+      },
+      
+      lock() {
+        // Clear all auth state
+        this.unlocked = false;
+        sessionStorage.removeItem(this.SESSION_KEY);
         
-        <button class="ps-nav-item" data-section="pages" onclick="PSUI.navigateTo('pages')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-          </svg>
-          <span class="ps-nav-label">Pages</span>
-        </button>
-        
-        <button class="ps-nav-item" data-section="site-settings" onclick="PSUI.navigateTo('site-settings')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="2" y1="12" x2="22" y2="12"/>
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-          </svg>
-          <span class="ps-nav-label">Site Settings</span>
-        </button>
-      </nav>
-
-      <div class="ps-sidebar-footer">
-        <button class="ps-nav-item" data-section="settings" onclick="PSUI.navigateTo('settings')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-          </svg>
-          <span class="ps-nav-label">Settings</span>
-        </button>
-        
-        <button class="ps-nav-item ps-nav-lock" onclick="PSAuth.lock()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
-          <span class="ps-nav-label">Lock</span>
-        </button>
-      </div>
-    </aside>
-
-    <!-- Main Content Area -->
-    <main class="ps-main">
-      <!-- Section: Her Mode Chat -->
-      <section class="ps-section active" id="section-chat">
-        <div class="ps-section-header">
-          <h2 class="ps-section-title">
-            <span class="ps-title-icon">💕</span>
-            Her Mode
-          </h2>
-          <div class="ps-section-actions">
-            <button class="ps-btn ps-btn-sm ps-btn-ghost" onclick="PSAISystem.openTrainingModal()" title="Training Data">
-              <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-            </button>
-            <button class="ps-btn ps-btn-sm ps-btn-secondary" onclick="PSAISystem.newSession('her')">
-              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              New
-            </button>
-          </div>
-        </div>
-        <div class="ps-workspace ps-chat-workspace" id="her-chat-workspace">
-          <div class="ps-chat-container">
-            <div class="ps-chat-messages" id="her-chat-messages"></div>
-            <div class="ps-chat-input-container">
-              <div class="ps-chat-input-wrapper">
-                <textarea class="ps-chat-input" id="her-chat-input" placeholder="Talk to me... 💫" rows="1" onkeydown="PSAISystem.handleKeyDown(event, 'her')"></textarea>
-                <button class="ps-chat-send" onclick="PSAISystem.sendMessage('her')">
-                  <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Section: Pro Mode Chat -->
-      <section class="ps-section" id="section-pro-chat">
-        <div class="ps-section-header">
-          <h2 class="ps-section-title">
-            <span class="ps-title-icon">⚡</span>
-            Professional Mode
-          </h2>
-          <div class="ps-section-actions">
-            <button class="ps-btn ps-btn-sm ps-btn-secondary" onclick="PSAISystem.newSession('pro')">
-              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              New
-            </button>
-          </div>
-        </div>
-        <div class="ps-workspace ps-chat-workspace" id="pro-chat-workspace">
-          <div class="ps-chat-container">
-            <div class="ps-chat-messages" id="pro-chat-messages"></div>
-            <div class="ps-chat-input-container">
-              <div class="ps-chat-input-wrapper">
-                <textarea class="ps-chat-input" id="pro-chat-input" placeholder="Ask anything..." rows="1" onkeydown="PSAISystem.handleKeyDown(event, 'pro')"></textarea>
-                <button class="ps-chat-send" onclick="PSAISystem.sendMessage('pro')">
-                  <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Section: Notes -->
-      <section class="ps-section" id="section-notes">
-        <div class="ps-section-header">
-          <h2 class="ps-section-title">Notes</h2>
-          <div class="ps-section-actions">
-            <button class="ps-btn ps-btn-sm ps-btn-secondary" onclick="PSNotes.create()">
-              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              New Note
-            </button>
-          </div>
-        </div>
-        <div class="ps-workspace">
-          <!-- Notes content loaded by PSNotes.load() -->
-        </div>
-      </section>
-
-      <!-- Section: Images -->
-      <section class="ps-section" id="section-images">
-        <div class="ps-section-header">
-          <h2 class="ps-section-title">Images</h2>
-          <div class="ps-section-actions">
-            <button class="ps-btn ps-btn-sm ps-btn-secondary" onclick="PSImages.upload()">
-              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              Upload
-            </button>
-          </div>
-        </div>
-        <div class="ps-workspace">
-          <!-- Images content loaded by PSImages.load() -->
-        </div>
-      </section>
-
-      <!-- Section: Daily Log -->
-      <section class="ps-section" id="section-log">
-        <div class="ps-section-header">
-          <h2 class="ps-section-title">Daily Log</h2>
-          <div class="ps-section-actions">
-            <button class="ps-btn ps-btn-sm ps-btn-secondary" onclick="PSLog.selectDate(new Date().getFullYear(), new Date().getMonth(), new Date().getDate())">
-              Today
-            </button>
-          </div>
-        </div>
-        <div class="ps-workspace">
-          <!-- Log content loaded by PSLog.load() -->
-        </div>
-      </section>
-
-      <!-- Section: Memory -->
-      <section class="ps-section" id="section-memory">
-        <div class="ps-section-header">
-          <h2 class="ps-section-title">AI Memory</h2>
-          <div class="ps-section-actions">
-            <button class="ps-btn ps-btn-sm ps-btn-danger" onclick="PSMemory.clearAll()">
-              Clear All
-            </button>
-          </div>
-        </div>
-        <div class="ps-workspace">
-          <!-- Memory content loaded by PSMemory.load() -->
-        </div>
-      </section>
-
-      <!-- Section: Projects Manager -->
-      <section class="ps-section" id="section-projects">
-        <div class="ps-section-header">
-          <h2 class="ps-section-title">Projects Manager</h2>
-          <div class="ps-section-actions">
-            <button class="ps-btn ps-btn-sm ps-btn-secondary" onclick="ProjectsManager.syncToPublicSite()">
-              <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-              Sync
-            </button>
-            <button class="ps-btn ps-btn-sm ps-btn-primary" onclick="ProjectsManager.openEditor()">
-              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              New Project
-            </button>
-          </div>
-        </div>
-        <div class="ps-workspace" id="projects-workspace">
-          <div class="ps-control-panel">
-            <div class="ps-projects-filters">
-              <div class="ps-projects-search">
-                <input type="text" class="ps-input ps-input-sm" id="projects-search" placeholder="Search projects..." oninput="ProjectsManager.filterProjects(this.value)">
-              </div>
-              <select class="ps-select ps-select-sm" id="projects-filter-status" onchange="ProjectsManager.filterByStatus(this.value)">
-                <option value="all">All Status</option>
-                <option value="published">Published</option>
-                <option value="draft">Draft</option>
-                <option value="hidden">Hidden</option>
-              </select>
-            </div>
-            <div class="ps-projects-list" id="projectsList">
-              <!-- Projects loaded dynamically -->
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Section: Navigation Manager -->
-      <section class="ps-section" id="section-navigation">
-        <div class="ps-section-header">
-          <h2 class="ps-section-title">Navigation Manager</h2>
-          <div class="ps-section-actions">
-            <button class="ps-btn ps-btn-sm ps-btn-secondary" onclick="NavigationManager.syncToPublicSite()">
-              <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-              Sync
-            </button>
-            <button class="ps-btn ps-btn-sm ps-btn-primary" onclick="NavigationManager.openEditor()">
-              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Add Link
-            </button>
-          </div>
-        </div>
-        <div class="ps-workspace" id="navigation-workspace">
-          <div class="ps-control-panel">
-            <div class="ps-nav-links-list" id="navLinksList">
-              <!-- Navigation links loaded dynamically -->
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Section: Pages Manager -->
-      <section class="ps-section" id="section-pages">
-        <div class="ps-section-header">
-          <h2 class="ps-section-title">Pages Manager</h2>
-          <div class="ps-section-actions">
-            <button class="ps-btn ps-btn-sm ps-btn-secondary" onclick="PagesManager.syncToPublicSite()">
-              <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-              Sync
-            </button>
-            <button class="ps-btn ps-btn-sm ps-btn-primary" onclick="PagesManager.openEditor()">
-              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              Add Page
-            </button>
-          </div>
-        </div>
-        <div class="ps-workspace" id="pages-workspace">
-          <div class="ps-control-panel">
-            <!-- Public Pages -->
-            <div class="ps-pages-section">
-              <div class="ps-pages-section-header">
-                <h3 class="ps-pages-section-title">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
-                  Public Pages
-                </h3>
-                <span class="ps-pages-count public">0</span>
-              </div>
-              <div class="ps-pages-list" id="publicPagesList"></div>
-            </div>
-            
-            <!-- Hidden Pages -->
-            <div class="ps-pages-section">
-              <div class="ps-pages-section-header">
-                <h3 class="ps-pages-section-title">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                  Hidden Pages
-                </h3>
-                <span class="ps-pages-count hidden">0</span>
-              </div>
-              <div class="ps-pages-list" id="hiddenPagesList"></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Section: Site Settings -->
-      <section class="ps-section" id="section-site-settings">
-        <div class="ps-section-header">
-          <h2 class="ps-section-title">Site Settings</h2>
-          <div class="ps-section-actions">
-            <button class="ps-btn ps-btn-sm ps-btn-primary" onclick="SettingsManager.collectAndSave()">
-              Save Changes
-            </button>
-          </div>
-        </div>
-        <div class="ps-workspace" id="site-settings-workspace">
-          <div class="ps-settings-panel">
-            <!-- Identity -->
-            <div class="ps-settings-section">
-              <h3 class="ps-settings-section-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                Site Identity
-              </h3>
-              <div class="ps-settings-grid">
-                <div class="ps-settings-field">
-                  <label class="ps-label">Site Name</label>
-                  <input type="text" class="ps-input" id="settings-site-name" placeholder="Your Site Name">
-                </div>
-                <div class="ps-settings-field">
-                  <label class="ps-label">Site Tagline</label>
-                  <input type="text" class="ps-input" id="settings-site-tagline" placeholder="Short description">
-                </div>
-                <div class="ps-settings-field ps-settings-field-full">
-                  <label class="ps-label">Author Bio</label>
-                  <textarea class="ps-textarea" id="settings-author-bio" rows="3" placeholder="About you..."></textarea>
-                </div>
-              </div>
-            </div>
-
-            <!-- Social Links -->
-            <div class="ps-settings-section">
-              <h3 class="ps-settings-section-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-                Social Links
-              </h3>
-              <div class="ps-settings-grid">
-                <div class="ps-settings-field">
-                  <label class="ps-label">GitHub</label>
-                  <input type="url" class="ps-input" id="settings-github" placeholder="https://github.com/username">
-                </div>
-                <div class="ps-settings-field">
-                  <label class="ps-label">LinkedIn</label>
-                  <input type="url" class="ps-input" id="settings-linkedin" placeholder="https://linkedin.com/in/username">
-                </div>
-                <div class="ps-settings-field">
-                  <label class="ps-label">Twitter/X</label>
-                  <input type="url" class="ps-input" id="settings-twitter" placeholder="https://x.com/username">
-                </div>
-                <div class="ps-settings-field">
-                  <label class="ps-label">Email</label>
-                  <input type="email" class="ps-input" id="settings-email" placeholder="you@example.com">
-                </div>
-              </div>
-            </div>
-
-            <!-- Appearance -->
-            <div class="ps-settings-section">
-              <h3 class="ps-settings-section-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-                Appearance
-              </h3>
-              <div class="ps-settings-grid">
-                <div class="ps-settings-field">
-                  <label class="ps-label">Accent Color</label>
-                  <input type="color" class="ps-color-input" id="settings-accent-color" value="#6366f1">
-                </div>
-                <div class="ps-settings-field">
-                  <label class="ps-label">Theme Mode</label>
-                  <select class="ps-select" id="settings-theme-mode">
-                    <option value="dark">Dark</option>
-                    <option value="light">Light</option>
-                    <option value="system">System</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <!-- SEO -->
-            <div class="ps-settings-section">
-              <h3 class="ps-settings-section-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                SEO & Meta
-              </h3>
-              <div class="ps-settings-grid">
-                <div class="ps-settings-field ps-settings-field-full">
-                  <label class="ps-label">Meta Description</label>
-                  <textarea class="ps-textarea" id="settings-meta-description" rows="2" placeholder="Site description for search engines..."></textarea>
-                </div>
-                <div class="ps-settings-field ps-settings-field-full">
-                  <label class="ps-label">Keywords</label>
-                  <input type="text" class="ps-input" id="settings-keywords" placeholder="keyword1, keyword2, keyword3">
-                </div>
-              </div>
-            </div>
-
-            <!-- Maintenance -->
-            <div class="ps-settings-section">
-              <h3 class="ps-settings-section-title">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-                Maintenance
-              </h3>
-              <div class="ps-settings-grid">
-                <div class="ps-settings-field">
-                  <label class="ps-toggle">
-                    <input type="checkbox" class="ps-toggle-input" id="settings-maintenance-mode">
-                    <span class="ps-toggle-track"></span>
-                    <span class="ps-toggle-label">Maintenance Mode</span>
-                  </label>
-                  <p class="ps-text-muted ps-text-sm">When enabled, visitors see a maintenance page.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Section: Settings (Personal Space) -->
-      <section class="ps-section" id="section-settings">
-        <div class="ps-section-header">
-          <h2 class="ps-section-title">Private Space Settings</h2>
-        </div>
-        <div class="ps-workspace">
-          <!-- Settings content loaded by PSSettings.load() -->
-        </div>
-      </section>
-    </main>
-
-    <!-- AI Panel (Collapsible Right Panel) -->
-    <aside class="ps-ai-panel" id="aiPanel">
-      <div class="ps-ai-panel-header">
-        <h3 class="ps-ai-panel-title">AI Assistant</h3>
-        <button class="ps-ai-panel-close" onclick="PSUI.toggleAI()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
-      </div>
-      <div class="ps-ai-panel-content" id="aiPanelContent">
-        <div class="ps-ai-panel-empty">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M12 8v4l3 3"/>
-          </svg>
-          <p>AI context will appear here based on your current activity.</p>
-        </div>
-      </div>
-    </aside>
-
-    <!-- Mobile Bottom Navigation -->
-    <nav class="ps-mobile-nav" id="mobileNav">
-      <button class="ps-mobile-nav-item active" data-section="chat" onclick="PSUI.navigateTo('chat')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-        </svg>
-        <span>Her</span>
-      </button>
-      <button class="ps-mobile-nav-item" data-section="pro-chat" onclick="PSUI.navigateTo('pro-chat')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-          <line x1="8" y1="21" x2="16" y2="21"/>
-          <line x1="12" y1="17" x2="12" y2="21"/>
-        </svg>
-        <span>Pro</span>
-      </button>
-      <button class="ps-mobile-nav-item" data-section="projects" onclick="PSUI.navigateTo('projects')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-        </svg>
-        <span>Projects</span>
-      </button>
-      <button class="ps-mobile-nav-item" data-section="pages" onclick="PSUI.navigateTo('pages')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-        </svg>
-        <span>Pages</span>
-      </button>
-      <button class="ps-mobile-nav-item ps-mobile-nav-more" onclick="PSUI.showMobileMenu()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="1"/>
-          <circle cx="12" cy="5" r="1"/>
-          <circle cx="12" cy="19" r="1"/>
-        </svg>
-        <span>More</span>
-      </button>
-    </nav>
-  </div>
-
-  <!-- Toast Container -->
-  <div class="ps-toast-container" id="toastContainer"></div>
-
-  <!-- Modal Container -->
-  <div class="ps-modal-overlay" id="modalOverlay" onclick="PSUI.hideModal()">
-    <div class="ps-modal" onclick="event.stopPropagation()">
-      <div class="ps-modal-header" id="modalHeader"></div>
-      <div class="ps-modal-body" id="modalBody"></div>
-    </div>
-  </div>
-
-  <!-- Project Editor Modal -->
-  <div class="ps-modal-overlay" id="projectEditorOverlay" onclick="ProjectsManager?.closeEditor()">
-    <div class="ps-modal ps-modal-lg" onclick="event.stopPropagation()">
-      <div class="ps-modal-header">
-        <h3 id="projectEditorTitle">Edit Project</h3>
-        <button class="ps-modal-close" onclick="ProjectsManager?.closeEditor()">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="ps-modal-body" id="projectEditorBody">
-        <!-- Editor form loaded dynamically -->
-      </div>
-    </div>
-  </div>
-
-  <!-- AI Training Modal -->
-  <div class="ps-modal-overlay" id="trainingModalOverlay" onclick="PSAISystem?.closeTrainingModal()">
-    <div class="ps-modal ps-modal-lg" onclick="event.stopPropagation()">
-      <div class="ps-modal-header">
-        <h3>Her Mode Training Data</h3>
-        <button class="ps-modal-close" onclick="PSAISystem?.closeTrainingModal()">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="ps-modal-body">
-        <p class="ps-text-muted ps-text-sm" style="margin-bottom: var(--ps-space-4);">
-          Add training examples to customize how She responds. These are stored locally and used to shape the AI's personality.
-        </p>
-        <div class="ps-training-form" style="display: flex; flex-direction: column; gap: var(--ps-space-4);">
-          <div class="ps-settings-field">
-            <label class="ps-label">Your Input</label>
-            <textarea class="ps-textarea" id="training-input" rows="2" placeholder="What you might say..."></textarea>
-          </div>
-          <div class="ps-settings-field">
-            <label class="ps-label">Her Response</label>
-            <textarea class="ps-textarea" id="training-output" rows="3" placeholder="How She should respond..."></textarea>
-          </div>
-          <button class="ps-btn ps-btn-primary" onclick="PSAISystem?.addTrainingData()">
-            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add Training Example
-          </button>
-        </div>
-        <div class="ps-training-list" id="training-data-list" style="margin-top: var(--ps-space-6);">
-          <!-- Training examples loaded dynamically -->
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- AI Assist Modal -->
-  <div class="ps-modal-overlay" id="aiAssistOverlay" onclick="PSAIAssist?.close()">
-    <div class="ps-modal ps-modal-xl" onclick="event.stopPropagation()">
-      <div class="ps-modal-header">
-        <h3>AI Content Assistant</h3>
-        <button class="ps-modal-close" onclick="PSAIAssist?.close()">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="ps-modal-body">
-        <div class="ps-ai-assist-content">
-          <div class="ps-ai-assist-options">
-            <button class="ps-btn ps-btn-sm ps-btn-secondary" onclick="PSAIAssist?.enhance('rewrite')">Rewrite</button>
-            <button class="ps-btn ps-btn-sm ps-btn-secondary" onclick="PSAIAssist?.enhance('improve')">Improve</button>
-            <button class="ps-btn ps-btn-sm ps-btn-secondary" onclick="PSAIAssist?.enhance('bullets')">To Bullets</button>
-            <button class="ps-btn ps-btn-sm ps-btn-secondary" onclick="PSAIAssist?.enhance('summarize')">Summarize</button>
-            <button class="ps-btn ps-btn-sm ps-btn-secondary" onclick="PSAIAssist?.enhance('expand')">Expand</button>
-          </div>
-          <div class="ps-ai-assist-compare">
-            <div class="ps-ai-assist-panel">
-              <span class="ps-ai-assist-panel-label">Original</span>
-              <textarea class="ps-textarea" id="ai-assist-original" rows="10" readonly></textarea>
-            </div>
-            <div class="ps-ai-assist-panel">
-              <span class="ps-ai-assist-panel-label">Enhanced</span>
-              <textarea class="ps-textarea" id="ai-assist-enhanced" rows="10" placeholder="AI-enhanced content will appear here..."></textarea>
-            </div>
-          </div>
-          <div class="ps-ai-assist-actions">
-            <button class="ps-btn ps-btn-secondary" onclick="PSAIAssist?.close()">Cancel</button>
-            <button class="ps-btn ps-btn-primary" onclick="PSAIAssist?.apply()">Apply Changes</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Scripts -->
-  <script src="js/crypto.js"></script>
-  <script src="js/storage.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/memory.js"></script>
-  <script src="js/chat.js"></script>
-  <script src="js/notes.js"></script>
-  <script src="js/images.js"></script>
-  <script src="js/log.js"></script>
-  <script src="js/projects.js"></script>
-  <script src="js/settings.js"></script>
-  <script src="js/sync.js"></script>
-  <!-- New Master Control Center Modules -->
-  <script src="js/toast.js"></script>
-  <script src="js/database.js"></script>
-  <script src="js/ai-system.js"></script>
-  <script src="js/ai-assist.js"></script>
-  <script src="js/projects-manager.js"></script>
-  <script src="js/navigation-manager.js"></script>
-  <script src="js/pages-manager.js"></script>
-  <script src="js/settings-manager.js"></script>
-  <script src="js/main.js"></script>
+        // Show lock screen
+        this.showLockScreen();
+      }
+    };
+    
+    // Initialize on DOM ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => Dashboard.init());
+    } else {
+      Dashboard.init();
+    }
+  </script>
 </body>
 </html>

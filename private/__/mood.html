@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mood | She</title>
+  <link rel="stylesheet" href="../css/personal.css">
+  <style>
+    .mood-container {
+      padding: 1.5rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .mood-today {
+      background: var(--bg-secondary);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid var(--her-accent-muted);
+      text-align: center;
+    }
+    
+    .mood-today-title {
+      font-size: 0.875rem;
+      color: var(--her-accent);
+      margin-bottom: 0.5rem;
+    }
+    
+    .mood-today-date {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      margin-bottom: 1.5rem;
+    }
+    
+    .mood-selector {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    
+    .mood-option {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 1.25rem;
+      background: var(--bg-tertiary);
+      border: 2px solid transparent;
+      border-radius: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .mood-option:hover {
+      background: var(--her-accent-subtle);
+      border-color: var(--her-accent-muted);
+    }
+    
+    .mood-option.selected {
+      background: var(--her-accent-subtle);
+      border-color: var(--her-accent);
+    }
+    
+    .mood-option-emoji {
+      font-size: 2rem;
+    }
+    
+    .mood-option-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+    
+    .mood-note-group {
+      margin-top: 1.5rem;
+    }
+    
+    .mood-note-label {
+      display: block;
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+      text-align: left;
+    }
+    
+    .mood-note-input {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-default);
+      border-radius: 0.625rem;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.875rem;
+      resize: none;
+      min-height: 80px;
+    }
+    
+    .mood-note-input:focus {
+      outline: none;
+      border-color: var(--her-accent);
+    }
+    
+    .mood-save-btn {
+      margin-top: 1.5rem;
+    }
+    
+    .mood-current {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    
+    .mood-current-emoji {
+      font-size: 3rem;
+    }
+    
+    .mood-current-label {
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    
+    /* History */
+    .mood-history-title {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+    }
+    
+    .mood-history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    
+    .mood-history-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: var(--bg-secondary);
+      border-radius: 0.75rem;
+      border: 1px solid var(--border-default);
+    }
+    
+    .mood-history-emoji {
+      font-size: 1.5rem;
+    }
+    
+    .mood-history-info {
+      flex: 1;
+    }
+    
+    .mood-history-date {
+      font-size: 0.8125rem;
+      color: var(--text-primary);
+    }
+    
+    .mood-history-note {
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+      margin-top: 0.25rem;
+    }
+    
+    .mood-history-delete {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: transparent;
+      border: 1px solid var(--border-default);
+      color: var(--text-tertiary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .mood-history-delete:hover {
+      background: rgba(239, 68, 68, 0.1);
+      border-color: var(--error);
+      color: var(--error);
+    }
+    
+    .no-history {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      font-size: 0.8125rem;
+    }
+    
+    /* Calendar View */
+    .mood-calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .mood-calendar-day-header {
+      font-size: 0.6875rem;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 0.25rem;
+    }
+    
+    .mood-calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.5rem;
+      background: var(--bg-tertiary);
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .mood-calendar-day:hover {
+      background: var(--bg-secondary);
+    }
+    
+    .mood-calendar-day.has-mood {
+      background: var(--her-accent-subtle);
+    }
+    
+    .mood-calendar-day.today {
+      border: 2px solid var(--her-accent);
+    }
+  </style>
+</head>
+<body>
+  <!-- Auth Check -->
+  <div id="authCheck" class="auth-checking">
+    <div class="auth-checking-spinner"></div>
+  </div>
+  
+  <!-- Ambient Background -->
+  <div class="her-ambient-bg">
+    <div class="her-ambient-orb her-ambient-orb-1"></div>
+    <div class="her-ambient-orb her-ambient-orb-2"></div>
+    <div class="her-ambient-orb her-ambient-orb-3"></div>
+  </div>
+  
+  <!-- Main App -->
+  <div id="moodApp" class="her-app">
+    <!-- Header -->
+    <header class="her-header">
+      <div class="her-header-left">
+        <a href="../personal.html" class="her-back-btn">← Back</a>
+        <h1 class="her-header-title">Mood</h1>
+      </div>
+    </header>
+    
+    <!-- Content -->
+    <main class="her-main" style="padding: 0;">
+      <div class="mood-container">
+        <!-- Today's Mood -->
+        <div class="mood-today">
+          <div class="mood-today-title">How are you feeling today?</div>
+          <div class="mood-today-date" id="todayDate"></div>
+          
+          <!-- Current Mood Display -->
+          <div id="currentMoodDisplay" style="display: none;">
+            <div class="mood-current">
+              <span class="mood-current-emoji" id="currentEmoji"></span>
+              <span class="mood-current-label" id="currentLabel"></span>
+            </div>
+            <p id="currentNote" style="color: var(--text-tertiary); font-size: 0.875rem; margin-bottom: 1rem;"></p>
+            <button class="her-btn her-btn-secondary" onclick="MoodApp.editMood()">Change Mood</button>
+          </div>
+          
+          <!-- Mood Selector -->
+          <div id="moodSelector">
+            <div class="mood-selector">
+              <div class="mood-option" data-mood="happy">
+                <span class="mood-option-emoji">😊</span>
+                <span class="mood-option-label">Happy</span>
+              </div>
+              <div class="mood-option" data-mood="loved">
+                <span class="mood-option-emoji">🥰</span>
+                <span class="mood-option-label">Loved</span>
+              </div>
+              <div class="mood-option" data-mood="calm">
+                <span class="mood-option-emoji">😌</span>
+                <span class="mood-option-label">Calm</span>
+              </div>
+              <div class="mood-option" data-mood="sad">
+                <span class="mood-option-emoji">😢</span>
+                <span class="mood-option-label">Sad</span>
+              </div>
+              <div class="mood-option" data-mood="tired">
+                <span class="mood-option-emoji">😴</span>
+                <span class="mood-option-label">Tired</span>
+              </div>
+              <div class="mood-option" data-mood="stressed">
+                <span class="mood-option-emoji">😰</span>
+                <span class="mood-option-label">Stressed</span>
+              </div>
+              <div class="mood-option" data-mood="angry">
+                <span class="mood-option-emoji">😠</span>
+                <span class="mood-option-label">Angry</span>
+              </div>
+              <div class="mood-option" data-mood="excited">
+                <span class="mood-option-emoji">🤩</span>
+                <span class="mood-option-label">Excited</span>
+              </div>
+            </div>
+            
+            <div class="mood-note-group">
+              <label class="mood-note-label">Note (optional)</label>
+              <textarea id="moodNote" class="mood-note-input" placeholder="What's on your mind?"></textarea>
+            </div>
+            
+            <button class="her-btn her-btn-primary mood-save-btn" onclick="MoodApp.saveMood()">Save Mood</button>
+          </div>
+        </div>
+        
+        <!-- History -->
+        <h3 class="mood-history-title">Recent Moods</h3>
+        <div id="moodHistory" class="mood-history-list"></div>
+        <div id="noHistory" class="no-history" style="display: none;">
+          No mood history yet
+        </div>
+      </div>
+    </main>
+    
+    <!-- Toast Container -->
+    <div id="toastContainer" class="her-toast-container"></div>
+  </div>
+  
+  <script src="../js/database.js"></script>
+  <script>
+    const MoodApp = {
+      SESSION_KEY: 'ps_session_active',
+      moods: [],
+      todayMood: null,
+      selectedMood: null,
+      
+      moodEmojis: {
+        happy: '😊',
+        loved: '🥰',
+        calm: '😌',
+        sad: '😢',
+        tired: '😴',
+        stressed: '😰',
+        angry: '😠',
+        excited: '🤩'
+      },
+      
+      async init() {
+        if (sessionStorage.getItem(this.SESSION_KEY) !== 'true') {
+          window.location.href = '../index.html';
+          return;
+        }
+        
+        document.getElementById('authCheck').classList.add('hidden');
+        document.getElementById('moodApp').classList.add('visible');
+        
+        await Database.init();
+        
+        // Set today's date
+        const today = new Date();
+        document.getElementById('todayDate').textContent = today.toLocaleDateString('en-US', {
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric'
+        });
+        
+        await this.loadMoods();
+        this.bindEvents();
+      },
+      
+      bindEvents() {
+        document.querySelectorAll('.mood-option').forEach(option => {
+          option.addEventListener('click', () => this.selectMood(option.dataset.mood));
+        });
+      },
+      
+      selectMood(mood) {
+        this.selectedMood = mood;
+        
+        document.querySelectorAll('.mood-option').forEach(option => {
+          option.classList.toggle('selected', option.dataset.mood === mood);
+        });
+      },
+      
+      async loadMoods() {
+        try {
+          this.moods = await Database.getAll('mood') || [];
+          this.moods.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+          
+          // Check for today's mood
+          const today = new Date().toISOString().split('T')[0];
+          this.todayMood = this.moods.find(m => m.date === today);
+          
+          if (this.todayMood) {
+            this.showCurrentMood();
+          } else {
+            document.getElementById('moodSelector').style.display = 'block';
+            document.getElementById('currentMoodDisplay').style.display = 'none';
+          }
+          
+          this.renderHistory();
+        } catch (e) {
+          this.moods = [];
+          this.renderHistory();
+        }
+      },
+      
+      showCurrentMood() {
+        if (!this.todayMood) return;
+        
+        document.getElementById('moodSelector').style.display = 'none';
+        document.getElementById('currentMoodDisplay').style.display = 'block';
+        
+        document.getElementById('currentEmoji').textContent = this.moodEmojis[this.todayMood.mood] || '😊';
+        document.getElementById('currentLabel').textContent = this.capitalize(this.todayMood.mood);
+        document.getElementById('currentNote').textContent = this.todayMood.note || '';
+      },
+      
+      editMood() {
+        document.getElementById('moodSelector').style.display = 'block';
+        document.getElementById('currentMoodDisplay').style.display = 'none';
+        
+        if (this.todayMood) {
+          this.selectMood(this.todayMood.mood);
+          document.getElementById('moodNote').value = this.todayMood.note || '';
+        }
+      },
+      
+      async saveMood() {
+        if (!this.selectedMood) {
+          this.toast('Please select a mood', 'error');
+          return;
+        }
+        
+        const note = document.getElementById('moodNote')?.value?.trim() || '';
+        const today = new Date().toISOString().split('T')[0];
+        
+        const moodEntry = {
+          id: this.todayMood?.id || crypto.randomUUID(),
+          date: today,
+          mood: this.selectedMood,
+          note,
+          timestamp: Date.now()
+        };
+        
+        try {
+          if (this.todayMood) {
+            await Database.put('mood', moodEntry);
+          } else {
+            await Database.add('mood', moodEntry);
+          }
+          
+          await this.loadMoods();
+          this.toast('Mood saved 💕', 'success');
+        } catch (e) {
+          this.toast('Failed to save mood', 'error');
+        }
+      },
+      
+      renderHistory() {
+        const container = document.getElementById('moodHistory');
+        const empty = document.getElementById('noHistory');
+        
+        // Show last 14 days
+        const history = this.moods.slice(0, 14);
+        
+        if (history.length === 0) {
+          container.innerHTML = '';
+          empty.style.display = 'block';
+          return;
+        }
+        
+        empty.style.display = 'none';
+        container.innerHTML = history.map(mood => `
+          <div class="mood-history-item">
+            <span class="mood-history-emoji">${this.moodEmojis[mood.mood] || '😊'}</span>
+            <div class="mood-history-info">
+              <div class="mood-history-date">${this.formatDate(mood.date)} - ${this.capitalize(mood.mood)}</div>
+              ${mood.note ? `<div class="mood-history-note">${this.escapeHtml(mood.note)}</div>` : ''}
+            </div>
+            <button class="mood-history-delete" onclick="MoodApp.deleteMood('${mood.id}')" title="Delete">×</button>
+          </div>
+        `).join('');
+      },
+      
+      async deleteMood(id) {
+        if (!confirm('Delete this mood entry?')) return;
+        
+        try {
+          await Database.delete('mood', id);
+          
+          // Reset today's mood if deleted
+          if (this.todayMood?.id === id) {
+            this.todayMood = null;
+            this.selectedMood = null;
+            document.querySelectorAll('.mood-option').forEach(o => o.classList.remove('selected'));
+            document.getElementById('moodNote').value = '';
+          }
+          
+          await this.loadMoods();
+          this.toast('Mood deleted', 'success');
+        } catch (e) {
+          this.toast('Failed to delete', 'error');
+        }
+      },
+      
+      toast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `her-toast ${type}`;
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.classList.add('hiding');
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      },
+      
+      escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      },
+      
+      capitalize(str) {
+        return str ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+      },
+      
+      formatDate(dateStr) {
+        if (!dateStr) return '';
+        const date = new Date(dateStr + 'T00:00:00');
+        return date.toLocaleDateString('en-US', { 
+          weekday: 'short',
+          month: 'short', 
+          day: 'numeric'
+        });
+      }
+    };
+    
+    document.addEventListener('DOMContentLoaded', () => MoodApp.init());
+  </script>
+</body>
+</html>

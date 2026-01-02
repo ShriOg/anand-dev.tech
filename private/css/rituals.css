@@ -1,0 +1,612 @@
+/* ═══════════════════════════════════════════════════════════
+   PRIVATE SPACE - PERSONAL RITUALS
+   Daily Entry • Mood • Memory
+   Quiet, Distraction-free, Safe
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────
+   RITUALS NAVIGATION GROUP
+   ───────────────────────────────── */
+.ps-nav-section-rituals {
+  margin-top: var(--ps-space-2);
+  padding-top: var(--ps-space-3);
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.ps-nav-section-rituals .ps-nav-section-label {
+  color: var(--ps-her-accent-dim);
+  opacity: 0.6;
+}
+
+/* ─────────────────────────────────
+   DAILY ENTRY (JOURNAL)
+   ───────────────────────────────── */
+.ps-journal-workspace {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0;
+}
+
+.ps-journal-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--ps-space-8) var(--ps-space-6);
+  width: 100%;
+}
+
+/* Date Header - Quiet */
+.ps-journal-date {
+  display: flex;
+  align-items: center;
+  gap: var(--ps-space-4);
+  margin-bottom: var(--ps-space-6);
+  padding-bottom: var(--ps-space-4);
+  border-bottom: 1px solid var(--ps-border-subtle);
+}
+
+.ps-journal-date-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--ps-space-2);
+}
+
+.ps-journal-date-nav button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ps-radius-md);
+  color: var(--ps-text-muted);
+  opacity: 0.6;
+  transition: 
+    opacity var(--ps-motion-fast) var(--ps-ease-calm),
+    background var(--ps-motion-fast) var(--ps-ease-calm);
+}
+
+.ps-journal-date-nav button:hover {
+  opacity: 1;
+  background: var(--ps-bg-hover);
+}
+
+.ps-journal-date-nav button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.ps-journal-date-display {
+  flex: 1;
+  font-size: var(--ps-text-base);
+  color: var(--ps-text-secondary);
+  font-weight: var(--ps-weight-normal);
+}
+
+.ps-journal-date-today {
+  font-size: var(--ps-text-xs);
+  color: var(--ps-text-muted);
+  padding: var(--ps-space-1) var(--ps-space-2);
+  border-radius: var(--ps-radius-sm);
+  background: var(--ps-bg-tertiary);
+  opacity: 0.6;
+}
+
+/* Writing Surface - Distraction Free */
+.ps-journal-editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.ps-journal-textarea {
+  flex: 1;
+  width: 100%;
+  min-height: 400px;
+  padding: var(--ps-space-4);
+  background: transparent;
+  border: none;
+  color: var(--ps-text-primary);
+  font-size: var(--ps-text-base);
+  font-family: var(--ps-font-sans);
+  line-height: var(--ps-leading-loose);
+  resize: none;
+  outline: none;
+}
+
+.ps-journal-textarea::placeholder {
+  color: var(--ps-text-muted);
+  opacity: 0.5;
+}
+
+/* Auto-save indicator - Subtle */
+.ps-journal-status {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--ps-space-2);
+  padding: var(--ps-space-3) 0;
+  font-size: var(--ps-text-xs);
+  color: var(--ps-text-muted);
+  opacity: 0.4;
+}
+
+.ps-journal-status.saving {
+  opacity: 0.6;
+}
+
+.ps-journal-status.saved {
+  color: var(--ps-success);
+  opacity: 0.5;
+}
+
+/* Entry list for navigation */
+.ps-journal-entries {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ps-space-2);
+  padding: var(--ps-space-4);
+  border-top: 1px solid var(--ps-border-subtle);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.ps-journal-entry-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ps-space-3);
+  padding: var(--ps-space-3);
+  border-radius: var(--ps-radius-md);
+  cursor: pointer;
+  transition: background var(--ps-motion-fast) var(--ps-ease-calm);
+}
+
+.ps-journal-entry-item:hover {
+  background: var(--ps-bg-hover);
+}
+
+.ps-journal-entry-item.active {
+  background: var(--ps-bg-active);
+}
+
+.ps-journal-entry-date {
+  font-size: var(--ps-text-xs);
+  color: var(--ps-text-muted);
+  min-width: 80px;
+}
+
+.ps-journal-entry-preview {
+  font-size: var(--ps-text-sm);
+  color: var(--ps-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─────────────────────────────────
+   MOOD TRACKING
+   ───────────────────────────────── */
+.ps-mood-workspace {
+  padding: var(--ps-space-8) var(--ps-space-6);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.ps-mood-container {
+  text-align: center;
+}
+
+.ps-mood-prompt {
+  font-size: var(--ps-text-lg);
+  color: var(--ps-text-secondary);
+  margin-bottom: var(--ps-space-8);
+  font-weight: var(--ps-weight-normal);
+}
+
+/* Mood Selection - One-tap, neutral */
+.ps-mood-selector {
+  display: flex;
+  justify-content: center;
+  gap: var(--ps-space-4);
+  margin-bottom: var(--ps-space-8);
+}
+
+.ps-mood-option {
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--ps-bg-tertiary);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: 
+    transform var(--ps-motion-fast) var(--ps-ease-calm),
+    border-color var(--ps-motion-fast) var(--ps-ease-calm),
+    background var(--ps-motion-fast) var(--ps-ease-calm);
+  font-size: 24px;
+  opacity: 0.6;
+}
+
+.ps-mood-option:hover {
+  opacity: 0.9;
+  transform: scale(1.08);
+  background: var(--ps-bg-elevated);
+}
+
+.ps-mood-option.selected {
+  opacity: 1;
+  border-color: var(--ps-her-accent);
+  background: var(--ps-her-accent-muted);
+}
+
+/* Mood dot style alternative */
+.ps-mood-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ps-text-muted);
+  opacity: 0.3;
+  cursor: pointer;
+  transition: 
+    opacity var(--ps-motion-fast) var(--ps-ease-calm),
+    transform var(--ps-motion-fast) var(--ps-ease-calm),
+    background var(--ps-motion-fast) var(--ps-ease-calm);
+}
+
+.ps-mood-dot:hover {
+  opacity: 0.6;
+  transform: scale(1.2);
+}
+
+.ps-mood-dot.selected {
+  opacity: 1;
+  background: var(--ps-her-accent);
+}
+
+/* Mood note - optional */
+.ps-mood-note {
+  margin-top: var(--ps-space-6);
+}
+
+.ps-mood-note-input {
+  width: 100%;
+  max-width: 400px;
+  padding: var(--ps-space-3) var(--ps-space-4);
+  background: var(--ps-bg-tertiary);
+  border: 1px solid var(--ps-border-subtle);
+  border-radius: var(--ps-radius-lg);
+  color: var(--ps-text-primary);
+  font-size: var(--ps-text-sm);
+  text-align: center;
+}
+
+.ps-mood-note-input::placeholder {
+  color: var(--ps-text-muted);
+  opacity: 0.5;
+}
+
+/* Today's mood display */
+.ps-mood-today {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ps-space-2);
+  padding: var(--ps-space-2) var(--ps-space-4);
+  background: var(--ps-bg-tertiary);
+  border-radius: var(--ps-radius-full);
+  font-size: var(--ps-text-sm);
+  color: var(--ps-text-secondary);
+  margin-bottom: var(--ps-space-6);
+}
+
+.ps-mood-today-icon {
+  font-size: 18px;
+}
+
+/* Mood history - no charts, just simple list */
+.ps-mood-history {
+  margin-top: var(--ps-space-10);
+  padding-top: var(--ps-space-6);
+  border-top: 1px solid var(--ps-border-subtle);
+}
+
+.ps-mood-history-title {
+  font-size: var(--ps-text-xs);
+  color: var(--ps-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--ps-space-4);
+  opacity: 0.5;
+}
+
+.ps-mood-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ps-space-2);
+}
+
+.ps-mood-history-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ps-space-3);
+  padding: var(--ps-space-2) 0;
+  font-size: var(--ps-text-sm);
+  color: var(--ps-text-secondary);
+  opacity: 0.7;
+}
+
+.ps-mood-history-date {
+  min-width: 80px;
+  font-size: var(--ps-text-xs);
+  color: var(--ps-text-muted);
+}
+
+.ps-mood-history-icon {
+  font-size: 16px;
+}
+
+/* ─────────────────────────────────
+   MEMORY RITUALS (INTENTIONAL)
+   ───────────────────────────────── */
+.ps-memory-workspace {
+  padding: var(--ps-space-6);
+}
+
+.ps-memory-intro {
+  max-width: 600px;
+  margin: 0 auto var(--ps-space-8);
+  text-align: center;
+}
+
+.ps-memory-intro-text {
+  font-size: var(--ps-text-sm);
+  color: var(--ps-text-muted);
+  line-height: var(--ps-leading-relaxed);
+  opacity: 0.7;
+}
+
+/* Add Memory - Intentional */
+.ps-memory-add {
+  max-width: 600px;
+  margin: 0 auto var(--ps-space-8);
+  padding: var(--ps-space-6);
+  background: var(--ps-bg-tertiary);
+  border: 1px solid var(--ps-border-subtle);
+  border-radius: var(--ps-radius-xl);
+}
+
+.ps-memory-type-selector {
+  display: flex;
+  gap: var(--ps-space-2);
+  margin-bottom: var(--ps-space-4);
+}
+
+.ps-memory-type-btn {
+  padding: var(--ps-space-2) var(--ps-space-3);
+  font-size: var(--ps-text-xs);
+  color: var(--ps-text-muted);
+  border-radius: var(--ps-radius-md);
+  border: 1px solid transparent;
+  background: transparent;
+  transition: 
+    background var(--ps-motion-fast) var(--ps-ease-calm),
+    color var(--ps-motion-fast) var(--ps-ease-calm),
+    border-color var(--ps-motion-fast) var(--ps-ease-calm);
+}
+
+.ps-memory-type-btn:hover {
+  background: var(--ps-bg-hover);
+  color: var(--ps-text-secondary);
+}
+
+.ps-memory-type-btn.active {
+  background: var(--ps-her-accent-muted);
+  color: var(--ps-her-accent-text);
+  border-color: rgba(232, 164, 184, 0.2);
+}
+
+.ps-memory-input-group {
+  margin-bottom: var(--ps-space-4);
+}
+
+.ps-memory-input {
+  width: 100%;
+  padding: var(--ps-space-3) var(--ps-space-4);
+  background: var(--ps-bg-secondary);
+  border: 1px solid var(--ps-border-subtle);
+  border-radius: var(--ps-radius-lg);
+  color: var(--ps-text-primary);
+  font-size: var(--ps-text-sm);
+  resize: none;
+}
+
+.ps-memory-input::placeholder {
+  color: var(--ps-text-muted);
+  opacity: 0.5;
+}
+
+.ps-memory-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Memory List */
+.ps-memory-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ps-space-3);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.ps-memory-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ps-space-3);
+  padding: var(--ps-space-4);
+  background: var(--ps-bg-tertiary);
+  border: 1px solid var(--ps-border-subtle);
+  border-radius: var(--ps-radius-lg);
+  transition: 
+    border-color var(--ps-motion-fast) var(--ps-ease-calm),
+    background var(--ps-motion-fast) var(--ps-ease-calm);
+}
+
+.ps-memory-item:hover {
+  border-color: var(--ps-border-default);
+}
+
+.ps-memory-item-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ps-radius-md);
+  background: var(--ps-bg-elevated);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.ps-memory-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.ps-memory-item-text {
+  font-size: var(--ps-text-sm);
+  color: var(--ps-text-primary);
+  line-height: var(--ps-leading-relaxed);
+  margin-bottom: var(--ps-space-2);
+}
+
+.ps-memory-item-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--ps-space-3);
+  font-size: var(--ps-text-xs);
+  color: var(--ps-text-muted);
+  opacity: 0.6;
+}
+
+.ps-memory-item-type {
+  padding: var(--ps-space-1) var(--ps-space-2);
+  background: var(--ps-bg-hover);
+  border-radius: var(--ps-radius-sm);
+}
+
+.ps-memory-item-actions {
+  display: flex;
+  gap: var(--ps-space-1);
+  opacity: 0;
+  transition: opacity var(--ps-motion-fast) var(--ps-ease-calm);
+}
+
+.ps-memory-item:hover .ps-memory-item-actions {
+  opacity: 1;
+}
+
+.ps-memory-item-action {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ps-radius-sm);
+  color: var(--ps-text-muted);
+  transition: 
+    background var(--ps-motion-fast) var(--ps-ease-calm),
+    color var(--ps-motion-fast) var(--ps-ease-calm);
+}
+
+.ps-memory-item-action:hover {
+  background: var(--ps-bg-hover);
+  color: var(--ps-text-secondary);
+}
+
+.ps-memory-item-action.delete:hover {
+  color: var(--ps-error);
+}
+
+/* Memory categories */
+.ps-memory-category {
+  margin-bottom: var(--ps-space-6);
+}
+
+.ps-memory-category-title {
+  font-size: var(--ps-text-xs);
+  color: var(--ps-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--ps-space-3);
+  opacity: 0.5;
+}
+
+/* Empty state */
+.ps-memory-empty {
+  text-align: center;
+  padding: var(--ps-space-12) var(--ps-space-6);
+  color: var(--ps-text-muted);
+  opacity: 0.5;
+}
+
+.ps-memory-empty-icon {
+  font-size: 48px;
+  margin-bottom: var(--ps-space-4);
+  opacity: 0.3;
+}
+
+.ps-memory-empty-text {
+  font-size: var(--ps-text-sm);
+}
+
+/* ─────────────────────────────────
+   SHARED RITUAL ELEMENTS
+   ───────────────────────────────── */
+.ps-ritual-quiet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ps-space-4) var(--ps-space-6);
+  border-bottom: 1px solid var(--ps-border-subtle);
+}
+
+.ps-ritual-title {
+  font-size: var(--ps-text-base);
+  font-weight: var(--ps-weight-normal);
+  color: var(--ps-text-secondary);
+}
+
+/* Optional hint text */
+.ps-ritual-hint {
+  font-size: var(--ps-text-xs);
+  color: var(--ps-text-muted);
+  opacity: 0.4;
+  font-style: italic;
+}
+
+/* ─────────────────────────────────
+   RESPONSIVE
+   ───────────────────────────────── */
+@media (max-width: 768px) {
+  .ps-journal-container {
+    padding: var(--ps-space-4);
+  }
+  
+  .ps-mood-selector {
+    gap: var(--ps-space-2);
+  }
+  
+  .ps-mood-option {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+  
+  .ps-memory-add {
+    padding: var(--ps-space-4);
+  }
+}

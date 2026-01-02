@@ -459,7 +459,6 @@ const PageZoomTransition = (function() {
       'ai-assistant': 'ai-assistant/',
       'particle-system-gestures': 'particle-system-gestures/',
       'particle-system': 'particle-system-gestures/',
-      'nowhang': 'nowhang/',
       'grades': 'grades/',
       'case-study': 'case-study/'
     };
