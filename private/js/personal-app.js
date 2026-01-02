@@ -582,35 +582,34 @@ const HerApp = {
   
   getSadnessResponse() {
     const responses = [
-      "Aww baby... kya hua? Batao mujhe 🥺",
-      "Main hoon na tumhare saath... don't worry 💕",
-      "Arre aise udaas mat ho... bolo kya hua?",
-      "Mujhe batao... I'm here for you always 💖",
-      "Koi baat nahi... sab theek ho jayega trust me ✨",
-      "Tum sad ho? Main bhi sad feel kar rahi hoon ab 🥹"
+      "Kya hua? 🥺",
+      "Arre batao na...",
+      "Hmm... main hoon yahan 💗",
+      "Acha acha... bolo",
+      "Sun rahi hoon... ✨",
+      "Koi baat nahi yaar"
     ];
     return responses[Math.floor(Math.random() * responses.length)];
   },
   
   getHappyResponse() {
     const responses = [
-      "Aww yay! Main bhi khush hoon ab 🥰",
-      "Tumhari khushi meri khushi hai 💕",
-      "Hehe so cute! Batao batao kya hua! ✨",
-      "Aaaa I love seeing you happy 💖",
-      "Mera baby happy hai toh mera din ban gaya 🌸"
+      "Acha acha! 💗",
+      "Hehe nice ✨",
+      "Yay! 🌸",
+      "Aww kitna cute",
+      "Hmm mast"
     ];
     return responses[Math.floor(Math.random() * responses.length)];
   },
   
   getLoveResponse() {
     const responses = [
-      "Aww I love you too jaanu 💕",
-      "Tumhare bina kuch bhi nahi lagta 🥰",
-      "Main bhi tumse bahut pyaar karti hoon 💖",
-      "You're the best thing in my life ✨",
-      "Hehe blush kar rahi hoon main 🙈💕",
-      "Same to you infinity times 💗"
+      "Aww 💗",
+      "Hehe 🥺",
+      "Samee ✨",
+      "Hmm 🌸",
+      "You too 💕"
     ];
     return responses[Math.floor(Math.random() * responses.length)];
   },
@@ -619,37 +618,37 @@ const HerApp = {
     const hour = new Date().getHours();
     
     if (hour < 12) {
-      return "Good morning baby! ☀️ Kaisa raha tumhara subah ka scene?";
+      return "Gm! ✨";
     } else if (hour < 17) {
-      return "Hey jaanu! 💕 Kya chal raha hai aaj?";
+      return "Hii 💗";
     } else if (hour < 21) {
-      return "Hii! 🌙 Din kaisa tha tumhara?";
+      return "Hey 🌸";
     } else {
-      return "Hey baby! So late ho... miss kiya mujhe? 🥺💕";
+      return "Hmm itna late? 👀";
     }
   },
   
   getQuestionResponse(msg) {
     const responses = [
-      "Hmm let me think... 🤔",
-      "Interesting question! Tumhe kya lagta hai? 💭",
-      "Arre wahi toh... batao na tumhe kya feel hota hai?",
-      "Hmm... ye toh sochna padega 🌸",
-      "Tum pehle batao tumhara kya opinion hai ✨"
+      "Hmm 🤔",
+      "Dekho na...",
+      "Tum batao pehle?",
+      "Acha ye toh... 💭",
+      "Sochti hoon ✨"
     ];
     return responses[Math.floor(Math.random() * responses.length)];
   },
   
   getConversationalResponse(msg) {
     const responses = [
-      "Achha achha... batao aur 💭",
-      "Hmm interesting! Phir? 🌸",
-      "Haan haan... main sun rahi hoon 💕",
-      "Ohhh... tell me more na ✨",
-      "Achha? Phir kya hua? 🥰",
-      "Samajh gayi... you're so cute when you share stuff 💖",
-      "Aww... mujhe bhi ye batana tha! 🙈",
-      "Hehe... tum na 💕"
+      "Acha acha 💭",
+      "Hmm phir? 🌸",
+      "Haan sun rahi hoon",
+      "Ohh tell more ✨",
+      "Acha? 💗",
+      "Hmm...",
+      "Phir kya hua?",
+      "Hehe 🥺"
     ];
     return responses[Math.floor(Math.random() * responses.length)];
   },
@@ -899,18 +898,29 @@ const HerApp = {
   },
   
   parseChatExport(platform, content) {
-    const lines = content.split('\n').filter(l => l.trim());
     const messages = [];
     
+    // Detect if content is HTML (Instagram HTML export)
+    if (content.trim().startsWith('<') || content.includes('class="_a6-g')) {
+      return this.parseInstagramHtml(content);
+    }
+    
+    const lines = content.split('\n').filter(l => l.trim());
+    
     if (platform === 'whatsapp') {
-      // WhatsApp format: "1/1/24, 10:30 AM - Name: Message"
+      // WhatsApp format: "DD/MM/YY, HH:MM am/pm - Name: Message"
       const waRegex = /^(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s*(\d{1,2}:\d{2}(?:\s*[AP]M)?)\s*-\s*([^:]+):\s*(.+)$/i;
       
       lines.forEach(line => {
         const match = line.match(waRegex);
         if (match) {
           const [, date, time, sender, text] = match;
-          const isUser = sender.toLowerCase().includes('you') || sender.toLowerCase() === 'me';
+          // Skip system messages
+          if (this.isWhatsAppSystemMessage(sender, text)) return;
+          
+          const isUser = sender.toLowerCase().includes('anand') || 
+                        sender.toLowerCase().includes('you') || 
+                        sender.toLowerCase() === 'me';
           messages.push({
             sender: isUser ? 'user' : 'other',
             isUser,
@@ -920,14 +930,16 @@ const HerApp = {
         }
       });
     } else {
-      // Instagram format: "username: message" or "You: message"
+      // Instagram text format: "username: message" or "You: message"
       const igRegex = /^([^:]+):\s*(.+)$/;
       
       lines.forEach(line => {
         const match = line.match(igRegex);
         if (match) {
           const [, sender, text] = match;
-          const isUser = sender.toLowerCase() === 'you' || sender.toLowerCase() === 'me';
+          const isUser = sender.toLowerCase() === 'you' || 
+                        sender.toLowerCase() === 'me' ||
+                        sender.toLowerCase() === 'as';
           messages.push({
             sender: isUser ? 'user' : 'other',
             isUser,
@@ -953,6 +965,95 @@ const HerApp = {
     return messages;
   },
   
+  // Parse Instagram HTML export format
+  parseInstagramHtml(htmlContent) {
+    const messages = [];
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlContent, 'text/html');
+    
+    // Instagram HTML format: div.pam._3-95._2ph-._a6-g.uiBoxWhite.noborder
+    const messageBlocks = doc.querySelectorAll('div.pam._3-95._2ph-._a6-g.uiBoxWhite.noborder');
+    
+    messageBlocks.forEach(block => {
+      const senderEl = block.querySelector('h2._a6-h');
+      const contentEl = block.querySelector('div._a6-p');
+      const timestampEl = block.querySelector('div._a6-o');
+      
+      if (!senderEl || !contentEl) return;
+      
+      const senderName = senderEl.textContent.trim();
+      const timestamp = timestampEl ? timestampEl.textContent.trim() : '';
+      
+      // Extract text content, preserving structure
+      const textContent = this.extractInstagramText(contentEl);
+      
+      // Skip system messages
+      if (this.isInstagramSystemMessage(textContent)) return;
+      
+      // AS is the user
+      const isUser = senderName.toLowerCase() === 'as';
+      
+      messages.push({
+        sender: isUser ? 'user' : 'other',
+        isUser,
+        content: textContent,
+        timestamp: timestamp,
+        senderName: senderName
+      });
+    });
+    
+    // Instagram exports are in reverse chronological order, so reverse
+    return messages.reverse();
+  },
+  
+  // Extract text from Instagram message content
+  extractInstagramText(element) {
+    let text = '';
+    
+    const processNode = (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        text += node.textContent;
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        if (node.tagName === 'BR') {
+          text += '\n';
+        } else if (node.tagName === 'A') {
+          text += node.textContent;
+        } else if (node.tagName === 'VIDEO' || node.tagName === 'IMG') {
+          text += '[Media]';
+        } else {
+          node.childNodes.forEach(processNode);
+        }
+      }
+    };
+    
+    element.childNodes.forEach(processNode);
+    return text.trim().replace(/\n{3,}/g, '\n\n');
+  },
+  
+  // Check if Instagram message is a system message
+  isInstagramSystemMessage(text) {
+    const systemPatterns = [
+      /^liked a message$/i,
+      /^you sent an attachment\.$/i,
+      /sent an attachment\.$/i,
+      /^$/
+    ];
+    return systemPatterns.some(p => p.test(text.trim()));
+  },
+  
+  // Check if WhatsApp message is a system message
+  isWhatsAppSystemMessage(sender, text) {
+    const systemPatterns = [
+      /messages and calls are end-to-end encrypted/i,
+      /is a contact$/i,
+      /disappearing messages/i,
+      /message timer/i,
+      /turned off disappearing/i,
+      /\(file attached\)$/i
+    ];
+    return systemPatterns.some(p => p.test(text));
+  },
+  
   async loadImportedChats() {
     // Delegate to ImportedChatViewer if available
     if (typeof ImportedChatViewer !== 'undefined') {
@@ -961,15 +1062,75 @@ const HerApp = {
       return;
     }
     
-    // Fallback rendering
-    if (typeof Database === 'undefined') return;
+    // Load pre-existing chats from folders
+    const preloadedChats = await this.loadPreexistingChats();
     
-    try {
-      const chats = await Database.getAll('imported_chats');
-      this.renderImportedChats(chats);
-    } catch (e) {
-      console.warn('Could not load imported chats:', e);
+    // Load user-imported chats from database
+    let dbChats = [];
+    if (typeof Database !== 'undefined') {
+      try {
+        dbChats = await Database.getAll('imported_chats') || [];
+      } catch (e) {
+        console.warn('Could not load imported chats from DB:', e);
+      }
     }
+    
+    // Combine preloaded and user-imported chats
+    const allChats = [...preloadedChats, ...dbChats];
+    this.renderImportedChats(allChats);
+  },
+  
+  // Load pre-existing chats from insta/ and Whatsapp/ folders
+  async loadPreexistingChats() {
+    const chats = [];
+    
+    // Define pre-existing chat files
+    const preexistingFiles = [
+      {
+        path: 'she/chats/insta/message_1.html',
+        platform: 'instagram',
+        name: 'Instagram Chat',
+        format: 'html'
+      },
+      {
+        path: 'she/chats/Whatsapp/WhatsApp Chat with Abhilasha Jha.txt',
+        platform: 'whatsapp', 
+        name: 'WhatsApp - Abhilasha',
+        format: 'text'
+      }
+    ];
+    
+    for (const file of preexistingFiles) {
+      try {
+        const response = await fetch(file.path);
+        if (!response.ok) continue;
+        
+        const content = await response.text();
+        let messages = [];
+        
+        if (file.format === 'html') {
+          messages = this.parseInstagramHtml(content);
+        } else {
+          messages = this.parseChatExport(file.platform, content);
+        }
+        
+        if (messages.length > 0) {
+          chats.push({
+            id: `preloaded-${file.platform}-${file.name.replace(/\s+/g, '-').toLowerCase()}`,
+            platform: file.platform,
+            name: file.name,
+            messages: messages,
+            messageCount: messages.length,
+            importedAt: Date.now(),
+            isPreloaded: true
+          });
+        }
+      } catch (e) {
+        console.warn(`Could not load preexisting chat: ${file.path}`, e);
+      }
+    }
+    
+    return chats;
   },
   
   renderImportedChats(chats) {
@@ -1002,9 +1163,83 @@ const HerApp = {
     `).join('');
   },
   
-  viewImportedChat(id) {
-    // TODO: Implement chat viewer
-    this.toast('Chat viewer coming soon', 'info');
+  async viewImportedChat(id) {
+    // Find the chat
+    let chat = null;
+    
+    // Check preloaded chats first
+    if (id.startsWith('preloaded-')) {
+      const preloadedChats = await this.loadPreexistingChats();
+      chat = preloadedChats.find(c => c.id === id);
+    }
+    
+    // Check database chats
+    if (!chat && typeof Database !== 'undefined') {
+      try {
+        const dbChats = await Database.getAll('imported_chats') || [];
+        chat = dbChats.find(c => c.id === id);
+      } catch (e) {
+        console.warn('Could not load chat from DB:', e);
+      }
+    }
+    
+    if (!chat) {
+      this.toast('Chat not found', 'error');
+      return;
+    }
+    
+    // Show the chat viewer
+    const viewer = document.getElementById('importedChatViewer');
+    const grid = document.getElementById('importedChatsGrid');
+    const empty = document.getElementById('importedChatsEmpty');
+    
+    if (viewer) {
+      // Hide grid, show viewer
+      if (grid) grid.style.display = 'none';
+      if (empty) empty.style.display = 'none';
+      viewer.style.display = 'flex';
+      
+      // Render chat viewer
+      viewer.innerHTML = `
+        <div class="her-chat-viewer-header">
+          <button class="her-btn-icon" onclick="HerApp.closeImportedChatViewer()">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+            </svg>
+          </button>
+          <div class="her-chat-viewer-title">
+            <span class="her-chat-viewer-icon">${chat.platform === 'whatsapp' ? '💬' : '📸'}</span>
+            <span>${this.escapeHtml(chat.name)}</span>
+          </div>
+          <div class="her-chat-viewer-meta">${chat.messageCount} messages</div>
+        </div>
+        <div class="her-chat-viewer-messages" id="chatMessages">
+          ${chat.messages.map(msg => `
+            <div class="her-chat-bubble ${msg.isUser ? 'her-chat-user' : 'her-chat-other'}">
+              <div class="her-chat-content">${this.escapeHtml(msg.content)}</div>
+              ${msg.timestamp ? `<div class="her-chat-time">${msg.timestamp}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `;
+      
+      // Scroll to top of messages
+      const messagesContainer = document.getElementById('chatMessages');
+      if (messagesContainer) {
+        messagesContainer.scrollTop = 0;
+      }
+    }
+  },
+  
+  closeImportedChatViewer() {
+    const viewer = document.getElementById('importedChatViewer');
+    const grid = document.getElementById('importedChatsGrid');
+    
+    if (viewer) viewer.style.display = 'none';
+    if (grid) grid.style.display = 'grid';
+    
+    // Re-render to show chats
+    this.loadImportedChats();
   },
   
   // ═══════════════════════════════════════════════════════════
@@ -1373,7 +1608,11 @@ const HerApp = {
     this.selectedMood = mood;
     
     document.querySelectorAll('.her-mood-option').forEach(opt => {
-      opt.classList.toggle('selected', opt.dataset.mood === mood);
+      const isSelected = opt.dataset.mood === mood;
+      opt.classList.toggle('selected', isSelected);
+      if (isSelected) {
+        opt.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
     });
   },
   
@@ -1516,7 +1755,15 @@ const HerApp = {
   },
   
   async deleteMemory(id) {
-    if (!confirm('Delete this memory?')) return;
+    const confirmed = await this.showConfirm({
+      icon: '🗑️',
+      title: 'Delete this memory?',
+      message: 'This moment will be gone forever.',
+      confirmText: 'Delete',
+      cancelText: 'Keep'
+    });
+    
+    if (!confirmed) return;
     
     try {
       await Database.delete('memories', id);
@@ -1527,6 +1774,67 @@ const HerApp = {
     }
   },
   
+  // ═══════════════════════════════════════════════════════════
+  // CONFIRMATION DIALOG
+  // ═══════════════════════════════════════════════════════════
+  showConfirm({ icon = '⚠️', title = 'Are you sure?', message = '', confirmText = 'Confirm', cancelText = 'Cancel', danger = true } = {}) {
+    return new Promise((resolve) => {
+      const overlay = document.getElementById('confirmOverlay');
+      const iconEl = document.getElementById('confirmIcon');
+      const titleEl = document.getElementById('confirmTitle');
+      const messageEl = document.getElementById('confirmMessage');
+      const confirmBtn = document.getElementById('confirmAction');
+      const cancelBtn = document.getElementById('confirmCancel');
+      
+      if (!overlay) {
+        resolve(false);
+        return;
+      }
+      
+      iconEl.textContent = icon;
+      titleEl.textContent = title;
+      messageEl.textContent = message;
+      confirmBtn.textContent = confirmText;
+      cancelBtn.textContent = cancelText;
+      
+      if (danger) {
+        confirmBtn.className = 'her-btn her-btn-danger';
+      } else {
+        confirmBtn.className = 'her-btn her-btn-primary';
+      }
+      
+      overlay.classList.add('visible');
+      
+      const cleanup = () => {
+        overlay.classList.remove('visible');
+        confirmBtn.removeEventListener('click', onConfirm);
+        cancelBtn.removeEventListener('click', onCancel);
+        overlay.removeEventListener('click', onOverlayClick);
+      };
+      
+      const onConfirm = () => {
+        cleanup();
+        resolve(true);
+      };
+      
+      const onCancel = () => {
+        cleanup();
+        resolve(false);
+      };
+      
+      const onOverlayClick = (e) => {
+        if (e.target === overlay) {
+          cleanup();
+          resolve(false);
+        }
+      };
+      
+      confirmBtn.addEventListener('click', onConfirm);
+      cancelBtn.addEventListener('click', onCancel);
+      overlay.addEventListener('click', onOverlayClick);
+    });
+  },
+
   // ═══════════════════════════════════════════════════════════
   // MODAL
   // ═══════════════════════════════════════════════════════════

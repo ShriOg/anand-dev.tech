@@ -640,73 +640,8 @@ html, body {
   font-style: italic;
 }
 
-/* Message Bubbles */
-.her-message {
-  display: flex;
-  gap: var(--space-3);
-  max-width: 85%;
-  animation: messageIn 0.3s ease;
-}
-
-@keyframes messageIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.her-message.user {
-  align-self: flex-end;
-  flex-direction: row-reverse;
-}
-
-.her-message-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--bg-elevated);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.875rem;
-  flex-shrink: 0;
-}
-
-.her-message.user .her-message-avatar {
-  background: var(--her-accent-subtle);
-}
-
-.her-message-content {
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-lg);
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-.her-message.user .her-message-content {
-  background: var(--her-accent-subtle);
-  border-color: var(--border-default);
-}
-
-.her-message.assistant .her-message-content {
-  background: rgba(232, 164, 184, 0.08);
-  border-color: rgba(232, 164, 184, 0.15);
-}
-
-.her-message-text {
-  font-size: var(--text-sm);
-  line-height: 1.6;
-  color: var(--text-primary);
-  white-space: pre-wrap;
-  word-break: break-word;
-  text-shadow: none;
-}
-
-.her-message-time {
-  font-size: var(--text-xs);
-  color: var(--text-muted);
-  margin-top: var(--space-2);
-}
+/* Message Bubbles - Unified Styles */
+/* Legacy alias support removed - use .her-message-user / .her-message-assistant */
 
 /* Typing Indicator */
 .her-typing-indicator {
@@ -983,6 +918,88 @@ html, body {
 @keyframes toastOut {
   from { opacity: 1; transform: translateX(0); }
   to { opacity: 0; transform: translateX(20px); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CONFIRMATION DIALOG
+   ═══════════════════════════════════════════════════════════ */
+.her-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9500;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  padding: var(--space-4);
+}
+
+.her-confirm-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.her-confirm-dialog {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  max-width: 320px;
+  width: 100%;
+  text-align: center;
+  transform: scale(0.95) translateY(10px);
+  transition: transform 0.2s ease;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.her-confirm-overlay.visible .her-confirm-dialog {
+  transform: scale(1) translateY(0);
+}
+
+.her-confirm-icon {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-4);
+  display: block;
+}
+
+.her-confirm-title {
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.her-confirm-message {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-5);
+  line-height: 1.5;
+}
+
+.her-confirm-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+}
+
+.her-confirm-actions .her-btn {
+  min-width: 100px;
+}
+
+.her-confirm-actions .her-btn-danger {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+.her-confirm-actions .her-btn-danger:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.5);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1530,8 +1547,9 @@ html, body {
    MOOD
    ═══════════════════════════════════════════════════════════ */
 .her-mood-container {
-  max-width: 600px;
+  max-width: 100%;
   margin: 0 auto;
+  overflow: visible;
 }
 
 .her-mood-current {
@@ -1563,28 +1581,58 @@ html, body {
 
 .her-mood-selector {
   display: flex;
-  justify-content: center;
-  gap: var(--space-3);
-  flex-wrap: wrap;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--space-4);
   margin-bottom: var(--space-4);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  padding: var(--space-4) calc(50vw - 60px);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  margin-left: calc(-1 * var(--space-6));
+  margin-right: calc(-1 * var(--space-6));
+  width: calc(100% + var(--space-6) * 2);
+}
+
+.her-mood-selector::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .her-mood-option {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: var(--space-2);
-  padding: var(--space-4);
+  padding: var(--space-4) var(--space-5);
   background: var(--bg-secondary);
   border: 2px solid transparent;
   border-radius: var(--radius-lg);
   cursor: pointer;
   transition: all var(--transition-fast);
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  flex-shrink: 0;
+  min-width: 88px;
+  min-height: 88px;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .her-mood-option:hover {
   background: var(--her-accent-subtle);
   border-color: var(--her-accent-muted);
+}
+
+.her-mood-option:active {
+  transform: scale(0.96);
 }
 
 .her-mood-option.selected {
@@ -1594,11 +1642,13 @@ html, body {
 
 .her-mood-option span {
   font-size: 2rem;
+  line-height: 1;
 }
 
 .her-mood-option small {
   font-size: var(--text-xs);
   color: var(--text-secondary);
+  white-space: nowrap;
 }
 
 .her-mood-note-group {
@@ -1971,49 +2021,56 @@ html, body {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   HER MODE - IMPROVED CHAT MESSAGE STYLING
-   Natural, warm, mobile-first design
+   HER MODE - CHAT MESSAGE STYLING
+   Clean, consistent, mobile-first bubbles
    ═══════════════════════════════════════════════════════════ */
+@keyframes messageSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .her-message {
   display: flex;
   flex-direction: column;
-  max-width: 85%;
-  animation: messageSlideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  max-width: 75%;
+  min-width: 60px;
+  animation: messageSlideIn 0.25s ease-out;
 }
 
 .her-message-user {
   align-self: flex-end;
+  align-items: flex-end;
 }
 
 .her-message-assistant {
   align-self: flex-start;
+  align-items: flex-start;
 }
 
 .her-message-bubble {
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-lg);
+  padding: 10px 14px;
+  border-radius: 18px;
   font-size: var(--text-sm);
-  line-height: 1.6;
+  line-height: 1.5;
   word-break: break-word;
   white-space: pre-wrap;
   text-shadow: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-width: 40px;
 }
 
 .her-message-user .her-message-bubble {
   background: var(--her-accent);
   color: #0a0a0a;
   border-bottom-right-radius: 4px;
-  text-shadow: none;
 }
 
 .her-message-assistant .her-message-bubble {
   background: rgba(232, 164, 184, 0.12);
-  border: 1px solid rgba(232, 164, 184, 0.2);
+  border: 1px solid rgba(232, 164, 184, 0.18);
   color: var(--text-primary);
   border-bottom-left-radius: 4px;
-  text-shadow: none;
 }
 
 .her-message-bubble.error {
@@ -2024,8 +2081,9 @@ html, body {
 .her-message-time {
   font-size: 10px;
   color: var(--text-muted);
-  margin-top: 4px;
+  margin-top: 3px;
   padding: 0 4px;
+  opacity: 0.7;
 }
 
 .her-message-user .her-message-time {
@@ -2034,15 +2092,23 @@ html, body {
 
 /* Message grouping for natural chat flow */
 .her-message.group-start {
-  margin-top: var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.her-message.group-end {
+  margin-bottom: var(--space-1);
 }
 
 .her-message:not(.group-start) {
-  margin-top: var(--space-1);
+  margin-top: 2px;
 }
 
-.her-message:not(.group-start) .her-message-bubble {
-  border-radius: var(--radius-lg);
+.her-message-user:not(.group-start) .her-message-bubble {
+  border-radius: 18px 18px 4px 18px;
+}
+
+.her-message-assistant:not(.group-start) .her-message-bubble {
+  border-radius: 18px 18px 18px 4px;
 }
 
 /* Typing Indicator - Improved */
@@ -2365,6 +2431,95 @@ html, body {
   padding: var(--space-8);
   color: var(--text-muted);
   font-size: var(--text-sm);
+}
+
+/* Imported Chat Viewer - Her Style Chat Bubbles */
+.her-chat-viewer-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-tertiary);
+}
+
+.her-chat-viewer-title {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.her-chat-viewer-icon {
+  font-size: 1.125rem;
+}
+
+.her-chat-viewer-meta {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.her-chat-bubble {
+  max-width: 80%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 16px;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.her-chat-user {
+  align-self: flex-end;
+  background: var(--her-accent);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.her-chat-other {
+  align-self: flex-start;
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-bottom-left-radius: 4px;
+}
+
+.her-chat-content {
+  word-break: break-word;
+}
+
+.her-chat-time {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  text-align: right;
+  opacity: 0.7;
+}
+
+.her-chat-user .her-chat-time {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.her-btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.her-btn-icon:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
 }
 
 /* Generic Message Bubble Base */

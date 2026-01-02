@@ -242,7 +242,7 @@
               </div>
             </div>
             
-            <div class="her-chat-viewer" id="importedChatViewer">
+            <div class="her-chat-viewer" id="importedChatViewer" style="display: none;">
               <p class="her-chat-viewer-empty">Select a chat to view</p>
             </div>
           </div>
@@ -431,6 +431,19 @@
 
   <!-- Toast Container -->
   <div class="her-toast-container" id="toastContainer"></div>
+
+  <!-- Confirmation Dialog -->
+  <div class="her-confirm-overlay" id="confirmOverlay">
+    <div class="her-confirm-dialog">
+      <span class="her-confirm-icon" id="confirmIcon">🗑️</span>
+      <h3 class="her-confirm-title" id="confirmTitle">Are you sure?</h3>
+      <p class="her-confirm-message" id="confirmMessage">This action cannot be undone.</p>
+      <div class="her-confirm-actions">
+        <button class="her-btn her-btn-secondary" id="confirmCancel">Cancel</button>
+        <button class="her-btn her-btn-danger" id="confirmAction">Delete</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal Overlay -->
   <div class="her-modal-overlay" id="modalOverlay">

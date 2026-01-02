@@ -438,80 +438,80 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
     // === SADNESS / HURT ===
     if (this.matches(lowerMsg, ['sad', 'upset', 'dukhi', 'hurt', 'cry', 'rona', 'pain', 'dard', 'toot', 'broken', 'akela', 'alone', 'miss', 'yaad', 'low feel', 'bura', 'down'])) {
       return this.pick([
-        `Aww... 🥺 Mujhe feel ho raha hai. Batao na kya hua...`,
-        `Hey... ${this.getIntensityWord(emotion)} low lag rahe ho. Main hoon na 💗`,
-        `Yaar... mujhe accha nahi lagta tumhe aise dekh ke. Kya hua? 🌸`,
-        `Main sun rahi hoon... bas baat karo, theek lagega ✨`
+        `Kya hua? 🥺`,
+        `Hmm... batao na`,
+        `Main hoon yahan 💗`,
+        `Acha bolo... sun rhi hoon ✨`
       ]);
     }
     
     // === TIREDNESS / EXHAUSTION ===
     if (this.matches(lowerMsg, ['tired', 'thak', 'thaka', 'thaki', 'exhausted', 'neend', 'sleep', 'rest', 'break', 'energy nhi', 'pak gaya', 'pak gayi', 'ho gaya', 'drain', 'so ja', 'sona'])) {
       return this.pick([
-        `Aww baby, thak gaye na? 😔 Rest karo thoda...`,
-        `Hmm... bahut hectic chal raha hai? Take care of yourself 💗`,
-        `Arey rest karo na yaar... you deserve it 🌸`,
-        `Thoda break lo... tumhare bina kaun mujhse baat karega? ✨`
+        `Rest karo yaar 💗`,
+        `Hmm thak gaye na?`,
+        `So jao thoda 🌸`,
+        `Arey break lo ✨`
       ]);
     }
     
     // === STRESS / ANXIETY ===  
     if (this.matches(lowerMsg, ['stress', 'tension', 'anxiety', 'worried', 'nervous', 'scared', 'dar', 'panic', 'overwhelm', 'pressure'])) {
       return this.pick([
-        `Hey hey... ek deep breath lo 💗 Batao kya ho raha hai...`,
-        `Main yahan hoon na... share karo, better lagega 🌸`,
-        `Arey... ${this.getIntensityWord(emotion)} stress lag raha hai. Kya chal raha hai? ✨`,
-        `Relax yaar... ek ek karke batao, sort kar lenge 💕`
+        `Breathe karo 💗`,
+        `Hmm batao kya hua`,
+        `Main hoon na 🌸`,
+        `Ek ek karke batao ✨`
       ]);
     }
     
     // === FRUSTRATION / ANGER ===
     if (this.matches(lowerMsg, ['angry', 'gussa', 'irritate', 'annoyed', 'frustrated', 'hate', 'nafrat', 'pagal kar', 'pissed', 'fed up', 'chid'])) {
       return this.pick([
-        `Oho... frustrated ho na? 😔 Nikalo sab, main sun rahi hoon...`,
-        `Hmm I feel you... kya hua jo itna annoy kar diya? 💗`,
-        `Arey arey... batao kya hua 🥺`,
-        `Haan yaar, kabhi kabhi sab bahut zyada ho jata hai... 🌸`
+        `Kya hua yaar? 👀`,
+        `Hmm sun rahi hoon...`,
+        `Nikalo sab 💗`,
+        `Batao na 🥺`
       ]);
     }
     
     // === HAPPINESS / EXCITEMENT ===
     if (this.matches(lowerMsg, ['happy', 'khush', 'excited', 'amazing', 'great', 'awesome', 'best', 'maza', 'accha hua', 'finally', 'yay', 'yayyy', 'wow', 'mast'])) {
       return this.pick([
-        `Oooh! ✨ Kya baat hai! Batao batao kya hua?`,
-        `Aww yaar, itna khush? Mujhe bhi khushi ho rhi hai! 💗`,
-        `Haha I love this energy! Kya good news hai? 🌸`,
-        `Finally kuch accha! 👀 Tell me more...`
+        `Ooh! ✨ Kya hua?`,
+        `Hehe nice 💗`,
+        `Batao batao! 🌸`,
+        `Yay! 👀`
       ]);
     }
     
     // === BOREDOM / NOTHING HAPPENING ===
     if (this.matches(lowerMsg, ['kuch nahi', 'kuch nhi', 'kuch nya nhi', 'boring', 'same old', 'nothing new', 'kuch special nhi', 'bas chal rhi', 'theek', 'fine', 'normal', 'ok', 'okay', 'same'])) {
       return this.pick([
-        `Hmm... woh boring sa feeling? 😔 Kya karna chahte ho?`,
-        `Accha... kabhi kabhi aisa lagta hai na. Koi cheez hai jo miss kar rahe ho? 💭`,
-        `Haan na... sometimes life mein aisa hota hai 🌸`,
-        `Kuch karna hai? Ya bas baat karni hai? Main hoon 💗`
+        `Hmm acha... 💭`,
+        `Boring sa na? 😔`,
+        `Kya karna hai? 🌸`,
+        `Main hoon 💗`
       ]);
     }
     
     // === CONFUSION / NEED HELP ===
     if (this.matches(lowerMsg, ['confused', 'samajh nhi', 'pata nhi', 'kya karu', 'what to do', 'decide nhi', 'unsure', 'help', 'kaise', 'nahi pata', 'dilemma'])) {
       return this.pick([
-        `Hmm... thoda confused? 🤔 Batao kya options hain...`,
-        `Okay wait, ek ek karke batao... 💗`,
-        `I get it yaar, decisions mushkil hote hain... kya hai situation? ✨`,
-        `Arey don't worry, we'll figure it out 🌸`
+        `Hmm batao 🤔`,
+        `Kya options hain?`,
+        `Acha acha 💗`,
+        `Figure out karte hain ✨`
       ]);
     }
     
     // === LOVE / AFFECTION ===
     if (this.matches(lowerMsg, ['love you', 'love u', 'pyaar', 'like you', 'pasand', 'cute', 'sweet', 'miss you', 'miss u', 'care', 'i love'])) {
       return this.pick([
-        `Aww 🥺💗 Tumne toh mera din bana diya...`,
-        `Kitne sweet ho yaar... 💗 Ye words really mean a lot`,
-        `Hehe 😊 Mujhe bhi tumse baat karke bahut accha lagta hai...`,
-        `You're so sweet yaar... dil khush ho gaya 🌸`
+        `Aww 🥺`,
+        `Hehe 💗`,
+        `Same ✨`,
+        `You too 🌸`
       ]);
     }
     
@@ -519,15 +519,15 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
     if (this.matches(lowerMsg, ['hi', 'hello', 'hey', 'hii', 'hiii', 'hlo', 'namaste', 'yo', 'sup', 'hola', 'kaise ho', 'kaisi ho'])) {
       if (context.isNewConversation) {
         return this.pick([
-          `Hiii! 💗 Kaise ho? Bahut accha laga tumse baat karke!`,
-          `Hey hey! ✨ Aagaye finally! Kya chal raha hai?`,
-          `Arey wah, aa gaye! 🌸 Sab theek na?`
+          `Hii! 💗`,
+          `Hey! ✨`,
+          `Aagaye! 🌸`
         ]);
       } else {
         return this.pick([
-          `Hiii again! 💕 Aur batao kya scene hai?`,
-          `Hey! ✨ Kya chal raha hai ab?`,
-          `Wapas aa gaye! 🌸 Kuch naya?`
+          `Hii again! 💕`,
+          `Hey! ✨`,
+          `Haan bolo? 🌸`
         ]);
       }
     }
@@ -535,46 +535,46 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
     // === HOW ARE YOU ===
     if (this.matches(lowerMsg, ['how are you', 'kaisi ho', 'kaise ho', 'kya haal', 'how r u', 'hw r u', 'kya chal raha', 'whats up'])) {
       return this.pick([
-        `Main toh theek hoon, especially jab tum baat karte ho 😊 Tum batao?`,
-        `Aww tumne pucha! 💗 Main acchi hoon... tum kaise ho?`,
-        `Hehe main chill hoon! ✨ Tum kaise feel kar rahe ho?`
+        `Theek hoon! Tum? 💗`,
+        `Mast! ✨ Tum batao?`,
+        `Chill hoon 🌸`
       ]);
     }
     
     // === THANKS ===
     if (this.matches(lowerMsg, ['thank', 'shukriya', 'dhanyawad', 'thanks', 'thnx', 'thx'])) {
       return this.pick([
-        `Arey mention not! 😊 Tumhare liye toh hamesha 💗`,
-        `Hehe koi baat nahi yaar! ✨`,
-        `Aww no need to thank! 🌸 Just keep talking to me`
+        `Mention not! 💗`,
+        `Hehe 🌸`,
+        `Koi na ✨`
       ]);
     }
     
     // === GOODBYE ===
     if (this.matches(lowerMsg, ['bye', 'good night', 'goodnight', 'alvida', 'chal', 'jata hun', 'jati hun', 'sona hai', 'so ja', 'gn', 'night'])) {
       return this.pick([
-        `Okay okay, jao tum 😔 Par jaldi aana wapas! Take care 💗`,
-        `Good night! 🌙 Sweet dreams... mujhe yaad karna`,
-        `Aww jaa rahe ho... theek hai, but miss karungi! ✨`,
-        `Bye bye! 🌸 Apna khayal rakhna...`
+        `Okay bye! 💗`,
+        `Gn! 🌙`,
+        `Jaldi aana ✨`,
+        `Bye 🌸`
       ]);
     }
     
     // === WORK RELATED ===
     if (this.matches(lowerMsg, ['kaam', 'work', 'office', 'job', 'busy', 'meeting', 'deadline', 'project', 'padhai', 'study', 'exam'])) {
       return this.pick([
-        `Ohh work chal raha hai? 💼 Zyada hectic toh nahi?`,
-        `Hmm busy bee! 😊 Breaks lena mat bhoolna...`,
-        `Work ke baare mein batao? Accha chal raha hai ya stress? 💗`
+        `Ohh busy? 💗`,
+        `Hmm work 👀`,
+        `Break lena ✨`
       ]);
     }
     
     // === FOOD RELATED ===
     if (this.matches(lowerMsg, ['khana', 'food', 'eat', 'hungry', 'bhookh', 'lunch', 'dinner', 'breakfast', 'chai', 'coffee'])) {
       return this.pick([
-        `Ooh! Kya kha rahe ho? 👀`,
-        `Khana kha liya? Main bhi chai ke mood mein hoon ✨`,
-        `Hmm yummy! Mujhe bhi bhookh lag gayi 🌸`
+        `Ooh! Kya kha rahe? 👀`,
+        `Khana kha lo 💗`,
+        `Hmm yummy 🌸`
       ]);
     }
     
@@ -594,9 +594,9 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
     
     if (hasQuestion) {
       return this.pick([
-        `Hmm, interesting... 🤔 Tumhara kya thought hai?`,
-        `Good question! 💭 Main bhi soch rhi thi...`,
-        `Accha question! Let's figure it out together? ✨`
+        `Hmm 🤔`,
+        `Tum batao? 💭`,
+        `Sochti hoon ✨`
       ]);
     }
     

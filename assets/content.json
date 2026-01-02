@@ -469,6 +469,118 @@
           ]
         }
       ]
+    },
+    {
+      "id": "imported-chat-viewer",
+      "title": "Imported Chat Viewer",
+      "shortDescription": "A platform-accurate WhatsApp & Instagram chat viewer for style-based AI training.",
+      "longDescription": "A generic chat import system that renders WhatsApp and Instagram style conversations with sender role assignment and privacy-safe local processing.",
+      "previewType": "grid",
+      "techStack": ["HTML", "CSS", "Vanilla JavaScript", "IndexedDB"],
+      "techStackShort": "JS / IndexedDB",
+      "timeline": "2 weeks",
+      "role": "Solo Developer",
+      "liveUrl": "/private/personal.html",
+      "sourceUrl": null,
+      "pageUrl": null,
+      "status": "active",
+      "featured": true,
+      "order": 6,
+      "sections": [
+        {
+          "id": "problem",
+          "title": "Problem Statement",
+          "content": [
+            "Training an AI persona requires reference to real conversation patterns, but existing tools either expose private data or lack platform-accurate rendering.",
+            "The challenge: How do you build a generic chat parser that works with any WhatsApp or Instagram export while keeping all data local?"
+          ]
+        },
+        {
+          "id": "features",
+          "title": "Key Features",
+          "type": "list",
+          "content": [
+            "WhatsApp-style & Instagram-style rendering",
+            "Generic chat parser (date, time, sender, message)",
+            "Sender role assignment during import",
+            "No hardcoded names - works with any chat",
+            "Privacy-safe, local-only processing",
+            "Mobile-first responsive UI"
+          ]
+        },
+        {
+          "id": "outcome",
+          "title": "Final Outcome",
+          "type": "list",
+          "content": [
+            "Standardized parser supporting DD/MM/YY format",
+            "Two-step import with participant role selection",
+            "Platform-specific bubble styling",
+            "File upload and paste support",
+            "Persistent storage via IndexedDB"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "her-mode-ai",
+      "title": "Her Mode AI",
+      "shortDescription": "An emotion-first Hinglish conversational AI designed with human-like pacing and warmth.",
+      "longDescription": "A style-trained emotional AI that speaks in Hinglish, responds with human-like pacing, and prioritizes emotional connection over task completion.",
+      "previewType": "waves",
+      "techStack": ["HTML", "CSS", "Vanilla JavaScript", "IndexedDB"],
+      "techStackShort": "JS / AI Design",
+      "timeline": "Ongoing",
+      "role": "Solo Developer",
+      "liveUrl": "/private/personal.html",
+      "sourceUrl": null,
+      "pageUrl": null,
+      "status": "active",
+      "featured": true,
+      "order": 7,
+      "sections": [
+        {
+          "id": "problem",
+          "title": "Problem Statement",
+          "content": [
+            "Most AI assistants sound robotic and professional. I wanted to build something that feels warm, understands emotional context, and speaks naturally in Hinglish.",
+            "The challenge: How do you train an AI to respond emotionally first without copying private conversations?"
+          ]
+        },
+        {
+          "id": "features",
+          "title": "Key Features",
+          "type": "list",
+          "content": [
+            "Emotion-first response engine",
+            "Hinglish conversational flow",
+            "Human pacing & micro-reactions",
+            "Style-trained using real chat patterns",
+            "Safe, non-manipulative behavior design",
+            "Mobile-optimized chat UI"
+          ]
+        },
+        {
+          "id": "approach",
+          "title": "Design Philosophy",
+          "content": [
+            "Instead of copying conversations, the system learns response patterns: how to acknowledge emotion, when to use emojis, how to pace multi-part responses.",
+            "The goal is warmth without deception—an AI that feels present but never pretends to be human."
+          ]
+        },
+        {
+          "id": "outcome",
+          "title": "Final Outcome",
+          "type": "list",
+          "content": [
+            "Natural Hinglish responses with emotional awareness",
+            "Typing indicators with human-like delays",
+            "Context-aware conversation memory",
+            "Style training UI for pattern refinement",
+            "Privacy-first local processing"
+          ]
+        }
+      ]
     }
   ],
 
