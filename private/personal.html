@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="robots" content="noindex, nofollow">
-  <title>Personal Space - Her Mode</title>
+  <title>Personal Space - Abhilasha</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,11 +38,12 @@
       <div class="her-sidebar-header">
         <a href="index.html" class="her-logo">
           <span class="her-logo-icon">💖</span>
-          <span class="her-logo-text">Her Space</span>
+          <span class="her-logo-text">Abhilasha</span>
         </a>
-        <button class="her-sidebar-toggle" id="sidebarToggle">
+        <button class="her-sidebar-close" id="sidebarClose">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="15 18 9 12 15 6"/>
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
           </svg>
         </button>
       </div>
@@ -56,7 +57,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
-          <span>Her AI</span>
+          <span>Abhilasha</span>
         </button>
         
         <a href="she/chats.html" class="her-nav-item">
@@ -168,18 +169,34 @@
             <!-- AI Connection Banner -->
             <div class="her-ai-banner" id="aiBanner">
               <div class="spinner"></div>
-              <span id="aiBannerText">Starting Her AI...</span>
+              <span id="aiBannerText">Connecting...</span>
             </div>
             
             <div class="her-chat-header">
+              <!-- Mobile Menu Toggle -->
+              <button class="her-mobile-menu-btn" id="mobileMenuBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="3" y1="12" x2="21" y2="12"/>
+                  <line x1="3" y1="6" x2="21" y2="6"/>
+                  <line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+              </button>
+              
               <div class="her-chat-header-info">
                 <span class="her-chat-header-icon">💕</span>
                 <div class="her-chat-header-text">
-                  <h2>Her AI</h2>
+                  <h2>Abhilasha</h2>
                   <span class="her-chat-status" id="chatStatus">Online</span>
                 </div>
               </div>
               <div class="her-chat-header-actions">
+                <button class="her-icon-btn" id="exportChatBtn" title="Export Chat">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                </button>
                 <button class="her-icon-btn" id="toggleTrainingBtn" title="Training Data">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M12 2L2 7l10 5 10-5-10-5z"/>
@@ -686,36 +703,8 @@
     </div>
   </div>
 
-  <!-- Mobile Navigation -->
-  <nav class="her-mobile-nav" id="mobileNav">
-    <button class="her-mobile-nav-item active" data-section="chat">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-      </svg>
-      <span>Chat</span>
-    </button>
-    <button class="her-mobile-nav-item" data-section="photos">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-        <circle cx="8.5" cy="8.5" r="1.5"/>
-        <polyline points="21 15 16 10 5 21"/>
-      </svg>
-      <span>Photos</span>
-    </button>
-    <button class="her-mobile-nav-item" data-section="daily">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 20h9"/>
-        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-      </svg>
-      <span>Daily</span>
-    </button>
-    <button class="her-mobile-nav-item" data-section="memories">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-      </svg>
-      <span>Memories</span>
-    </button>
-  </nav>
+  <!-- Mobile Sidebar Overlay -->
+  <div class="her-sidebar-overlay" id="sidebarOverlay"></div>
 
   <!-- Lightbox -->
   <div class="her-lightbox" id="lightbox">

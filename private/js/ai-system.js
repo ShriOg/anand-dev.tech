@@ -277,35 +277,20 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
   },
   
   bindEvents() {
-    // Her Mode events
-    const herInput = document.getElementById('herChatInput');
-    const herSend = document.getElementById('herSendBtn');
-    
-    herSend?.addEventListener('click', () => this.sendMessage('her'));
-    herInput?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        this.sendMessage('her');
-      }
-    });
-    herInput?.addEventListener('input', () => this.autoResize(herInput));
-    
-    // Pro Mode events
-    const proInput = document.getElementById('proChatInput');
-    const proSend = document.getElementById('proSendBtn');
-    
-    proSend?.addEventListener('click', () => this.sendMessage('pro'));
-    proInput?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        this.sendMessage('pro');
-      }
-    });
-    proInput?.addEventListener('input', () => this.autoResize(proInput));
+    // [AI System] All event bindings are DISABLED. AIService is the only authority for chat events.
+    // This method is intentionally left blank to prevent duplicate or fake AI responses.
+    return;
   },
   
   // Bind events specific to personal.html chat interface
+  // DISABLED: personal-app.js handles this with real API via AIService
+  // This was causing duplicate event handlers and fake responses
   bindPersonalChatEvents() {
+    // DO NOT bind events here - ai-service.js uses AIService for real API calls
+    console.log('[AI System] Personal chat events DISABLED');
+    return;
+    
+    /* DISABLED - old code that caused fake responses
     const chatInput = document.getElementById('chatInput');
     const sendBtn = document.getElementById('sendBtn');
     const chatMessages = document.getElementById('chatMessages');
@@ -338,6 +323,7 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
       this.renderPersonalChat();
       this.renderPersonalSessions();
     }
+    */
   },
   
   autoResize(textarea) {

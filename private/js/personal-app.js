@@ -1,7 +1,7 @@
 /**
  * ═══════════════════════════════════════════════════════════
- * PERSONAL SPACE - HER MODE APPLICATION
- * Emotional AI Chat, Imported Chats, Photos, Videos, Rituals
+ * PERSONAL SPACE - ABHILASHA AI APPLICATION
+ * Emotional AI Chat with Streaming, Imported Chats, Photos, Videos
  * ═══════════════════════════════════════════════════════════
  */
 
@@ -16,6 +16,7 @@ const HerApp = {
   trainingData: [],
   memories: [],
   currentMood: null,
+  streamingMessageEl: null,
   
   // Photos/Videos state
   photos: [],
@@ -62,6 +63,7 @@ const HerApp = {
     
     this.bindEvents();
     this.bindAIStatusEvents();
+    this.bindMobileNavEvents();
     this.renderSessions();
     this.setDates();
     
@@ -72,7 +74,7 @@ const HerApp = {
     // Check AI relay status on init
     this.checkAIStatus();
     
-    console.log('[Her Space] Initialized');
+    console.log('[Abhilasha] Initialized');
   },
   
   isAuthenticated() {
@@ -83,6 +85,82 @@ const HerApp = {
     if (typeof Database !== 'undefined') {
       await Database.init();
     }
+  },
+  
+  // ═══════════════════════════════════════════════════════════
+  // MOBILE NAVIGATION
+  // ═══════════════════════════════════════════════════════════
+  bindMobileNavEvents() {
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const sidebarClose = document.getElementById('sidebarClose');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const sidebar = document.getElementById('sidebar');
+    
+    console.log('[Mobile Nav] Binding events...', {
+      mobileMenuBtn: !!mobileMenuBtn,
+      sidebarClose: !!sidebarClose,
+      sidebarOverlay: !!sidebarOverlay,
+      sidebar: !!sidebar
+    });
+    
+    if (mobileMenuBtn) {
+      mobileMenuBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('[Mobile Nav] Menu clicked');
+        sidebar?.classList.add('open');
+        sidebarOverlay?.classList.add('visible');
+      });
+    }
+    
+    if (sidebarClose) {
+      sidebarClose.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('[Mobile Nav] Close clicked');
+        sidebar?.classList.remove('open');
+        sidebarOverlay?.classList.remove('visible');
+      });
+    }
+    
+    if (sidebarOverlay) {
+      sidebarOverlay.addEventListener('click', () => {
+        console.log('[Mobile Nav] Overlay clicked');
+        sidebar?.classList.remove('open');
+        sidebarOverlay?.classList.remove('visible');
+        // Failsafe: always reset pointer-events and visibility
+        sidebarOverlay.style.pointerEvents = 'none';
+        sidebarOverlay.style.visibility = 'hidden';
+        sidebarOverlay.style.opacity = '0';
+        setTimeout(() => {
+          sidebarOverlay.style.pointerEvents = '';
+          sidebarOverlay.style.visibility = '';
+          sidebarOverlay.style.opacity = '';
+        }, 400);
+        // Also ensure sidebar is always interactable
+        if (sidebar) sidebar.style.pointerEvents = 'auto';
+      });
+    }
+  },
+  
+  closeMobileNav() {
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    if (sidebar) sidebar.classList.remove('open');
+    if (sidebarOverlay) {
+      sidebarOverlay.classList.remove('visible');
+      // Failsafe: always reset pointer-events and visibility
+      sidebarOverlay.style.pointerEvents = 'none';
+      sidebarOverlay.style.visibility = 'hidden';
+      sidebarOverlay.style.opacity = '0';
+    }
+    // Also, after a short delay, clear any inline styles (let CSS handle it)
+    setTimeout(() => {
+      if (sidebarOverlay) {
+        sidebarOverlay.style.pointerEvents = '';
+        sidebarOverlay.style.visibility = '';
+        sidebarOverlay.style.opacity = '';
+      }
+    }, 400);
   },
   
   // ═══════════════════════════════════════════════════════════
@@ -169,18 +247,45 @@ const HerApp = {
     // Sidebar toggle
     document.getElementById('sidebarToggle')?.addEventListener('click', () => this.toggleSidebar());
     
-    // Chat
-    document.getElementById('newChatBtn')?.addEventListener('click', () => this.startNewSession());
-    document.getElementById('sendBtn')?.addEventListener('click', () => this.sendMessage());
-    
+    // Chat - Remove all previous listeners before binding
+    const sendBtn = document.getElementById('sendBtn');
     const input = document.getElementById('chatInput');
-    input?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        this.sendMessage();
-      }
-    });
-    input?.addEventListener('input', () => this.autoResizeInput(input));
+    const form = document.getElementById('chatForm');
+    if (sendBtn) {
+      sendBtn.replaceWith(sendBtn.cloneNode(true));
+    }
+    if (input) {
+      input.replaceWith(input.cloneNode(true));
+    }
+    // Re-query after replace
+    const newSendBtn = document.getElementById('sendBtn');
+    const newInput = document.getElementById('chatInput');
+    // Guard with requestInProgress
+    this.requestInProgress = false;
+    if (newSendBtn) {
+      newSendBtn.addEventListener('click', async () => {
+        if (this.requestInProgress) return;
+        this.requestInProgress = true;
+        await this.sendMessage();
+        this.requestInProgress = false;
+      });
+    }
+    if (newInput) {
+      newInput.addEventListener('keydown', async (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          if (this.requestInProgress) return;
+          this.requestInProgress = true;
+          await this.sendMessage();
+          this.requestInProgress = false;
+        }
+      });
+      newInput.addEventListener('input', () => this.autoResizeInput(newInput));
+    }
+    // Log AIService available
+    if (typeof AIService !== 'undefined') {
+      console.log('[Abhilasha] AIService available');
+    }
     
     // Training modal
     document.getElementById('toggleTrainingBtn')?.addEventListener('click', () => this.openTrainingModal());
@@ -296,7 +401,7 @@ const HerApp = {
     }
     
     if (window.innerWidth <= 1024) {
-      document.getElementById('sidebar')?.classList.remove('open');
+      this.closeMobileNav();
     }
   },
   
@@ -418,7 +523,7 @@ const HerApp = {
   },
   
   // ═══════════════════════════════════════════════════════════
-  // MESSAGES
+  // MESSAGES - WITH STREAMING
   // ═══════════════════════════════════════════════════════════
   async sendMessage() {
     const input = document.getElementById('chatInput');
@@ -443,27 +548,151 @@ const HerApp = {
     this.renderMessages();
     this.scrollToBottom();
     
-    // Show typing
-    this.showTyping();
+    // Use streaming response
+    await this.generateStreamingResponse(content);
     
-    // Generate response
+    await this.saveSession();
+    this.scrollToBottom();
+  },
+  
+  async generateStreamingResponse(userMessage) {
+    this.isTyping = true;
+    
+    // Show streaming message bubble
+    this.showStreamingBubble();
+    
     try {
-      const response = await this.generateResponse(content);
+      // Build conversation history INCLUDING the new user message
+      const conversationHistory = this.currentSession?.messages
+        ?.slice(-10)
+        ?.map(m => ({ role: m.role, content: m.content })) || [];
+      
+      console.log('[Abhilasha] Sending', conversationHistory.length, 'messages to AI');
+      console.log('[Abhilasha] Last message:', conversationHistory[conversationHistory.length - 1]?.content);
+      
+      let fullResponse = '';
+      
+      // Use AIService - MUST call real API
+      if (typeof AIService !== 'undefined') {
+        console.log('[Abhilasha] AIService available, calling chatStream...');
+        
+        // Try streaming first
+        const result = await AIService.chatStream('her', conversationHistory, (chunk, accumulated) => {
+          console.log('[Abhilasha] Stream chunk received:', chunk.substring(0, 20));
+          this.updateStreamingBubble(accumulated);
+          this.scrollToBottom();
+        });
+        
+        console.log('[Abhilasha] Stream result:', result.success, result.error || '');
+        
+        if (result.success && result.response) {
+          fullResponse = result.response;
+        } else {
+          // Streaming failed - try non-streaming
+          console.log('[Abhilasha] Streaming failed, trying non-streaming...');
+          const fallbackResult = await AIService.chat('her', conversationHistory);
+          console.log('[Abhilasha] Non-stream result:', fallbackResult.success, fallbackResult.error || '');
+          
+          if (fallbackResult.success && fallbackResult.response) {
+            fullResponse = fallbackResult.response;
+            await this.typewriterEffect(fullResponse);
+          } else {
+            // API FAILED - Show system message, NOT fake response
+            fullResponse = "Abhilasha is quiet right now… something's off 💭";
+            console.error('[Abhilasha] API FAILED:', fallbackResult.error);
+          }
+        }
+      } else {
+        // No AIService - system error
+        console.error('[Abhilasha] AIService not available!');
+        fullResponse = "Abhilasha is quiet right now… something's off 💭";
+      }
+      
+      // Finalize the message
+      this.hideStreamingBubble();
       
       this.currentSession.messages.push({
         role: 'assistant',
-        content: response,
+        content: fullResponse,
         timestamp: Date.now()
       });
       
-      await this.saveSession();
+      this.renderMessages();
+      
     } catch (e) {
-      console.warn('Response error:', e);
+      console.warn('[Abhilasha] Response error:', e);
+      this.hideStreamingBubble();
+      
+      this.currentSession.messages.push({
+        role: 'assistant',
+        content: "Kuch technical issue hua... firse try karo? 💭",
+        timestamp: Date.now(),
+        error: true
+      });
+      
+      this.renderMessages();
     }
     
-    this.hideTyping();
-    this.renderMessages();
+    this.isTyping = false;
+  },
+  
+  showStreamingBubble() {
+    const container = document.getElementById('chatMessages');
+    if (!container) return;
+    
+    // Remove empty state if present
+    const emptyEl = container.querySelector('.her-chat-empty');
+    if (emptyEl) emptyEl.style.display = 'none';
+    
+    const streamEl = document.createElement('div');
+    streamEl.className = 'her-message her-message-assistant her-streaming-message';
+    streamEl.id = 'streamingMessage';
+    streamEl.innerHTML = `
+      <div class="her-message-bubble her-streaming-bubble">
+        <span class="her-streaming-cursor">▋</span>
+      </div>
+    `;
+    container.appendChild(streamEl);
+    this.streamingMessageEl = streamEl;
     this.scrollToBottom();
+  },
+  
+  updateStreamingBubble(text) {
+    const bubble = document.querySelector('#streamingMessage .her-message-bubble');
+    if (bubble) {
+      bubble.innerHTML = this.formatMessage(text) + '<span class="her-streaming-cursor">▋</span>';
+    }
+  },
+  
+  hideStreamingBubble() {
+    document.getElementById('streamingMessage')?.remove();
+    this.streamingMessageEl = null;
+  },
+  
+  async typewriterEffect(text) {
+    const words = text.split(' ');
+    let accumulated = '';
+    
+    for (let i = 0; i < words.length; i++) {
+      accumulated += (i > 0 ? ' ' : '') + words[i];
+      this.updateStreamingBubble(accumulated);
+      this.scrollToBottom();
+      await this.delay(30 + Math.random() * 40);
+    }
+  },
+  
+  async generateLocalResponse(userMessage) {
+    await this.delay(600 + Math.random() * 800);
+    
+    const msg = userMessage.toLowerCase();
+    
+    // Simple greeting responses
+    if (this.detectGreeting(msg)) {
+      return this.getGreetingResponse();
+    }
+    
+    // Fallback
+    return this.getConversationalResponse(msg);
   },
   
   renderMessages() {
@@ -473,12 +702,14 @@ const HerApp = {
     if (!this.currentSession || this.currentSession.messages.length === 0) {
       container.innerHTML = `
         <div class="her-chat-empty">
-          <span class="her-chat-empty-icon">💭</span>
-          <p>Kuch baat karo...</p>
+          <span class="her-chat-empty-icon">�</span>
+          <p>Abhilasha se baat karo...</p>
         </div>
       `;
       return;
     }
+    
+    console.log('[Abhilasha] Rendering', this.currentSession.messages.length, 'messages');
     
     let lastRole = null;
     
@@ -559,93 +790,110 @@ const HerApp = {
   },
   
   // ═══════════════════════════════════════════════════════════
-  // AI RESPONSE GENERATION - Uses Local Relay for Her AI
+  // EXPORT CHAT
   // ═══════════════════════════════════════════════════════════
-  async generateResponse(userMessage) {
-    // ════════════════════════════════════════════════════════════
-    // PRIMARY: Use AIService (Local Relay)
-    // This sends requests through the local server to OpenAI
-    // ════════════════════════════════════════════════════════════
-    if (typeof AIService !== 'undefined') {
-      try {
-        // Build conversation history for context
-        const conversationHistory = this.currentSession?.messages
-          ?.slice(-10)
-          ?.map(m => ({ role: m.role, content: m.content })) || [];
-        
-        // Send to local relay via AIService
-        const result = await AIService.chat('her', [
-          ...conversationHistory,
-          { role: 'user', content: userMessage }
-        ]);
-        
-        if (result.success && result.response) {
-          return result.response;
-        }
-        
-        // If relay not running, show one clear message
-        if (result.needsRelay) {
-          return "Starting Her AI... 💭 (Server connecting)";
-        }
-        
-        // If error, log and fallback
-        console.warn('[Her AI] Response error:', result.error);
-      } catch (e) {
-        console.warn('[Her AI] AIService error:', e);
-      }
+  showExportOptions() {
+    if (!this.currentSession || this.currentSession.messages.length === 0) {
+      this.showToast('No messages to export');
+      return;
     }
     
-    // ════════════════════════════════════════════════════════════
-    // FALLBACK: AISystem (if available)
-    // ════════════════════════════════════════════════════════════
-    if (typeof AISystem !== 'undefined' && AISystem.generateHerResponse) {
-      const emotion = AISystem.detectEmotion(userMessage);
-      await AISystem.simulateEmotionalPacing(emotion, 50, 'her');
-      return AISystem.generateHerResponse(userMessage, emotion);
+    const html = `
+      <div class="her-export-options">
+        <h3>Export Chat</h3>
+        <p>Choose export format:</p>
+        <div class="her-export-buttons">
+          <button class="her-btn" onclick="HerApp.exportChat('txt')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            Text File (.txt)
+          </button>
+          <button class="her-btn" onclick="HerApp.exportChat('json')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="12" y1="18" x2="12" y2="12"/>
+              <line x1="9" y1="15" x2="15" y2="15"/>
+            </svg>
+            JSON File (.json)
+          </button>
+        </div>
+      </div>
+    `;
+    
+    this.openModal('Export Chat', html);
+  },
+  
+  exportChat(format) {
+    if (!this.currentSession) return;
+    
+    const session = this.currentSession;
+    const dateStr = new Date(session.createdAt).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+    
+    let content, filename, mimeType;
+    
+    if (format === 'txt') {
+      // Plain text format
+      const lines = [`Abhilasha Chat - ${dateStr}`, '═'.repeat(40), ''];
+      
+      session.messages.forEach(msg => {
+        const time = new Date(msg.timestamp).toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit'
+        });
+        const sender = msg.role === 'user' ? 'You' : 'Abhilasha';
+        lines.push(`[${time}] ${sender}:`);
+        lines.push(msg.content);
+        lines.push('');
+      });
+      
+      content = lines.join('\n');
+      filename = `abhilasha-chat-${Date.now()}.txt`;
+      mimeType = 'text/plain';
+      
+    } else {
+      // JSON format
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        session: {
+          id: session.id,
+          createdAt: new Date(session.createdAt).toISOString(),
+          updatedAt: new Date(session.updatedAt).toISOString(),
+          messageCount: session.messages.length
+        },
+        messages: session.messages.map(msg => ({
+          role: msg.role,
+          content: msg.content,
+          timestamp: new Date(msg.timestamp).toISOString()
+        }))
+      };
+      
+      content = JSON.stringify(exportData, null, 2);
+      filename = `abhilasha-chat-${Date.now()}.json`;
+      mimeType = 'application/json';
     }
     
-    // ════════════════════════════════════════════════════════════
-    // LAST RESORT: Local fallback responses
-    // Only used when server is completely unreachable
-    // ════════════════════════════════════════════════════════════
-    await this.delay(800 + Math.random() * 1200);
+    // Download
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
     
-    const msg = userMessage.toLowerCase();
-    
-    // Context from memories
-    const relevantMemories = this.findRelevantMemories(msg);
-    
-    // Mood influence
-    const moodContext = this.getMoodContext();
-    
-    // Training data patterns
-    const trainedResponse = this.findTrainedResponse(msg);
-    if (trainedResponse) return trainedResponse;
-    
-    // Emotion detection
-    if (this.detectSadness(msg)) {
-      return this.getSadnessResponse();
-    }
-    
-    if (this.detectHappiness(msg)) {
-      return this.getHappyResponse();
-    }
-    
-    if (this.detectLove(msg)) {
-      return this.getLoveResponse();
-    }
-    
-    if (this.detectQuestion(msg)) {
-      return this.getQuestionResponse(msg);
-    }
-    
-    // Greetings
-    if (this.detectGreeting(msg)) {
-      return this.getGreetingResponse();
-    }
-    
-    // Default conversational
-    return this.getConversationalResponse(msg);
+    this.closeModal();
+    this.showToast(`Chat exported as ${format.toUpperCase()}`);
   },
   
   detectSadness(msg) {

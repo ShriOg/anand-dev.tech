@@ -213,7 +213,13 @@ html, body {
   flex-direction: column;
   flex-shrink: 0;
   transition: transform var(--transition-smooth);
-  z-index: 100;
+  z-index: 1200;
+  pointer-events: auto;
+}
+
+.her-sidebar.open {
+  z-index: 1201;
+  pointer-events: auto;
 }
 
 .her-sidebar-header {
@@ -1144,45 +1150,77 @@ html, body {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   MOBILE NAVIGATION
+   MOBILE MENU & SIDEBAR
    ═══════════════════════════════════════════════════════════ */
-.her-mobile-nav {
-  display: none;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: var(--mobile-nav-height);
-  background: rgba(8, 8, 8, 0.95);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border-subtle);
-  z-index: 200;
-}
 
-.her-mobile-nav-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+/* Mobile Menu Button - Hidden on desktop */
+.her-mobile-menu-btn {
+  display: none;
+  width: 40px;
+  height: 40px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  cursor: pointer;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  font-size: 10px;
-  cursor: pointer;
-  text-decoration: none;
-  transition: color var(--transition-fast);
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
 }
 
-.her-mobile-nav-item:hover,
-.her-mobile-nav-item.active {
+.her-mobile-menu-btn:hover {
+  background: var(--her-accent-subtle);
+  color: var(--her-accent);
+  border-color: var(--her-accent-dim);
+}
+
+.her-mobile-menu-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Sidebar Close Button - Hidden on desktop */
+.her-sidebar-close {
+  display: none;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.her-sidebar-close:hover {
+  background: var(--bg-hover);
   color: var(--her-accent);
 }
 
-.her-mobile-nav-item svg {
-  width: 22px;
-  height: 22px;
+.her-sidebar-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Sidebar Overlay for Mobile */
+.her-sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity var(--transition-normal), visibility var(--transition-normal);
+}
+
+.her-sidebar-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1193,23 +1231,35 @@ html, body {
     position: fixed;
     left: 0;
     top: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
     transform: translateX(-100%);
+    z-index: 1000;
+    transition: transform var(--transition-smooth);
   }
   
   .her-sidebar.open {
     transform: translateX(0);
   }
   
-  .her-main {
-    padding-bottom: var(--mobile-nav-height);
+  /* Show mobile menu button */
+  .her-mobile-menu-btn {
+    display: flex;
   }
   
-  .her-mobile-nav {
+  /* Show sidebar close button */
+  .her-sidebar-close {
     display: flex;
   }
   
   .her-chat-sidebar {
     display: none;
+  }
+  
+  /* Main content should NOT blur */
+  .her-main {
+    filter: none !important;
+    backdrop-filter: none !important;
   }
 }
 
@@ -2210,6 +2260,75 @@ html, body {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+/* Streaming Message Cursor */
+.her-streaming-message .her-message-bubble {
+  padding: var(--space-3) var(--space-4);
+  background: rgba(232, 164, 184, 0.12);
+  border: 1px solid rgba(232, 164, 184, 0.2);
+}
+
+.her-streaming-cursor {
+  display: inline-block;
+  animation: cursorBlink 0.8s infinite;
+  color: var(--her-accent);
+  font-weight: bold;
+  margin-left: 2px;
+}
+
+@keyframes cursorBlink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* Export Options Modal */
+.her-export-options {
+  text-align: center;
+  padding: var(--space-4);
+}
+
+.her-export-options h3 {
+  font-size: var(--text-lg);
+  color: var(--her-accent);
+  margin-bottom: var(--space-2);
+}
+
+.her-export-options p {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-6);
+}
+
+.her-export-buttons {
+  display: flex;
+  gap: var(--space-4);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.her-export-buttons .her-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  background: var(--bg-hover);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.her-export-buttons .her-btn:hover {
+  background: var(--her-accent-subtle);
+  border-color: var(--her-accent-dim);
+  color: var(--her-accent);
+}
+
+.her-export-buttons .her-btn svg {
+  flex-shrink: 0;
 }
 
 @keyframes messageSlideIn {
