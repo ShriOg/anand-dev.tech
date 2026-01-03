@@ -61,12 +61,16 @@ const HerApp = {
     await this.loadDailyEntry();
     
     this.bindEvents();
+    this.bindAIStatusEvents();
     this.renderSessions();
     this.setDates();
     
     if (this.sessions.length > 0) {
       this.loadSession(this.sessions[0].id);
     }
+    
+    // Check AI relay status on init
+    this.checkAIStatus();
     
     console.log('[Her Space] Initialized');
   },
@@ -78,6 +82,56 @@ const HerApp = {
   async initDatabase() {
     if (typeof Database !== 'undefined') {
       await Database.init();
+    }
+  },
+  
+  // ═══════════════════════════════════════════════════════════
+  // AI CONNECTION STATUS
+  // ═══════════════════════════════════════════════════════════
+  bindAIStatusEvents() {
+    // Listen for AI connection status changes
+    window.addEventListener('ai-connection-status', (e) => {
+      const { message, isConnecting } = e.detail;
+      this.updateAIStatusUI(isConnecting, message);
+    });
+  },
+  
+  async checkAIStatus() {
+    if (typeof AIService !== 'undefined') {
+      // On website, always ready (direct OpenAI)
+      if (!AIService.isLocalhost) {
+        this.updateAIStatusUI(false, '');
+        return;
+      }
+      // On localhost, check relay
+      const isOnline = await AIService.checkRelayHealth();
+      this.updateAIStatusUI(!isOnline, isOnline ? '' : 'Connecting...');
+    }
+  },
+  
+  updateAIStatusUI(isConnecting, message) {
+    const statusEl = document.getElementById('chatStatus');
+    const bannerEl = document.getElementById('aiBanner');
+    const bannerTextEl = document.getElementById('aiBannerText');
+    
+    if (statusEl) {
+      if (isConnecting) {
+        statusEl.textContent = 'Connecting...';
+        statusEl.classList.add('connecting');
+        statusEl.classList.remove('offline');
+      } else {
+        statusEl.textContent = 'Online';
+        statusEl.classList.remove('connecting', 'offline');
+      }
+    }
+    
+    if (bannerEl) {
+      if (isConnecting && message) {
+        bannerEl.classList.add('visible');
+        if (bannerTextEl) bannerTextEl.textContent = message;
+      } else {
+        bannerEl.classList.remove('visible');
+      }
     }
   },
   
@@ -505,17 +559,55 @@ const HerApp = {
   },
   
   // ═══════════════════════════════════════════════════════════
-  // AI RESPONSE GENERATION - Uses AISystem for Her Mode
+  // AI RESPONSE GENERATION - Uses Local Relay for Her AI
   // ═══════════════════════════════════════════════════════════
   async generateResponse(userMessage) {
-    // Delegate to AISystem if available for improved emotional intelligence
+    // ════════════════════════════════════════════════════════════
+    // PRIMARY: Use AIService (Local Relay)
+    // This sends requests through the local server to OpenAI
+    // ════════════════════════════════════════════════════════════
+    if (typeof AIService !== 'undefined') {
+      try {
+        // Build conversation history for context
+        const conversationHistory = this.currentSession?.messages
+          ?.slice(-10)
+          ?.map(m => ({ role: m.role, content: m.content })) || [];
+        
+        // Send to local relay via AIService
+        const result = await AIService.chat('her', [
+          ...conversationHistory,
+          { role: 'user', content: userMessage }
+        ]);
+        
+        if (result.success && result.response) {
+          return result.response;
+        }
+        
+        // If relay not running, show one clear message
+        if (result.needsRelay) {
+          return "Starting Her AI... 💭 (Server connecting)";
+        }
+        
+        // If error, log and fallback
+        console.warn('[Her AI] Response error:', result.error);
+      } catch (e) {
+        console.warn('[Her AI] AIService error:', e);
+      }
+    }
+    
+    // ════════════════════════════════════════════════════════════
+    // FALLBACK: AISystem (if available)
+    // ════════════════════════════════════════════════════════════
     if (typeof AISystem !== 'undefined' && AISystem.generateHerResponse) {
       const emotion = AISystem.detectEmotion(userMessage);
       await AISystem.simulateEmotionalPacing(emotion, 50, 'her');
       return AISystem.generateHerResponse(userMessage, emotion);
     }
     
-    // Fallback to legacy response generation
+    // ════════════════════════════════════════════════════════════
+    // LAST RESORT: Local fallback responses
+    // Only used when server is completely unreachable
+    // ════════════════════════════════════════════════════════════
     await this.delay(800 + Math.random() * 1200);
     
     const msg = userMessage.toLowerCase();

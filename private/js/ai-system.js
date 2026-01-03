@@ -209,6 +209,49 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
     console.log('[AI System] Initialized with style-trained emotional intelligence');
   },
   
+  // ═══════════════════════════════════════════════════════════════
+  // STYLE RESOLUTION - SYNCHRONOUS, NEVER PENDING
+  // ═══════════════════════════════════════════════════════════════
+  // RULE: This returns IMMEDIATELY with either:
+  // 1. Resolved style from PersonalityAdapter
+  // 2. Default warm Her style (NEVER null/undefined/pending)
+  // ═══════════════════════════════════════════════════════════════
+  
+  DEFAULT_WARM_HER_STYLE: {
+    tone: 'caring',
+    warmth: 'warm',
+    humor: 'playful',
+    hinglishLevel: 'moderate',
+    useParticles: true,
+    useFillers: false,
+    emojiFrequency: 'moderate',
+    suggestedEmojis: ['💗', '✨', '🌸', '🥺', '💕'],
+    expressiveness: 0.7,
+    targetLength: 'short'
+  },
+  
+  /**
+   * Resolve style hints SYNCHRONOUSLY
+   * @returns {Object} Always returns a valid style object, never null/pending
+   */
+  resolveStyleHints() {
+    // Try PersonalityAdapter first
+    if (typeof PersonalityAdapter !== 'undefined') {
+      // Check if profile is ACTUALLY resolved (not pending)
+      if (PersonalityAdapter.isInitialized && PersonalityAdapter.styleProfile) {
+        const hints = PersonalityAdapter.getStyleHints();
+        // Validate hints are not empty
+        if (hints && Object.keys(hints).length > 0 && hints.tone) {
+          return hints;
+        }
+      }
+    }
+    
+    // FALLBACK: Return default warm style (NEVER return null)
+    console.log('[AI System] Using DEFAULT_WARM_HER_STYLE');
+    return this.DEFAULT_WARM_HER_STYLE;
+  },
+  
   async loadStylePatterns() {
     // Load learned style patterns from training data
     if (typeof PSDatabase !== 'undefined') {
@@ -457,19 +500,35 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
       console.warn('Could not delete session:', e);
     }
   },
-  
+
   // ═══════════════════════════════════
   // MESSAGE HANDLING
+  // ═══════════════════════════════════
+  // STATE SAFETY RULES:
+  // - Each user message triggers EXACTLY ONE AI call
+  // - AI responds ONLY to user messages, never its own output
+  // - Never reuse last assistant output as input
   // ═══════════════════════════════════
   async sendMessage(mode) {
     const input = document.getElementById(this.modes[mode].inputEl);
     const content = input?.value.trim();
     
+    // STATE SAFETY: Prevent duplicate calls
     if (!content || this.isTyping) return;
     
     // Initialize session if needed
     if (!this.currentSession[mode]) {
       this.startNewSession(mode);
+    }
+    
+    // STATE SAFETY: Verify we're not echoing AI's own response
+    const messages = this.currentSession[mode].messages;
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage.role === 'assistant' && lastMessage.content === content) {
+        console.warn('[AI System] Prevented echo loop - user input matches last AI response');
+        return;
+      }
     }
     
     // Add user message
@@ -552,6 +611,18 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
     const emotion = this.detectEmotion(userMessage);
     
     // ═══════════════════════════════════════════════════════════════
+    // STYLE RESOLUTION - MUST HAPPEN BEFORE AI CALL
+    // Style is NEVER "pending" when AI is called
+    // ═══════════════════════════════════════════════════════════════
+    let styleHints = null;
+    
+    if (mode === 'her') {
+      // Resolve style SYNCHRONOUSLY before proceeding
+      styleHints = this.resolveStyleHints();
+      console.log('[AI System] Style resolved:', styleHints ? 'from PersonalityAdapter' : 'using default');
+    }
+    
+    // ═══════════════════════════════════════════════════════════════
     // AI-FIRST: Try backend AI service FIRST
     // Local generation is FALLBACK only
     // ═══════════════════════════════════════════════════════════════
@@ -563,21 +634,23 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
         // Build conversation history for context
         const history = this.getFullConversationHistory(mode);
         
-        const aiResult = await AIService.chat(mode === 'her' ? 'her' : 'professional', [
-          ...history,
-          { role: 'user', content: userMessage }
-        ]);
+        // CRITICAL: Pass styleHints to AIService.chat for system prompt injection
+        const aiResult = await AIService.chat(
+          mode === 'her' ? 'her' : 'professional', 
+          [...history, { role: 'user', content: userMessage }],
+          { styleHints: styleHints }
+        );
         
         if (aiResult.success && aiResult.response) {
           response = aiResult.response;
           
-          // Apply mode-specific post-processing
+          // Apply mode-specific post-processing (light touch - main style in system prompt)
           if (mode === 'her') {
             response = this.applyHerModeStyle(response);
             
             // ═══════════════════════════════════════════════════════════════
-            // PERSONALITY ADAPTER: Apply learned style to backend AI response
-            // This adapts STYLE only, never recalls or quotes content
+            // PERSONALITY ADAPTER: Light style adaptation on backend AI response
+            // Main style injection is in system prompt - this is refinement only
             // ═══════════════════════════════════════════════════════════════
             if (typeof PersonalityAdapter !== 'undefined') {
               const styleHints = PersonalityAdapter.getStyleHints();
@@ -737,55 +810,86 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
     const previousTopic = this.extractKeyPhrase(context.lastUserMessage);
     
     // Generate based on intent (inferred, not keyword-matched)
+    // ═══════════════════════════════════════════════════════════════
+    // ANTI-GENERIC RESPONSES: Every response must feel SPECIFIC
+    // FORBIDDEN: "aur?", "thoda aur batao", "samajh raha hoon"
+    // ═══════════════════════════════════════════════════════════════
     switch (intent) {
       case 'greeting':
-        return context.isNewConversation 
-          ? this.pick([`Hii! 💗`, `Hey! ✨`, `Aagaye! 🌸`])
-          : this.pick([`Hii again! 💕`, `Hey! ✨`, `Haan bolo? 🌸`]);
-      
-      case 'farewell':
-        return this.pick([`Okay bye! 💗`, `Gn! 🌙`, `Jaldi aana ✨`, `Bye 🌸`]);
-      
-      case 'thanking':
-        return this.pick([`Mention not! 💗`, `Hehe 🌸`, `Koi na ✨`]);
-      
-      case 'seeking':
-        if (isShort) {
-          return this.pick([`Hmm 🤔`, `Tum batao? 💭`, `Sochti hoon ✨`]);
+        // WARM greeting with VARIATION and CONVERSATION PROGRESSION
+        if (context.isNewConversation) {
+          return this.pick([
+            `Hii! Kaise ho aaj? 💗`,
+            `Hey there! Din kaisa raha? ✨`,
+            `Aagaye finally! Kya chal raha hai? 🌸`,
+            `Helloo! Miss kiya kya mujhe? 💕`
+          ]);
         }
         return this.pick([
-          `Hmm interesting question... 💭`,
-          `Accha, let me think... 🤔`,
-          `Hmm ${hasHinglish ? 'batati hoon' : 'let me see'} ✨`
+          `Hii again! Sab theek? 💕`,
+          `Hey! Kuch naya? ✨`,
+          `Back so soon! Kya hua? 🌸`,
+          `Haan bolo, kya scene hai? 💗`
+        ]);
+      
+      case 'farewell':
+        return this.pick([
+          `Okay bye! Jaldi milna 💗`,
+          `Gn! Sweet dreams 🌙`,
+          `Jaldi aana wapas ✨`,
+          `Byee! Take care 🌸`
+        ]);
+      
+      case 'thanking':
+        return this.pick([
+          `Arey mention not yaar! 💗`,
+          `Hehe anytime 🌸`,
+          `Koi na, apne log hain ✨`
+        ]);
+      
+      case 'seeking':
+        // ENGAGED response, not dismissive
+        if (isShort) {
+          return this.pick([
+            `Hmm interesting... tell me more? 🤔`,
+            `Kya specific hai dimaag mein? 💭`,
+            `Sochne do thoda ✨`
+          ]);
+        }
+        return this.pick([
+          `Hmm that's a good question actually... 💭`,
+          `Accha wait, let me think about this properly 🤔`,
+          `Interesting! ${hasHinglish ? 'Batati hoon apna take' : 'Here\'s what I think'} ✨`
         ]);
       
       case 'requesting':
         return this.pick([
-          `Haan zaroor 💗`,
-          `Of course yaar ✨`,
-          `Main hoon na 🌸`
+          `Haan zaroor! Batao kya chahiye exactly 💗`,
+          `Of course yaar, main hoon na ✨`,
+          `Done! Kya karna hai specifically? 🌸`
         ]);
       
       case 'sharing':
-        // Respond empathetically to sharing
+        // EMPATHETIC and ENGAGED response
         if (sentiment === 'negative') {
           return this.pick([
-            `Main sun rahi hoon... 💗`,
-            `Hmm... batao na aur 🥺`,
-            `I'm here yaar ✨`
+            `Aw yaar, kya hua? Main sun rahi hoon 💗`,
+            `Hey... you okay? Batao kya ho gaya 🥺`,
+            `I'm here yaar, share karo freely ✨`
           ]);
         }
         if (sentiment === 'positive') {
           return this.pick([
-            `Ooh nice! ✨`,
-            `Hehe that's good 💗`,
-            `Tell me more! 🌸`
+            `Ooh nice! Yeh toh exciting hai! ✨`,
+            `Hehe that's so good yaar! Details do 💗`,
+            `Wah! Tell me everything 🌸`
           ]);
         }
+        // Neutral sharing - show interest
         return this.pick([
-          `Accha accha... 💭`,
-          `Hmm... aur? ✨`,
-          `Go on yaar 💗`
+          `Hmm interesting... phir kya hua? 💭`,
+          `Accha accha, continue karo ✨`,
+          `Go on, I'm listening 💗`
         ]);
       
       default: // 'conversing' - natural conversation
@@ -794,33 +898,67 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
   },
   
   // Natural conversation generation (for any input)
+  // ═══════════════════════════════════════════════════════════════
+  // ANTI-GENERIC: Responses must reference MESSAGE CONTENT
+  // Never just acknowledge - always ENGAGE or PROGRESS
+  // ═══════════════════════════════════════════════════════════════
   generateNaturalConversation(message, emotion, context, analysis, continuityAware, previousTopic) {
     const { isShort, isMedium, sentiment, hasHinglish } = analysis;
     
-    // Short messages - encourage elaboration
+    // Extract something specific from the message to reference
+    const keyPhrase = this.extractKeyPhrase(message);
+    
+    // Short messages - ASK SPECIFIC questions, not vague "aur?"
     if (isShort) {
       return this.pick([
-        `Hmm... thoda aur batao na? 💗`,
-        `Accha accha... aur? 💭`,
-        `Go on yaar ✨`,
-        `Haan? 🌸`
+        `Hmm "${keyPhrase}" - kya matlab iska? 💗`,
+        `Wait, yeh toh interesting hai. Context do thoda? ✨`,
+        `Haan, I'm curious now. Kya scene hai? 🌸`,
+        `Short but intriguing... elaborate karo na? 💭`
       ]);
     }
     
-    // Medium/Long messages - engage with content
-    const keyPhrase = this.extractKeyPhrase(message);
+    // Medium/Long messages - engage with SPECIFIC content
     
-    // Emotionally aware responses
+    // Emotionally aware responses - ALWAYS reference the emotion
     if (emotion && emotion.type !== 'neutral') {
       const emotionResponses = {
-        sadness: [`Main hoon yahan 💗`, `Hmm... batao na 🥺`, `Sun rahi hoon... ✨`],
-        happiness: [`Ooh! ✨ Kya hua?`, `Hehe nice 💗`, `Batao batao! 🌸`],
-        anger: [`Kya hua yaar? 👀`, `Hmm sun rahi hoon...`, `Nikalo sab 💗`],
-        tiredness: [`Rest karo yaar 💗`, `Hmm thak gaye na?`, `Break lo ✨`],
-        stress: [`Breathe karo 💗`, `Main hoon na 🌸`, `Ek ek karke ✨`],
-        love: [`Aww 🥺`, `Hehe 💗`, `Same ✨`],
-        confusion: [`Hmm batao 🤔`, `Kya options hain?`, `Figure out karte hain ✨`],
-        boredom: [`Hmm acha... 💭`, `Kya karna hai? 🌸`, `Main hoon 💗`]
+        sadness: [
+          `Main samajh sakti hoon yaar... kya specifically bothering hai? 💗`,
+          `Aw, sounds tough. Vent karna hai toh I'm here 🥺`,
+          `Hmm... seems like a lot. One thing at a time? ✨`
+        ],
+        happiness: [
+          `Ooh! ${keyPhrase ? `"${keyPhrase}" sounds amazing!` : 'That\'s exciting!'} ✨`,
+          `Hehe your energy is contagious! Tell me more 💗`,
+          `Love this vibe! Kya hua specifically? 🌸`
+        ],
+        anger: [
+          `Okay wait, kya exactly ho gaya? Let it out 👀`,
+          `Yaar sounds frustrating. Full story batao 💗`,
+          `Hmm I can tell you're upset. Main sun rahi hoon ✨`
+        ],
+        tiredness: [
+          `Yaar thak gaye lagta hai... rest liya? 💗`,
+          `Hmm sounds exhausting. Kya kiya aaj? ✨`,
+          `Take it easy na... khud ka khayal rakho 🌸`
+        ],
+        stress: [
+          `Breathe yaar... ek cheez at a time. Kya pressing hai? 💗`,
+          `Main hoon na, figure out karenge together 🌸`,
+          `Sounds overwhelming. Priority kya hai? ✨`
+        ],
+        love: [`Awww 🥺 that's sweet`, `Hehe cutie 💗`, `Same energy ✨`],
+        confusion: [
+          `Hmm confusing hai... kya options consider kar rahe? 🤔`,
+          `Let's break it down? Kya exactly unclear hai? 💭`,
+          `Figure out karte hain together ✨`
+        ],
+        boredom: [
+          `Bore ho gaye? Kuch fun karte hain 💭`,
+          `Hmm same mood. Kya karna hai? 🌸`,
+          `Let's change that! Any ideas? 💗`
+        ]
       };
       
       if (emotionResponses[emotion.type]) {
@@ -828,22 +966,22 @@ You NEVER use: "How can I help you?", "Please provide details", therapist tone, 
       }
     }
     
-    // Continuity-aware responses
+    // Continuity-aware responses - reference PREVIOUS topic
     if (continuityAware && previousTopic) {
       return this.pick([
-        `Hmm "${keyPhrase}" - interesting... 🤔`,
-        `Accha accha, samjh gayi... ${hasHinglish ? 'aur batao' : 'tell me more'} 💭`,
-        `Ohh really? That's something... 💗`,
-        `Haan haan, main sun rahi hoon... 🌸`
+        `Ohh continuing from "${previousTopic}"... interesting point! 🤔`,
+        `Hmm yeah, building on that... ${hasHinglish ? 'sahi keh rahe' : 'makes sense'} 💭`,
+        `Accha so "${keyPhrase}" - that connects to what you said before 💗`,
+        `I see where this is going... tell me more about "${keyPhrase}" 🌸`
       ]);
     }
     
-    // Default natural responses
+    // Default: SPECIFIC engagement, never generic acknowledgment
     return this.pick([
-      `Hmm interesting... "${keyPhrase}" 🤔`,
-      `Accha accha... 💭`,
-      `Ohh really? 💗`,
-      `Main sun rahi hoon... 🌸 Aur batao?`
+      `Hmm "${keyPhrase}" caught my attention... explain more? 🤔`,
+      `Interesting perspective yaar! What made you think of this? 💭`,
+      `Ohh I like where this is going! "${keyPhrase}" specifically - elaborate? 💗`,
+      `That's a thought! Kya triggered this topic? 🌸`
     ]);
   },
   

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Memories | She</title>
   <link rel="stylesheet" href="../css/personal.css">
+  <link rel="stylesheet" href="../css/mobile-nav.css">
   <style>
     .memories-container {
       padding: 1.5rem;
@@ -521,6 +522,12 @@
     };
     
     document.addEventListener('DOMContentLoaded', () => MemoriesApp.init());
+  </script>
+  <script src="../js/mobile-nav.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      MobileSideNav.init('memories');
+    });
   </script>
 </body>
 </html>

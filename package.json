@@ -1,0 +1,24 @@
+{
+  "name": "anand-dev-tech",
+  "version": "1.0.0",
+  "description": "Personal Portfolio & Her AI Space",
+  "private": true,
+  "main": "local-server.js",
+  "scripts": {
+    "start": "node local-server.js",
+    "her": "node local-server.js",
+    "server": "node local-server.js",
+    "dev": "node local-server.js"
+  },
+  "keywords": [
+    "portfolio",
+    "personal",
+    "ai",
+    "her"
+  ],
+  "author": "Anand Shukla",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

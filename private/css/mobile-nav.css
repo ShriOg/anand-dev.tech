@@ -1,0 +1,466 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   MOBILE SIDE NAVIGATION - UNIFIED SYSTEM (LOCKED)
+   ═══════════════════════════════════════════════════════════════════════════
+   
+   MANDATORY STRATEGY:
+   - Mobile uses the SAME SIDE NAV structure as desktop
+   - NO bottom navigation bar (STRICTLY FORBIDDEN)
+   - Left side nav, collapsible, icon-only when collapsed
+   - Same sections, same order, same logic
+   
+   BEHAVIOR:
+   - Default state: ICON-ONLY (collapsed, compact)
+   - Expanded state: ICON + LABELS
+   - Swipe from left OR tap hamburger to expand
+   - Tap outside OR swipe left to collapse
+   - Semi-transparent backdrop behind nav when expanded
+   - Nav overlays content when expanded (does NOT reduce chat width)
+   - Nav stays FIXED vertically
+   
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════
+   CSS VARIABLES
+   ═══════════════════════════════════════════════════════════ */
+:root {
+  /* Side nav dimensions */
+  --side-nav-width-collapsed: 60px;
+  --side-nav-width-expanded: 240px;
+  
+  /* Colors */
+  --side-nav-bg: rgba(12, 12, 16, 0.98);
+  --side-nav-border: rgba(255, 255, 255, 0.06);
+  --side-nav-active: #ff6b9d;
+  --side-nav-active-bg: rgba(255, 107, 157, 0.12);
+  --side-nav-inactive: #71717a;
+  --side-nav-text: #f5f5f7;
+  --side-nav-label: rgba(255, 107, 157, 0.6);
+  --side-nav-hover: rgba(255, 255, 255, 0.06);
+  
+  /* Transitions */
+  --side-nav-transition: 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE SIDE NAV - COLLAPSIBLE LEFT SIDE (MANDATORY)
+   ═══════════════════════════════════════════════════════════ */
+.mobile-side-nav {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--side-nav-width-collapsed);
+  background: var(--side-nav-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right: 1px solid var(--side-nav-border);
+  z-index: 1000;
+  flex-direction: column;
+  transition: width var(--side-nav-transition);
+  overflow: hidden;
+  padding-top: env(safe-area-inset-top, 0);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Expanded state */
+.mobile-side-nav.expanded {
+  width: var(--side-nav-width-expanded);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BACKDROP (SEMI-TRANSPARENT)
+   ═══════════════════════════════════════════════════════════ */
+.mobile-nav-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: 999;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-nav-backdrop.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NAV HEADER
+   ═══════════════════════════════════════════════════════════ */
+.mobile-side-nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 12px;
+  border-bottom: 1px solid var(--side-nav-border);
+  flex-shrink: 0;
+  min-height: 64px;
+}
+
+.mobile-nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--side-nav-text);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.mobile-nav-logo-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-nav-logo-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--side-nav-text);
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.2s ease 0.1s, transform 0.2s ease 0.1s;
+}
+
+.mobile-side-nav.expanded .mobile-nav-logo-text {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HAMBURGER TOGGLE BUTTON (FIXED POSITION)
+   ═══════════════════════════════════════════════════════════ */
+.mobile-nav-toggle {
+  display: none;
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  width: 40px;
+  height: 40px;
+  background: var(--side-nav-bg);
+  border: 1px solid var(--side-nav-border);
+  border-radius: 10px;
+  color: var(--side-nav-text);
+  cursor: pointer;
+  z-index: 1001;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-nav-toggle:active {
+  transform: scale(0.95);
+  background: var(--side-nav-hover);
+}
+
+.mobile-nav-toggle svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+/* Hide toggle when nav is expanded */
+.mobile-side-nav.expanded ~ .mobile-nav-toggle {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NAV CONTENT AREA (SCROLLABLE)
+   ═══════════════════════════════════════════════════════════ */
+.mobile-side-nav-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 8px;
+  overscroll-behavior: contain;
+}
+
+.mobile-side-nav-content::-webkit-scrollbar {
+  width: 3px;
+}
+
+.mobile-side-nav-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mobile-side-nav-content::-webkit-scrollbar-thumb {
+  background: var(--side-nav-active-bg);
+  border-radius: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NAV SECTIONS (CONNECT, GALLERY, RITUALS)
+   ═══════════════════════════════════════════════════════════ */
+.mobile-nav-section {
+  margin-bottom: 8px;
+}
+
+.mobile-nav-section-label {
+  display: flex;
+  align-items: center;
+  padding: 10px 8px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--side-nav-label);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* Hide section labels when collapsed */
+.mobile-side-nav:not(.expanded) .mobile-nav-section-label {
+  opacity: 0;
+  height: 0;
+  padding: 0;
+  margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NAV ITEMS (MANDATORY - MATCHING DESKTOP)
+   ═══════════════════════════════════════════════════════════ */
+.mobile-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: var(--side-nav-inactive);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: left;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+}
+
+/* Center icon when collapsed */
+.mobile-side-nav:not(.expanded) .mobile-nav-item {
+  justify-content: center;
+  padding: 12px 8px;
+}
+
+/* Touch feedback */
+.mobile-nav-item:active {
+  transform: scale(0.97);
+}
+
+/* Hover state */
+.mobile-nav-item:hover {
+  background: var(--side-nav-hover);
+  color: var(--side-nav-text);
+}
+
+/* Active state (MANDATORY - clearly highlighted) */
+.mobile-nav-item.active {
+  background: var(--side-nav-active-bg);
+  color: var(--side-nav-active);
+}
+
+/* Active indicator bar */
+.mobile-nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  background: var(--side-nav-active);
+  border-radius: 0 3px 3px 0;
+}
+
+/* Icon */
+.mobile-nav-item-icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mobile-nav-item-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  fill: none;
+}
+
+.mobile-nav-item.active .mobile-nav-item-icon svg {
+  stroke-width: 2.25;
+}
+
+/* Label */
+.mobile-nav-item-label {
+  flex: 1;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.mobile-side-nav.expanded .mobile-nav-item-label {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Hide label completely when collapsed */
+.mobile-side-nav:not(.expanded) .mobile-nav-item-label {
+  display: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NAV FOOTER (BACK TO DASHBOARD)
+   ═══════════════════════════════════════════════════════════ */
+.mobile-side-nav-footer {
+  padding: 12px 8px;
+  border-top: 1px solid var(--side-nav-border);
+  flex-shrink: 0;
+}
+
+.mobile-nav-item.back-item {
+  color: var(--side-nav-inactive);
+}
+
+.mobile-nav-item.back-item:hover {
+  color: var(--side-nav-text);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SHOW ON MOBILE ONLY (MANDATORY)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .mobile-side-nav {
+    display: flex;
+  }
+  
+  .mobile-nav-toggle {
+    display: flex;
+  }
+  
+  .mobile-nav-backdrop {
+    display: block;
+  }
+  
+  /* Hide desktop sidebar on mobile */
+  .sidebar,
+  .chat-list-panel,
+  .her-sidebar {
+    display: none !important;
+  }
+  
+  /* Full width content on mobile */
+  .chat-viewer-panel,
+  .chat-container {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  /* App container full height */
+  .app-container {
+    height: 100vh;
+    padding-bottom: 0;
+  }
+  
+  body {
+    padding-bottom: 0;
+  }
+  
+  /* Chat input safe - NO bottom nav interference */
+  .input-container,
+  .her-chat-input-container,
+  .chat-input-area {
+    padding-bottom: env(safe-area-inset-bottom, 16px) !important;
+  }
+  
+  /* Main content full height */
+  .main-content {
+    height: calc(100vh - 65px);
+  }
+  
+  /* Ensure header has room for toggle button */
+  .gallery-header,
+  .app-header,
+  .chat-header,
+  .her-chat-header {
+    padding-left: 60px !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LANDSCAPE ADJUSTMENTS
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 768px) and (orientation: landscape) {
+  :root {
+    --side-nav-width-collapsed: 50px;
+    --side-nav-width-expanded: 200px;
+  }
+  
+  .mobile-side-nav-header {
+    min-height: 50px;
+    padding: 10px 8px;
+  }
+  
+  .mobile-nav-item {
+    padding: 10px;
+  }
+  
+  .mobile-nav-toggle {
+    width: 36px;
+    height: 36px;
+    top: 8px;
+    left: 8px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════════════════════════════ */
+@keyframes nav-tap-feedback {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.mobile-nav-item:active {
+  animation: nav-tap-feedback 0.15s ease;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STRICTLY FORBIDDEN: BOTTOM NAVIGATION
+   ═══════════════════════════════════════════════════════════
+   The following classes are DEPRECATED and must NOT be used:
+   - .mobile-nav (bottom bar)
+   - .mobile-nav-panel (bottom sheet)
+   - .mobile-nav-panel-overlay (bottom sheet overlay)
+   
+   All mobile navigation MUST use the side nav system above.
+   ═══════════════════════════════════════════════════════════ */
+
+/* Hide any legacy bottom nav elements */
+.mobile-nav,
+.mobile-nav-panel,
+.mobile-nav-panel-overlay {
+  display: none !important;
+}

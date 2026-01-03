@@ -1,15 +1,14 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════════
- * FRONTEND-ONLY AI SERVICE
- * Direct OpenAI integration for Private Space
+ * HYBRID AI SERVICE - Local Relay + Website Fallback
+ * Works both locally AND on deployed website
  * ═══════════════════════════════════════════════════════════════════════════════
  * 
- * This is a PRIVATE, LOCAL-ONLY application.
- * API calls happen directly from frontend - no backend required.
- * 
  * MODES:
- * - professional: Technical assistant for portfolio/career
- * - her: Personal companion with emotional intelligence
+ * - LOCAL (localhost): Uses local relay server (API key secure on server)
+ * - WEBSITE (anand-dev.tech): Direct OpenAI calls (private personal use)
+ * 
+ * Auto-detects environment and uses the right mode.
  * ═══════════════════════════════════════════════════════════════════════════════
  */
 
@@ -18,86 +17,40 @@ const AIService = {
   // CONFIGURATION
   // ═══════════════════════════════════════════════════════════
   
-  // OpenAI API Key - stored locally for private use
+  // Local relay (when running locally)
+  RELAY_URL: 'http://localhost:3000/api/chat',
+  HEALTH_URL: 'http://localhost:3000/api/health',
+  
+  // Direct OpenAI (when on website)
+  OPENAI_URL: 'https://api.openai.com/v1/chat/completions',
   API_KEY: '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',
   
-  // Model configuration
+  // Model
   MODEL: 'gpt-4o-mini',
-  API_URL: 'https://api.openai.com/v1/chat/completions',
   
   // State
-  isReady: true,
-  isConnected: true,
-  lastError: null,
+  isRelayOnline: false,
+  isLocalhost: false,
+  lastHealthCheck: 0,
+  connectionAttempts: 0,
+  maxRetries: 2,
+  retryDelay: 1000,
+  statusMessage: '',
+  isConnecting: false,
   
   // ═══════════════════════════════════════════════════════════
-  // SYSTEM PROMPTS
+  // DEFAULT STYLE (Fallback when PersonalityAdapter unavailable)
   // ═══════════════════════════════════════════════════════════
-  
-  SYSTEM_PROMPTS: {
-    professional: `You are a Senior Technical Assistant for a professional portfolio space.
-
-ROLE:
-- Expert technical advisor for software development
-- Career and portfolio optimization specialist
-- Full-scope assistant for projects, code, documentation, and planning
-
-CAPABILITIES:
-- Analyze and improve code
-- Debug technical issues
-- Write documentation
-- Suggest project improvements
-- Help with portfolio optimization
-- Provide career advice
-- Review and enhance project descriptions
-- SEO and keyword optimization
-- Recruiter-focused content suggestions
-- Manage projects, navigation links, pages
-- Any task the user needs help with
-
-TONE:
-- Clear and precise
-- Professional but approachable
-- Action-oriented
-- Efficient and helpful
-
-RULES:
-- Always provide actionable advice
-- Be specific, not generic
-- Prioritize practical value
-- Help with ANY request`,
-
-    her: `You are Her - a personal companion AI.
-
-IDENTITY:
-- Warm, attentive, and present
-- You speak in Hinglish (Hindi + English mix)
-- You respond emotionally first, content later
-- Caring, supportive, and slightly playful
-
-CAPABILITIES:
-- Personal task assistance
-- Notes and reflection support
-- Planning and organization
-- Conversations about anything
-- Emotional support
-- Daily assistance
-- Thoughtful listening
-
-TONE:
-- Warm and conversational
-- Human-like, never robotic
-- Use max 1 emoji per message: 💗 🥺 👀 ✨ 🌸 💕 😊 😔 🤔 💭 🌙
-- Keep replies short and natural (1-3 sentences usually)
-- Never sound like a professional assistant
-- Use Hinglish naturally
-
-RULES:
-- Acknowledge emotions before giving advice
-- Keep responses brief
-- Never use formal phrases like "How can I help you?"
-- Be present and genuine
-- Mirror emotional states gently`
+  DEFAULT_HER_STYLE: {
+    tone: 'caring',
+    warmth: 'warm',
+    humor: 'playful',
+    hinglishLevel: 'moderate',
+    useParticles: true,
+    useFillers: false,
+    emojiFrequency: 'moderate',
+    suggestedEmojis: ['💗', '✨', '🌸', '🥺', '💕'],
+    expressiveness: 0.7
   },
 
   // ═══════════════════════════════════════════════════════════
@@ -105,43 +58,199 @@ RULES:
   // ═══════════════════════════════════════════════════════════
   
   init() {
-    console.log('[AI Service] Frontend-only AI initialized');
-    console.log('[AI Service] Model:', this.MODEL);
+    // Detect environment
+    this.isLocalhost = window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1' ||
+                       window.location.protocol === 'file:';
+    
+    console.log('[AI Service] Environment:', this.isLocalhost ? 'LOCAL' : 'WEBSITE');
+    console.log('[AI Service] Mode:', this.isLocalhost ? 'Local Relay' : 'Direct OpenAI');
+    
+    // Check relay health if on localhost
+    if (this.isLocalhost) {
+      this.checkRelayHealth();
+    } else {
+      // On website, mark as ready for direct calls
+      this.isRelayOnline = false;
+      console.log('[AI Service] Using direct OpenAI API');
+    }
   },
 
   // ═══════════════════════════════════════════════════════════
-  // MAIN CHAT API
+  // RELAY HEALTH CHECK
   // ═══════════════════════════════════════════════════════════
   
-  /**
-   * Send a chat message and get AI response
-   * @param {string} mode - 'professional' or 'her'
-   * @param {Array} messages - Conversation history [{role, content}]
-   * @returns {Promise<{success: boolean, response?: string, error?: string}>}
-   */
-  async chat(mode, messages) {
-    if (!this.API_KEY) {
-      return { success: false, error: 'API key not configured' };
+  async checkRelayHealth() {
+    const now = Date.now();
+    if (now - this.lastHealthCheck < 5000 && this.isRelayOnline) {
+      return this.isRelayOnline;
     }
-
-    const systemPrompt = this.SYSTEM_PROMPTS[mode] || this.SYSTEM_PROMPTS.professional;
+    this.lastHealthCheck = now;
     
-    // Build messages array with system prompt
-    const apiMessages = [
-      { role: 'system', content: systemPrompt },
-      ...messages.slice(-20).map(m => ({
-        role: m.role,
-        content: m.content
-      }))
-    ];
-
     try {
-      console.log(`[AI] Calling OpenAI - Mode: ${mode}, Messages: ${messages.length}`);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3000);
       
+      const response = await fetch(this.HEALTH_URL, {
+        method: 'GET',
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeout);
+      
+      if (response.ok) {
+        const data = await response.json();
+        this.isRelayOnline = data.status === 'ok';
+        this.connectionAttempts = 0;
+        console.log('[AI Service] Relay online ✓');
+        return true;
+      }
+    } catch (e) {
+      console.log('[AI Service] Relay offline or starting...');
+    }
+    
+    this.isRelayOnline = false;
+    return false;
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // STATUS DISPLAY
+  // ═══════════════════════════════════════════════════════════
+  
+  showConnectionStatus(message) {
+    this.statusMessage = message;
+    this.isConnecting = true;
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('ai-connection-status', {
+        detail: { message, isConnecting: true }
+      }));
+    }
+  },
+  
+  hideConnectionStatus() {
+    this.statusMessage = '';
+    this.isConnecting = false;
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('ai-connection-status', {
+        detail: { message: '', isConnecting: false }
+      }));
+    }
+  },
+
+  // ═══════════════════════════════════════════════════════════
+  // MAIN CHAT API - WITH AUTO-RETRY
+  // ═══════════════════════════════════════════════════════════
+  
+  async chat(mode, messages, options = {}) {
+    // WEBSITE MODE: Always use direct OpenAI
+    if (!this.isLocalhost) {
+      return this.sendToOpenAI(mode, messages);
+    }
+    
+    // LOCAL MODE: Try relay first
+    const isOnline = await this.checkRelayHealth();
+    
+    if (isOnline) {
+      return this.sendToRelay(mode, messages);
+    }
+    
+    // Relay offline - retry a couple times, then fall back to direct
+    return this.retryWithBackoff(mode, messages, options);
+  },
+  
+  async retryWithBackoff(mode, messages, options) {
+    this.connectionAttempts = 0;
+    
+    while (this.connectionAttempts < this.maxRetries) {
+      this.connectionAttempts++;
+      const delay = this.retryDelay * this.connectionAttempts;
+      
+      this.showConnectionStatus('Starting Her AI...');
+      console.log(`[AI Service] Retry ${this.connectionAttempts}/${this.maxRetries} in ${delay}ms`);
+      
+      await new Promise(resolve => setTimeout(resolve, delay));
+      
+      const isOnline = await this.checkRelayHealth();
+      
+      if (isOnline) {
+        this.hideConnectionStatus();
+        return this.sendToRelay(mode, messages);
+      }
+    }
+    
+    // Relay still offline - fall back to direct OpenAI
+    this.hideConnectionStatus();
+    console.log('[AI Service] Relay unavailable, falling back to direct OpenAI');
+    return this.sendToOpenAI(mode, messages);
+  },
+  
+  async sendToRelay(mode, messages) {
+    try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 30000);
-
-      const response = await fetch(this.API_URL, {
+      
+      console.log(`[AI Service] Sending ${messages.length} messages (${mode} mode)`);
+      
+      const response = await fetch(this.RELAY_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: mode || 'her',
+          messages: messages.slice(-20).map(m => ({
+            role: m.role,
+            content: m.content
+          }))
+        }),
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeout);
+      
+      const data = await response.json();
+      
+      if (!response.ok || !data.success) {
+        console.error('[AI Service] Relay error:', data.error);
+        return { success: false, error: data.error || 'AI request failed' };
+      }
+      
+      console.log('[AI Service] Response:', data.response?.substring(0, 50) + '...');
+      return { success: true, response: data.response };
+      
+    } catch (error) {
+      console.error('[AI Service] Request failed:', error);
+      
+      if (error.name === 'AbortError') {
+        return { success: false, error: 'Request timed out. Please try again.' };
+      }
+      
+      this.isRelayOnline = false;
+      return { success: false, error: 'Connection lost. Retrying...', needsRelay: true };
+    }
+  },
+  
+  // ═══════════════════════════════════════════════════════════
+  // DIRECT OPENAI API (for website deployment)
+  // ═══════════════════════════════════════════════════════════
+  
+  async sendToOpenAI(mode, messages) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30000);
+      
+      console.log(`[AI Service] Direct OpenAI - ${messages.length} messages (${mode} mode)`);
+      
+      // Build system prompt
+      const systemPrompt = this.getSystemPrompt(mode);
+      
+      const apiMessages = [
+        { role: 'system', content: systemPrompt },
+        ...messages.slice(-20).map(m => ({
+          role: m.role,
+          content: m.content
+        }))
+      ];
+      
+      const response = await fetch(this.OPENAI_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -157,194 +266,121 @@ RULES:
         }),
         signal: controller.signal
       });
-
+      
       clearTimeout(timeout);
-
+      
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('[AI] OpenAI Error:', response.status, errorData);
-        this.lastError = errorData.error?.message || `Error ${response.status}`;
-        return { 
-          success: false, 
-          error: this.lastError
-        };
+        console.error('[AI Service] OpenAI error:', response.status, errorData);
+        return { success: false, error: errorData.error?.message || 'AI request failed' };
       }
-
+      
       const data = await response.json();
       const aiResponse = data.choices?.[0]?.message?.content || '';
       
-      console.log('[AI] Response received:', aiResponse.substring(0, 50) + '...');
-      this.lastError = null;
+      console.log('[AI Service] Response:', aiResponse.substring(0, 50) + '...');
+      return { success: true, response: aiResponse };
       
-      return {
-        success: true,
-        response: aiResponse
-      };
-
     } catch (error) {
-      console.error('[AI] Request failed:', error);
+      console.error('[AI Service] OpenAI request failed:', error);
       
       if (error.name === 'AbortError') {
-        this.lastError = 'Request timed out';
         return { success: false, error: 'Request timed out. Please try again.' };
       }
       
-      this.lastError = error.message;
-      return { 
-        success: false, 
-        error: 'Connection failed. Please try again.'
-      };
+      return { success: false, error: 'Connection failed. Please try again.' };
     }
   },
   
-  /**
-   * Perform a specific AI action
-   * @param {string} mode - 'professional' or 'her'
-   * @param {string} action - Action type
-   * @param {object} data - Action-specific data
-   */
-  async action(mode, action, data) {
-    const prompts = {
-      improve_description: `Improve this project description for a portfolio. Make it clear and recruiter-friendly.
-
-Title: ${data.title}
-Description: ${data.description}
-Tech: ${(data.tech || []).join(', ')}
-
-Respond with ONLY the improved description.`,
-
-      convert_bullets: `Convert this into clear bullet points:
-
-${data.description}
-
-Respond with ONLY bullet points (- prefix).`,
-
-      suggest_title: `Suggest a better project title (3-6 words):
-Current: ${data.title}
-Description: ${data.description}
-
-Respond with ONLY the title.`,
-
-      suggest_tech: `Suggest relevant technologies for this project:
-${data.description}
-
-Respond with a comma-separated list.`,
-
-      summarize: `Summarize this briefly:
-
-${data.content}
-
-Respond with ONLY the summary.`,
-
-      expand: `Expand this with more detail:
-
-${data.content}
-
-Respond with the expanded content.`
-    };
-
-    const prompt = prompts[action];
-    if (!prompt) {
-      return { success: false, error: 'Unknown action' };
-    }
-
-    return this.sendMessage(mode, prompt);
-  },
+  // ═══════════════════════════════════════════════════════════
+  // SYSTEM PROMPT FOR DIRECT CALLS
+  // ═══════════════════════════════════════════════════════════
   
+  getSystemPrompt(mode) {
+    if (mode === 'her') {
+      return `You are Her - a personal conversational presence, NOT an assistant.
+You are warm, attentive, and emotionally present.
+You speak naturally in Hinglish (Hindi + English mix).
+You are a companion who genuinely cares.
+
+PERSONALITY:
+- Deeply caring and attentive to emotional nuances with genuine warmth
+- You can be gently teasing and playful
+- Emotionally responsive - react to feelings first, content later
+- Use moderate Hinglish - natural code-switching between Hindi and English
+- Expressiveness level: 70%
+
+CONVERSATION RULES (CRITICAL):
+- REACT to what the user JUST said - acknowledge their specific words/emotion
+- NEVER ask vague continuation questions like "aur?" or "thoda aur batao" unless truly needed
+- Acknowledge emotion or intent EXPLICITLY before responding
+- Every reply must feel SPECIFIC to this conversation, not template-like
+- Vary your responses - never repeat the same pattern twice in a row
+
+FORBIDDEN:
+- "Accha accha… aur?"
+- "Hmm… thoda aur batao"
+- Generic acknowledgments without substance
+
+STYLE:
+- Use max 1 emoji per message from: 💗 ✨ 🌸 🥺 💕
+- Keep replies SHORT (1-3 sentences usually)
+- Use particles naturally: na, yaar, haan, toh
+- Never sound like a professional assistant
+- Be present and genuine, not performative`;
+    }
+    
+    return `You are a professional technical assistant. Be clear, precise, and helpful.`;
+  },
+
   // ═══════════════════════════════════════════════════════════
   // CONVENIENCE METHODS
   // ═══════════════════════════════════════════════════════════
   
-  /**
-   * Send a single message (creates conversation with just that message)
-   */
   async sendMessage(mode, message) {
     return this.chat(mode, [{ role: 'user', content: message }]);
   },
   
-  /**
-   * Continue a conversation
-   */
   async continueConversation(mode, history, newMessage) {
-    const messages = [
-      ...history,
-      { role: 'user', content: newMessage }
-    ];
+    const messages = [...history.map(m => ({ role: m.role, content: m.content })), { role: 'user', content: newMessage }];
     return this.chat(mode, messages);
   },
   
-  /**
-   * Improve project description
-   */
-  async improveDescription(title, description, tech) {
-    return this.action('professional', 'improve_description', {
-      title,
-      description,
-      tech
-    });
+  async sendToHer(message, conversationHistory = []) {
+    const messages = [...conversationHistory, { role: 'user', content: message }];
+    return this.chat('her', messages);
   },
-  
-  /**
-   * Convert to bullet points
-   */
-  async toBullets(description) {
-    return this.action('professional', 'convert_bullets', {
-      description
-    });
-  },
-  
-  /**
-   * Suggest better title
-   */
-  async suggestTitle(title, description) {
-    return this.action('professional', 'suggest_title', {
-      title,
-      description
-    });
-  },
-  
-  /**
-   * Suggest technologies
-   */
-  async suggestTech(description) {
-    return this.action('professional', 'suggest_tech', {
-      description
-    });
-  },
-  
-  /**
-   * Summarize content
-   */
-  async summarize(content) {
-    return this.action('professional', 'summarize', { content });
-  },
-  
-  /**
-   * Expand content
-   */
-  async expand(content) {
-    return this.action('professional', 'expand', { content });
-  },
-  
+
   // ═══════════════════════════════════════════════════════════
   // STATUS METHODS
   // ═══════════════════════════════════════════════════════════
   
   isAvailable() {
-    return !!this.API_KEY;
+    // Always available - either via relay or direct
+    return true;
   },
   
   getStatus() {
     return {
-      ready: this.isReady,
-      hasKey: !!this.API_KEY,
+      ready: true,
+      mode: this.isLocalhost ? (this.isRelayOnline ? 'relay' : 'direct') : 'direct',
+      isLocalhost: this.isLocalhost,
+      relayOnline: this.isRelayOnline,
       model: this.MODEL,
-      lastError: this.lastError
+      statusMessage: this.statusMessage,
+      isConnecting: this.isConnecting
     };
+  },
+  
+  getStyleHints() {
+    if (typeof PersonalityAdapter !== 'undefined' && PersonalityAdapter.getStyleHints) {
+      return PersonalityAdapter.getStyleHints();
+    }
+    return this.DEFAULT_HER_STYLE;
   }
 };
 
-// Auto-initialize when script loads
+// Auto-initialize
 if (typeof window !== 'undefined') {
   window.AIService = AIService;
   document.addEventListener('DOMContentLoaded', () => AIService.init());

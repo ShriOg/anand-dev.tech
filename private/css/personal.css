@@ -569,6 +569,62 @@ html, body {
 .her-chat-status {
   font-size: var(--text-xs);
   color: var(--success);
+  transition: color 0.3s ease;
+}
+
+.her-chat-status.connecting {
+  color: var(--warning);
+  animation: pulse-status 1.5s ease-in-out infinite;
+}
+
+.her-chat-status.offline {
+  color: var(--error);
+}
+
+@keyframes pulse-status {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* AI Connection Banner */
+.her-ai-banner {
+  display: none;
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(232, 164, 184, 0.15);
+  border: 1px solid var(--her-accent-dim);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-5);
+  color: var(--her-accent);
+  font-size: var(--text-sm);
+  z-index: 100;
+  animation: slideDown 0.3s ease;
+}
+
+.her-ai-banner.visible {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.her-ai-banner .spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--her-accent-dim);
+  border-top-color: var(--her-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .her-chat-header-actions {

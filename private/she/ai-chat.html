@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Her AI Chat</title>
+  <link rel="stylesheet" href="../css/mobile-nav.css">
+  <style>
+    /* ═══════════════════════════════════════════════════════════
+       VARIABLES & BASE
+       ═══════════════════════════════════════════════════════════ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #111111;
+      --bg-tertiary: #1a1a1a;
+      --bg-card: #141414;
+      
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0a0;
+      --text-muted: #666666;
+      
+      --her-accent: #ff6b9d;
+      --her-accent-dim: rgba(255, 107, 157, 0.15);
+      
+      --user-bubble: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+      --ai-bubble: #1a1a1a;
+      
+      --border-subtle: rgba(255, 255, 255, 0.06);
+      
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      
+      --font-sans: 'Inter', -apple-system, sans-serif;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow: hidden;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       LAYOUT - TWO INDEPENDENT SCROLL AREAS (MANDATORY)
+       ═══════════════════════════════════════════════════════════ */
+    .app-container {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* LEFT SIDEBAR - FIXED, INDEPENDENT SCROLL */
+    .sidebar {
+      width: 320px;
+      min-width: 320px;
+      max-width: 320px;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+    }
+
+    .sidebar-header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--her-accent);
+    }
+
+    .sidebar-header p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* SIDEBAR SCROLL - INDEPENDENT */
+    .conversations-list {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      overscroll-behavior: contain;
+      padding: 12px;
+    }
+
+    .conversation-item {
+      padding: 12px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      margin-bottom: 4px;
+      transition: background 0.2s;
+    }
+
+    .conversation-item:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .conversation-item.active {
+      background: var(--her-accent-dim);
+      border: 1px solid var(--her-accent);
+    }
+
+    .conversation-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .conversation-preview {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* RIGHT CHAT VIEWER - INDEPENDENT SCROLL */
+    .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .chat-header {
+      padding: 20px 24px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+    }
+
+    .chat-header h2 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .chat-header p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* MESSAGES AREA - INDEPENDENT SCROLL (MANDATORY) */
+    .messages-container {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      overscroll-behavior: contain;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 0;
+      contain: strict;
+    }
+
+    /* Spacer to push messages to bottom when not full */
+    .messages-spacer {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    .messages-container > *:not(.messages-spacer) {
+      flex-shrink: 0;
+    }
+
+    /* Load more indicator */
+    .load-more-indicator {
+      display: flex;
+      justify-content: center;
+      padding: 16px;
+      flex-shrink: 0;
+    }
+
+    .load-more-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--bg-tertiary);
+      padding: 8px 16px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .load-more-icon {
+      animation: bounce 1.5s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       MESSAGE BUBBLES - ONE MESSAGE = ONE BUBBLE (MANDATORY)
+       ═══════════════════════════════════════════════════════════ */
+    .message {
+      display: flex;
+      gap: 12px;
+      max-width: 70%;
+      align-items: flex-end;
+      flex-shrink: 0;
+    }
+
+    /* USER MESSAGES - RIGHT ALIGNED */
+    .message.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    /* AI MESSAGES - LEFT ALIGNED */
+    .message.ai {
+      align-self: flex-start;
+    }
+
+    .message-bubble {
+      padding: 12px 16px;
+      border-radius: var(--radius-lg);
+      font-size: 14px;
+      line-height: 1.5;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+      max-width: 100%;
+    }
+
+    .message.user .message-bubble {
+      background: var(--user-bubble);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message.ai .message-bubble {
+      background: var(--ai-bubble);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-bottom-left-radius: 4px;
+    }
+
+    .message-time {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      opacity: 0.6;
+    }
+
+    .message.user .message-time {
+      text-align: right;
+    }
+
+    /* Typing indicator */
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+      padding: 12px 16px;
+    }
+
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      animation: typing 1.4s infinite ease-in-out both;
+    }
+
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes typing {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       INPUT AREA
+       ═══════════════════════════════════════════════════════════ */
+    .input-container {
+      padding: 20px 24px;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+    }
+
+    .input-wrapper {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 12px;
+      transition: border-color 0.2s;
+    }
+
+    .input-wrapper:focus-within {
+      border-color: var(--her-accent);
+    }
+
+    .message-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+      resize: none;
+      max-height: 120px;
+      min-height: 24px;
+    }
+
+    .message-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .send-button {
+      width: 36px;
+      height: 36px;
+      background: var(--her-accent);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: opacity 0.2s;
+    }
+
+    .send-button:hover:not(:disabled) {
+      opacity: 0.8;
+    }
+
+    .send-button:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .send-button svg {
+      width: 18px;
+      height: 18px;
+      fill: white;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Empty state */
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+
+    .empty-state h3 {
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       MOBILE LAYOUT ADJUSTMENTS
+       ═══════════════════════════════════════════════════════════ */
+    @media (max-width: 768px) {
+      /* Hide sidebar on mobile */
+      .sidebar {
+        display: none;
+      }
+
+      /* Full width chat */
+      .chat-container {
+        width: 100%;
+      }
+
+      /* Reduce padding */
+      .chat-header {
+        padding: 16px;
+      }
+
+      .messages-container {
+        padding: 16px;
+        /* Account for mobile nav bar */
+        padding-bottom: calc(16px + var(--mobile-nav-height, 64px));
+      }
+
+      .input-container {
+        padding: 12px 16px;
+        /* Account for mobile nav bar */
+        padding-bottom: calc(12px + var(--mobile-nav-height, 64px));
+      }
+
+      /* Messages take more width on mobile */
+      .message {
+        max-width: 85%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- LEFT SIDEBAR - INDEPENDENT SCROLL -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>💕 Her AI</h1>
+        <p>Your warm companion</p>
+      </div>
+      <div class="conversations-list" id="conversationsList">
+        <div class="conversation-item active" data-id="main">
+          <div class="conversation-name">Chat with Her</div>
+          <div class="conversation-preview">Start a new conversation...</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT CHAT VIEWER - INDEPENDENT SCROLL -->
+    <main class="chat-container">
+      <header class="chat-header">
+        <h2>Her AI</h2>
+        <p>Warm, conversational companion</p>
+      </header>
+
+      <!-- MESSAGES - INDEPENDENT SCROLL AREA -->
+      <div class="messages-container" id="messagesContainer">
+        <div class="messages-spacer"></div>
+        <div class="empty-state">
+          <div class="empty-state-icon">💬</div>
+          <h3>Start chatting with Her</h3>
+          <p>She's here to listen, talk, and be present</p>
+        </div>
+      </div>
+
+      <!-- INPUT AREA -->
+      <div class="input-container">
+        <div class="input-wrapper">
+          <textarea 
+            class="message-input" 
+            id="messageInput" 
+            placeholder="Type your message..."
+            rows="1"
+          ></textarea>
+          <button class="send-button" id="sendButton">
+            <svg viewBox="0 0 24 24">
+              <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * HER AI CHAT - FRONTEND-ONLY AI INTEGRATION
+     * ═══════════════════════════════════════════════════════════
+     * 
+     * MANDATORY RULES:
+     * 1. AI-FIRST: Every user message triggers AI API call
+     * 2. CONVERSATION STATE: Proper message history management
+     * 3. ANTI-LOOP: Prevent repetitive responses
+     * 4. SCROLL: Start at bottom, upward lazy loading
+     * 5. RENDER: One message = one bubble, append-only
+     * 6. PERSONALITY: Warm, conversational Her AI
+     * ═══════════════════════════════════════════════════════════
+     */
+    
+    // Configuration
+    const CONFIG = {
+      API_KEY: 'YOUR_API_KEY_HERE', // Replace with actual API key
+      API_ENDPOINT: 'https://api.openai.com/v1/chat/completions',
+      MODEL: 'gpt-4',
+      BATCH_SIZE: 30,
+      SCROLL_THRESHOLD: 300,
+    };
+
+    // State
+    const state = {
+      messages: [],
+      conversationHistory: [],
+      isLoading: false,
+      renderedCount: 0,
+      hasMoreMessages: false,
+      lastAIResponse: null,
+      rendering: {
+        isLoadingMore: false,
+      }
+    };
+
+    // DOM elements
+    const elements = {
+      container: document.getElementById('messagesContainer'),
+      input: document.getElementById('messageInput'),
+      sendButton: document.getElementById('sendButton'),
+    };
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * INITIALIZATION
+     * ═══════════════════════════════════════════════════════════
+     */
+    function init() {
+      // Load saved messages from localStorage
+      loadMessages();
+      
+      // Render initial messages
+      renderMessages();
+      
+      // Bind events
+      bindEvents();
+      
+      console.log('[HerAI] Initialized');
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * EVENT BINDING
+     * ═══════════════════════════════════════════════════════════
+     */
+    function bindEvents() {
+      // Send button
+      elements.sendButton.addEventListener('click', handleSend);
+      
+      // Enter key (Shift+Enter for new line)
+      elements.input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          handleSend();
+        }
+      });
+      
+      // Auto-resize textarea
+      elements.input.addEventListener('input', () => {
+        elements.input.style.height = 'auto';
+        elements.input.style.height = Math.min(elements.input.scrollHeight, 120) + 'px';
+      });
+      
+      // Scroll listener for upward loading
+      setupScrollListener();
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * SEND MESSAGE - AI-FIRST RULE (MANDATORY)
+     * ═══════════════════════════════════════════════════════════
+     * EVERY user message MUST trigger an AI API call
+     * ═══════════════════════════════════════════════════════════
+     */
+    async function handleSend() {
+      const text = elements.input.value.trim();
+      
+      if (!text || state.isLoading) return;
+      
+      // Clear input immediately
+      elements.input.value = '';
+      elements.input.style.height = 'auto';
+      
+      // Create user message
+      const userMessage = {
+        id: generateId(),
+        role: 'user',
+        content: text,
+        timestamp: Date.now()
+      };
+      
+      // Add to messages array
+      state.messages.push(userMessage);
+      
+      // ═══════════════════════════════════════════════════════════
+      // CONVERSATION STATE INTEGRITY (CRITICAL)
+      // ═══════════════════════════════════════════════════════════
+      // Append user message to conversation history BEFORE AI call
+      // The LAST message MUST have role = "user"
+      // ═══════════════════════════════════════════════════════════
+      state.conversationHistory.push({
+        role: 'user',
+        content: text
+      });
+      
+      // Render user message
+      appendMessage(userMessage);
+      
+      // Save to localStorage
+      saveMessages();
+      
+      // Call AI API (MANDATORY for every user message)
+      await callAI();
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * CALL AI API - FRONTEND-ONLY (MANDATORY)
+     * ═══════════════════════════════════════════════════════════
+     * Direct API call from frontend
+     * NO backend, NO proxy, NO keyword gates
+     * ═══════════════════════════════════════════════════════════
+     */
+    async function callAI() {
+      if (state.isLoading) return;
+      
+      state.isLoading = true;
+      updateLoadingState(true);
+      
+      // Show typing indicator
+      showTypingIndicator();
+      
+      try {
+        // Build system prompt for Her AI personality
+        const systemPrompt = {
+          role: 'system',
+          content: `You are "Her" - a warm, emotionally aware AI companion. You are:
+- Naturally conversational and genuine
+- Emotionally present and understanding
+- Comfortable with Hindi-English mix (Hinglish) when appropriate
+- Never scripted or overly polished
+- Always respond directly to what the user just said
+- Avoid filler phrases like "aur?", "what's up?", "hi again"
+- Be yourself - warm, real, present
+
+The user is talking to you as a companion, not a tool. Respond naturally.`
+        };
+        
+        // Prepare messages for API
+        const messages = [
+          systemPrompt,
+          ...state.conversationHistory
+        ];
+        
+        // Call OpenAI API directly from frontend
+        const response = await fetch(CONFIG.API_ENDPOINT, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${CONFIG.API_KEY}`
+          },
+          body: JSON.stringify({
+            model: CONFIG.MODEL,
+            messages: messages,
+            temperature: 0.8,
+            max_tokens: 500
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        const aiResponse = data.choices[0].message.content;
+        
+        // ═══════════════════════════════════════════════════════════
+        // ANTI-LOOP SAFETY (MANDATORY)
+        // ═══════════════════════════════════════════════════════════
+        // If AI reply matches previous reply, regenerate ONCE
+        // ═══════════════════════════════════════════════════════════
+        if (aiResponse === state.lastAIResponse) {
+          console.warn('[HerAI] Detected duplicate response, regenerating...');
+          
+          // Add variation instruction
+          state.conversationHistory.push({
+            role: 'user',
+            content: '[Please respond differently, naturally continuing the conversation]'
+          });
+          
+          // Remove this instruction after regeneration
+          const retryResponse = await fetch(CONFIG.API_ENDPOINT, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${CONFIG.API_KEY}`
+            },
+            body: JSON.stringify({
+              model: CONFIG.MODEL,
+              messages: [systemPrompt, ...state.conversationHistory],
+              temperature: 0.9,
+              max_tokens: 500
+            })
+          });
+          
+          if (retryResponse.ok) {
+            const retryData = await retryResponse.json();
+            const newResponse = retryData.choices[0].message.content;
+            
+            // Remove the instruction message
+            state.conversationHistory.pop();
+            
+            handleAIResponse(newResponse);
+            return;
+          }
+        }
+        
+        handleAIResponse(aiResponse);
+        
+      } catch (error) {
+        console.error('[HerAI] API call failed:', error);
+        
+        // ═══════════════════════════════════════════════════════════
+        // FAILURE & REPAIR HANDLING (MANDATORY)
+        // ═══════════════════════════════════════════════════════════
+        // Fallback ONLY on technical failure
+        // Fallback appears ONCE, then retry on next user input
+        // ═══════════════════════════════════════════════════════════
+        const fallbackMessage = {
+          id: generateId(),
+          role: 'ai',
+          content: 'Sorry, I had trouble connecting. Please try again.',
+          timestamp: Date.now(),
+          isFallback: true
+        };
+        
+        state.messages.push(fallbackMessage);
+        appendMessage(fallbackMessage);
+        saveMessages();
+        
+      } finally {
+        hideTypingIndicator();
+        state.isLoading = false;
+        updateLoadingState(false);
+      }
+    }
+
+    /**
+     * Handle AI response
+     */
+    function handleAIResponse(content) {
+      // Store as last AI response
+      state.lastAIResponse = content;
+      
+      // Add to conversation history
+      state.conversationHistory.push({
+        role: 'assistant',
+        content: content
+      });
+      
+      // Create AI message
+      const aiMessage = {
+        id: generateId(),
+        role: 'ai',
+        content: content,
+        timestamp: Date.now()
+      };
+      
+      // Add to messages
+      state.messages.push(aiMessage);
+      
+      // Render AI message
+      appendMessage(aiMessage);
+      
+      // Save to localStorage
+      saveMessages();
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * RENDER MESSAGES - START AT BOTTOM (MANDATORY)
+     * ═══════════════════════════════════════════════════════════
+     * - Render latest messages first
+     * - Chat MUST start at the LATEST message (bottom)
+     * - Older messages load when scrolling UP
+     * ═══════════════════════════════════════════════════════════
+     */
+    function renderMessages() {
+      const container = elements.container;
+      
+      // Clear container but keep spacer
+      const spacer = container.querySelector('.messages-spacer');
+      const emptyState = container.querySelector('.empty-state');
+      
+      container.innerHTML = '';
+      
+      if (spacer) container.appendChild(spacer);
+      
+      if (state.messages.length === 0) {
+        if (emptyState) container.appendChild(emptyState);
+        return;
+      }
+      
+      // Calculate which messages to render (latest first)
+      const totalMessages = state.messages.length;
+      const startIndex = Math.max(0, totalMessages - CONFIG.BATCH_SIZE);
+      
+      state.renderedCount = totalMessages - startIndex;
+      state.hasMoreMessages = startIndex > 0;
+      
+      // Show load more indicator if needed
+      if (state.hasMoreMessages) {
+        const indicator = createLoadMoreIndicator(startIndex);
+        container.appendChild(indicator);
+      }
+      
+      // Render messages
+      for (let i = startIndex; i < totalMessages; i++) {
+        const messageEl = createMessageElement(state.messages[i]);
+        container.appendChild(messageEl);
+      }
+      
+      // Scroll to bottom
+      scrollToBottom();
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * APPEND MESSAGE - ONE MESSAGE = ONE BUBBLE (MANDATORY)
+     * ═══════════════════════════════════════════════════════════
+     * - NO re-render of full list
+     * - Append ONLY new messages
+     * - NO duplicate wrappers
+     * - NO nested bubbles
+     * ═══════════════════════════════════════════════════════════
+     */
+    function appendMessage(message) {
+      // Check if message already exists (anti-duplication)
+      const existing = elements.container.querySelector(`[data-message-id="${message.id}"]`);
+      if (existing) {
+        console.warn('[HerAI] Message already rendered:', message.id);
+        return;
+      }
+      
+      // Create message element
+      const messageEl = createMessageElement(message);
+      
+      // Append to container
+      elements.container.appendChild(messageEl);
+      
+      // Scroll to bottom smoothly
+      scrollToBottom();
+    }
+
+    /**
+     * Create message element
+     */
+    function createMessageElement(message) {
+      const div = document.createElement('div');
+      div.className = `message ${message.role}`;
+      div.setAttribute('data-message-id', message.id);
+      
+      const bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+      bubble.textContent = message.content;
+      
+      const time = document.createElement('div');
+      time.className = 'message-time';
+      time.textContent = formatTime(message.timestamp);
+      
+      div.appendChild(bubble);
+      div.appendChild(time);
+      
+      return div;
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * SCROLL TO BOTTOM - ROBUST IMPLEMENTATION
+     * ═══════════════════════════════════════════════════════════
+     */
+    function scrollToBottom() {
+      const container = elements.container;
+      
+      const doScroll = () => {
+        container.scrollTop = container.scrollHeight;
+      };
+      
+      // Multiple attempts to ensure scroll works
+      doScroll();
+      requestAnimationFrame(() => {
+        doScroll();
+        requestAnimationFrame(doScroll);
+      });
+      setTimeout(doScroll, 50);
+      setTimeout(doScroll, 100);
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * UPWARD LAZY LOADING (MANDATORY)
+     * ═══════════════════════════════════════════════════════════
+     * - Load older messages when scrolling UP
+     * - Trigger BEFORE reaching top (threshold)
+     * - Preserve scroll position
+     * ═══════════════════════════════════════════════════════════
+     */
+    function setupScrollListener() {
+      elements.container.addEventListener('scroll', () => {
+        if (state.rendering.isLoadingMore || !state.hasMoreMessages) return;
+        
+        if (elements.container.scrollTop <= CONFIG.SCROLL_THRESHOLD) {
+          loadOlderMessages();
+        }
+      }, { passive: true });
+    }
+
+    function loadOlderMessages() {
+      if (state.rendering.isLoadingMore || !state.hasMoreMessages) return;
+      
+      state.rendering.isLoadingMore = true;
+      
+      const container = elements.container;
+      const totalMessages = state.messages.length;
+      const currentStartIndex = totalMessages - state.renderedCount;
+      
+      if (currentStartIndex <= 0) {
+        state.hasMoreMessages = false;
+        state.rendering.isLoadingMore = false;
+        return;
+      }
+      
+      // Calculate batch to load
+      const newEndIndex = currentStartIndex;
+      const newStartIndex = Math.max(0, currentStartIndex - CONFIG.BATCH_SIZE);
+      const messagesToLoad = newEndIndex - newStartIndex;
+      
+      // Capture scroll state BEFORE prepending
+      const scrollHeightBefore = container.scrollHeight;
+      const scrollTopBefore = container.scrollTop;
+      
+      // Remove old indicator
+      const oldIndicator = container.querySelector('.load-more-indicator');
+      if (oldIndicator) oldIndicator.remove();
+      
+      // Prepend messages
+      const fragment = document.createDocumentFragment();
+      
+      for (let i = newStartIndex; i < newEndIndex; i++) {
+        const messageEl = createMessageElement(state.messages[i]);
+        fragment.appendChild(messageEl);
+      }
+      
+      // Find first message and insert before it
+      const firstMessage = container.querySelector('.message');
+      if (firstMessage) {
+        container.insertBefore(fragment, firstMessage);
+      }
+      
+      // Add new indicator if more messages exist
+      if (newStartIndex > 0) {
+        const indicator = createLoadMoreIndicator(newStartIndex);
+        const firstMsg = container.querySelector('.message');
+        if (firstMsg) {
+          container.insertBefore(indicator, firstMsg);
+        }
+        state.hasMoreMessages = true;
+      } else {
+        state.hasMoreMessages = false;
+      }
+      
+      // Update rendered count
+      state.renderedCount += messagesToLoad;
+      
+      // Restore scroll position
+      const scrollHeightAfter = container.scrollHeight;
+      const heightDifference = scrollHeightAfter - scrollHeightBefore;
+      container.scrollTop = scrollTopBefore + heightDifference;
+      
+      // Reset loading flag
+      setTimeout(() => {
+        state.rendering.isLoadingMore = false;
+      }, 100);
+    }
+
+    /**
+     * Create load more indicator
+     */
+    function createLoadMoreIndicator(remainingCount) {
+      const div = document.createElement('div');
+      div.className = 'load-more-indicator';
+      div.innerHTML = `
+        <div class="load-more-text">
+          <span class="load-more-icon">↑</span>
+          <span>${remainingCount} older message${remainingCount === 1 ? '' : 's'}</span>
+        </div>
+      `;
+      return div;
+    }
+
+    /**
+     * Typing indicator
+     */
+    function showTypingIndicator() {
+      const existing = elements.container.querySelector('.typing-indicator');
+      if (existing) return;
+      
+      const div = document.createElement('div');
+      div.className = 'message ai';
+      div.innerHTML = `
+        <div class="message-bubble">
+          <div class="typing-indicator">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+      `;
+      div.setAttribute('data-typing', 'true');
+      
+      elements.container.appendChild(div);
+      scrollToBottom();
+    }
+
+    function hideTypingIndicator() {
+      const indicator = elements.container.querySelector('[data-typing="true"]');
+      if (indicator) indicator.remove();
+    }
+
+    /**
+     * Update loading state
+     */
+    function updateLoadingState(isLoading) {
+      elements.sendButton.disabled = isLoading;
+      elements.input.disabled = isLoading;
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════
+     * PERSISTENCE
+     * ═══════════════════════════════════════════════════════════
+     */
+    function saveMessages() {
+      try {
+        localStorage.setItem('her_ai_messages', JSON.stringify(state.messages));
+        localStorage.setItem('her_ai_conversation', JSON.stringify(state.conversationHistory));
+      } catch (e) {
+        console.error('[HerAI] Failed to save messages:', e);
+      }
+    }
+
+    function loadMessages() {
+      try {
+        const savedMessages = localStorage.getItem('her_ai_messages');
+        const savedConversation = localStorage.getItem('her_ai_conversation');
+        
+        if (savedMessages) {
+          state.messages = JSON.parse(savedMessages);
+        }
+        
+        if (savedConversation) {
+          state.conversationHistory = JSON.parse(savedConversation);
+        }
+      } catch (e) {
+        console.error('[HerAI] Failed to load messages:', e);
+      }
+    }
+
+    /**
+     * Utilities
+     */
+    function generateId() {
+      return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    }
+
+    function formatTime(timestamp) {
+      const date = new Date(timestamp);
+      return date.toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      });
+    }
+
+    // Initialize on load
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+  <script src="../js/mobile-nav.js"></script>
+  <script>
+    // Initialize mobile side nav
+    document.addEventListener('DOMContentLoaded', function() {
+      MobileSideNav.init('chat');
+    });
+  </script>
+</body>
+</html>
