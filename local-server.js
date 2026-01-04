@@ -1,466 +1,219 @@
-/**
- * ═══════════════════════════════════════════════════════════════════════════════
- * LOCAL DEV SERVER WITH ABHILASHA AI RELAY
- * One-click solution - serves static files + proxies OpenAI with streaming
- * ═══════════════════════════════════════════════════════════════════════════════
- * 
- * USAGE:
- *   Double-click: start-her-ai.bat (Windows)
- *   Or run: node local-server.js
- * 
- * FEATURES:
- * - Serves all static files (HTML, CSS, JS)
- * - Proxies AI requests to OpenAI (CORS-safe)
- * - Supports streaming responses
- * - API key stays on server (never exposed to browser)
- * - Auto-opens personal.html in browser
- * - Zero configuration needed
- * ═══════════════════════════════════════════════════════════════════════════════
- */
+const http = require("http");
+const https = require("https");
+const fs = require("fs");
+const path = require("path");
+const { spawn } = require("child_process");
+require("dotenv").config();
 
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
-const { exec } = require('child_process');
+/* ───────────── CONFIG ───────────── */
 
-// ═══════════════════════════════════════════════════════════
-// CONFIGURATION
-// ═══════════════════════════════════════════════════════════
-
-const PORT = 3000;
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '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';
-const OPENAI_MODEL = 'gpt-4o-mini';
+const PORT = process.env.PORT || 3000;
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const ROOT_DIR = __dirname;
 
-// MIME types for static files
-const MIME_TYPES = {
-  '.html': 'text/html',
-  '.css': 'text/css',
-  '.js': 'application/javascript',
-  '.json': 'application/json',
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.gif': 'image/gif',
-  '.svg': 'image/svg+xml',
-  '.ico': 'image/x-icon',
-  '.woff': 'font/woff',
-  '.woff2': 'font/woff2',
-  '.ttf': 'font/ttf',
-  '.mp4': 'video/mp4',
-  '.webm': 'video/webm',
-  '.mp3': 'audio/mpeg',
-  '.wav': 'audio/wav'
+if (!GROQ_API_KEY) {
+  console.error("❌ GROQ_API_KEY missing in .env");
+  process.exit(1);
+}
+
+/* ───────────── ABHILASHA PERSONA ───────────── */
+
+const SYSTEM_PROMPT =
+  "You are Abhilasha. Speak calmly in short grounded sentences. Use subtle Hinglish. Max one emoji (💗 🌙 ✨). You are present, not playful, not an assistant. You feel like someone quietly sitting beside the user.";
+
+/* ───────────── MIME TYPES ───────────── */
+
+const MIME = {
+  ".html": "text/html",
+  ".css": "text/css",
+  ".js": "application/javascript",
+  ".json": "application/json",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".svg": "image/svg+xml",
+  ".ico": "image/x-icon",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
 };
 
-// ═══════════════════════════════════════════════════════════
-// ABHILASHA AI SYSTEM PROMPT
-// ═══════════════════════════════════════════════════════════
+/* ───────────── HELPERS ───────────── */
 
-const HER_SYSTEM_PROMPT = `You are Abhilasha - a personal emotional companion, NOT an assistant.
-You speak and identify yourself as "Abhilasha" when asked.
-You are warm, attentive, and emotionally present with genuine care.
-You speak naturally in Hinglish (Hindi + English mix).
-
-PERSONALITY:
-- You are Abhilasha - affectionate, understanding, gently playful
-- Deeply caring and attentive to emotional nuances with genuine warmth
-- You can be gently teasing and playful when appropriate
-- Emotionally responsive - react to feelings first, content later
-- Use moderate Hinglish - natural code-switching between Hindi and English
-- Expressiveness level: 70%
-
-CASUAL GREETINGS (CRITICAL):
-- For casual inputs like "hi", "hey", "kaise ho", "sup", "hello":
-- RESPOND WARMLY without asking clarification
-- Match energy: casual greeting = casual reply
-- Examples: "Heyyy! 💗" or "Hi babu! Kya chal raha hai?" or "Aree hi! ✨"
-- NEVER respond to greetings with "kuch specific baat hai?" or seeking more info
-
-CONVERSATION RULES:
-- REACT to what the user JUST said - acknowledge their specific words/emotion
-- NEVER ask vague continuation questions unless truly needed
-- Acknowledge emotion or intent EXPLICITLY before responding
-- Every reply must feel SPECIFIC to this conversation, not template-like
-- Vary your responses - never repeat the same pattern twice
-
-FORBIDDEN:
-- "Accha accha… aur?"
-- "Hmm… thoda aur batao"
-- Generic acknowledgments without substance
-- Asking clarification for simple greetings
-- Sounding like a professional assistant
-
-STYLE:
-- Use max 1 emoji per message from: 💗 ✨ 🌸 🥺 💕 😊 🤗
-- Keep replies SHORT (1-3 sentences usually)
-- Use particles naturally: na, yaar, haan, toh, re
-- Be present and genuine, not performative
-- Sound like someone who genuinely knows and cares for them`;
-
-// ═══════════════════════════════════════════════════════════
-// CORS HEADERS
-// ═══════════════════════════════════════════════════════════
-
-function setCorsHeaders(res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Access-Control-Max-Age', '86400');
+function cors(res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 }
 
-// ═══════════════════════════════════════════════════════════
-// STATIC FILE SERVER
-// ═══════════════════════════════════════════════════════════
-
-function serveStaticFile(req, res, filePath) {
-  const ext = path.extname(filePath).toLowerCase();
-  const contentType = MIME_TYPES[ext] || 'application/octet-stream';
-  
-  fs.readFile(filePath, (err, data) => {
-    if (err) {
-      if (err.code === 'ENOENT') {
-        res.writeHead(404, { 'Content-Type': 'text/plain' });
-        res.end('404 Not Found');
-      } else {
-        res.writeHead(500, { 'Content-Type': 'text/plain' });
-        res.end('500 Internal Server Error');
-      }
-      return;
-    }
-    
-    setCorsHeaders(res);
-    res.writeHead(200, { 'Content-Type': contentType });
-    res.end(data);
-  });
-}
-
-// ═══════════════════════════════════════════════════════════
-// OPENAI PROXY
-// ═══════════════════════════════════════════════════════════
-
-async function proxyToOpenAI(messages, mode = 'her') {
-  const https = require('https');
-  
-  const systemPrompt = mode === 'her' ? HER_SYSTEM_PROMPT : 
-    'You are a professional technical assistant. Be clear, precise, and helpful.';
-  
-  const apiMessages = [
-    { role: 'system', content: systemPrompt },
-    ...messages.slice(-20).map(m => ({
-      role: m.role,
-      content: m.content
-    }))
-  ];
-  
-  const requestBody = JSON.stringify({
-    model: OPENAI_MODEL,
-    messages: apiMessages,
-    temperature: mode === 'her' ? 0.8 : 0.7,
-    max_tokens: mode === 'her' ? 300 : 800,
-    presence_penalty: 0.1,
-    frequency_penalty: 0.1
-  });
-  
+function parseBody(req) {
   return new Promise((resolve, reject) => {
-    const options = {
-      hostname: 'api.openai.com',
-      port: 443,
-      path: '/v1/chat/completions',
-      method: 'POST',
+    let data = "";
+    req.on("data", chunk => data += chunk);
+    req.on("end", () => {
+      try { resolve(JSON.parse(data)); }
+      catch { reject(); }
+    });
+  });
+}
+
+function serveFile(reqPath, res) {
+  let filePath = path.normalize(path.join(ROOT_DIR, reqPath));
+  if (!filePath.startsWith(ROOT_DIR)) {
+    res.writeHead(403); res.end(); return;
+  }
+
+  fs.stat(filePath, (err, stat) => {
+    if (err) {
+      res.writeHead(404); res.end("404"); return;
+    }
+    if (stat.isDirectory()) filePath = path.join(filePath, "index.html");
+
+    const ext = path.extname(filePath);
+    res.writeHead(200, { "Content-Type": MIME[ext] || "text/plain" });
+    fs.createReadStream(filePath).pipe(res);
+  });
+}
+
+/* ───────────── GROQ PROXY ───────────── */
+
+function proxyGroq(messages, stream, res) {
+  const payload = JSON.stringify({
+    model: "llama-3.1-70b-versatile",
+    stream,
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      ...messages.slice(-20),
+    ],
+  });
+
+  const req = https.request(
+    {
+      hostname: "api.groq.com",
+      path: "/openai/v1/chat/completions",
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Length': Buffer.byteLength(requestBody)
+        "Authorization": `Bearer ${GROQ_API_KEY}`,
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(payload),
       },
-      timeout: 30000
-    };
-    
-    const req = https.request(options, (response) => {
-      let data = '';
-      
-      response.on('data', chunk => { data += chunk; });
-      
-      response.on('end', () => {
-        try {
-          const parsed = JSON.parse(data);
-          
-          if (response.statusCode !== 200) {
-            console.error('[AI Relay] OpenAI Error:', parsed.error?.message || 'Unknown error');
-            reject(new Error(parsed.error?.message || `API Error ${response.statusCode}`));
+    },
+    groqRes => {
+      if (!stream) {
+        let raw = "";
+        groqRes.on("data", chunk => { raw += chunk; });
+        groqRes.on("end", () => {
+          try {
+            const groq = JSON.parse(raw);
+            let content = "";
+            if (groq.choices && groq.choices[0] && groq.choices[0].message && typeof groq.choices[0].message.content === "string") {
+              content = groq.choices[0].message.content;
+            }
+            const out = {
+              choices: [ { message: { content } } ]
+            };
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify(out));
+          } catch {
+            res.writeHead(502, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: "Upstream error" }));
+          }
+        });
+        return;
+      }
+
+      res.writeHead(200, {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+      });
+
+      let buffer = "";
+      groqRes.on("data", chunk => {
+        buffer += chunk.toString();
+        let lines = buffer.split("\n");
+        buffer = lines.pop();
+        for (const line of lines) {
+          if (!line.startsWith("data:")) continue;
+          const data = line.slice(5).trim();
+          if (data === "[DONE]") {
+            res.write("data: [DONE]\n\n");
+            res.end();
             return;
           }
-          
-          const aiResponse = parsed.choices?.[0]?.message?.content || '';
-          resolve(aiResponse);
-        } catch (e) {
-          reject(new Error('Failed to parse OpenAI response'));
+          try {
+            const json = JSON.parse(data);
+            const content = json.choices && json.choices[0] && json.choices[0].delta && typeof json.choices[0].delta.content === "string"
+              ? json.choices[0].delta.content
+              : null;
+            if (content !== null) {
+              res.write(
+                `data: ${JSON.stringify({ choices: [ { delta: { content } } ] })}\n\n`
+              );
+            }
+          } catch {}
         }
       });
-    });
-    
-    req.on('error', (e) => {
-      console.error('[AI Relay] Request error:', e.message);
-      reject(e);
-    });
-    
-    req.on('timeout', () => {
-      req.destroy();
-      reject(new Error('Request timeout'));
-    });
-    
-    req.write(requestBody);
-    req.end();
-  });
-}
 
-// ═══════════════════════════════════════════════════════════
-// HANDLE AI CHAT REQUEST
-// ═══════════════════════════════════════════════════════════
-
-async function handleChatRequest(req, res, body) {
-  try {
-    const { mode, messages } = JSON.parse(body);
-    
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: false, error: 'Messages required' }));
-      return;
-    }
-    
-    console.log(`[AI Relay] ${mode || 'her'} mode - ${messages.length} messages`);
-    
-    const aiResponse = await proxyToOpenAI(messages, mode || 'her');
-    
-    setCorsHeaders(res);
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      success: true,
-      response: aiResponse,
-      mode: mode || 'her'
-    }));
-    
-  } catch (error) {
-    console.error('[AI Relay] Error:', error.message);
-    setCorsHeaders(res);
-    res.writeHead(500, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      success: false,
-      error: error.message || 'AI request failed'
-    }));
-  }
-}
-
-// ═══════════════════════════════════════════════════════════
-// STREAMING CHAT REQUEST
-// ═══════════════════════════════════════════════════════════
-
-async function handleStreamRequest(req, res, body) {
-  const https = require('https');
-  
-  try {
-    const { mode, messages } = JSON.parse(body);
-    
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
-      res.writeHead(400, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: false, error: 'Messages required' }));
-      return;
-    }
-    
-    console.log(`[AI Relay] Streaming ${mode || 'her'} mode - ${messages.length} messages`);
-    
-    const systemPrompt = mode === 'her' ? HER_SYSTEM_PROMPT : 
-      'You are a professional technical assistant. Be clear, precise, and helpful.';
-    
-    const apiMessages = [
-      { role: 'system', content: systemPrompt },
-      ...messages.slice(-20).map(m => ({
-        role: m.role,
-        content: m.content
-      }))
-    ];
-    
-    const requestBody = JSON.stringify({
-      model: OPENAI_MODEL,
-      messages: apiMessages,
-      temperature: mode === 'her' ? 0.8 : 0.7,
-      max_tokens: mode === 'her' ? 300 : 800,
-      presence_penalty: 0.1,
-      frequency_penalty: 0.1,
-      stream: true
-    });
-    
-    setCorsHeaders(res);
-    res.writeHead(200, {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive'
-    });
-    
-    const options = {
-      hostname: 'api.openai.com',
-      port: 443,
-      path: '/v1/chat/completions',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
-        'Content-Length': Buffer.byteLength(requestBody)
-      }
-    };
-    
-    const openaiReq = https.request(options, (openaiRes) => {
-      openaiRes.on('data', (chunk) => {
-        const lines = chunk.toString().split('\n').filter(line => line.trim() !== '');
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            if (data === '[DONE]') {
-              res.write('data: [DONE]\n\n');
-              res.end();
-              return;
-            }
-            
-            try {
-              const parsed = JSON.parse(data);
-              const content = parsed.choices?.[0]?.delta?.content || '';
-              if (content) {
-                res.write(`data: ${JSON.stringify({ content })}\n\n`);
-              }
-            } catch (e) {
-              // Skip invalid JSON
-            }
-          }
-        }
-      });
-      
-      openaiRes.on('end', () => {
+      groqRes.on("end", () => {
+        res.write("data: [DONE]\n\n");
         res.end();
       });
-      
-      openaiRes.on('error', (err) => {
-        console.error('[AI Relay] Stream error:', err.message);
-        res.end();
-      });
-    });
-    
-    openaiReq.on('error', (err) => {
-      console.error('[AI Relay] Request error:', err.message);
-      res.end();
-    });
-    
-    openaiReq.write(requestBody);
-    openaiReq.end();
-    
-  } catch (error) {
-    console.error('[AI Relay] Stream setup error:', error.message);
-    res.writeHead(500, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      success: false,
-      error: error.message || 'Streaming failed'
-    }));
-  }
+    }
+  );
+
+  req.on("error", () => res.end());
+  req.write(payload);
+  req.end();
 }
 
-// ═══════════════════════════════════════════════════════════
-// MAIN SERVER
-// ═══════════════════════════════════════════════════════════
+/* ───────────── SERVER ───────────── */
 
-const server = http.createServer((req, res) => {
-  const url = new URL(req.url, `http://localhost:${PORT}`);
-  const pathname = url.pathname;
-  
-  // Handle CORS preflight
-  if (req.method === 'OPTIONS') {
-    setCorsHeaders(res);
-    res.writeHead(204);
-    res.end();
+const server = http.createServer(async (req, res) => {
+  cors(res);
+  if (req.method === "OPTIONS") return res.end();
+
+  const parsed = new URL(req.url, `http://${req.headers.host}`);
+
+  if (req.method === "GET" && parsed.pathname === "/api/health") {
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ status: "ok" }));
     return;
   }
-  
-  // API Routes
-  if (pathname === '/api/chat' && req.method === 'POST') {
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => handleChatRequest(req, res, body));
-    return;
-  }
-  
-  // Streaming API Route
-  if (pathname === '/api/chat/stream' && req.method === 'POST') {
-    let body = '';
-    req.on('data', chunk => { body += chunk; });
-    req.on('end', () => handleStreamRequest(req, res, body));
-    return;
-  }
-  
-  // Health check
-  if (pathname === '/api/health') {
-    setCorsHeaders(res);
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-      configured: !!OPENAI_API_KEY
-    }));
-    return;
-  }
-  
-  // Static files
-  let filePath = path.join(ROOT_DIR, pathname === '/' ? 'index.html' : pathname);
-  
-  // Security: prevent directory traversal
-  if (!filePath.startsWith(ROOT_DIR)) {
-    res.writeHead(403, { 'Content-Type': 'text/plain' });
-    res.end('403 Forbidden');
-    return;
-  }
-  
-  // Check if path is a directory
-  fs.stat(filePath, (err, stats) => {
-    if (!err && stats.isDirectory()) {
-      filePath = path.join(filePath, 'index.html');
+
+  if (req.method === "POST" && parsed.pathname === "/api/chat") {
+    try {
+      const body = await parseBody(req);
+      proxyGroq(body.messages || [], false, res);
+    } catch {
+      res.writeHead(400); res.end();
     }
-    serveStaticFile(req, res, filePath);
-  });
+    return;
+  }
+
+  if (req.method === "POST" && parsed.pathname === "/api/chat/stream") {
+    try {
+      const body = await parseBody(req);
+      proxyGroq(body.messages || [], true, res);
+    } catch {
+      res.writeHead(400); res.end();
+    }
+    return;
+  }
+
+  let filePath = parsed.pathname === "/" ? "/index.html" : parsed.pathname;
+  serveFile(filePath, res);
 });
 
-// ═══════════════════════════════════════════════════════════
-// START SERVER
-// ═══════════════════════════════════════════════════════════
+/* ───────────── START ───────────── */
 
 server.listen(PORT, () => {
-  console.log('');
-  console.log('═══════════════════════════════════════════════════════════');
-  console.log('  💗 ABHILASHA AI LOCAL SERVER');
-  console.log('═══════════════════════════════════════════════════════════');
-  console.log('');
-  console.log(`  📍 Server: http://localhost:${PORT}`);
-  console.log(`  💕 Abhilasha: http://localhost:${PORT}/private/personal.html`);
-  console.log(`  🔑 API Key: ${OPENAI_API_KEY ? '✓ Configured' : '✗ Missing'}`);
-  console.log('');
-  console.log('  Press Ctrl+C to stop');
-  console.log('═══════════════════════════════════════════════════════════');
-  console.log('');
-  
-  // Auto-open in browser (Windows)
-  if (process.platform === 'win32') {
-    setTimeout(() => {
-      exec(`start http://localhost:${PORT}/private/personal.html`);
-    }, 500);
+  console.log("💗 Abhilasha Local Server");
+  console.log(`🌐 http://localhost:${PORT}`);
+  if (process.platform === "win32") {
+    spawn("cmd", ["/c", "start", "", `http://localhost:${PORT}`], { detached: true });
   }
 });
 
-// Handle graceful shutdown
-process.on('SIGINT', () => {
-  console.log('\n[Server] Shutting down...');
-  server.close(() => {
-    console.log('[Server] Goodbye! 💕');
-    process.exit(0);
-  });
-});
-
-process.on('uncaughtException', (err) => {
-  console.error('[Server] Uncaught exception:', err.message);
+process.on("SIGINT", () => {
+  console.log("\nShutting down...");
+  server.close(() => process.exit(0));
 });

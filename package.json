@@ -20,5 +20,17 @@
   "license": "MIT",
   "engines": {
     "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ShriOg/anand-dev.tech.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/ShriOg/anand-dev.tech/issues"
+  },
+  "homepage": "https://github.com/ShriOg/anand-dev.tech#readme",
+  "dependencies": {
+    "dotenv": "^17.2.3"
   }
 }

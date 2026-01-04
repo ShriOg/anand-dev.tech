@@ -232,13 +232,19 @@ const HerApp = {
   // EVENT BINDING
   // ═══════════════════════════════════════════════════════════
   bindEvents() {
-    // Navigation
+    // Sidebar Navigation (desktop & mobile)
     document.querySelectorAll('.her-nav-item[data-section]').forEach(item => {
-      item.addEventListener('click', () => this.navigateTo(item.dataset.section));
-    });
-    
-    document.querySelectorAll('.her-mobile-nav-item[data-section]').forEach(item => {
-      item.addEventListener('click', () => this.navigateTo(item.dataset.section));
+      // Only bind to <button> nav items (not <a> links)
+      if (item.tagName === 'BUTTON') {
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.navigateTo(item.dataset.section);
+          // On mobile, close sidebar after navigation
+          if (window.innerWidth <= 1024) {
+            this.closeMobileNav();
+          }
+        });
+      }
     });
     
     // Lock button
@@ -364,20 +370,23 @@ const HerApp = {
   // NAVIGATION
   // ═══════════════════════════════════════════════════════════
   navigateTo(section) {
+    // Remove 'active' from all nav items first (failsafe)
     document.querySelectorAll('.her-nav-item').forEach(item => {
-      item.classList.toggle('active', item.dataset.section === section);
+      item.classList.remove('active');
     });
-    
-    document.querySelectorAll('.her-mobile-nav-item').forEach(item => {
-      item.classList.toggle('active', item.dataset.section === section);
-    });
-    
+    // Set active only on the correct nav item
+    const activeNav = document.querySelector(`.her-nav-item[data-section='${section}']`);
+    if (activeNav) activeNav.classList.add('active');
+
+    // Hide all sections, show only the selected one
     document.querySelectorAll('.her-section').forEach(sec => {
-      sec.classList.toggle('active', sec.id === `section-${section}`);
+      sec.classList.remove('active');
     });
-    
+    const activeSection = document.getElementById(`section-${section}`);
+    if (activeSection) activeSection.classList.add('active');
+
     this.currentSection = section;
-    
+
     // Load section data
     switch (section) {
       case 'photos':
@@ -399,7 +408,7 @@ const HerApp = {
         this.loadImportedChats();
         break;
     }
-    
+    // Always close sidebar on mobile after navigation
     if (window.innerWidth <= 1024) {
       this.closeMobileNav();
     }
@@ -575,26 +584,29 @@ const HerApp = {
       // Use AIService - MUST call real API
       if (typeof AIService !== 'undefined') {
         console.log('[Abhilasha] AIService available, calling chatStream...');
-        
+
         // Try streaming first
         const result = await AIService.chatStream('her', conversationHistory, (chunk, accumulated) => {
-          console.log('[Abhilasha] Stream chunk received:', chunk.substring(0, 20));
-          this.updateStreamingBubble(accumulated);
+          // Normalize chunk for safety
+          const safeChunk = typeof AIService.normalizeAIContent === 'function' ? AIService.normalizeAIContent(chunk) : chunk;
+          const safeAccum = typeof AIService.normalizeAIContent === 'function' ? AIService.normalizeAIContent(accumulated) : accumulated;
+          console.log('[Abhilasha] Stream chunk received:', safeChunk?.substring(0, 20));
+          this.updateStreamingBubble(safeAccum);
           this.scrollToBottom();
         });
-        
+
         console.log('[Abhilasha] Stream result:', result.success, result.error || '');
-        
+
         if (result.success && result.response) {
-          fullResponse = result.response;
+          fullResponse = typeof AIService.normalizeAIContent === 'function' ? AIService.normalizeAIContent(result.response) : result.response;
         } else {
-          // Streaming failed - try non-streaming
+          // Streaming failed - try non-streaming...
           console.log('[Abhilasha] Streaming failed, trying non-streaming...');
           const fallbackResult = await AIService.chat('her', conversationHistory);
           console.log('[Abhilasha] Non-stream result:', fallbackResult.success, fallbackResult.error || '');
-          
+
           if (fallbackResult.success && fallbackResult.response) {
-            fullResponse = fallbackResult.response;
+            fullResponse = typeof AIService.normalizeAIContent === 'function' ? AIService.normalizeAIContent(fallbackResult.response) : fallbackResult.response;
             await this.typewriterEffect(fullResponse);
           } else {
             // API FAILED - Show system message, NOT fake response
@@ -711,29 +723,33 @@ const HerApp = {
     
     console.log('[Abhilasha] Rendering', this.currentSession.messages.length, 'messages');
     
-    let lastRole = null;
-    
-    container.innerHTML = this.currentSession.messages.map((msg, idx) => {
+    // Remove duplicate messages by id+content
+    const seen = new Set();
+    const uniqueMessages = this.currentSession.messages.filter(msg => {
+      const key = msg.timestamp + ':' + msg.content;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    container.innerHTML = uniqueMessages.map((msg, idx) => {
       const isUser = msg.role === 'user';
-      const time = new Date(msg.timestamp).toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
-        minute: '2-digit' 
+      const time = new Date(msg.timestamp).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit'
       });
-      
-      const nextRole = this.currentSession.messages[idx + 1]?.role;
-      const isGroupStart = msg.role !== lastRole;
-      const isGroupEnd = msg.role !== nextRole;
-      lastRole = msg.role;
-      
-      const groupClasses = `${isGroupStart ? 'group-start' : ''} ${isGroupEnd ? 'group-end' : ''}`;
-      
+      // Instagram-style bubble classes
+      const bubbleClass = isUser ? 'her-message-bubble-user' : 'her-message-bubble-assistant';
       return `
-        <div class="her-message her-message-${msg.role} ${groupClasses}">
-          <div class="her-message-bubble ${msg.error ? 'error' : ''}">${this.formatMessage(msg.content)}</div>
+        <div class="her-message ${isUser ? 'her-message-user' : 'her-message-assistant'}">
+          <div class="her-message-bubble ${bubbleClass} ${msg.error ? 'error' : ''}">${this.formatMessage(msg.content)}</div>
           <div class="her-message-time">${time}</div>
         </div>
       `;
     }).join('');
+    // Remove blur from chat area if present
+    container.classList.remove('blur');
+    this.scrollToBottom();
   },
   
   formatMessage(content) {

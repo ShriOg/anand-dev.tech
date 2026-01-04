@@ -14,6 +14,34 @@
  */
 
 const AIService = {
+    // ═══════════════════════════════════════════════════════════
+    // RESPONSE NORMALIZATION LAYER
+    // ═══════════════════════════════════════════════════════════
+    normalizeAIContent(data) {
+      // Streaming chunk or full response
+      if (!data) return '';
+      // Try choices[0].delta.content
+      if (data.choices && data.choices[0]) {
+        if (data.choices[0].delta && typeof data.choices[0].delta.content === 'string') {
+          return data.choices[0].delta.content;
+        }
+        if (data.choices[0].message && typeof data.choices[0].message.content === 'string') {
+          return data.choices[0].message.content;
+        }
+      }
+      // Try choices[0].text
+      if (data.choices && data.choices[0] && typeof data.choices[0].text === 'string') {
+        return data.choices[0].text;
+      }
+      // Direct string content
+      if (typeof data.content === 'string') {
+        return data.content;
+      }
+      if (typeof data === 'string') {
+        return data;
+      }
+      return '';
+    },
   // ═══════════════════════════════════════════════════════════
   // CONFIGURATION
   // ═══════════════════════════════════════════════════════════
@@ -23,9 +51,7 @@ const AIService = {
   RELAY_STREAM_URL: 'http://localhost:3000/api/chat/stream',
   HEALTH_URL: 'http://localhost:3000/api/health',
   
-  // Direct OpenAI (when on website)
-  OPENAI_URL: 'https://api.openai.com/v1/chat/completions',
-  API_KEY: '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',
+  // (REMOVED) Direct OpenAI config - relay only
   
   // Model
   MODEL: 'gpt-4o-mini',
@@ -60,22 +86,10 @@ const AIService = {
   // ═══════════════════════════════════════════════════════════
   
   init() {
-    // Detect environment
-    this.isLocalhost = window.location.hostname === 'localhost' || 
-                       window.location.hostname === '127.0.0.1' ||
-                       window.location.protocol === 'file:';
-    
-    console.log('[AI Service] Environment:', this.isLocalhost ? 'LOCAL' : 'WEBSITE');
-    console.log('[AI Service] Mode:', this.isLocalhost ? 'Local Relay' : 'Direct OpenAI');
-    
-    // Check relay health if on localhost
-    if (this.isLocalhost) {
-      this.checkRelayHealth();
-    } else {
-      // On website, mark as ready for direct calls
-      this.isRelayOnline = false;
-      console.log('[AI Service] Using direct OpenAI API');
-    }
+    // Always use relay endpoint for all environments
+    this.isLocalhost = true;
+    this.checkRelayHealth();
+    console.log('[AI Service] Mode: Local Relay ONLY (secure)');
   },
 
   // ═══════════════════════════════════════════════════════════
@@ -144,46 +158,32 @@ const AIService = {
   // ═══════════════════════════════════════════════════════════
   
   async chat(mode, messages, options = {}) {
-    // WEBSITE MODE: Always use direct OpenAI
-    if (!this.isLocalhost) {
-      return this.sendToOpenAI(mode, messages);
-    }
-    
-    // LOCAL MODE: Try relay first
+    // Always use relay endpoint, never direct OpenAI
     const isOnline = await this.checkRelayHealth();
-    
     if (isOnline) {
       return this.sendToRelay(mode, messages);
     }
-    
-    // Relay offline - retry a couple times, then fall back to direct
+    // Retry relay a couple times, then show error
     return this.retryWithBackoff(mode, messages, options);
   },
   
   async retryWithBackoff(mode, messages, options) {
     this.connectionAttempts = 0;
-    
     while (this.connectionAttempts < this.maxRetries) {
       this.connectionAttempts++;
       const delay = this.retryDelay * this.connectionAttempts;
-      
       this.showConnectionStatus('Connecting to Abhilasha...');
       console.log(`[AI Service] Retry ${this.connectionAttempts}/${this.maxRetries} in ${delay}ms`);
-      
       await new Promise(resolve => setTimeout(resolve, delay));
-      
       const isOnline = await this.checkRelayHealth();
-      
       if (isOnline) {
         this.hideConnectionStatus();
         return this.sendToRelay(mode, messages);
       }
     }
-    
-    // Relay still offline - fall back to direct OpenAI
     this.hideConnectionStatus();
-    console.log('[AI Service] Relay unavailable, falling back to direct OpenAI');
-    return this.sendToOpenAI(mode, messages);
+    // Never fall back to direct OpenAI. Show safe error.
+    return { success: false, error: 'Abhilasha is quiet right now… something’s off 💭' };
   },
   
   async sendToRelay(mode, messages) {
@@ -209,15 +209,31 @@ const AIService = {
       clearTimeout(timeout);
       
       const data = await response.json();
-      
+
       if (!response.ok || !data.success) {
         console.error('[AI Service] Relay error:', data.error);
         return { success: false, error: data.error || 'AI request failed' };
       }
-      
+
+      // Normalize response shape
+      let normalized = '';
+      if (data.response) {
+        try {
+          // Try to parse if response is JSON
+          if (typeof data.response === 'string') {
+            let parsed = null;
+            try { parsed = JSON.parse(data.response); } catch {}
+            normalized = parsed ? this.normalizeAIContent(parsed) : data.response;
+          } else {
+            normalized = this.normalizeAIContent(data.response);
+          }
+        } catch {
+          normalized = typeof data.response === 'string' ? data.response : '';
+        }
+      }
       console.log('[AI Service] API RESPONSE RECEIVED');
-      console.log('[AI Service] Response:', data.response?.substring(0, 50) + '...');
-      return { success: true, response: data.response };
+      console.log('[AI Service] Normalized:', normalized?.substring(0, 50) + '...');
+      return { success: true, response: normalized };
       
     } catch (error) {
       console.error('[AI Service] Request failed:', error);
@@ -231,70 +247,7 @@ const AIService = {
     }
   },
   
-  // ═══════════════════════════════════════════════════════════
-  // DIRECT OPENAI API (for website deployment)
-  // ═══════════════════════════════════════════════════════════
-  
-  async sendToOpenAI(mode, messages) {
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30000);
-      
-      console.log(`[AI Service] Direct OpenAI - ${messages.length} messages (${mode} mode)`);
-      
-      // Build system prompt
-      const systemPrompt = this.getSystemPrompt(mode);
-      
-      const apiMessages = [
-        { role: 'system', content: systemPrompt },
-        ...messages.slice(-20).map(m => ({
-          role: m.role,
-          content: m.content
-        }))
-      ];
-      
-      const response = await fetch(this.OPENAI_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.API_KEY}`
-        },
-        body: JSON.stringify({
-          model: this.MODEL,
-          messages: apiMessages,
-          temperature: mode === 'her' ? 0.8 : 0.7,
-          max_tokens: mode === 'her' ? 300 : 800,
-          presence_penalty: 0.1,
-          frequency_penalty: 0.1
-        }),
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeout);
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('[AI Service] OpenAI error:', response.status, errorData);
-        return { success: false, error: errorData.error?.message || 'AI request failed' };
-      }
-      
-      const data = await response.json();
-      const aiResponse = data.choices?.[0]?.message?.content || '';
-      
-      console.log('[AI Service] API RESPONSE RECEIVED');
-      console.log('[AI Service] Response:', aiResponse.substring(0, 50) + '...');
-      return { success: true, response: aiResponse };
-      
-    } catch (error) {
-      console.error('[AI Service] OpenAI request failed:', error);
-      
-      if (error.name === 'AbortError') {
-        return { success: false, error: 'Request timed out. Please try again.' };
-      }
-      
-      return { success: false, error: 'Connection failed. Please try again.' };
-    }
-  },
+  // (REMOVED) Direct OpenAI API - relay only
   
   // ═══════════════════════════════════════════════════════════
   // SYSTEM PROMPT FOR DIRECT CALLS
@@ -484,18 +437,18 @@ STYLE:
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        
+
         const chunk = decoder.decode(value, { stream: true });
         const lines = chunk.split('\n').filter(line => line.trim() !== '');
-        
+
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             const data = line.slice(6);
             if (data === '[DONE]') continue;
-            
+
             try {
               const parsed = JSON.parse(data);
-              const content = parsed.content || '';
+              const content = this.normalizeAIContent(parsed);
               if (content) {
                 fullResponse += content;
                 if (onChunk) onChunk(content, fullResponse);
@@ -506,7 +459,7 @@ STYLE:
           }
         }
       }
-      
+
       return { success: true, response: fullResponse };
       
     } catch (error) {
