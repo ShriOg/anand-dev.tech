@@ -12,7 +12,7 @@ var Admin = (function () {
     setValues('—', '—', '—', '—');
 
     try {
-      var data = await API.get('/api/admin/stats');
+      var data = await API.get('/admin/stats');
       var users = data.totalUsers || data.users || 0;
       var notes = data.totalNotes || data.notes || 0;
       var files = data.totalFiles || data.files || 0;

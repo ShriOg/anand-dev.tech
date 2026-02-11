@@ -39,7 +39,7 @@ var AI = (function () {
     var typingEl = showTyping(container);
 
     try {
-      var data = await API.post('/api/ai', { message: message, history: history });
+      var data = await API.post('/ai', { message: message, history: history });
       var reply = data.reply || data.message || data.response || (typeof data === 'string' ? data : 'No response');
       history.push({ role: 'assistant', content: reply });
       removeTyping(typingEl);

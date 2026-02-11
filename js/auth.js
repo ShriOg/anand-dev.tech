@@ -39,7 +39,7 @@ var Auth = (function () {
     hideError(errEl);
 
     try {
-      var data = await API.post('/api/auth/login', { email: email, password: password });
+      var data = await API.post('/auth/login', { email: email, password: password });
       API.setToken(data.token);
       if (data.user) API.setUser(data.user);
       window.location.href = 'index.html';
@@ -73,7 +73,7 @@ var Auth = (function () {
     hideError(errEl);
 
     try {
-      var data = await API.post('/api/auth/register', {
+      var data = await API.post('/auth/register', {
         username: username,
         email: email,
         password: password
@@ -115,7 +115,7 @@ var Auth = (function () {
 
   async function loadProfile() {
     try {
-      var data = await API.get('/api/auth/me');
+      var data = await API.get('/auth/me');
       if (data.user) API.setUser(data.user);
       return data.user || data;
     } catch (e) {

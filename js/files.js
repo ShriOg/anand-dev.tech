@@ -42,7 +42,7 @@ var Files = (function () {
     list.innerHTML = '<div class="loader-center"><div class="loader"></div></div>';
 
     try {
-      var data = await API.get('/api/files');
+      var data = await API.get('/files');
       files = Array.isArray(data) ? data : (data.files || []);
       if (countEl) countEl.textContent = files.length + ' file' + (files.length !== 1 ? 's' : '');
       render();
@@ -94,7 +94,7 @@ var Files = (function () {
 
     try {
       showToast('Uploading...', 'info');
-      await API.upload('/api/files', formData);
+      await API.upload('/files', formData);
       showToast('File uploaded', 'success');
       var input = document.getElementById('fileInput');
       if (input) input.value = '';
@@ -109,7 +109,7 @@ var Files = (function () {
     if (!confirm('Delete this file?')) return;
 
     try {
-      await API.del('/api/files/' + id);
+      await API.del('/files/' + id);
       showToast('File deleted', 'success');
       load();
     } catch (err) {

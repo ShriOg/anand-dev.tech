@@ -25,7 +25,7 @@ var Notes = (function () {
     grid.innerHTML = '<div class="loader-center"><div class="loader"></div></div>';
 
     try {
-      var data = await API.get('/api/notes');
+      var data = await API.get('/notes');
       notes = Array.isArray(data) ? data : (data.notes || []);
       render();
     } catch (err) {
@@ -143,10 +143,10 @@ var Notes = (function () {
 
     try {
       if (currentId) {
-        await API.put('/api/notes/' + currentId, { title: title, content: content });
+        await API.put('/notes/' + currentId, { title: title, content: content });
         showToast('Note updated', 'success');
       } else {
-        await API.post('/api/notes', { title: title, content: content });
+        await API.post('/notes', { title: title, content: content });
         showToast('Note created', 'success');
       }
       hideEditor();
@@ -160,7 +160,7 @@ var Notes = (function () {
     if (!confirm('Delete this note?')) return;
 
     try {
-      await API.del('/api/notes/' + id);
+      await API.del('/notes/' + id);
       showToast('Note deleted', 'success');
       load();
     } catch (err) {
