@@ -1,115 +1,52 @@
-var API = (function () {
-  'use strict';
+const API_BASE_URL = 'https://anand-os-backend.onrender.com';
 
-  var API_URL = 'https://anand-os-backend.onrender.com';
+async function apiRequest(endpoint, options = {}) {
+  const token = localStorage.getItem('accessToken');
+  
+  const headers = {
+    ...options.headers,
+  };
 
-  function getToken() {
-    return localStorage.getItem('accessToken');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
   }
 
-  function setToken(token) {
-    localStorage.setItem('accessToken', token);
+  if (!(options.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
   }
 
-  function removeToken() {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('user');
-  }
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+    });
 
-  function getUser() {
-    try {
-      return JSON.parse(localStorage.getItem('user'));
-    } catch (e) {
+    if (response.status === 401) {
+      localStorage.removeItem('accessToken');
+      window.location.href = '/index.html';
       return null;
     }
-  }
 
-  function setUser(user) {
-    localStorage.setItem('user', JSON.stringify(user));
-  }
-
-  function headers(isJson) {
-    var h = {};
-    var token = getToken();
-    if (token) h['Authorization'] = 'Bearer ' + token;
-    if (isJson) h['Content-Type'] = 'application/json';
-    return h;
-  }
-
-  function handleUnauth() {
-    removeToken();
-    window.location.href = 'login.html';
-  }
-
-  async function request(method, path, body, isFormData) {
-    var opts = {
-      method: method,
-      headers: isFormData ? { 'Authorization': 'Bearer ' + (getToken() || '') } : headers(true)
-    };
-
-    if (body) {
-      opts.body = isFormData ? body : JSON.stringify(body);
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Request failed');
     }
 
-    var res;
-    try {
-      res = await fetch(API_URL + path, opts);
-    } catch (err) {
-      throw new Error('Network error. Please check your connection.');
-    }
-
-    if (res.status === 401) {
-      handleUnauth();
-      throw new Error('Session expired. Please login again.');
-    }
-
-    var data;
-    var contentType = res.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) {
-      data = await res.json();
-    } else {
-      data = await res.text();
-    }
-
-    if (!res.ok) {
-      var msg = (typeof data === 'object' && data.message) ? data.message : 'Request failed';
-      throw new Error(msg);
-    }
-
-    return data;
+    return await response.json();
+  } catch (error) {
+    throw error;
   }
+}
 
-  function get(path) {
-    return request('GET', path);
-  }
-
-  function post(path, body) {
-    return request('POST', path, body);
-  }
-
-  function put(path, body) {
-    return request('PUT', path, body);
-  }
-
-  function del(path) {
-    return request('DELETE', path);
-  }
-
-  function upload(path, formData) {
-    return request('POST', path, formData, true);
-  }
-
-  return {
-    API_URL: API_URL,
-    getToken: getToken,
-    setToken: setToken,
-    removeToken: removeToken,
-    getUser: getUser,
-    setUser: setUser,
-    get: get,
-    post: post,
-    put: put,
-    del: del,
-    upload: upload
-  };
-})();
+const api = {
+  get: (endpoint) => apiRequest(endpoint, { method: 'GET' }),
+  post: (endpoint, data) => apiRequest(endpoint, {
+    method: 'POST',
+    body: data instanceof FormData ? data : JSON.stringify(data),
+  }),
+  put: (endpoint, data) => apiRequest(endpoint, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+  delete: (endpoint) => apiRequest(endpoint, { method: 'DELETE' }),
+};
