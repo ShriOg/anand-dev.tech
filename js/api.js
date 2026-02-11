@@ -22,7 +22,7 @@ async function apiRequest(endpoint, options = {}) {
     });
 
     if (response.status === 401) {
-      localStorage.removeItem('accessToken');
+      localStorage.clear();
       window.location.href = '/index.html';
       return null;
     }

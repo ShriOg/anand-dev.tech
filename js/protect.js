@@ -14,7 +14,7 @@ async function verifyAuth() {
     });
 
     if (response.status === 401) {
-      localStorage.removeItem('accessToken');
+      localStorage.clear();
       window.location.href = '/index.html';
       return;
     }
@@ -24,9 +24,10 @@ async function verifyAuth() {
     }
 
     const userData = await response.json();
+    localStorage.setItem('user', JSON.stringify(userData));
     return userData;
   } catch (error) {
-    localStorage.removeItem('accessToken');
+    localStorage.clear();
     window.location.href = '/index.html';
   }
 }

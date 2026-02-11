@@ -36,6 +36,8 @@ async function handleLogin(event) {
     
     if (data.accessToken) {
       localStorage.setItem('accessToken', data.accessToken);
+      const user = data.user || { email };
+      localStorage.setItem('user', JSON.stringify(user));
       window.location.href = '/dashboard.html';
     } else {
       throw new Error('No access token received');
