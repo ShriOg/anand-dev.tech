@@ -39,8 +39,8 @@ var Auth = (function () {
     hideError(errEl);
 
     try {
-      var data = await API.post('/auth/login', { email: email, password: password });
-      API.setToken(data.token);
+      var data = await API.post('/api/auth/login', { email: email, password: password });
+      API.setToken(data.accessToken);
       if (data.user) API.setUser(data.user);
       window.location.href = 'index.html';
     } catch (err) {
@@ -73,14 +73,14 @@ var Auth = (function () {
     hideError(errEl);
 
     try {
-      var data = await API.post('/auth/register', {
+      var data = await API.post('/api/auth/register', {
         username: username,
         email: email,
         password: password
       });
-      API.setToken(data.token);
+      API.setToken(data.accessToken);
       if (data.user) API.setUser(data.user);
-      window.location.href = 'index.html';
+      window.location.href = 'login.html';
     } catch (err) {
       showError(errEl, err.message);
       btn.disabled = false;

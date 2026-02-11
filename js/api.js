@@ -1,18 +1,18 @@
 var API = (function () {
   'use strict';
 
-  var BASE_URL = 'https://anand-os-backend.onrender.com';
+  var API_URL = 'https://anand-os-backend.onrender.com';
 
   function getToken() {
-    return localStorage.getItem('token');
+    return localStorage.getItem('accessToken');
   }
 
   function setToken(token) {
-    localStorage.setItem('token', token);
+    localStorage.setItem('accessToken', token);
   }
 
   function removeToken() {
-    localStorage.removeItem('token');
+    localStorage.removeItem('accessToken');
     localStorage.removeItem('user');
   }
 
@@ -53,7 +53,7 @@ var API = (function () {
 
     var res;
     try {
-      res = await fetch(BASE_URL + path, opts);
+      res = await fetch(API_URL + path, opts);
     } catch (err) {
       throw new Error('Network error. Please check your connection.');
     }
@@ -100,7 +100,7 @@ var API = (function () {
   }
 
   return {
-    BASE_URL: BASE_URL,
+    API_URL: API_URL,
     getToken: getToken,
     setToken: setToken,
     removeToken: removeToken,
