@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mechanical Flip Stopwatch</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+  --bg: radial-gradient(circle at top,#262626,#0a0a0a);
+  --card:#262626;
+  --txt:#e0e0e0;
+  --w:120px;
+  --h:170px;
+  --fs:90px;
+  --r:14px;
+  --sep:rgba(255,255,255,.5);
+  --spd:.35s;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;user-select:none}
+
+body{
+  background:var(--bg);
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  font-family:system-ui,sans-serif;
+  color:var(--txt);
+}
+
+/* layout */
+.clock{display:flex;align-items:center;gap:14px}
+.group{display:flex;gap:8px}
+.sep{font-size:60px;color:var(--sep);padding-bottom:18px}
+
+/* digit */
+.digit{
+  width:var(--w);
+  height:var(--h);
+  position:relative;
+  perspective:1200px;
+  border-radius:var(--r);
+  box-shadow:0 10px 25px rgba(0,0,0,.5);
+}
+.half{
+  position:absolute;
+  width:100%;
+  height:50%;
+  background:var(--card);
+  overflow:hidden;
+  backface-visibility:hidden;
+  border:1px solid rgba(255,255,255,.05);
+}
+.half span{
+  position:absolute;
+  width:100%;
+  height:var(--h);
+  line-height:var(--h);
+  text-align:center;
+  font-size:var(--fs);
+  font-weight:700;
+}
+
+/* top */
+.top{
+  top:0;
+  border-radius:var(--r) var(--r) 0 0;
+  background:linear-gradient(to bottom,#323232,#262626);
+  transform-origin:bottom;
+}
+.top span{top:0}
+
+/* bottom */
+.bottom{
+  bottom:0;
+  border-radius:0 0 var(--r) var(--r);
+  background:linear-gradient(to bottom,#262626,#1f1f1f);
+  transform-origin:top;
+}
+.bottom span{top:-100%}
+
+/* layers */
+.static{z-index:1}
+.flip{z-index:2}
+
+/* STRICT SEQUENTIAL FLIP */
+.flip.top{
+  animation:flipTop var(--spd) cubic-bezier(.4,0,.2,1) forwards;
+}
+.flip.bottom{
+  transform:rotateX(90deg);
+  animation:flipBottom var(--spd) cubic-bezier(.4,0,.2,1) forwards;
+  animation-delay:var(--spd);
+}
+
+@keyframes flipTop{to{transform:rotateX(-90deg)}}
+@keyframes flipBottom{to{transform:rotateX(0)}}
+
+/* controls */
+.controls{margin-top:30px;display:flex;gap:20px}
+button{
+  background:transparent;
+  border:1px solid rgba(255,255,255,.3);
+  color:#fff;
+  padding:10px 28px;
+  border-radius:30px;
+  cursor:pointer;
+}
+button:hover{border-color:#fff}
+</style>
+</head>
+
+<body>
+
+<div class="clock">
+  <div class="group">
+    <div class="digit" id="m1"></div>
+    <div class="digit" id="m2"></div>
+  </div>
+  <div class="sep">:</div>
+  <div class="group">
+    <div class="digit" id="s1"></div>
+    <div class="digit" id="s2"></div>
+  </div>
+  <div class="sep">:</div>
+  <div class="group">
+    <div class="digit" id="ms1"></div>
+    <div class="digit" id="ms2"></div>
+  </div>
+</div>
+
+<div class="controls">
+  <button id="start">Start</button>
+  <button id="reset">Reset</button>
+</div>
+
+<script>
+/* ----- ENGINE ----- */
+const ids=["m1","m2","s1","s2","ms1","ms2"]
+const els={},vals={},busy={}
+
+ids.forEach(id=>{
+  const d=document.getElementById(id)
+  d.innerHTML=`
+    <div class="half top static"><span>0</span></div>
+    <div class="half bottom static"><span>0</span></div>`
+  els[id]={el:d,top:d.querySelector(".top span"),bot:d.querySelector(".bottom span")}
+  vals[id]="0"; busy[id]=false
+})
+
+function flip(id,next){
+  if(busy[id]||vals[id]===next) return
+  busy[id]=true
+  const cur=vals[id],d=els[id]
+
+  d.top.textContent=next
+  d.bot.textContent=cur
+
+  const ft=document.createElement("div")
+  ft.className="half top flip"
+  ft.innerHTML=`<span>${cur}</span>`
+
+  const fb=document.createElement("div")
+  fb.className="half bottom flip"
+  fb.innerHTML=`<span>${next}</span>`
+
+  d.el.append(ft,fb)
+
+  fb.addEventListener("animationend",()=>{
+    d.bot.textContent=next
+    ft.remove(); fb.remove()
+    vals[id]=next; busy[id]=false
+  },{once:true})
+}
+
+/* ----- STOPWATCH (Tick-style timing) ----- */
+let running=false,startTime=0,elapsed=0,raf=null
+
+function update(){
+  if(!running) return
+  elapsed=performance.now()-startTime
+
+  const ms=Math.floor((elapsed%1000)/10)
+  const s=Math.floor(elapsed/1000)%60
+  const m=Math.floor(elapsed/60000)
+
+  const t=
+    m.toString().padStart(2,"0")+
+    s.toString().padStart(2,"0")+
+    ms.toString().padStart(2,"0")
+
+  ids.forEach((id,i)=>flip(id,t[i]))
+  raf=requestAnimationFrame(update)
+}
+
+/* ----- CONTROLS ----- */
+start.onclick=()=>{
+  if(running){
+    running=false
+    start.textContent="Start"
+  }else{
+    running=true
+    startTime=performance.now()-elapsed
+    start.textContent="Pause"
+    update()
+  }
+}
+
+reset.onclick=()=>{
+  running=false
+  elapsed=0
+  start.textContent="Start"
+  ids.forEach(id=>flip(id,"0"))
+}
+</script>
+
+</body>
+</html>

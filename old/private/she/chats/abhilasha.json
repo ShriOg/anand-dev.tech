@@ -1,0 +1,61 @@
+{
+  "id": "abhilasha_default",
+  "name": "Abhilasha's",
+  "platform": "whatsapp",
+  "importedAt": "2025-12-15T10:30:00.000Z",
+  "participants": ["Abhilasha", "Me"],
+  "senderMapping": {
+    "Abhilasha": "left",
+    "Me": "right"
+  },
+  "messageCount": 42,
+  "messages": [
+    { "timestamp": "2025-12-10T09:15:00", "sender": "Me", "text": "Good morning", "isMedia": false },
+    { "timestamp": "2025-12-10T09:16:00", "sender": "Abhilasha", "text": "Hii 💗", "isMedia": false },
+    { "timestamp": "2025-12-10T09:16:30", "sender": "Me", "text": "Kaisi ho?", "isMedia": false },
+    { "timestamp": "2025-12-10T09:17:00", "sender": "Abhilasha", "text": "Theek hoon! Tum?", "isMedia": false },
+    { "timestamp": "2025-12-10T09:18:00", "sender": "Me", "text": "Bas chal rahi hai", "isMedia": false },
+    { "timestamp": "2025-12-10T09:18:30", "sender": "Abhilasha", "text": "Hmm acha 💭", "isMedia": false },
+    { "timestamp": "2025-12-10T09:19:00", "sender": "Abhilasha", "text": "Kya kar rahe?", "isMedia": false },
+    { "timestamp": "2025-12-10T09:20:00", "sender": "Me", "text": "Kuch nhi yaar boring day", "isMedia": false },
+    { "timestamp": "2025-12-10T09:20:30", "sender": "Abhilasha", "text": "Boring? 😔", "isMedia": false },
+    { "timestamp": "2025-12-10T09:21:00", "sender": "Me", "text": "Haan", "isMedia": false },
+    { "timestamp": "2025-12-10T09:21:30", "sender": "Abhilasha", "text": "Kuch karo na 🌸", "isMedia": false },
+    
+    { "timestamp": "2025-12-10T14:30:00", "sender": "Me", "text": "Aaj bahut tired hoon", "isMedia": false },
+    { "timestamp": "2025-12-10T14:31:00", "sender": "Abhilasha", "text": "Aww 🥺", "isMedia": false },
+    { "timestamp": "2025-12-10T14:31:30", "sender": "Abhilasha", "text": "Rest karo", "isMedia": false },
+    { "timestamp": "2025-12-10T14:32:00", "sender": "Me", "text": "Kaam bahut hai", "isMedia": false },
+    { "timestamp": "2025-12-10T14:32:30", "sender": "Abhilasha", "text": "Hmm break lo 💗", "isMedia": false },
+    { "timestamp": "2025-12-10T14:33:00", "sender": "Me", "text": "Haan sochta hoon", "isMedia": false },
+    { "timestamp": "2025-12-10T14:33:30", "sender": "Abhilasha", "text": "Haan soch mat karo 👀", "isMedia": false },
+    
+    { "timestamp": "2025-12-11T10:00:00", "sender": "Abhilasha", "text": "Hey!", "isMedia": false },
+    { "timestamp": "2025-12-11T10:05:00", "sender": "Me", "text": "Hii", "isMedia": false },
+    { "timestamp": "2025-12-11T10:05:30", "sender": "Abhilasha", "text": "Kya scene hai ✨", "isMedia": false },
+    { "timestamp": "2025-12-11T10:06:00", "sender": "Me", "text": "Nothing much, tum batao", "isMedia": false },
+    { "timestamp": "2025-12-11T10:06:30", "sender": "Abhilasha", "text": "Bss chill 🌸", "isMedia": false },
+    
+    { "timestamp": "2025-12-11T18:00:00", "sender": "Me", "text": "Yaar aaj kuch accha hua!", "isMedia": false },
+    { "timestamp": "2025-12-11T18:01:00", "sender": "Abhilasha", "text": "Ooh! 👀", "isMedia": false },
+    { "timestamp": "2025-12-11T18:01:30", "sender": "Abhilasha", "text": "Kya hua batao!", "isMedia": false },
+    { "timestamp": "2025-12-11T18:02:00", "sender": "Me", "text": "Interview clear ho gaya", "isMedia": false },
+    { "timestamp": "2025-12-11T18:02:30", "sender": "Abhilasha", "text": "OMG yay! ✨", "isMedia": false },
+    { "timestamp": "2025-12-11T18:03:00", "sender": "Abhilasha", "text": "So proud 💗", "isMedia": false },
+    { "timestamp": "2025-12-11T18:03:30", "sender": "Me", "text": "Thanks yaar", "isMedia": false },
+    { "timestamp": "2025-12-11T18:04:00", "sender": "Abhilasha", "text": "Hehe 🌸", "isMedia": false },
+    
+    { "timestamp": "2025-12-12T22:00:00", "sender": "Me", "text": "Sona hai", "isMedia": false },
+    { "timestamp": "2025-12-12T22:01:00", "sender": "Abhilasha", "text": "Gn! 🌙", "isMedia": false },
+    { "timestamp": "2025-12-12T22:01:30", "sender": "Me", "text": "Good night", "isMedia": false },
+    { "timestamp": "2025-12-12T22:02:00", "sender": "Abhilasha", "text": "Sweet dreams 💗", "isMedia": false },
+    
+    { "timestamp": "2025-12-13T11:00:00", "sender": "Me", "text": "Confused hoon yaar", "isMedia": false },
+    { "timestamp": "2025-12-13T11:01:00", "sender": "Abhilasha", "text": "Kya hua? 🤔", "isMedia": false },
+    { "timestamp": "2025-12-13T11:02:00", "sender": "Me", "text": "Decision nhi ho rha", "isMedia": false },
+    { "timestamp": "2025-12-13T11:02:30", "sender": "Abhilasha", "text": "Hmm batao", "isMedia": false },
+    { "timestamp": "2025-12-13T11:03:00", "sender": "Abhilasha", "text": "Options kya hain? 💭", "isMedia": false },
+    { "timestamp": "2025-12-13T11:04:00", "sender": "Me", "text": "Wo sab complicated hai", "isMedia": false },
+    { "timestamp": "2025-12-13T11:04:30", "sender": "Abhilasha", "text": "Main hoon na ✨", "isMedia": false }
+  ]
+}

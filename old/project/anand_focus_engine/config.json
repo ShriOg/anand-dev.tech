@@ -1,0 +1,34 @@
+{
+  "blocked_sites": [
+    "instagram.com",
+    "youtube.com",
+    "reddit.com",
+    "facebook.com",
+    "twitter.com",
+    "tiktok.com",
+    "twitch.tv",
+    "discord.com"
+  ],
+  "blocked_window_titles": [
+    "Instagram",
+    "YouTube",
+    "reddit",
+    "Facebook",
+    "Twitter",
+    "TikTok",
+    "Twitch"
+  ],
+  "focus_session_durations": [25, 45, 60],
+  "emergency_override_password": "focus2026",
+  "ui_overlay": {
+    "top_bar_height": 60,
+    "update_interval": 1000,
+    "font_size": 14,
+    "opacity": 0.95
+  },
+  "auto_close_delay_ms": 500,
+  "flash_warning_count": 3,
+  "flash_warning_interval_ms": 200,
+  "keyboard_override_key": "F12",
+  "session_cooldown_seconds": 300
+}

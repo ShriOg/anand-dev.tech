@@ -1,0 +1,383 @@
+/* ═══════════════════════════════════════════════════════════
+   PRIVATE SPACE - MOTION POLISH
+   Calm, Intentional, Grounded Movement
+   CSS-first • Opacity + Transform only • No bounce/overshoot
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────
+   MOTION VARIABLES
+   ───────────────────────────────── */
+:root {
+  /* Calm Easing - No bounce, no overshoot */
+  --ps-ease-calm: cubic-bezier(0.4, 0, 0.2, 1);
+  --ps-ease-gentle: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ps-ease-enter: cubic-bezier(0, 0, 0.2, 1);
+  --ps-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  
+  /* Timing - Slow and intentional */
+  --ps-motion-fast: 200ms;
+  --ps-motion-normal: 350ms;
+  --ps-motion-slow: 500ms;
+  --ps-motion-slower: 700ms;
+}
+
+/* ─────────────────────────────────
+   SECTION TRANSITIONS
+   ───────────────────────────────── */
+.ps-section {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: 
+    opacity var(--ps-motion-normal) var(--ps-ease-calm),
+    transform var(--ps-motion-normal) var(--ps-ease-calm);
+  will-change: opacity, transform;
+}
+
+.ps-section.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Staggered content appearance */
+.ps-section.active .ps-section-header {
+  animation: ps-fade-up var(--ps-motion-normal) var(--ps-ease-calm) forwards;
+}
+
+.ps-section.active .ps-workspace {
+  animation: ps-fade-up var(--ps-motion-normal) var(--ps-ease-calm) 80ms forwards;
+}
+
+/* ─────────────────────────────────
+   PANEL TRANSITIONS
+   ───────────────────────────────── */
+.ps-panel,
+.ps-modal-overlay {
+  opacity: 0;
+  visibility: hidden;
+  transition: 
+    opacity var(--ps-motion-normal) var(--ps-ease-calm),
+    visibility 0ms var(--ps-motion-normal);
+}
+
+.ps-panel.active,
+.ps-modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+  transition: 
+    opacity var(--ps-motion-normal) var(--ps-ease-calm),
+    visibility 0ms;
+}
+
+/* Panel content slide */
+.ps-panel-content,
+.ps-modal-content {
+  transform: translateY(16px);
+  transition: transform var(--ps-motion-normal) var(--ps-ease-calm);
+}
+
+.ps-panel.active .ps-panel-content,
+.ps-modal-overlay.active .ps-modal-content {
+  transform: translateY(0);
+}
+
+/* ─────────────────────────────────
+   MODE SWITCHING
+   ───────────────────────────────── */
+[data-ai-mode] {
+  transition: 
+    background-color var(--ps-motion-slow) var(--ps-ease-gentle),
+    border-color var(--ps-motion-slow) var(--ps-ease-gentle);
+}
+
+/* Smooth color transitions on mode change */
+.ps-nav-item,
+.ps-btn,
+.ps-chat-input-wrapper,
+.ps-message-bubble,
+.ps-ai-message-bubble {
+  transition: 
+    background-color var(--ps-motion-fast) var(--ps-ease-calm),
+    border-color var(--ps-motion-fast) var(--ps-ease-calm),
+    color var(--ps-motion-fast) var(--ps-ease-calm),
+    opacity var(--ps-motion-fast) var(--ps-ease-calm),
+    transform var(--ps-motion-fast) var(--ps-ease-calm);
+}
+
+/* ─────────────────────────────────
+   CHAT MESSAGE ENTRY
+   ───────────────────────────────── */
+@keyframes ps-message-appear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ps-ai-message,
+.ps-message {
+  animation: ps-message-appear var(--ps-motion-normal) var(--ps-ease-calm) forwards;
+}
+
+/* Stagger delay for multiple messages */
+.ps-ai-message:nth-child(1) { animation-delay: 0ms; }
+.ps-ai-message:nth-child(2) { animation-delay: 50ms; }
+.ps-ai-message:nth-child(3) { animation-delay: 100ms; }
+
+/* Typing indicator pulse - calm rhythm */
+@keyframes ps-typing-pulse {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.ps-typing-dot {
+  animation: ps-typing-pulse 1.4s var(--ps-ease-gentle) infinite;
+}
+
+.ps-typing-dot:nth-child(1) { animation-delay: -0.4s; }
+.ps-typing-dot:nth-child(2) { animation-delay: -0.2s; }
+.ps-typing-dot:nth-child(3) { animation-delay: 0s; }
+
+/* ─────────────────────────────────
+   SIDEBAR TRANSITIONS
+   ───────────────────────────────── */
+.ps-sidebar {
+  transition: 
+    width var(--ps-motion-normal) var(--ps-ease-calm),
+    transform var(--ps-motion-normal) var(--ps-ease-calm);
+}
+
+.ps-sidebar.collapsed {
+  width: var(--ps-sidebar-collapsed);
+}
+
+/* Nav item hover - subtle */
+.ps-nav-item {
+  position: relative;
+}
+
+.ps-nav-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--ps-bg-hover);
+  border-radius: var(--ps-radius-md);
+  opacity: 0;
+  transform: scale(0.95);
+  transition: 
+    opacity var(--ps-motion-fast) var(--ps-ease-calm),
+    transform var(--ps-motion-fast) var(--ps-ease-calm);
+  z-index: -1;
+}
+
+.ps-nav-item:hover::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ─────────────────────────────────
+   LIST ITEM APPEARANCES
+   ───────────────────────────────── */
+@keyframes ps-list-item-in {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.ps-chat-session-item,
+.ps-project-item,
+.ps-note-item {
+  animation: ps-list-item-in var(--ps-motion-fast) var(--ps-ease-calm) forwards;
+}
+
+/* Stagger list items */
+.ps-chat-session-item:nth-child(1),
+.ps-project-item:nth-child(1) { animation-delay: 0ms; }
+.ps-chat-session-item:nth-child(2),
+.ps-project-item:nth-child(2) { animation-delay: 30ms; }
+.ps-chat-session-item:nth-child(3),
+.ps-project-item:nth-child(3) { animation-delay: 60ms; }
+.ps-chat-session-item:nth-child(4),
+.ps-project-item:nth-child(4) { animation-delay: 90ms; }
+.ps-chat-session-item:nth-child(5),
+.ps-project-item:nth-child(5) { animation-delay: 120ms; }
+
+/* ─────────────────────────────────
+   INPUT FOCUS TRANSITIONS
+   ───────────────────────────────── */
+.ps-input,
+.ps-textarea,
+.ps-chat-input,
+.ps-chat-textarea {
+  transition: 
+    border-color var(--ps-motion-fast) var(--ps-ease-calm),
+    background-color var(--ps-motion-fast) var(--ps-ease-calm),
+    box-shadow var(--ps-motion-fast) var(--ps-ease-calm);
+}
+
+/* ─────────────────────────────────
+   BUTTON INTERACTIONS
+   ───────────────────────────────── */
+.ps-btn {
+  position: relative;
+  overflow: hidden;
+  transition: 
+    background-color var(--ps-motion-fast) var(--ps-ease-calm),
+    border-color var(--ps-motion-fast) var(--ps-ease-calm),
+    transform var(--ps-motion-fast) var(--ps-ease-calm);
+}
+
+.ps-btn:active {
+  transform: scale(0.98);
+}
+
+/* ─────────────────────────────────
+   TOAST NOTIFICATIONS
+   ───────────────────────────────── */
+@keyframes ps-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ps-toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+}
+
+.ps-toast {
+  animation: ps-toast-in var(--ps-motion-normal) var(--ps-ease-calm) forwards;
+}
+
+.ps-toast.hiding {
+  animation: ps-toast-out var(--ps-motion-fast) var(--ps-ease-exit) forwards;
+}
+
+/* ─────────────────────────────────
+   PREVIEW PANEL APPEARANCE
+   ───────────────────────────────── */
+.ps-preview-panel {
+  opacity: 0;
+  transform: translateX(16px);
+  transition: 
+    opacity var(--ps-motion-normal) var(--ps-ease-calm),
+    transform var(--ps-motion-normal) var(--ps-ease-calm);
+}
+
+.ps-preview-panel.active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ─────────────────────────────────
+   CARDS AND CONTAINERS
+   ───────────────────────────────── */
+.ps-card,
+.ps-control-panel {
+  transition: 
+    background-color var(--ps-motion-fast) var(--ps-ease-calm),
+    border-color var(--ps-motion-fast) var(--ps-ease-calm),
+    box-shadow var(--ps-motion-fast) var(--ps-ease-calm);
+}
+
+/* ─────────────────────────────────
+   FADE UTILITIES
+   ───────────────────────────────── */
+@keyframes ps-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ps-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ps-fade-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Utility classes */
+.ps-fade-in {
+  animation: ps-fade-in var(--ps-motion-normal) var(--ps-ease-calm) forwards;
+}
+
+.ps-fade-up {
+  animation: ps-fade-up var(--ps-motion-normal) var(--ps-ease-calm) forwards;
+}
+
+/* ─────────────────────────────────
+   AI ASSISTANT PANEL
+   ───────────────────────────────── */
+.ps-ai-panel {
+  transition: 
+    opacity var(--ps-motion-normal) var(--ps-ease-calm),
+    transform var(--ps-motion-normal) var(--ps-ease-calm);
+}
+
+.ps-ai-panel.collapsed {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+/* ─────────────────────────────────
+   WELCOME SCREEN
+   ───────────────────────────────── */
+.ps-ai-welcome {
+  animation: ps-fade-up var(--ps-motion-slow) var(--ps-ease-gentle) forwards;
+}
+
+.ps-ai-welcome-icon {
+  animation: ps-fade-in var(--ps-motion-slower) var(--ps-ease-gentle) forwards;
+}
+
+/* ─────────────────────────────────
+   REDUCED MOTION
+   ───────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

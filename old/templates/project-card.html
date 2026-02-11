@@ -1,0 +1,32 @@
+<!-- 
+  PROJECT CARD TEMPLATE
+  Reusable project card component
+  Used in: projects page, home page featured section
+  Variables: {{id}}, {{title}}, {{shortDescription}}, {{techStackShort}}, {{timeline}}, {{role}}, {{previewType}}, {{liveUrl}}, {{sourceUrl}}
+-->
+<article class="focus-card reveal" id="{{id}}" data-focus-id="{{id}}" data-project-id="{{id}}">
+  <div class="focus-card__preview">
+    <div class="focus-card__preview-visual">
+      <canvas data-preview="{{previewType}}"></canvas>
+    </div>
+  </div>
+  <div class="focus-card__body">
+    <span class="focus-card__tag">{{techStackShort}}</span>
+    <h2 class="focus-card__title">{{title}}</h2>
+    <p class="focus-card__description">{{shortDescription}}</p>
+    <div class="focus-card__meta">
+      <span class="focus-card__meta-item">Timeline: <span>{{timeline}}</span></span>
+      <span class="focus-card__meta-item">Role: <span>{{role}}</span></span>
+    </div>
+    <div class="focus-card__actions">
+      {{liveButton}}
+      {{sourceButton}}
+    </div>
+  </div>
+  <div class="focus-card__arrow">→</div>
+
+  <!-- Hidden content template for overlay -->
+  <template class="focus-card__content-template">
+    {{overlayContent}}
+  </template>
+</article>

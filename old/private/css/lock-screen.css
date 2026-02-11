@@ -1,0 +1,290 @@
+/* ═══════════════════════════════════════════════════════════
+   PRIVATE SPACE - LOCK SCREEN
+   Nothing OS Inspired × Minimal × Calm
+   ═══════════════════════════════════════════════════════════ */
+
+.ps-lock-screen {
+  position: fixed;
+  inset: 0;
+  background: #000000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--ps-z-lock);
+  opacity: 0;
+  visibility: hidden;
+  transition: 
+    opacity var(--ps-duration-slower) var(--ps-ease-smooth),
+    visibility var(--ps-duration-slower) var(--ps-ease-smooth);
+}
+
+/* Subtle ambient - almost invisible */
+.ps-lock-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255, 255, 255, 0.02), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(255, 255, 255, 0.01), transparent);
+  pointer-events: none;
+}
+
+.ps-lock-screen.active {
+  display: flex;
+  opacity: 1;
+  visibility: visible;
+}
+
+.ps-lock-content {
+  width: 100%;
+  max-width: 340px;
+  padding: var(--ps-space-8);
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  animation: ps-lock-content-in 700ms var(--ps-ease-smooth);
+}
+
+@keyframes ps-lock-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ps-lock-logo {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto var(--ps-space-8);
+  color: var(--ps-text-muted);
+  opacity: 0.6;
+  animation: ps-lock-logo-in 700ms var(--ps-ease-smooth) 100ms both;
+}
+
+@keyframes ps-lock-logo-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+}
+
+.ps-lock-logo svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: 1;
+}
+
+.ps-lock-title {
+  font-size: var(--ps-text-lg);
+  font-weight: var(--ps-weight-medium);
+  color: var(--ps-text-secondary);
+  margin-bottom: var(--ps-space-2);
+  letter-spacing: var(--ps-tracking-tight);
+}
+
+.ps-lock-subtitle {
+  font-size: var(--ps-text-xs);
+  color: var(--ps-text-muted);
+  margin-bottom: var(--ps-space-10);
+  letter-spacing: var(--ps-tracking-wide);
+  opacity: 0.7;
+}
+
+.ps-lock-form {
+  display: flex;
+  gap: var(--ps-space-3);
+  margin-bottom: var(--ps-space-4);
+}
+
+.ps-lock-input-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.ps-lock-input {
+  width: 100%;
+  height: 52px;
+  padding: 0 var(--ps-space-12) 0 var(--ps-space-5);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--ps-border-subtle);
+  border-radius: var(--ps-radius-lg);
+  color: var(--ps-text-primary);
+  font-size: var(--ps-text-sm);
+  font-weight: var(--ps-weight-medium);
+  letter-spacing: 0.15em;
+  transition: 
+    border-color var(--ps-duration-normal) var(--ps-ease-smooth),
+    background var(--ps-duration-normal) var(--ps-ease-smooth);
+}
+
+.ps-lock-input:focus {
+  border-color: var(--ps-border-strong);
+  background: rgba(255, 255, 255, 0.04);
+  outline: none;
+}
+
+.ps-lock-input::placeholder {
+  color: var(--ps-text-muted);
+  letter-spacing: 0.02em;
+  font-weight: var(--ps-weight-normal);
+}
+
+.ps-lock-input.shake {
+  animation: ps-shake 0.5s var(--ps-ease-smooth);
+  border-color: var(--ps-error);
+}
+
+@keyframes ps-shake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-8px); }
+  30% { transform: translateX(6px); }
+  45% { transform: translateX(-8px); }
+  60% { transform: translateX(6px); }
+  75% { transform: translateX(-4px); }
+  90% { transform: translateX(2px); }
+}
+
+.ps-show-password {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  padding: var(--ps-space-2);
+  cursor: pointer;
+  color: var(--ps-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ps-radius-sm);
+  opacity: 0.5;
+  transition: 
+    color var(--ps-duration-normal) var(--ps-ease-smooth),
+    opacity var(--ps-duration-normal) var(--ps-ease-smooth);
+}
+
+.ps-show-password:hover {
+  color: var(--ps-text-secondary);
+  opacity: 0.8;
+}
+
+.ps-show-password svg {
+  width: 16px;
+  height: 16px;
+}
+
+.ps-lock-btn {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--ps-border-subtle);
+  border-radius: var(--ps-radius-lg);
+  color: var(--ps-text-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: 
+    background var(--ps-duration-normal) var(--ps-ease-smooth),
+    color var(--ps-duration-normal) var(--ps-ease-smooth),
+    opacity var(--ps-duration-normal) var(--ps-ease-smooth);
+}
+
+.ps-lock-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--ps-text-primary);
+}
+
+.ps-lock-btn:active:not(:disabled) {
+  opacity: 0.7;
+}
+
+.ps-lock-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.ps-lock-btn svg {
+  width: 18px;
+  height: 18px;
+  transition: transform var(--ps-duration-normal) var(--ps-ease-smooth);
+}
+
+.ps-lock-btn:hover:not(:disabled) svg {
+  transform: translateX(2px);
+}
+
+.ps-lock-btn svg.spin {
+  animation: ps-spin 1s linear infinite;
+}
+
+@keyframes ps-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.ps-lock-error {
+  display: none;
+  font-size: var(--ps-text-sm);
+  color: var(--ps-error);
+  text-align: center;
+  padding: var(--ps-space-3) 0;
+  animation: ps-slide-up var(--ps-duration-normal) var(--ps-ease-out);
+}
+
+.ps-lock-hint {
+  margin-top: var(--ps-space-12);
+  font-size: var(--ps-text-xs);
+  color: var(--ps-text-muted);
+  opacity: 0.6;
+  letter-spacing: var(--ps-tracking-wide);
+  transition: opacity var(--ps-duration-slow) var(--ps-ease-default);
+}
+
+.ps-lock-hint:hover {
+  opacity: 0.8;
+}
+
+.ps-lock-hint span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ps-space-2);
+}
+
+.ps-lock-hint svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Mobile Lock Screen */
+@media (max-width: 480px) {
+  .ps-lock-content {
+    padding: var(--ps-space-6);
+    max-width: 100%;
+  }
+  
+  .ps-lock-logo {
+    width: 64px;
+    height: 64px;
+  }
+  
+  .ps-lock-title {
+    font-size: var(--ps-text-xl);
+  }
+  
+  .ps-lock-input,
+  .ps-lock-btn {
+    height: 52px;
+  }
+}

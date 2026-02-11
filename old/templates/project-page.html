@@ -1,0 +1,36 @@
+<!-- 
+  PROJECT PAGE TEMPLATE
+  Full project detail page
+  Used for: /pages/{project}.html
+  Variables: {{title}}, {{description}}, {{badge}}, {{subtitle}}, {{sections}}, {{techStack}}
+-->
+<section class="case-study-hero">
+  <div class="container">
+    <span class="case-study-hero__badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      {{badge}}
+    </span>
+    <h1 class="case-study-hero__title">{{title}}</h1>
+    <p class="case-study-hero__subtitle">{{subtitle}}</p>
+    <div class="case-study-hero__actions">
+      {{actionButtons}}
+    </div>
+  </div>
+</section>
+
+<section class="case-study-content">
+  <div class="container">
+    {{sections}}
+    
+    <!-- Tech Stack -->
+    <div class="case-study-section">
+      <h2 class="case-study-section__title">Tech Stack</h2>
+      <div class="tech-stack">
+        {{techStack}}
+      </div>
+    </div>
+  </div>
+</section>
