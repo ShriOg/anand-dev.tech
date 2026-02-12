@@ -35,9 +35,8 @@ async function handleLogin(event) {
     }
     
     if (data.accessToken) {
-      localStorage.setItem('authToken', data.accessToken);
-      localStorage.setItem('userEmail', email);
-      window.location.href = '/os/dashboard.html';
+      localStorage.setItem('authToken', 'true');
+      window.location.replace('/os/dashboard.html');
     } else {
       throw new Error('No access token received');
     }
@@ -54,6 +53,3 @@ function showError(message) {
   errorMessage.classList.add('show');
 }
 
-if (localStorage.getItem('authToken') && window.location.pathname !== '/os/dashboard.html') {
-  window.location.href = '/os/dashboard.html';
-}
