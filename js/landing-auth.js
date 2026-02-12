@@ -48,8 +48,7 @@ async function handleLogin(event) {
     }
   } catch (error) {
     showError(error.message);
-    loginBtn.disabled = false;
-    loginBtn.textContent = 'Sign In';
+    enableLoginAfterDelay(loginBtn, 3000);
   }
 }
 
@@ -57,5 +56,12 @@ function showError(message) {
   const errorMessage = document.getElementById('errorMessage');
   errorMessage.textContent = message;
   errorMessage.classList.add('show');
+}
+
+function enableLoginAfterDelay(loginBtn, delayMs) {
+  setTimeout(() => {
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'Sign In';
+  }, delayMs);
 }
 
