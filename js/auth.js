@@ -1,23 +1,17 @@
 var Auth = (function () {
   'use strict';
 
+  var API_URL = 'https://anand-os-backend.onrender.com';
+
   function init() {
     var loginForm = document.getElementById('loginForm');
     var registerForm = document.getElementById('registerForm');
 
     if (loginForm) {
-      if (API.getToken()) {
-        window.location.href = '/os/';
-        return;
-      }
       loginForm.addEventListener('submit', handleLogin);
     }
 
     if (registerForm) {
-      if (API.getToken()) {
-        window.location.href = '/os/';
-        return;
-      }
       registerForm.addEventListener('submit', handleRegister);
     }
   }
@@ -39,14 +33,28 @@ var Auth = (function () {
     hideError(errEl);
 
     try {
-      var data = await API.post('/api/auth/login', { email: email, password: password });
-      API.setToken(data.accessToken);
-      if (data.user) API.setUser(data.user);
-      window.location.href = '/os/';
+      var response = await fetch(API_URL + '/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, password: password })
+      });
+
+      var text = await response.text();
+      var data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch (pe) { data = { message: text }; }
+
+      if (!response.ok) {
+        throw new Error(data.error || data.message || 'Login failed');
+      }
+
+      localStorage.setItem('authToken', 'true');
+      window.location.replace('/os/');
     } catch (err) {
       showError(errEl, err.message);
-      btn.disabled = false;
-      btn.textContent = 'Sign In';
+      setTimeout(function () {
+        btn.disabled = false;
+        btn.textContent = 'Sign In';
+      }, 3000);
     }
   }
 
@@ -73,18 +81,28 @@ var Auth = (function () {
     hideError(errEl);
 
     try {
-      var data = await API.post('/api/auth/register', {
-        username: username,
-        email: email,
-        password: password
+      var response = await fetch(API_URL + '/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username, email: email, password: password })
       });
-      API.setToken(data.accessToken);
-      if (data.user) API.setUser(data.user);
-      window.location.href = '/os/';
+
+      var text = await response.text();
+      var data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch (pe) { data = { message: text }; }
+
+      if (!response.ok) {
+        throw new Error(data.error || data.message || 'Registration failed');
+      }
+
+      localStorage.setItem('authToken', 'true');
+      window.location.replace('/os/');
     } catch (err) {
       showError(errEl, err.message);
-      btn.disabled = false;
-      btn.textContent = 'Create Account';
+      setTimeout(function () {
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
+      }, 3000);
     }
   }
 
@@ -100,27 +118,9 @@ var Auth = (function () {
     el.classList.remove('visible');
   }
 
-  function requireAuth() {
-    if (!API.getToken()) {
-      window.location.href = '/login/';
-      return false;
-    }
-    return true;
-  }
-
   function logout() {
-    API.removeToken();
-    window.location.href = '/login/';
-  }
-
-  async function loadProfile() {
-    try {
-      var data = await API.get('/auth/me');
-      if (data.user) API.setUser(data.user);
-      return data.user || data;
-    } catch (e) {
-      return API.getUser();
-    }
+    localStorage.removeItem('authToken');
+    window.location.replace('/login/');
   }
 
   if (document.readyState === 'loading') {
@@ -130,8 +130,6 @@ var Auth = (function () {
   }
 
   return {
-    requireAuth: requireAuth,
-    logout: logout,
-    loadProfile: loadProfile
+    logout: logout
   };
 })();
