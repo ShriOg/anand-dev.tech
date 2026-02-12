@@ -7,7 +7,7 @@ var Auth = (function () {
 
     if (loginForm) {
       if (API.getToken()) {
-        window.location.href = 'dashboard.html';
+        window.location.href = '/os/';
         return;
       }
       loginForm.addEventListener('submit', handleLogin);
@@ -15,7 +15,7 @@ var Auth = (function () {
 
     if (registerForm) {
       if (API.getToken()) {
-        window.location.href = 'dashboard.html';
+        window.location.href = '/os/';
         return;
       }
       registerForm.addEventListener('submit', handleRegister);
@@ -42,7 +42,7 @@ var Auth = (function () {
       var data = await API.post('/api/auth/login', { email: email, password: password });
       API.setToken(data.accessToken);
       if (data.user) API.setUser(data.user);
-      window.location.href = 'dashboard.html';
+      window.location.href = '/os/';
     } catch (err) {
       showError(errEl, err.message);
       btn.disabled = false;
@@ -80,7 +80,7 @@ var Auth = (function () {
       });
       API.setToken(data.accessToken);
       if (data.user) API.setUser(data.user);
-      window.location.href = 'dashboard.html';
+      window.location.href = '/os/';
     } catch (err) {
       showError(errEl, err.message);
       btn.disabled = false;
@@ -102,7 +102,7 @@ var Auth = (function () {
 
   function requireAuth() {
     if (!API.getToken()) {
-      window.location.href = 'login.html';
+      window.location.href = '/login/';
       return false;
     }
     return true;
@@ -110,7 +110,7 @@ var Auth = (function () {
 
   function logout() {
     API.removeToken();
-    window.location.href = 'login.html';
+    window.location.href = '/login/';
   }
 
   async function loadProfile() {

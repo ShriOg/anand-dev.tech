@@ -42,7 +42,7 @@ async function handleLogin(event) {
     
     if (data.accessToken) {
       localStorage.setItem('authToken', 'true');
-      window.location.replace('/os/dashboard.html');
+      window.location.replace('/os/');
     } else {
       throw new Error('No access token received');
     }

@@ -23,7 +23,7 @@ async function apiRequest(endpoint, options = {}) {
 
     if (response.status === 401) {
       localStorage.clear();
-      window.location.href = '/index.html';
+      window.location.href = '/login/';
       return null;
     }
 

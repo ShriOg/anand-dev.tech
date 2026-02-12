@@ -2,27 +2,14 @@ let currentUser = null;
 let currentModule = 'notes';
 
 async function initDashboard() {
-  const token = localStorage.getItem('accessToken');
-  
+  const token = localStorage.getItem('authToken');
+
   if (!token) {
-    window.location.href = '/login.html';
+    window.location.replace('/login/');
     return;
   }
 
-  try {
-    const userData = await api.get('/api/auth/me');
-    currentUser = userData;
-    
-    document.getElementById('userEmail').textContent = userData.email;
-    
-    if (userData.role !== 'admin') {
-      document.querySelector('[data-module="admin"]').style.display = 'none';
-    }
-    
-    loadModule('notes');
-  } catch (error) {
-    console.error('Failed to load user data:', error);
-  }
+  loadModule('notes');
 }
 
 function loadModule(moduleName) {
@@ -59,8 +46,8 @@ function loadModule(moduleName) {
 }
 
 function logout() {
-  localStorage.removeItem('accessToken');
-  window.location.href = '/index.html';
+  localStorage.removeItem('authToken');
+  window.location.replace('/login/');
 }
 
 document.addEventListener('DOMContentLoaded', initDashboard);
