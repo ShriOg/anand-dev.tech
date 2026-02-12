@@ -47,6 +47,7 @@ function loadModule(moduleName) {
 
 function logout() {
   localStorage.removeItem('authToken');
+  localStorage.removeItem('accessToken');
   window.location.replace('/login/');
 }
 

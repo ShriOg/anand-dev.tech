@@ -48,6 +48,9 @@ var Auth = (function () {
       }
 
       localStorage.setItem('authToken', 'true');
+      if (data.accessToken) {
+        localStorage.setItem('accessToken', data.accessToken);
+      }
       window.location.replace('/os/');
     } catch (err) {
       showError(errEl, err.message);
@@ -96,6 +99,9 @@ var Auth = (function () {
       }
 
       localStorage.setItem('authToken', 'true');
+      if (data.accessToken) {
+        localStorage.setItem('accessToken', data.accessToken);
+      }
       window.location.replace('/os/');
     } catch (err) {
       showError(errEl, err.message);
@@ -120,6 +126,7 @@ var Auth = (function () {
 
   function logout() {
     localStorage.removeItem('authToken');
+    localStorage.removeItem('accessToken');
     window.location.replace('/login/');
   }
 
