@@ -28,7 +28,13 @@ async function handleLogin(event) {
       body: JSON.stringify({ email, password }),
     });
     
-    const data = await response.json();
+    const rawText = await response.text();
+    let data = {};
+    try {
+      data = rawText ? JSON.parse(rawText) : {};
+    } catch (parseError) {
+      data = { message: rawText || 'Invalid server response' };
+    }
     
     if (!response.ok) {
       throw new Error(data.error || data.message || 'Login failed');

@@ -27,12 +27,19 @@ async function apiRequest(endpoint, options = {}) {
       return null;
     }
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Request failed');
+    const rawText = await response.text();
+    let payload = {};
+    try {
+      payload = rawText ? JSON.parse(rawText) : {};
+    } catch (parseError) {
+      payload = { message: rawText || 'Invalid server response' };
     }
 
-    return await response.json();
+    if (!response.ok) {
+      throw new Error(payload.error || payload.message || 'Request failed');
+    }
+
+    return payload;
   } catch (error) {
     throw error;
   }
