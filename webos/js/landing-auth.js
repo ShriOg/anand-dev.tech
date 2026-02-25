@@ -1,5 +1,4 @@
-const API_URL = 'https://anand-os-backend.onrender.com';
-const WEBOS_BASE = '/webos';
+// API_BASE_URL and WEBOS_BASE provided by config.js
 
 async function handleLogin(event) {
   event.preventDefault();
@@ -21,7 +20,7 @@ async function handleLogin(event) {
   loginBtn.textContent = 'Signing in...';
   
   try {
-    const response = await fetch(`${API_URL}/api/auth/login`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

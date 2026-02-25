@@ -1,8 +1,9 @@
 var Auth = (function () {
   'use strict';
 
-  var API_URL = 'https://anand-os-backend.onrender.com';
-  var WEBOS_BASE = '/webos';
+  // Use globals from config.js, with fallbacks
+  var API_URL = window.API_BASE_URL || 'https://anand-os-backend.onrender.com';
+  var WEBOS_BASE = window.WEBOS_BASE || '/webos';
 
   function init() {
     var loginForm = document.getElementById('loginForm');

@@ -1,5 +1,4 @@
-const API_BASE_URL = 'https://anand-os-backend.onrender.com';
-const WEBOS_BASE = '/webos';
+// API_BASE_URL and WEBOS_BASE provided by config.js
 
 async function apiRequest(endpoint, options = {}) {
   const token = localStorage.getItem('accessToken');
