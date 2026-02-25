@@ -1,4 +1,5 @@
 const API_URL = 'https://anand-os-backend.onrender.com';
+const WEBOS_BASE = '/webos';
 
 async function handleLogin(event) {
   event.preventDefault();
@@ -43,7 +44,7 @@ async function handleLogin(event) {
     if (data.accessToken) {
       localStorage.setItem('authToken', 'true');
       localStorage.setItem('accessToken', data.accessToken);
-      window.location.replace('/os/');
+      window.location.replace(`${WEBOS_BASE}/os/`);
     } else {
       throw new Error('No access token received');
     }

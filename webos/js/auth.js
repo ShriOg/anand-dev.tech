@@ -2,6 +2,7 @@ var Auth = (function () {
   'use strict';
 
   var API_URL = 'https://anand-os-backend.onrender.com';
+  var WEBOS_BASE = '/webos';
 
   function init() {
     var loginForm = document.getElementById('loginForm');
@@ -51,7 +52,7 @@ var Auth = (function () {
       if (data.accessToken) {
         localStorage.setItem('accessToken', data.accessToken);
       }
-      window.location.replace('/os/');
+      window.location.replace(WEBOS_BASE + '/os/');
     } catch (err) {
       showError(errEl, err.message);
       setTimeout(function () {
@@ -102,7 +103,7 @@ var Auth = (function () {
       if (data.accessToken) {
         localStorage.setItem('accessToken', data.accessToken);
       }
-      window.location.replace('/os/');
+      window.location.replace(WEBOS_BASE + '/os/');
     } catch (err) {
       showError(errEl, err.message);
       setTimeout(function () {
@@ -127,7 +128,7 @@ var Auth = (function () {
   function logout() {
     localStorage.removeItem('authToken');
     localStorage.removeItem('accessToken');
-    window.location.replace('/login/');
+    window.location.replace(WEBOS_BASE + '/login/');
   }
 
   if (document.readyState === 'loading') {

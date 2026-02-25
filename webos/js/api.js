@@ -1,4 +1,5 @@
 const API_BASE_URL = 'https://anand-os-backend.onrender.com';
+const WEBOS_BASE = '/webos';
 
 async function apiRequest(endpoint, options = {}) {
   const token = localStorage.getItem('accessToken');
@@ -23,7 +24,7 @@ async function apiRequest(endpoint, options = {}) {
 
     if (response.status === 401) {
       localStorage.clear();
-      window.location.href = '/login/';
+      window.location.href = `${WEBOS_BASE}/login/`;
       return null;
     }
 

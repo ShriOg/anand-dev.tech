@@ -5,7 +5,7 @@ async function initDashboard() {
   const token = localStorage.getItem('authToken');
 
   if (!token) {
-    window.location.replace('/login/');
+    window.location.replace('/webos/login/');
     return;
   }
 
@@ -48,7 +48,7 @@ function loadModule(moduleName) {
 function logout() {
   localStorage.removeItem('authToken');
   localStorage.removeItem('accessToken');
-  window.location.replace('/login/');
+  window.location.replace('/webos/login/');
 }
 
 document.addEventListener('DOMContentLoaded', initDashboard);
