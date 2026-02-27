@@ -23,8 +23,195 @@ document.addEventListener('DOMContentLoaded', () => {
         return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
     };
 
+    /* ==========  ORDER RESULT POPUP  ========== */
+    const _showOrderResult = (success, data = {}) => {
+        /* Remove any existing popup */
+        const existing = document.getElementById('orderResultPopup');
+        if (existing) existing.remove();
+
+        const popup = document.createElement('div');
+        popup.id = 'orderResultPopup';
+        popup.className = `order-popup order-popup--${success ? 'success' : 'error'}`;
+        popup.setAttribute('role', 'alertdialog');
+
+        if (success) {
+            popup.innerHTML = `
+                <div class="order-popup__inner">
+                    <span class="order-popup__icon">✅</span>
+                    <h3 class="order-popup__title">Order Placed!</h3>
+                    <p class="order-popup__sub">Hi ${_esc(data.name || '')}, your order is confirmed</p>
+                    <div class="order-popup__id-row">
+                        <span class="order-popup__id">🧾 ${data.orderId || '—'}</span>
+                        <button class="order-popup__copy" data-copy="${data.orderId || ''}" title="Copy Order ID">📋</button>
+                    </div>
+                    <p class="order-popup__total">Total: ₹${data.total || 0}</p>
+                    <div class="order-popup__actions">
+                        <button class="order-popup__btn order-popup__btn--wa" data-wa-url="${data.url || ''}">💬 Send via WhatsApp</button>
+                        <button class="order-popup__btn order-popup__btn--close">Close</button>
+                    </div>
+                    <p class="order-popup__hint">You'll get notified when your order status changes</p>
+                </div>`;
+        } else {
+            popup.innerHTML = `
+                <div class="order-popup__inner">
+                    <span class="order-popup__icon">❌</span>
+                    <h3 class="order-popup__title">Order Failed</h3>
+                    <p class="order-popup__sub">${_esc(data.error || 'Something went wrong')}</p>
+                    <p class="order-popup__hint">Your cart is safe — please try again</p>
+                    <div class="order-popup__actions">
+                        <button class="order-popup__btn order-popup__btn--close">OK</button>
+                    </div>
+                </div>`;
+        }
+
+        document.body.appendChild(popup);
+        requestAnimationFrame(() => popup.classList.add('order-popup--visible'));
+
+        /* Event delegation inside popup */
+        popup.addEventListener('click', (e) => {
+            const copyBtn = e.target.closest('[data-copy]');
+            if (copyBtn) {
+                navigator.clipboard.writeText(copyBtn.dataset.copy).then(() => {
+                    copyBtn.textContent = '✅';
+                    setTimeout(() => { copyBtn.textContent = '📋'; }, 1200);
+                }).catch(() => showToast('Copy failed'));
+                return;
+            }
+            const waBtn = e.target.closest('[data-wa-url]');
+            if (waBtn && waBtn.dataset.waUrl) {
+                window.open(waBtn.dataset.waUrl, '_blank');
+                return;
+            }
+            if (e.target.closest('.order-popup__btn--close')) {
+                popup.classList.remove('order-popup--visible');
+                setTimeout(() => popup.remove(), 300);
+            }
+        });
+
+        /* Auto-dismiss after 15s */
+        setTimeout(() => {
+            if (popup.parentNode) {
+                popup.classList.remove('order-popup--visible');
+                setTimeout(() => popup.remove(), 300);
+            }
+        }, 15000);
+    };
+
+    const _esc = (s) => {
+        if (!s) return '';
+        const d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    };
+
+    /* ==========  COLD START LISTENER  ========== */
+    document.addEventListener('api:cold-start', () => {
+        showToast('⏳ Server waking up — please wait…');
+    });
+
+    /* ==========  CUSTOMER ORDER NOTIFICATIONS (Socket.IO)  ========== */
+    let _customerSocket = null;
+    let _lastOrderId = null;
+
+    const _initCustomerSocket = () => {
+        if (typeof io === 'undefined') return;
+
+        const socketUrl = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+            ? 'http://localhost:3000'
+            : 'https://anand-os-backend.onrender.com';
+
+        _customerSocket = io(socketUrl, {
+            transports: ['websocket', 'polling'],
+            reconnection: true,
+            reconnectionDelay: 3000,
+            reconnectionAttempts: 10,
+        });
+
+        _customerSocket.on('connect', () => {
+            console.log('[CustomerSocket] Connected');
+            /* Join room for latest order if we have one */
+            if (_lastOrderId) {
+                _customerSocket.emit('join:order', _lastOrderId);
+            }
+        });
+
+        _customerSocket.on('restaurant:order-status', (data) => {
+            if (!data) return;
+            console.log('[CustomerSocket] Order status update:', data);
+            _showOrderNotification(data);
+        });
+
+        _customerSocket.on('disconnect', () => {
+            console.log('[CustomerSocket] Disconnected');
+        });
+    };
+
+    const _trackOrder = (orderId) => {
+        _lastOrderId = orderId;
+        localStorage.setItem('pf_last_order', orderId);
+        if (_customerSocket && _customerSocket.connected) {
+            _customerSocket.emit('join:order', orderId);
+        }
+    };
+
+    const _showOrderNotification = (data) => {
+        const statusLabels = {
+            PENDING: { icon: '⏳', label: 'Order Received', desc: 'Your order has been received' },
+            PREPARING: { icon: '🔥', label: 'Preparing', desc: 'Your order is being prepared!' },
+            COMPLETED: { icon: '✅', label: 'Ready!', desc: 'Your order is ready for pickup/serving' },
+            CANCELLED: { icon: '❌', label: 'Cancelled', desc: 'Your order has been cancelled' },
+        };
+
+        const info = statusLabels[data.status] || { icon: '📦', label: data.status, desc: 'Order status updated' };
+
+        /* Remove any existing notification */
+        const existing = document.getElementById('orderNotification');
+        if (existing) existing.remove();
+
+        const notif = document.createElement('div');
+        notif.id = 'orderNotification';
+        notif.className = `order-notif order-notif--${(data.status || '').toLowerCase()}`;
+        notif.setAttribute('role', 'alert');
+        notif.innerHTML = `
+            <div class="order-notif__inner">
+                <span class="order-notif__icon">${info.icon}</span>
+                <div class="order-notif__text">
+                    <strong class="order-notif__title">${info.label}</strong>
+                    <span class="order-notif__desc">${info.desc}</span>
+                    ${data.orderId ? `<span class="order-notif__id">Order: ${data.orderId}</span>` : ''}
+                </div>
+                <button class="order-notif__close" aria-label="Dismiss">✕</button>
+            </div>`;
+        document.body.appendChild(notif);
+        requestAnimationFrame(() => notif.classList.add('order-notif--visible'));
+
+        /* Vibrate on mobile */
+        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+
+        /* Dismiss */
+        notif.querySelector('.order-notif__close').addEventListener('click', () => {
+            notif.classList.remove('order-notif--visible');
+            setTimeout(() => notif.remove(), 300);
+        });
+
+        /* Auto-dismiss */
+        setTimeout(() => {
+            if (notif.parentNode) {
+                notif.classList.remove('order-notif--visible');
+                setTimeout(() => notif.remove(), 300);
+            }
+        }, 8000);
+    };
+
     /* ==========  INITIAL RENDER  ========== */
     showSkeleton();
+
+    /* Initialize customer Socket.IO for order notifications */
+    _initCustomerSocket();
+
+    /* Restore last tracked order ID */
+    const savedOrderId = localStorage.getItem('pf_last_order');
+    if (savedOrderId) _lastOrderId = savedOrderId;
 
     // Fetch menu from API → fall back to static data
     (async () => {
@@ -217,15 +404,22 @@ document.addEventListener('DOMContentLoaded', () => {
                         const result = await Cart.submitOrder(info);
 
                         if (!result.ok) {
-                            showToast(result.error || 'Order failed — please try again');
+                            _showOrderResult(false, { error: result.error });
                             btn.disabled = false;
                             btn.textContent = '💬 Confirm & Send';
                             return;
                         }
 
-                        // Order saved (or fallback succeeded) — open WhatsApp
-                        showToast('Order placed! Opening WhatsApp…');
-                        if (result.url) window.open(result.url, '_blank');
+                        // Order saved — show success popup
+                        _showOrderResult(true, {
+                            orderId: result.orderId,
+                            total: result.total,
+                            url: result.url,
+                            name: info.name,
+                        });
+
+                        // Track order for status notifications
+                        if (result.orderId) _trackOrder(result.orderId);
 
                         // Refresh loyalty data after successful order
                         if (typeof Api !== 'undefined' && Api.isAuthenticated()) {
@@ -234,7 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             });
                         }
 
-                        // Clear cart only after backend confirms
+                        // Clear cart & reset checkout
                         setTimeout(() => {
                             btn.disabled = false;
                             btn.textContent = '💬 Confirm & Send';
@@ -244,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }, 2000);
 
                     } catch (err) {
-                        showToast('Network error — your cart is safe');
+                        _showOrderResult(false, { error: 'Network error — your cart is safe' });
                         btn.disabled = false;
                         btn.textContent = '💬 Confirm & Send';
                     }

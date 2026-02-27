@@ -611,3 +611,15 @@ body{
     .toolbar-filters{width:100%;flex-wrap:wrap}
     .tool-input,.tool-select{flex:1;min-width:120px}
 }
+
+/* ================================================================
+   COLD-START BANNER
+   ================================================================ */
+.cold-banner{
+    background:linear-gradient(90deg,#fef3c7,#fde68a,#fef3c7);
+    background-size:200% 100%;
+    animation:shimmer 2s infinite linear;
+    color:#92400e;font-size:13px;font-weight:600;
+    padding:10px 16px;border-radius:var(--r-sm);
+    text-align:center;margin-bottom:var(--sp-4);
+}

@@ -17,7 +17,7 @@ const Api = (() => {
     const _BASE = (() => {
         const host = location.hostname;
         if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:3000';
-        return '';  // same-origin in production
+        return 'https://anand-os-backend.onrender.com';
     })();
 
     const ENDPOINTS = Object.freeze({
@@ -26,30 +26,24 @@ const Api = (() => {
         profile: '/api/auth/profile',
     });
 
-    const TIMEOUT_MS = 12000;
+    const TIMEOUT_MS = 15000;
+    const COLD_START_RETRY_DELAY = 3000;
 
     /** JWT token (set after login, if any) */
     let _token = localStorage.getItem('pf_token') || null;
 
+    /** Track server readiness for cold-start UX */
+    let _serverAwake = false;
+    const isServerAwake = () => _serverAwake;
+
     /* ---------- Internals ---------- */
 
     /**
-     * Core fetch wrapper.
-     * @param {string}  path     - API path (e.g. '/api/restaurant/menu')
-     * @param {object}  [opts]   - fetch options override
-     * @param {number}  [timeout] - ms before abort
-     * @returns {Promise<{ok:boolean, status:number, data:any, error?:string}>}
+     * Single attempt fetch.
      */
-    const request = async (path, opts = {}, timeout = TIMEOUT_MS) => {
-        const url = `${_BASE}${path}`;
+    const _doFetch = async (url, opts, headers, timeout) => {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), timeout);
-
-        const headers = {
-            'Content-Type': 'application/json',
-            ...(opts.headers || {}),
-        };
-        if (_token) headers['Authorization'] = `Bearer ${_token}`;
 
         try {
             const res = await fetch(url, {
@@ -73,6 +67,7 @@ const Api = (() => {
                     error: (data && (data.message || data.error)) || `HTTP ${res.status}`,
                 };
             }
+            _serverAwake = true;
             return { ok: true, status: res.status, data };
 
         } catch (err) {
@@ -82,6 +77,38 @@ const Api = (() => {
             }
             return { ok: false, status: 0, data: null, error: err.message || 'Network error' };
         }
+    };
+
+    /**
+     * Core fetch wrapper with automatic cold-start retry.
+     * On first network error / timeout, waits 3s and retries once
+     * (Render free-tier spins down after inactivity).
+     *
+     * @param {string}  path     - API path (e.g. '/api/restaurant/menu')
+     * @param {object}  [opts]   - fetch options override
+     * @param {number}  [timeout] - ms before abort
+     * @returns {Promise<{ok:boolean, status:number, data:any, error?:string}>}
+     */
+    const request = async (path, opts = {}, timeout = TIMEOUT_MS) => {
+        const url = `${_BASE}${path}`;
+
+        const headers = {
+            'Content-Type': 'application/json',
+            ...(opts.headers || {}),
+        };
+        if (_token) headers['Authorization'] = `Bearer ${_token}`;
+
+        const result = await _doFetch(url, opts, headers, timeout);
+
+        /* Retry once on cold-start (network error or timeout, not HTTP errors) */
+        if (!result.ok && result.status === 0 && !_serverAwake) {
+            console.log('[Api] Server may be waking up — retrying in 3s…');
+            document.dispatchEvent(new CustomEvent('api:cold-start'));
+            await new Promise(r => setTimeout(r, COLD_START_RETRY_DELAY));
+            return _doFetch(url, opts, headers, timeout);
+        }
+
+        return result;
     };
 
     /* ---------- Public API ---------- */
@@ -131,6 +158,7 @@ const Api = (() => {
         setToken,
         getToken,
         isAuthenticated,
+        isServerAwake,
         ENDPOINTS,
     });
 })();

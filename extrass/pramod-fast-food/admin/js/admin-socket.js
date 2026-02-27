@@ -41,12 +41,12 @@ const AdminSocket = (() => {
 
         const baseUrl = window.location.hostname === 'localhost'
             ? 'http://localhost:3000'
-            : window.location.origin;
+            : 'https://anand-os-backend.onrender.com';
 
-        const token = AdminAPI.getToken();
+        const token = typeof AdminAPI !== 'undefined' && AdminAPI.getToken ? AdminAPI.getToken() : null;
 
         _socket = io(baseUrl, {
-            auth: { token },
+            ...(token ? { auth: { token } } : {}),
             transports: ['websocket', 'polling'],
             reconnection: true,
             reconnectionDelay: 2000,

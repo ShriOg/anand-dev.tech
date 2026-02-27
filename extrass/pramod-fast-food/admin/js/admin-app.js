@@ -165,6 +165,12 @@ document.addEventListener('DOMContentLoaded', () => {
         /* Connect realtime */
         AdminSocket.connect();
 
+        /* Cold-start listener */
+        document.addEventListener('admin:cold-start', () => {
+            showToast('⏳ Server waking up — hang tight…', 'info');
+            _showWakingBanner(true);
+        });
+
         /* Load initial data */
         loadDashboard();
 
@@ -180,6 +186,22 @@ document.addEventListener('DOMContentLoaded', () => {
         wireSidebar();
     }
 
+    /* ---------- Cold-start banner ---------- */
+    function _showWakingBanner(show) {
+        let banner = $('#coldStartBanner');
+        if (show && !banner) {
+            banner = document.createElement('div');
+            banner.id = 'coldStartBanner';
+            banner.className = 'cold-banner';
+            banner.innerHTML = '⏳ Backend server is waking up (free-tier cold start). Data will load in a few seconds…';
+            const container = $('#pageContainer');
+            if (container) container.prepend(banner);
+        }
+        if (!show && banner) {
+            banner.remove();
+        }
+    }
+
     /* ====================================================================
        DASHBOARD
     ==================================================================== */
@@ -189,11 +211,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 AdminAPI.getStats(),
                 AdminAPI.getRecentOrders(5),
             ]);
+            _showWakingBanner(false);
             renderStats(stats);
             const recent = recentRes?.data || recentRes?.orders || (Array.isArray(recentRes) ? recentRes : []);
             renderRecentOrders(recent);
         } catch (err) {
-            showToast('Failed to load dashboard data', 'error');
+            const msg = (err.message || '').includes('Failed to fetch')
+                ? 'Server is starting up — will retry automatically…'
+                : 'Failed to load dashboard data';
+            showToast(msg, 'error');
         }
     }
 

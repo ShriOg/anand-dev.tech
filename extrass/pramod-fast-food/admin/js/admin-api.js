@@ -11,30 +11,44 @@ const AdminAPI = (() => {
     /* ---------- Config ---------- */
     const BASE_URL = window.location.hostname === 'localhost'
         ? 'http://localhost:3000/api'
-        : '/api';
+        : 'https://anand-os-backend.onrender.com/api';
 
-    /* ---------- Core fetch wrapper ---------- */
-    const _fetch = async (endpoint, options = {}) => {
+    const COLD_START_RETRY_DELAY = 3500;
+    let _serverAwake = false;
+
+    /* ---------- Core fetch wrapper (with cold-start retry) ---------- */
+    const _singleFetch = async (endpoint, options = {}) => {
         const headers = {
             'Content-Type': 'application/json',
             ...(options.headers || {}),
         };
 
+        const res = await fetch(`${BASE_URL}${endpoint}`, {
+            ...options,
+            headers,
+        });
+
+        if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            throw new Error(body.message || `HTTP ${res.status}`);
+        }
+
+        _serverAwake = true;
+        if (res.status === 204) return null;
+        return await res.json();
+    };
+
+    const _fetch = async (endpoint, options = {}) => {
         try {
-            const res = await fetch(`${BASE_URL}${endpoint}`, {
-                ...options,
-                headers,
-            });
-
-            if (!res.ok) {
-                const body = await res.json().catch(() => ({}));
-                throw new Error(body.message || `HTTP ${res.status}`);
-            }
-
-            /* Handle 204 No Content */
-            if (res.status === 204) return null;
-            return await res.json();
+            return await _singleFetch(endpoint, options);
         } catch (err) {
+            /* Retry once on cold-start (network-level failures only) */
+            if (!_serverAwake && (err.message === 'Failed to fetch' || err.name === 'TypeError')) {
+                console.log('[AdminAPI] Server may be waking up — retrying in 3.5s…');
+                document.dispatchEvent(new CustomEvent('admin:cold-start'));
+                await new Promise(r => setTimeout(r, COLD_START_RETRY_DELAY));
+                return _singleFetch(endpoint, options);
+            }
             console.error(`[AdminAPI] ${options.method || 'GET'} ${endpoint}:`, err);
             throw err;
         }
