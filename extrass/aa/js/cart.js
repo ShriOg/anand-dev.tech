@@ -150,17 +150,24 @@ const Cart = (() => {
         if (typeof Api !== 'undefined') {
             try {
                 const res = await Api.placeOrder(payload);
-                if (res.ok && res.data) {
+                const isSuccess = res?.success ?? res?.ok;
+                console.log('[Cart] placeOrder response:', { isSuccess, hasData: !!res?.data, res });
+
+                if (isSuccess && res.data) {
                     window.__BACKEND_CONNECTED__ = true;
-                    const backendOrderId = res.data.orderId || res.data._id || generateOrderId();
-                    const backendTotal = res.data.total != null ? res.data.total : total();
+                    const d = res.data;
+                    const backendOrderId = d.orderId || d._id || generateOrderId();
+                    const backendTotal = d.total != null ? d.total : total();
                     return { ok: true, orderId: backendOrderId, total: backendTotal, source: 'server' };
                 }
+
+                // HTTP succeeded but backend returned failure
+                console.warn('[Cart] Backend returned non-success:', res);
             } catch (err) {
                 console.warn('[Cart] API order failed:', err.message);
             }
 
-            // Backend failed
+            // Backend failed or returned error
             window.__BACKEND_CONNECTED__ = false;
             return {
                 ok: false,

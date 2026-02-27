@@ -317,6 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await MenuData.connectLive();
                 if (result.live) {
                     console.log('[live] Connected! Changed items:', result.changedIds?.length || 0);
+                    window.__BACKEND_CONNECTED__ = true;
                     clearInterval(_bgPingTimer);
                     _bgPingTimer = null;
 
@@ -329,6 +330,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (result.changedIds && result.changedIds.length > 0) {
                         renderMenu();
                     }
+                    /* Re-render cart to hide WhatsApp fallback button */
+                    renderCartModal();
                     return true;
                 }
             } catch (err) {
@@ -359,11 +362,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     _backgroundConnect();
 
+    /* ==========  BACKEND STATUS PING (Step 2)  ========== */
+    /* Proactively detect backend status via GET /api/restaurant/stats.
+       This sets __BACKEND_CONNECTED__ BEFORE user reaches checkout. */
+    (async () => {
+        if (typeof Api === 'undefined') return;
+        try {
+            const res = await Api.request('/api/restaurant/stats');
+            const isSuccess = res?.success ?? res?.ok;
+            console.log('[BackendPing] Stats response:', { isSuccess, res });
+            if (isSuccess) {
+                window.__BACKEND_CONNECTED__ = true;
+                console.log('[BackendPing] Backend is connected');
+                /* Re-render cart modal if open, to hide WhatsApp button */
+                renderCartModal();
+            } else {
+                window.__BACKEND_CONNECTED__ = false;
+                console.log('[BackendPing] Backend returned non-success');
+            }
+        } catch (err) {
+            window.__BACKEND_CONNECTED__ = false;
+            console.log('[BackendPing] Backend unreachable:', err.message);
+        }
+    })();
+
     // Fetch loyalty profile if authenticated
     (async () => {
         if (typeof Api !== 'undefined' && Api.isAuthenticated()) {
             const res = await Api.fetchProfile();
-            if (res.ok && res.data) {
+            const isSuccess = res?.success ?? res?.ok;
+            if (isSuccess && res.data) {
                 UI.renderLoyaltyBar(res.data);
             } else {
                 UI.renderLoyaltyBar(null);
@@ -536,6 +564,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         if (result.ok && result.source === 'server') {
                             /* === Backend accepted the order === */
+                            window.__BACKEND_CONNECTED__ = true;
                             _showOrderResult(true, {
                                 orderId: result.orderId,
                                 total: result.total,
@@ -548,7 +577,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             // Refresh loyalty data
                             if (typeof Api !== 'undefined' && Api.isAuthenticated()) {
                                 Api.fetchProfile().then(res => {
-                                    if (res.ok && res.data) UI.renderLoyaltyBar(res.data);
+                                    const profOk = res?.success ?? res?.ok;
+                                    if (profOk && res.data) UI.renderLoyaltyBar(res.data);
                                 });
                             }
 
@@ -563,24 +593,29 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
 
                         /* === Backend failed — show apology popup with WhatsApp fallback === */
+                        window.__BACKEND_CONNECTED__ = false;
                         const waData = Cart.sendViaWhatsApp(info);
                         _showOrderResult(false, {
-                            error: 'Our server is temporarily unavailable.',
+                            error: 'Sorry, our server is temporarily unavailable.',
                             serverDown: true,
                             url: waData.url,
                         });
                         btn.disabled = false;
                         btn.textContent = '✅ Place Order';
+                        /* Re-render cart to show WhatsApp button */
+                        renderCartModal();
 
                     } catch (err) {
+                        window.__BACKEND_CONNECTED__ = false;
                         const waData = Cart.sendViaWhatsApp(info);
                         _showOrderResult(false, {
-                            error: 'Network error — server may be waking up.',
+                            error: 'Sorry, our server is temporarily unavailable.',
                             serverDown: true,
                             url: waData.url,
                         });
                         btn.disabled = false;
                         btn.textContent = '✅ Place Order';
+                        renderCartModal();
                     }
                 })();
                 break;

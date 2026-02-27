@@ -504,8 +504,9 @@ const MenuData = (() => {
         }
 
         const res = await Api.fetchMenu();
+        const isSuccess = res?.success ?? res?.ok;
 
-        if (res.ok && res.data) {
+        if (isSuccess && res.data) {
             const cats = normalizeMenuFromServer(res.data);
             if (cats && Object.keys(cats).length) {
                 load(cats);
@@ -535,7 +536,8 @@ const MenuData = (() => {
 
         try {
             const res = await Api.fetchMenu();
-            if (!res.ok || !res.data) return { live: false, error: res.error || 'No data' };
+            const isSuccess = res?.success ?? res?.ok;
+            if (!isSuccess || !res.data) return { live: false, error: res.error || 'No data' };
 
             const cats = normalizeMenuFromServer(res.data);
             if (!cats || !Object.keys(cats).length) return { live: false, error: 'Empty menu' };
