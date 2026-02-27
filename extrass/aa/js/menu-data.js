@@ -141,7 +141,7 @@ const MenuData = (() => {
     /** Populate categories from static data (immediate, synchronous) */
     const _initStatic = () => {
         categories = _filterActive(_staticCategories);
-        debug('Static Menu Loaded', allItems());
+        debug('Static Menu Loaded', Object.values(categories).flatMap(c => c.items));
     };
 
     // Start with static data so everything works synchronously
