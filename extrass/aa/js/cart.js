@@ -123,15 +123,16 @@ const Cart = (() => {
     };
 
     /**
-     * Submit order to backend API, then build WhatsApp URL.
+     * Submit order to backend API.
      * Does NOT clear the cart — caller clears only on success.
+     * Does NOT build WhatsApp URL on success — backend handles the order.
      *
      * @param {object} info — { name, phone, orderType, persons?, table?, note? }
-     * @returns {Promise<{ok:boolean, url?:string, orderId?:string, total?:number, error?:string}>}
+     * @returns {Promise<{ok:boolean, orderId?:string, total?:number, source:string, error?:string}>}
      */
     const submitOrder = async (info) => {
         const items = snapshot();
-        if (!items.length) return { ok: false, error: 'Cart is empty' };
+        if (!items.length) return { ok: false, error: 'Cart is empty', source: 'none' };
 
         const payload = {
             customerName: info.name,
@@ -145,37 +146,46 @@ const Cart = (() => {
         }
         if (info.note) payload.note = info.note;
 
-        // Try backend first
+        // Try backend
         if (typeof Api !== 'undefined') {
             try {
                 const res = await Api.placeOrder(payload);
                 if (res.ok && res.data) {
+                    window.__BACKEND_CONNECTED__ = true;
                     const backendOrderId = res.data.orderId || res.data._id || generateOrderId();
                     const backendTotal = res.data.total != null ? res.data.total : total();
-                    const url = buildCheckoutMessage(info, { orderId: backendOrderId, total: backendTotal });
-                    return { ok: true, url, orderId: backendOrderId, total: backendTotal, source: 'server' };
+                    return { ok: true, orderId: backendOrderId, total: backendTotal, source: 'server' };
                 }
             } catch (err) {
-                console.warn('[Cart] API error, falling back to WhatsApp:', err.message);
+                console.warn('[Cart] API order failed:', err.message);
             }
 
-            // Backend failed — fallback to WhatsApp, keep cart intact
-            console.warn('[Cart] Server unavailable — using WhatsApp fallback');
-            const fallbackUrl = buildCheckoutMessage(info);
+            // Backend failed
+            window.__BACKEND_CONNECTED__ = false;
             return {
-                ok: true,
-                url: fallbackUrl,
-                orderId: generateOrderId(),
-                total: total(),
-                source: 'whatsapp-fallback',
-                fallbackMessage: 'Server waking up — sending via WhatsApp',
+                ok: false,
+                error: 'Server temporarily unavailable',
+                source: 'server-down',
             };
         }
 
-        // No API module — fallback to client-side only (WhatsApp)
-        const url = buildCheckoutMessage(info);
-        return { ok: true, url, orderId: generateOrderId(), total: total() };
+        // No API module — caller should use sendViaWhatsApp()
+        return { ok: false, error: 'No API available', source: 'no-api' };
     };
 
-    return Object.freeze({ add, update, remove, clear, qty, count, total, snapshot, checkoutURL, buildCheckoutMessage, submitOrder });
+    /**
+     * Build WhatsApp checkout URL and return it.
+     * Used as fallback when backend is down.
+     *
+     * @param {object} info — { name, phone, orderType, persons?, table?, note? }
+     * @returns {{url:string, orderId:string, total:number}}
+     */
+    const sendViaWhatsApp = (info) => {
+        const orderId = generateOrderId();
+        const orderTotal = total();
+        const url = buildCheckoutMessage(info, { orderId, total: orderTotal });
+        return { url, orderId, total: orderTotal };
+    };
+
+    return Object.freeze({ add, update, remove, clear, qty, count, total, snapshot, checkoutURL, buildCheckoutMessage, submitOrder, sendViaWhatsApp });
 })();

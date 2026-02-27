@@ -670,10 +670,17 @@ body.modal-open .cart-fab{
 }
 .checkout-next-btn{background:var(--c-brand)}
 .checkout-next-btn:hover{box-shadow:0 4px 14px rgba(232,93,4,.25)}
-.checkout-confirm-btn{background:linear-gradient(135deg,#25d366,#128c45)}
-.checkout-confirm-btn:hover{box-shadow:0 4px 16px rgba(37,211,102,.3)}
+.checkout-confirm-btn--primary{background:var(--c-brand)}
+.checkout-confirm-btn--primary:hover{box-shadow:0 4px 14px rgba(232,93,4,.25)}
+.checkout-confirm-btn--wa{background:linear-gradient(135deg,#25d366,#128c45)}
+.checkout-confirm-btn--wa:hover{box-shadow:0 4px 16px rgba(37,211,102,.3)}
 .checkout-next-btn:active,.checkout-confirm-btn:active{transform:scale(.97)}
 .checkout-confirm-btn:disabled{opacity:.65;cursor:not-allowed;transform:none}
+.checkout-server-hint{
+    text-align:center;font-size:11.5px;color:var(--c-text-soft);
+    margin-top:var(--sp-2);padding:0 var(--sp-2);
+}
+.checkout-nav{flex-wrap:wrap;gap:var(--sp-2)}
 
 /* ================================================================
    ORDER SUMMARY (inside cart modal)

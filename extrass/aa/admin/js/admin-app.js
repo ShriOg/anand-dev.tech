@@ -5,6 +5,7 @@
  * All interactions via event delegation on stable containers.
  */
 'use strict';
+console.log('[Admin] admin-app.js loaded');
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('[Admin] DOMContentLoaded fired');
@@ -116,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /* Check session first */
     if (sessionStorage.getItem(GATE_KEY)) {
         hideGate();
-        init();
+        try { init(); } catch (err) { console.error('[Admin] Boot failed (session restore):', err); }
     } else {
         showGate();
     }
@@ -142,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
             input.classList.remove('gate__input--shake');
             error.hidden = true;
             hideGate();
-            init();
+            try { init(); } catch (err) { console.error('[Admin] Boot failed (gate unlock):', err); }
         } else {
             error.hidden = false;
             input.value = '';
@@ -237,17 +238,21 @@ document.addEventListener('DOMContentLoaded', () => {
        DASHBOARD
     ==================================================================== */
     async function loadDashboard() {
+        console.log('[Admin] loadDashboard()');
         try {
             const [statsRes, recentRes] = await Promise.all([
                 AdminAPI.getStats(),
                 AdminAPI.getRecentOrders(5),
             ]);
+            console.log('[Admin] Stats response:', statsRes);
+            console.log('[Admin] Recent orders response:', recentRes);
             _showWakingBanner(false);
             /* Unwrap { success, data } wrapper */
             const stats = statsRes?.data || statsRes;
             renderStats(stats);
             const recentPayload = recentRes?.data || recentRes;
             const recent = Array.isArray(recentPayload) ? recentPayload : (recentPayload?.orders || []);
+            console.log('[Admin] Rendered', recent.length, 'recent orders');
             renderRecentOrders(recent);
         } catch (err) {
             const msg = (err.message || '').includes('Failed to fetch')
@@ -261,10 +266,13 @@ document.addEventListener('DOMContentLoaded', () => {
        NAVIGATION
     ==================================================================== */
     function wireNavigation() {
-        $('#sidebar').addEventListener('click', (e) => {
+        const sidebar = $('#sidebar');
+        if (!sidebar) { console.error('[Admin] #sidebar not found in DOM'); return; }
+        sidebar.addEventListener('click', (e) => {
             const btn = e.target.closest('.nav-item');
             if (!btn) return;
             const page = btn.dataset.page;
+            console.log('[Admin] Sidebar click → page:', page);
             if (!page || page === currentPage) return;
             currentPage = page;
             switchPage(page);
@@ -301,12 +309,15 @@ document.addEventListener('DOMContentLoaded', () => {
        LIVE ORDERS
     ==================================================================== */
     async function loadLiveOrders() {
+        console.log('[Admin] loadLiveOrders()');
         try {
             const statusFilter = $('#ordersStatusFilter')?.value || '';
             const res = await AdminAPI.getTodayOrders({ status: statusFilter });
+            console.log('[Admin] Today orders response:', res);
             /* Unwrap { success, data } wrapper */
             const payload = res?.data || res;
             liveOrders = Array.isArray(payload) ? payload : (payload?.orders || []);
+            console.log('[Admin] Live orders count:', liveOrders.length);
             renderOrderCards(liveOrders);
             updatePendingBadge();
         } catch (err) {
@@ -367,6 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
         /* Realtime: new order from socket */
         document.addEventListener('admin:new-order', (e) => {
             const order = e.detail;
+            console.log('[Admin] admin:new-order event received:', order);
             if (!order) return;
 
             /* Deduplicate */
@@ -397,6 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         /* Socket status */
         document.addEventListener('socket:status', (e) => {
+            console.log('[Admin] Socket status:', e.detail?.connected);
             updateSocketStatus(e.detail?.connected);
         });
     }
@@ -405,6 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
        ORDER HISTORY
     ==================================================================== */
     async function loadHistory() {
+        console.log('[Admin] loadHistory()');
         try {
             const params = {
                 page: historyPage,
@@ -465,8 +479,10 @@ document.addEventListener('DOMContentLoaded', () => {
        MENU MANAGEMENT
     ==================================================================== */
     async function loadMenu() {
+        console.log('[Admin] loadMenu()');
         try {
             const res = await AdminAPI.getMenu();
+            console.log('[Admin] Menu response:', res);
             /* Unwrap { success, data } wrapper */
             const data = res?.data || res?.categories || res;
 
@@ -578,8 +594,10 @@ document.addEventListener('DOMContentLoaded', () => {
        ANALYTICS
     ==================================================================== */
     async function loadAnalytics() {
+        console.log('[Admin] loadAnalytics()');
         try {
             const res = await AdminAPI.getAnalytics();
+            console.log('[Admin] Analytics response:', res);
             /* Unwrap { success, data } wrapper */
             const data = res?.data || res;
             if (!data) return;

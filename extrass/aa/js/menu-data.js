@@ -13,6 +13,9 @@
 /** Global server readiness flag */
 window.__SERVER_READY__ = false;
 
+/** Backend connection flag — true once any API call succeeds */
+window.__BACKEND_CONNECTED__ = false;
+
 const MenuData = (() => {
 
     /** Whether data was successfully loaded from the live API */
@@ -508,6 +511,7 @@ const MenuData = (() => {
                 load(cats);
                 _isLive = true;
                 window.__SERVER_READY__ = true;
+                window.__BACKEND_CONNECTED__ = true;
                 return { live: true };
             }
         }
@@ -537,6 +541,7 @@ const MenuData = (() => {
             if (!cats || !Object.keys(cats).length) return { live: false, error: 'Empty menu' };
 
             const changedIds = setLiveData(cats);
+            window.__BACKEND_CONNECTED__ = true;
             return { live: true, changedIds };
         } catch (err) {
             return { live: false, error: err.message || 'Network error' };

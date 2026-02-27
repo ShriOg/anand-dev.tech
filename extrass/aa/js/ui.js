@@ -293,7 +293,7 @@ const UI = (() => {
         footerEl.hidden = false;
         footerEl.innerHTML = `
             <div class="cart-total"><span>Total</span><span class="cart-total__val" id="cartTotal">₹${Cart.total()}</span></div>
-            <button class="checkout-btn" id="checkoutBtn" data-action="checkout-start">💬 Place Order via WhatsApp</button>`;
+            <button class="checkout-btn" id="checkoutBtn" data-action="checkout-start">� Place Order</button>`;
     };
 
     /* ---------- Checkout Form ---------- */
@@ -379,11 +379,15 @@ const UI = (() => {
 
         listEl.innerHTML = html;
         footerEl.hidden = false;
+
+        const connected = window.__BACKEND_CONNECTED__;
         footerEl.innerHTML = `
             <div class="checkout-nav">
                 <button class="checkout-back-btn" data-action="checkout-back-form">← Edit</button>
-                <button class="checkout-confirm-btn" data-action="checkout-confirm">💬 Confirm & Send</button>
-            </div>`;
+                <button class="checkout-confirm-btn checkout-confirm-btn--primary" data-action="checkout-confirm">✅ Place Order</button>
+                ${!connected ? '<button class="checkout-confirm-btn checkout-confirm-btn--wa" data-action="checkout-wa">💬 Place Order via WhatsApp</button>' : ''}
+            </div>
+            ${!connected ? '<p class="checkout-server-hint">⚠️ Server may be waking up — WhatsApp is available as backup</p>' : ''}`;
     };
 
     /* ---------- Checkout Step Manager ---------- */

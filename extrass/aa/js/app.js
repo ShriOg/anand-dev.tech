@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         popup.setAttribute('role', 'alertdialog');
 
         if (success) {
+            const showWaBtn = !!data.url;  /* Only show WhatsApp button if URL provided */
             popup.innerHTML = `
                 <div class="order-popup__inner">
                     <span class="order-popup__icon">✅</span>
@@ -46,10 +47,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <p class="order-popup__total">Total: ₹${data.total || 0}</p>
                     <div class="order-popup__actions">
-                        <button class="order-popup__btn order-popup__btn--wa" data-wa-url="${data.url || ''}">💬 Send via WhatsApp</button>
+                        ${showWaBtn ? `<button class="order-popup__btn order-popup__btn--wa" data-wa-url="${data.url}">💬 Send via WhatsApp</button>` : ''}
                         <button class="order-popup__btn order-popup__btn--close">Close</button>
                     </div>
-                    <p class="order-popup__hint">You'll get notified when your order status changes</p>
+                    ${data.viaWhatsApp ? '<p class="order-popup__hint">Order sent via WhatsApp — check your chat</p>' : '<p class="order-popup__hint">You\'ll get notified when your order status changes</p>'}
+                </div>`;
+        } else if (data.serverDown && data.url) {
+            /* Server down — show apology with WhatsApp fallback */
+            popup.innerHTML = `
+                <div class="order-popup__inner">
+                    <span class="order-popup__icon">⚠️</span>
+                    <h3 class="order-popup__title">Server Issue</h3>
+                    <p class="order-popup__sub">Sorry, our server is waking up. You can still order via WhatsApp.</p>
+                    <p class="order-popup__hint">Your cart is safe — no items lost</p>
+                    <div class="order-popup__actions">
+                        <button class="order-popup__btn order-popup__btn--wa" data-wa-url="${data.url}">💬 Order via WhatsApp</button>
+                        <button class="order-popup__btn order-popup__btn--close">Close</button>
+                    </div>
                 </div>`;
         } else {
             popup.innerHTML = `
@@ -520,37 +534,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     try {
                         const result = await Cart.submitOrder(info);
 
-                        if (!result.ok) {
-                            _showOrderResult(false, { error: result.error });
-                            btn.disabled = false;
-                            btn.textContent = '💬 Confirm & Send';
-                            return;
-                        }
+                        if (result.ok && result.source === 'server') {
+                            /* === Backend accepted the order === */
+                            _showOrderResult(true, {
+                                orderId: result.orderId,
+                                total: result.total,
+                                name: info.name,
+                                /* No url → WhatsApp button hidden in popup */
+                            });
 
-                        // Show fallback toast if server was unavailable
-                        if (result.fallbackMessage) {
-                            showToast(result.fallbackMessage);
-                        }
+                            if (result.orderId) _trackOrder(result.orderId);
 
-                        // Order saved (or WhatsApp fallback) — show success popup
-                        _showOrderResult(true, {
-                            orderId: result.orderId,
-                            total: result.total,
-                            url: result.url,
-                            name: info.name,
-                        });
-
-                        // Track order for status notifications
-                        if (result.orderId) _trackOrder(result.orderId);
-
-                        if (result.source === 'whatsapp-fallback') {
-                            /* Server failed — auto-open WhatsApp, keep cart intact */
-                            if (result.url) window.open(result.url, '_blank');
-                            btn.disabled = false;
-                            btn.textContent = '💬 Confirm & Send';
-                        } else {
-                            /* Server confirmed — clear cart after short delay */
-                            // Refresh loyalty data after successful server order
+                            // Refresh loyalty data
                             if (typeof Api !== 'undefined' && Api.isAuthenticated()) {
                                 Api.fetchProfile().then(res => {
                                     if (res.ok && res.data) UI.renderLoyaltyBar(res.data);
@@ -559,19 +554,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             setTimeout(() => {
                                 btn.disabled = false;
-                                btn.textContent = '💬 Confirm & Send';
+                                btn.textContent = '✅ Place Order';
                                 Cart.clear();
                                 UI.setCheckoutStep('cart');
                                 toggleCart(false);
                             }, 2000);
+                            return;
                         }
 
-                    } catch (err) {
-                        _showOrderResult(false, { error: 'Network error — your cart is safe' });
+                        /* === Backend failed — show apology popup with WhatsApp fallback === */
+                        const waData = Cart.sendViaWhatsApp(info);
+                        _showOrderResult(false, {
+                            error: 'Our server is temporarily unavailable.',
+                            serverDown: true,
+                            url: waData.url,
+                        });
                         btn.disabled = false;
-                        btn.textContent = '💬 Confirm & Send';
+                        btn.textContent = '✅ Place Order';
+
+                    } catch (err) {
+                        const waData = Cart.sendViaWhatsApp(info);
+                        _showOrderResult(false, {
+                            error: 'Network error — server may be waking up.',
+                            serverDown: true,
+                            url: waData.url,
+                        });
+                        btn.disabled = false;
+                        btn.textContent = '✅ Place Order';
                     }
                 })();
+                break;
+            }
+            case 'checkout-wa': {
+                /* Direct WhatsApp send — bypasses backend entirely */
+                const waInfo = UI.getCustomerInfo();
+                if (!Cart.count()) return;
+                const waResult = Cart.sendViaWhatsApp(waInfo);
+                if (waResult.url) {
+                    window.open(waResult.url, '_blank');
+                    showToast('Opening WhatsApp…');
+                    _showOrderResult(true, {
+                        orderId: waResult.orderId,
+                        total: waResult.total,
+                        name: waInfo.name,
+                        url: waResult.url,
+                        viaWhatsApp: true,
+                    });
+                }
                 break;
             }
         }
