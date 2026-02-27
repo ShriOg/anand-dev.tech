@@ -13,6 +13,9 @@
 const Customer = (() => {
 
     const STORAGE_KEY = 'pf_user';
+    const NAME_KEY = 'pf_customer_name';
+    const THEME_KEY = 'pf_theme';
+    const ORDERS_KEY = 'pf_orders';
     const POINTS_PER_100 = 10; // ₹100 = 10 points
 
     /* ---------- Internal helpers ---------- */
@@ -167,6 +170,95 @@ const Customer = (() => {
         document.dispatchEvent(new CustomEvent('customer:updated', { detail: null }));
     };
 
+    /* ---------- Name persistence ---------- */
+
+    const getName = () => localStorage.getItem(NAME_KEY) || '';
+
+    const setName = (name) => {
+        const trimmed = (name || '').trim();
+        if (trimmed) {
+            localStorage.setItem(NAME_KEY, trimmed);
+            /* Also update profile name if profile exists */
+            const profile = _load();
+            if (profile) {
+                profile.name = trimmed;
+                _save(profile);
+            }
+        }
+    };
+
+    const hasName = () => !!localStorage.getItem(NAME_KEY);
+
+    /* ---------- Theme persistence ---------- */
+
+    const getTheme = () => localStorage.getItem(THEME_KEY) || 'light';
+
+    const setTheme = (theme) => {
+        localStorage.setItem(THEME_KEY, theme);
+        document.documentElement.setAttribute('data-theme', theme);
+    };
+
+    /* ---------- Orders history ---------- */
+
+    const _loadOrders = () => {
+        try {
+            const raw = localStorage.getItem(ORDERS_KEY);
+            return raw ? JSON.parse(raw) : [];
+        } catch { return []; }
+    };
+
+    const _saveOrders = (orders) => {
+        try {
+            localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+        } catch (err) {
+            console.warn('[Customer] Failed to save orders:', err.message);
+        }
+    };
+
+    /**
+     * Save an order to local history.
+     * @param {object} order  — { orderId, items, total, status, date, customerName, phone }
+     */
+    const saveOrder = (order) => {
+        const orders = _loadOrders();
+        /* Prevent duplicates */
+        const idx = orders.findIndex(o => o.orderId === order.orderId);
+        if (idx >= 0) {
+            orders[idx] = { ...orders[idx], ...order };
+        } else {
+            orders.unshift(order);
+        }
+        /* Keep max 20 orders */
+        if (orders.length > 20) orders.length = 20;
+        _saveOrders(orders);
+        document.dispatchEvent(new CustomEvent('orders:updated'));
+    };
+
+    /**
+     * Update an order's status in local history.
+     * @param {string} orderId
+     * @param {string} status — PENDING | PREPARING | COMPLETED | CANCELLED
+     */
+    const updateOrderStatus = (orderId, status) => {
+        const orders = _loadOrders();
+        const order = orders.find(o => o.orderId === orderId);
+        if (order) {
+            order.status = status;
+            order.updatedAt = new Date().toISOString();
+            _saveOrders(orders);
+            document.dispatchEvent(new CustomEvent('orders:updated'));
+        }
+    };
+
+    /** Get all saved orders (newest first). */
+    const getOrders = () => _loadOrders();
+
+    /** Get a specific order by ID. */
+    const getOrder = (orderId) => _loadOrders().find(o => o.orderId === orderId) || null;
+
+    /** Check if there are any active orders (PENDING or PREPARING). */
+    const hasActiveOrders = () => _loadOrders().some(o => o.status === 'PENDING' || o.status === 'PREPARING');
+
     return Object.freeze({
         getProfile,
         exists,
@@ -175,5 +267,15 @@ const Customer = (() => {
         repeatLastOrder,
         getLoyaltyData,
         clear,
+        getName,
+        setName,
+        hasName,
+        getTheme,
+        setTheme,
+        saveOrder,
+        updateOrderStatus,
+        getOrders,
+        getOrder,
+        hasActiveOrders,
     });
 })();

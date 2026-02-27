@@ -23,6 +23,47 @@ document.addEventListener('DOMContentLoaded', () => {
         return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
     };
 
+    /* ==========  THEME INIT  ========== */
+    if (typeof Customer !== 'undefined') {
+        const savedTheme = Customer.getTheme();
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        UI.renderThemeToggle();
+    }
+
+    /* ==========  NAME MODAL  ========== */
+    const _initNameModal = () => {
+        if (typeof Customer === 'undefined' || Customer.hasName()) return;
+        const modal = $('#nameModal');
+        const input = $('#nameInput');
+        const submitBtn = $('#nameSubmit');
+        const skipBtn = $('#nameSkip');
+        if (!modal) return;
+
+        requestAnimationFrame(() => modal.classList.add('name-modal--visible'));
+        setTimeout(() => { if (input) input.focus(); }, 400);
+
+        const _close = (name) => {
+            if (name) Customer.setName(name);
+            modal.classList.remove('name-modal--visible');
+            setTimeout(() => modal.remove(), 300);
+            UI.renderGreeting();
+            UI.renderLoyaltyBar(null);
+        };
+
+        submitBtn.addEventListener('click', () => {
+            const name = input.value.trim();
+            if (!name) { input.focus(); return; }
+            _close(name);
+            showToast(`Welcome, ${name}! 🎉`);
+        });
+
+        skipBtn.addEventListener('click', () => _close(''));
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') submitBtn.click();
+        });
+    };
+
     /* ==========  ORDER RESULT POPUP  ========== */
     const _showOrderResult = (success, data = {}) => {
         /* Remove any existing popup */
@@ -185,6 +226,48 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('[CustomerSocket] Order status update:', data);
             debug('Socket Status Update', data);
             _showOrderNotification(data);
+
+            /* Update local orders history */
+            if (typeof Customer !== 'undefined' && data.orderId) {
+                Customer.updateOrderStatus(data.orderId, data.status);
+                UI.renderGreeting();
+                UI.renderOrdersPanel();
+            }
+        });
+
+        /* Listen for new orders placed by this phone */
+        _customerSocket.on('restaurant:new-order', (data) => {
+            if (!data) return;
+            const profile = typeof Customer !== 'undefined' ? Customer.getProfile() : null;
+            if (profile && data.phone && data.phone === profile.phone) {
+                console.log('[CustomerSocket] New order confirmed:', data);
+                if (data.orderId) {
+                    Customer.saveOrder({
+                        orderId: data.orderId,
+                        status: data.status || 'PENDING',
+                        total: data.total,
+                        items: data.items || [],
+                        date: data.date || new Date().toISOString(),
+                        customerName: data.customerName,
+                        phone: data.phone,
+                    });
+                    UI.renderGreeting();
+                    UI.renderOrdersPanel();
+                }
+            }
+        });
+
+        /* Listen for order updates matching saved orders */
+        _customerSocket.on('restaurant:order-updated', (data) => {
+            if (!data || !data.orderId) return;
+            const order = typeof Customer !== 'undefined' ? Customer.getOrder(data.orderId) : null;
+            if (order) {
+                console.log('[CustomerSocket] Order updated:', data);
+                Customer.updateOrderStatus(data.orderId, data.status);
+                _showOrderNotification(data);
+                UI.renderGreeting();
+                UI.renderOrdersPanel();
+            }
         });
 
         _customerSocket.on('disconnect', () => {
@@ -219,6 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         const info = statusLabels[data.status] || { icon: '📦', label: data.status, desc: 'Order status updated' };
+        const customerName = (typeof Customer !== 'undefined' ? Customer.getName() : '') || 'Guest';
 
         /* Remove any existing notification */
         const existing = document.getElementById('orderNotification');
@@ -232,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="order-notif__inner">
                 <span class="order-notif__icon">${info.icon}</span>
                 <div class="order-notif__text">
-                    <strong class="order-notif__title">${info.label}</strong>
+                    <strong class="order-notif__title">${customerName}, ${info.label}</strong>
                     <span class="order-notif__desc">${info.desc}</span>
                     ${data.orderId ? `<span class="order-notif__id">Order: ${data.orderId}</span>` : ''}
                 </div>
@@ -264,6 +348,12 @@ document.addEventListener('DOMContentLoaded', () => {
     State.set('loading', false);
     renderStats();
     renderMenu();
+
+    /* Initialize greeting bar */
+    UI.renderGreeting();
+
+    /* Show name modal on first visit */
+    _initNameModal();
 
     /* Initialize customer Socket.IO for order notifications */
     _initCustomerSocket();
@@ -580,6 +670,18 @@ document.addEventListener('DOMContentLoaded', () => {
                                     showToast(`+${earnedPoints} loyalty points earned!`);
                                 }
                                 UI.renderLoyaltyBar(null); /* re-render from localStorage */
+
+                                /* Save to orders history */
+                                Customer.saveOrder({
+                                    orderId: result.orderId,
+                                    status: 'PENDING',
+                                    total: result.total,
+                                    items: Cart.snapshot(),
+                                    date: new Date().toISOString(),
+                                    customerName: info.name,
+                                    phone: info.phone,
+                                });
+                                UI.renderGreeting();
                             }
 
                             _showOrderResult(true, {
@@ -762,6 +864,12 @@ document.addEventListener('DOMContentLoaded', () => {
     /* Listen for customer updates (order placed) to refresh bar */
     document.addEventListener('customer:updated', () => {
         UI.renderLoyaltyBar(null);
+        UI.renderGreeting();
+    });
+
+    /* Listen for orders history changes */
+    document.addEventListener('orders:updated', () => {
+        UI.renderGreeting();
     });
 
     document.addEventListener('click', (e) => {
@@ -769,4 +877,66 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Rewards coming soon!');
         }
     });
+
+    /* ==========  THEME TOGGLE  ========== */
+    const themeToggle = $('#themeToggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const current = Customer.getTheme();
+            const next = current === 'dark' ? 'light' : 'dark';
+            Customer.setTheme(next);
+            UI.renderThemeToggle();
+            showToast(next === 'dark' ? '🌙 Dark mode' : '☀️ Light mode');
+        });
+    }
+
+    /* ==========  ORDERS PANEL  ========== */
+    const ordersBtn = $('#ordersBtn');
+    if (ordersBtn) {
+        ordersBtn.addEventListener('click', () => UI.toggleOrdersPanel(true));
+    }
+
+    const closeOrders = $('#closeOrders');
+    if (closeOrders) {
+        closeOrders.addEventListener('click', () => UI.toggleOrdersPanel(false));
+    }
+
+    const ordersOverlay = $('#ordersOverlay');
+    if (ordersOverlay) {
+        ordersOverlay.addEventListener('click', () => UI.toggleOrdersPanel(false));
+    }
+
+    /* Close orders panel on Escape */
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const panel = $('#ordersPanel');
+            if (panel && panel.classList.contains('orders-panel--visible')) {
+                UI.toggleOrdersPanel(false);
+            }
+        }
+    });
+
+    /* Reorder from orders panel */
+    const ordersPanel = $('#ordersPanel');
+    if (ordersPanel) {
+        ordersPanel.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-action="panel-reorder"]');
+            if (!btn) return;
+            const orderId = btn.dataset.orderId;
+            const order = Customer.getOrder(orderId);
+            if (!order || !order.items || !order.items.length) {
+                showToast('No items to reorder');
+                return;
+            }
+            Cart.clear();
+            order.items.forEach(i => {
+                for (let q = 0; q < (i.quantity || 1); q++) {
+                    Cart.add(i.itemId || i.id, i.size, i.price);
+                }
+            });
+            UI.toggleOrdersPanel(false);
+            toggleCart(true);
+            showToast('Order restored! 🔁');
+        });
+    }
 });

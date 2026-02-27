@@ -27,6 +27,19 @@
         </div>
     </header>
 
+    <!-- ========================= GREETING ========================= -->
+    <div class="greeting" id="greetingBar" hidden>
+        <div class="greeting__text">
+            <div class="greeting__hi" id="greetingHi">Hey there! 👋</div>
+            <div class="greeting__sub" id="greetingSub">Welcome back</div>
+        </div>
+        <div class="greeting__actions">
+            <button class="greeting__btn greeting__btn--orders" id="ordersBtn" aria-label="My Orders">
+                📦 Orders <span class="greeting__order-dot" id="orderDot"></span>
+            </button>
+        </div>
+    </div>
+
     <!-- ==================== LOYALTY BAR ==================== -->
     <div class="loyalty-bar" id="loyaltyBar" role="complementary" aria-label="Rewards"></div>
 
@@ -144,6 +157,31 @@
             <button class="checkout-btn" id="checkoutBtn">� Place Order</button>
         </div>
     </div>
+
+    <!-- ==================== NAME MODAL ==================== -->
+    <div class="name-modal" id="nameModal" role="dialog" aria-label="Welcome" aria-modal="true">
+        <div class="name-modal__card">
+            <span class="name-modal__emoji">🥟</span>
+            <h2 class="name-modal__title">Welcome!</h2>
+            <p class="name-modal__sub">What should we call you?</p>
+            <input type="text" class="name-modal__input" id="nameInput" placeholder="Your name" maxlength="30" autocomplete="given-name">
+            <button class="name-modal__btn" id="nameSubmit">Let's Go! 🚀</button>
+            <button class="name-modal__skip" id="nameSkip">Skip for now</button>
+        </div>
+    </div>
+
+    <!-- ==================== ORDERS PANEL ==================== -->
+    <div class="orders-overlay" id="ordersOverlay"></div>
+    <aside class="orders-panel" id="ordersPanel" role="dialog" aria-label="My Orders" aria-modal="true">
+        <div class="orders-panel__head">
+            <span class="orders-panel__title">📦 My Orders</span>
+            <button class="orders-panel__close" id="closeOrders" aria-label="Close orders">✕</button>
+        </div>
+        <div class="orders-panel__body" id="ordersList"></div>
+    </aside>
+
+    <!-- ==================== THEME TOGGLE ==================== -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode">🌙</button>
 
     <!-- ==================== SCRIPTS (order matters) ==================== -->
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous" defer></script>

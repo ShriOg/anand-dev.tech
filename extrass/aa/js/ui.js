@@ -490,6 +490,159 @@ const UI = (() => {
         }
     };
 
+    /* ====================================================================
+       GREETING BAR
+    ==================================================================== */
+    const renderGreeting = () => {
+        const bar = $('#greetingBar');
+        if (!bar) return;
+        const name = Customer.getName() || '';
+        const loyalty = Customer.getLoyaltyData();
+
+        if (!name && !loyalty) {
+            bar.hidden = true;
+            return;
+        }
+
+        bar.hidden = false;
+        const hi = $('#greetingHi');
+        const sub = $('#greetingSub');
+        const dot = $('#orderDot');
+
+        const displayName = name || loyalty?.name || 'Guest';
+        const hour = new Date().getHours();
+        const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
+        if (hi) hi.textContent = `${greeting}, ${displayName}! 👋`;
+        if (sub) {
+            const pts = loyalty?.points || 0;
+            const orders = loyalty?.orders || 0;
+            sub.textContent = pts > 0 ? `⭐ ${pts} pts · 🏅 ${orders} orders` : 'Ready to order something delicious?';
+        }
+        if (dot) {
+            dot.classList.toggle('greeting__order-dot--active', Customer.hasActiveOrders());
+        }
+    };
+
+    /* ====================================================================
+       THEME TOGGLE
+    ==================================================================== */
+    const renderThemeToggle = () => {
+        const btn = $('#themeToggle');
+        if (!btn) return;
+        const theme = Customer.getTheme();
+        btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+        btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    };
+
+    /* ====================================================================
+       ORDERS PANEL
+    ==================================================================== */
+    const _buildTimeline = (status) => {
+        const steps = [
+            { key: 'PENDING',   label: 'Placed',   icon: '⏳' },
+            { key: 'PREPARING', label: 'Preparing', icon: '🔥' },
+            { key: 'COMPLETED', label: 'Ready',     icon: '✅' },
+        ];
+        const statusOrder = { PENDING: 0, PREPARING: 1, COMPLETED: 2, CANCELLED: -1 };
+        const current = statusOrder[status] ?? -1;
+
+        let html = '';
+        steps.forEach((step, i) => {
+            const stepIdx = statusOrder[step.key];
+            const isDone = current > stepIdx;
+            const isActive = current === stepIdx;
+            const dotClass = isDone ? 'order-timeline__dot--done' : isActive ? 'order-timeline__dot--active' : '';
+            const labelClass = isDone ? 'order-timeline__label--done' : isActive ? 'order-timeline__label--active' : '';
+
+            html += `<div class="order-timeline__step">
+                <div class="order-timeline__dot ${dotClass}">${isDone ? '✓' : isActive ? step.icon : ''}</div>
+                <span class="order-timeline__label ${labelClass}">${step.label}</span>
+            </div>`;
+
+            if (i < steps.length - 1) {
+                const lineClass = isDone ? 'order-timeline__line--done' : isActive ? 'order-timeline__line--active' : '';
+                html += `<div class="order-timeline__line ${lineClass}"></div>`;
+            }
+        });
+
+        return `<div class="order-timeline">${html}</div>`;
+    };
+
+    const _formatOrderDate = (dateStr) => {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        const now = new Date();
+        const diffMs = now - d;
+        const diffMin = Math.floor(diffMs / 60000);
+        if (diffMin < 1) return 'Just now';
+        if (diffMin < 60) return `${diffMin}m ago`;
+        const diffHr = Math.floor(diffMin / 60);
+        if (diffHr < 24) return `${diffHr}h ago`;
+        const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return `${d.getDate()} ${M[d.getMonth()]}, ${d.getHours() % 12 || 12}:${String(d.getMinutes()).padStart(2,'0')} ${d.getHours() >= 12 ? 'PM' : 'AM'}`;
+    };
+
+    const renderOrdersPanel = () => {
+        const body = $('#ordersList');
+        if (!body) return;
+
+        const orders = Customer.getOrders();
+
+        if (!orders.length) {
+            body.innerHTML = `
+                <div class="orders-panel__empty">
+                    <span class="orders-panel__empty-icon">📦</span>
+                    <p class="orders-panel__empty-text">No orders yet</p>
+                    <p class="orders-panel__empty-hint">Your order history will appear here</p>
+                </div>`;
+            return;
+        }
+
+        body.innerHTML = orders.map(order => {
+            const statusKey = (order.status || 'PENDING').toUpperCase();
+            const isCancelled = statusKey === 'CANCELLED';
+            const isCompleted = statusKey === 'COMPLETED';
+            const items = order.items || [];
+
+            let itemsHtml = items.slice(0, 4).map(i =>
+                `<div class="order-card__item">
+                    <span class="order-card__item-name">${i.name || 'Item'}</span>
+                    <span class="order-card__item-qty">${i.size ? i.size + ' × ' : ''}${i.quantity || 1}</span>
+                </div>`
+            ).join('');
+            if (items.length > 4) itemsHtml += `<div class="order-card__item"><span class="order-card__item-name" style="color:var(--c-text-lighter)">+${items.length - 4} more</span><span></span></div>`;
+
+            return `
+            <div class="order-card" data-order-id="${order.orderId || ''}">
+                <div class="order-card__head">
+                    <span class="order-card__id">${order.orderId || '—'}</span>
+                    <span class="order-card__date">${_formatOrderDate(order.date)}</span>
+                </div>
+                <span class="order-card__status order-card__status--${statusKey.toLowerCase()}">${statusKey}</span>
+                ${!isCancelled ? _buildTimeline(statusKey) : ''}
+                <div class="order-card__items">${itemsHtml}</div>
+                <div class="order-card__foot">
+                    <span class="order-card__total">₹${order.total || 0}</span>
+                    ${isCompleted ? `<button class="order-card__reorder" data-action="panel-reorder" data-order-id="${order.orderId}">🔁 Reorder</button>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+    };
+
+    const toggleOrdersPanel = (force) => {
+        const panel = $('#ordersPanel');
+        const overlay = $('#ordersOverlay');
+        if (!panel || !overlay) return;
+
+        const open = force !== undefined ? force : !panel.classList.contains('orders-panel--visible');
+        panel.classList.toggle('orders-panel--visible', open);
+        overlay.classList.toggle('orders-overlay--visible', open);
+        document.body.style.overflow = open ? 'hidden' : '';
+
+        if (open) renderOrdersPanel();
+    };
+
     /* ---------- Public surface ---------- */
     return Object.freeze({
         $, $$,
@@ -498,5 +651,9 @@ const UI = (() => {
         showToast, setActiveTab, setActiveChip,
         setCheckoutStep, getCheckoutStep, setCustomerInfo, getCustomerInfo,
         renderLoyaltyBar,
+        renderGreeting,
+        renderThemeToggle,
+        renderOrdersPanel,
+        toggleOrdersPanel,
     });
 })();
