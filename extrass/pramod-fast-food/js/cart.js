@@ -123,44 +123,21 @@ const Cart = (() => {
     };
 
     /**
-     * Submit order to backend API, then build WhatsApp URL.
+     * Submit order — pure frontend WhatsApp checkout.
+     * Generates a local order ID and builds the WhatsApp URL.
      * Does NOT clear the cart — caller clears only on success.
      *
      * @param {object} info — { name, phone, orderType, persons?, table?, note? }
-     * @returns {Promise<{ok:boolean, url?:string, orderId?:string, total?:number, error?:string}>}
+     * @returns {{ok:boolean, url?:string, orderId?:string, total?:number, error?:string}}
      */
-    const submitOrder = async (info) => {
+    const submitOrder = (info) => {
         const items = snapshot();
         if (!items.length) return { ok: false, error: 'Cart is empty' };
 
-        const payload = {
-            customerName: info.name,
-            phone: info.phone,
-            orderType: info.orderType,
-            items: items.map(i => ({ itemId: i.id, size: i.size, quantity: i.quantity })),
-        };
-        if (info.orderType === 'Dine-In') {
-            if (info.persons) payload.persons = Number(info.persons);
-            if (info.table) payload.tableNumber = info.table;
-        }
-        if (info.note) payload.note = info.note;
-
-        // Try backend first
-        if (typeof Api !== 'undefined') {
-            const res = await Api.placeOrder(payload);
-            if (res.ok && res.data) {
-                const backendOrderId = res.data.orderId || res.data._id || generateOrderId();
-                const backendTotal = res.data.total != null ? res.data.total : total();
-                const url = buildCheckoutMessage(info, { orderId: backendOrderId, total: backendTotal });
-                return { ok: true, url, orderId: backendOrderId, total: backendTotal };
-            }
-            // Backend failed — return error, keep cart intact
-            return { ok: false, error: res.error || 'Order submission failed' };
-        }
-
-        // No API module — fallback to client-side only (WhatsApp)
-        const url = buildCheckoutMessage(info);
-        return { ok: true, url, orderId: generateOrderId(), total: total() };
+        const orderId = generateOrderId();
+        const orderTotal = total();
+        const url = buildCheckoutMessage(info, { orderId, total: orderTotal });
+        return { ok: true, url, orderId, total: orderTotal };
     };
 
     return Object.freeze({ add, update, remove, clear, qty, count, total, snapshot, checkoutURL, buildCheckoutMessage, submitOrder });

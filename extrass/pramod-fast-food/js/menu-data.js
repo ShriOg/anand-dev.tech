@@ -167,56 +167,15 @@ const MenuData = (() => {
     };
 
     /**
-     * Group a flat array of items (from backend) into the categories
-     * structure that the rest of the app expects.
-     */
-    const _groupByCategory = (items) => {
-        const result = {};
-        items.forEach(item => {
-            const key = (item.category || 'other').toLowerCase().replace(/\s+/g, '-');
-            if (!result[key]) {
-                result[key] = { title: item.category || 'Other', icon: '🍽️', items: [] };
-            }
-            result[key].items.push(item);
-        });
-        return result;
-    };
-
-    /**
-     * Fetch menu from backend API and load it.
-     * Falls back to static data on any failure.
-     * @returns {Promise<{live:boolean, error?:string}>}
+     * fetchFromApi — DISABLED (frontend-only mode).
+     * Always uses the static menu. No network calls.
+     * Signature kept so callers don't break.
+     * @returns {Promise<{live:boolean}>}
      */
     const fetchFromApi = async () => {
-        if (typeof Api === 'undefined') {
-            _isLive = false;
-            return { live: false, error: 'Api module not loaded' };
-        }
-
-        const res = await Api.fetchMenu();
-
-        if (res.ok && res.data) {
-            let cats;
-
-            if (Array.isArray(res.data)) {
-                /* Backend returned flat item array — group into categories */
-                cats = _groupByCategory(res.data);
-            } else {
-                /* Object: { categories: {...} } or top-level { steam:{…}, fried:{…} } */
-                cats = res.data.categories || res.data;
-            }
-
-            if (cats && typeof cats === 'object' && !Array.isArray(cats) && Object.keys(cats).length) {
-                load(cats);
-                _isLive = true;
-                return { live: true };
-            }
-        }
-
-        // Fallback to static
         _initStatic();
         _isLive = false;
-        return { live: false, error: res.error || 'Empty menu data' };
+        return { live: false };
     };
 
     /** Did the last load come from the live API? */

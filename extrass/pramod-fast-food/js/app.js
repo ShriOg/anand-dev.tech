@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <button class="order-popup__btn order-popup__btn--wa" data-wa-url="${data.url || ''}">💬 Send via WhatsApp</button>
                         <button class="order-popup__btn order-popup__btn--close">Close</button>
                     </div>
-                    <p class="order-popup__hint">You'll get notified when your order status changes</p>
+                    <p class="order-popup__hint">Check WhatsApp for your order details</p>
                 </div>`;
         } else {
             popup.innerHTML = `
@@ -104,180 +104,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return d.innerHTML;
     };
 
-    /* ==========  CONNECTION INDICATOR  ========== */
-    const _updateConnectionIndicator = (state) => {
-        let el = document.getElementById('connIndicator');
-        if (!el) {
-            el = document.createElement('div');
-            el.id = 'connIndicator';
-            el.className = 'conn-indicator';
-            document.body.appendChild(el);
-        }
-        const map = {
-            connected:  { dot: '🟢', label: 'Connected',  cls: 'conn-indicator--on' },
-            connecting: { dot: '🟡', label: 'Connecting', cls: 'conn-indicator--mid' },
-            offline:    { dot: '🔴', label: 'Offline',    cls: 'conn-indicator--off' },
-        };
-        const info = map[state] || map.offline;
-        el.className = `conn-indicator ${info.cls}`;
-        el.innerHTML = `${info.dot} <span>${info.label}</span>`;
-        /* Auto-hide connected indicator after 3s */
-        if (state === 'connected') {
-            clearTimeout(el._hideTimer);
-            el._hideTimer = setTimeout(() => el.classList.add('conn-indicator--hidden'), 3000);
-        } else {
-            clearTimeout(el._hideTimer);
-            el.classList.remove('conn-indicator--hidden');
-        }
-    };
-
-    /* ==========  COLD START LISTENER  ========== */
-    document.addEventListener('api:cold-start', () => {
-        showToast('⏳ Server waking up — please wait…');
-    });
-
-    /* ==========  CUSTOMER ORDER NOTIFICATIONS (Socket.IO)  ========== */
-    let _customerSocket = null;
-    let _lastOrderId = null;
-
-    const _initCustomerSocket = () => {
-        if (typeof io === 'undefined') return;
-
-        const socketUrl = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-            ? 'http://localhost:10000'
-            : 'https://anand-os-backend.onrender.com';
-
-        _updateConnectionIndicator('connecting');
-
-        _customerSocket = io(socketUrl, {
-            transports: ['websocket', 'polling'],
-            reconnection: true,
-            reconnectionDelay: 3000,
-            reconnectionAttempts: 10,
-        });
-
-        _customerSocket.on('connect', () => {
-            console.log('[CustomerSocket] Connected');
-            _updateConnectionIndicator('connected');
-            /* Join room for latest order if we have one */
-            if (_lastOrderId) {
-                _customerSocket.emit('join:order', _lastOrderId);
-            }
-        });
-
-        _customerSocket.on('restaurant:order-status', (data) => {
-            if (!data) return;
-            console.log('[CustomerSocket] Order status update:', data);
-            _showOrderNotification(data);
-        });
-
-        _customerSocket.on('disconnect', () => {
-            console.log('[CustomerSocket] Disconnected');
-            _updateConnectionIndicator('offline');
-        });
-
-        _customerSocket.on('reconnect_attempt', () => {
-            _updateConnectionIndicator('connecting');
-        });
-
-        _customerSocket.on('connect_error', () => {
-            _updateConnectionIndicator('offline');
-        });
-    };
-
-    const _trackOrder = (orderId) => {
-        _lastOrderId = orderId;
-        localStorage.setItem('pf_last_order', orderId);
-        if (_customerSocket && _customerSocket.connected) {
-            _customerSocket.emit('join:order', orderId);
-        }
-    };
-
-    const _showOrderNotification = (data) => {
-        const statusLabels = {
-            PENDING: { icon: '⏳', label: 'Order Received', desc: 'Your order has been received' },
-            PREPARING: { icon: '🔥', label: 'Preparing', desc: 'Your order is being prepared!' },
-            COMPLETED: { icon: '✅', label: 'Ready!', desc: 'Your order is ready for pickup/serving' },
-            CANCELLED: { icon: '❌', label: 'Cancelled', desc: 'Your order has been cancelled' },
-        };
-
-        const info = statusLabels[data.status] || { icon: '📦', label: data.status, desc: 'Order status updated' };
-
-        /* Remove any existing notification */
-        const existing = document.getElementById('orderNotification');
-        if (existing) existing.remove();
-
-        const notif = document.createElement('div');
-        notif.id = 'orderNotification';
-        notif.className = `order-notif order-notif--${(data.status || '').toLowerCase()}`;
-        notif.setAttribute('role', 'alert');
-        notif.innerHTML = `
-            <div class="order-notif__inner">
-                <span class="order-notif__icon">${info.icon}</span>
-                <div class="order-notif__text">
-                    <strong class="order-notif__title">${info.label}</strong>
-                    <span class="order-notif__desc">${info.desc}</span>
-                    ${data.orderId ? `<span class="order-notif__id">Order: ${data.orderId}</span>` : ''}
-                </div>
-                <button class="order-notif__close" aria-label="Dismiss">✕</button>
-            </div>`;
-        document.body.appendChild(notif);
-        requestAnimationFrame(() => notif.classList.add('order-notif--visible'));
-
-        /* Vibrate on mobile */
-        if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-
-        /* Dismiss */
-        notif.querySelector('.order-notif__close').addEventListener('click', () => {
-            notif.classList.remove('order-notif--visible');
-            setTimeout(() => notif.remove(), 300);
-        });
-
-        /* Auto-dismiss */
-        setTimeout(() => {
-            if (notif.parentNode) {
-                notif.classList.remove('order-notif--visible');
-                setTimeout(() => notif.remove(), 300);
-            }
-        }, 8000);
-    };
-
     /* ==========  INITIAL RENDER  ========== */
     showSkeleton();
 
-    /* Initialize customer Socket.IO for order notifications */
-    _initCustomerSocket();
-
-    /* Restore last tracked order ID */
-    const savedOrderId = localStorage.getItem('pf_last_order');
-    if (savedOrderId) _lastOrderId = savedOrderId;
-
-    // Fetch menu from API → fall back to static data
-    (async () => {
-        try {
-            const result = await MenuData.fetchFromApi();
-            if (!result.live) {
-                console.warn('[menu] Using static fallback:', result.error);
-            }
-        } catch (err) {
-            console.warn('[menu] Fetch failed, using static data:', err);
-        }
-        renderStats();
-        State.set('loading', false);
-        renderMenu();
-    })();
-
-    // Fetch loyalty profile if authenticated
-    (async () => {
-        if (typeof Api !== 'undefined' && Api.isAuthenticated()) {
-            const res = await Api.fetchProfile();
-            if (res.ok && res.data) {
-                UI.renderLoyaltyBar(res.data);
-            } else {
-                UI.renderLoyaltyBar(null);
-            }
-        }
-    })();
+    /* Load static menu (no backend) */
+    renderStats();
+    State.set('loading', false);
+    renderMenu();
 
     /* ==========  STATE → UI SUBSCRIPTIONS  ========== */
     const updateTabIndicator = (activeTab) => {
@@ -433,55 +266,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             case 'checkout-confirm': {
                 const info = UI.getCustomerInfo();
-                if (!Cart.count()) return;
+                if (!Cart.count() || btn.disabled) return;
 
                 btn.disabled = true;
-                btn.textContent = '⏳ Placing order…';
+                btn.textContent = '⏳ Opening WhatsApp…';
 
-                (async () => {
-                    try {
-                        const result = await Cart.submitOrder(info);
+                const result = Cart.submitOrder(info);
 
-                        if (!result.ok) {
-                            _showOrderResult(false, { error: result.error });
-                            btn.disabled = false;
-                            btn.textContent = '💬 Confirm & Send';
-                            return;
-                        }
+                if (!result.ok) {
+                    showToast(result.error || 'Something went wrong');
+                    btn.disabled = false;
+                    btn.textContent = '💬 Confirm & Send';
+                    break;
+                }
 
-                        // Order saved — show success popup
-                        _showOrderResult(true, {
-                            orderId: result.orderId,
-                            total: result.total,
-                            url: result.url,
-                            name: info.name,
-                        });
+                /* Show success popup */
+                _showOrderResult(true, {
+                    orderId: result.orderId,
+                    total: result.total,
+                    url: result.url,
+                    name: info.name,
+                });
 
-                        // Track order for status notifications
-                        if (result.orderId) _trackOrder(result.orderId);
+                showToast('Opening WhatsApp…');
+                if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
 
-                        // Refresh loyalty data after successful order
-                        if (typeof Api !== 'undefined' && Api.isAuthenticated()) {
-                            Api.fetchProfile().then(res => {
-                                if (res.ok && res.data) UI.renderLoyaltyBar(res.data);
-                            });
-                        }
-
-                        // Clear cart & reset checkout
-                        setTimeout(() => {
-                            btn.disabled = false;
-                            btn.textContent = '💬 Confirm & Send';
-                            Cart.clear();
-                            UI.setCheckoutStep('cart');
-                            toggleCart(false);
-                        }, 2000);
-
-                    } catch (err) {
-                        _showOrderResult(false, { error: 'Network error — your cart is safe' });
-                        btn.disabled = false;
-                        btn.textContent = '💬 Confirm & Send';
-                    }
-                })();
+                /* Clear cart & reset after short delay */
+                setTimeout(() => {
+                    Cart.clear();
+                    UI.setCheckoutStep('cart');
+                    toggleCart(false);
+                    btn.disabled = false;
+                    btn.textContent = '💬 Confirm & Send';
+                }, 2000);
                 break;
             }
         }
