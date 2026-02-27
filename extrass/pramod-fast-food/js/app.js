@@ -10,6 +10,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const { $, $$, renderMenu, renderStats, renderCartBadge, renderCartModal,
             toggleCart, showToast, showSkeleton, setActiveTab, setActiveChip } = UI;
 
+    const hero = document.querySelector('.hero');
+    const tabs = $('#menuTabs');
+    const tabIndicator = document.querySelector('.tab-indicator');
+    const cartModal = $('#cartModal');
+    const modalOverlay = $('#modalOverlay');
+    let lastFocusedEl = null;
+
     /* ==========  UTILITY  ========== */
     const debounce = (fn, ms) => {
         let t;
@@ -27,9 +34,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 350);
 
     /* ==========  STATE → UI SUBSCRIPTIONS  ========== */
-    State.on('category', (v) => { setActiveTab(v);  renderMenu(); });
+    const updateTabIndicator = (activeTab) => {
+        if (!tabs || !tabIndicator || !activeTab) return;
+        requestAnimationFrame(() => {
+            const rect = activeTab.getBoundingClientRect();
+            const parentRect = tabs.getBoundingClientRect();
+            const x = rect.left - parentRect.left + tabs.scrollLeft;
+            tabIndicator.style.transform = `translateX(${x}px)`;
+            tabIndicator.style.width = `${rect.width}px`;
+        });
+    };
+
+    State.on('category', (v) => {
+        setActiveTab(v);
+        renderMenu();
+        updateTabIndicator(document.querySelector(`.tab[data-category="${v}"]`));
+    });
     State.on('filter',   (v) => { setActiveChip(v); renderMenu(); });
     State.on('search',   ()  => { renderMenu(); });
+    State.on('cartOpen', (open) => {
+        document.body.classList.toggle('modal-open', open);
+        modalOverlay.setAttribute('aria-hidden', String(!open));
+
+        if (open) {
+            lastFocusedEl = document.activeElement;
+            const focusable = cartModal.querySelector('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])');
+            if (focusable) focusable.focus();
+        } else if (lastFocusedEl) {
+            lastFocusedEl.focus();
+        }
+    });
 
     document.addEventListener('cart:changed', () => {
         renderMenu();
@@ -48,8 +82,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         switch (action) {
             case 'cart-add':
+                const prevCount = Cart.count();
                 Cart.add(itemId, size, priceNum);
+                if (prevCount === 0 && Cart.count() === 1) toggleCart(true);
                 showToast(`Added ${MenuData.findById(itemId)?.name || 'item'}`);
+                if (navigator.vibrate) navigator.vibrate(12);
                 break;
             case 'cart-inc':
                 Cart.update(itemId, size, priceNum, 1);
@@ -66,6 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!tab) return;
         State.set('category', tab.dataset.category);
         tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        updateTabIndicator(tab);
     });
 
     /* ==========  FILTER CHIPS  ========== */
@@ -105,10 +143,42 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Close cart on Escape
+    // Close cart on Escape + trap focus in modal
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && State.get('cartOpen')) toggleCart(false);
+        if (!State.get('cartOpen')) return;
+        if (e.key === 'Escape') return toggleCart(false);
+        if (e.key !== 'Tab') return;
+
+        const focusables = cartModal.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])');
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+
+        if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+        }
     });
+
+    // Swipe down to close (mobile)
+    let touchStartY = 0;
+    let touchActive = false;
+    cartModal.addEventListener('touchstart', (e) => {
+        touchStartY = e.touches[0].clientY;
+        touchActive = true;
+    }, { passive: true });
+    cartModal.addEventListener('touchmove', (e) => {
+        if (!touchActive) return;
+        const delta = e.touches[0].clientY - touchStartY;
+        if (delta > 90) {
+            touchActive = false;
+            toggleCart(false);
+        }
+    }, { passive: true });
+    cartModal.addEventListener('touchend', () => { touchActive = false; }, { passive: true });
 
     /* ==========  BACK TO TOP  ========== */
     const btt = $('#backToTop');
@@ -119,9 +189,24 @@ document.addEventListener('DOMContentLoaded', () => {
         scrollTick = true;
         requestAnimationFrame(() => {
             btt.classList.toggle('show', window.scrollY > 400);
+            if (hero) hero.classList.toggle('hero--compact', window.scrollY > 60);
             scrollTick = false;
         });
     }, { passive: true });
 
+    if (tabs) {
+        tabs.addEventListener('scroll', () => {
+            const active = document.querySelector('.tab.active');
+            updateTabIndicator(active);
+        }, { passive: true });
+    }
+
+    window.addEventListener('resize', () => {
+        const active = document.querySelector('.tab.active');
+        updateTabIndicator(active);
+    });
+
     btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+    updateTabIndicator(document.querySelector('.tab.active'));
 });

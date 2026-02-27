@@ -11,6 +11,10 @@ const UI = (() => {
     const $ = (s, ctx = document) => ctx.querySelector(s);
     const $$ = (s, ctx = document) => ctx.querySelectorAll(s);
 
+    /* ---------- Internal state ---------- */
+    const _prevQty = new Map();
+    let _lastCartCount = 0;
+
     /* ====================================================================
        STATS
     ==================================================================== */
@@ -57,17 +61,26 @@ const UI = (() => {
 
     const _cartButton = (item, label, value) => {
         const q = Cart.qty(item.id, label);
+        const key = `${item.id}-${label}`;
+        const prev = _prevQty.get(key) || 0;
+        const morphClass = q > 0 && prev === 0 ? ' cart-ctrl--morph' : '';
+
         if (q === 0) {
-            return `<button class="add-btn" data-action="cart-add"
-                        data-id="${item.id}" data-size="${label}" data-price="${value}">+ Add</button>`;
+            return `
+                <div class="cart-ctrl cart-ctrl--empty${morphClass}">
+                    <button class="add-btn" data-action="cart-add"
+                        data-id="${item.id}" data-size="${label}" data-price="${value}">+ Add</button>
+                </div>`;
         }
         return `
-            <div class="qty-ctrl">
-                <button class="qty-btn" data-action="cart-dec"
-                    data-id="${item.id}" data-size="${label}" data-price="${value}" aria-label="Decrease">−</button>
-                <span class="qty-val" aria-live="polite">${q}</span>
-                <button class="qty-btn" data-action="cart-inc"
-                    data-id="${item.id}" data-size="${label}" data-price="${value}" aria-label="Increase">+</button>
+            <div class="cart-ctrl cart-ctrl--qty${morphClass}">
+                <div class="qty-ctrl">
+                    <button class="qty-btn" data-action="cart-dec"
+                        data-id="${item.id}" data-size="${label}" data-price="${value}" aria-label="Decrease">−</button>
+                    <span class="qty-val" aria-live="polite">${q}</span>
+                    <button class="qty-btn" data-action="cart-inc"
+                        data-id="${item.id}" data-size="${label}" data-price="${value}" aria-label="Increase">+</button>
+                </div>
             </div>`;
     };
 
@@ -79,6 +92,10 @@ const UI = (() => {
 
         const cats = category === 'all' ? MenuData.keys() : [category];
         let html = '';
+
+        if (filter === 'special') {
+            html += '<div class="special-ribbon" role="status">Today\'s Specials</div>';
+        }
 
         cats.forEach(key => {
             const cat = MenuData.get(key);
@@ -98,6 +115,7 @@ const UI = (() => {
                 <div class="menu-grid">
                     ${visible.map((item, i) => `
                     <article class="card${item.special ? ' card--special' : ''}" style="animation-delay:${i * 0.04}s">
+                        ${item.prices[0].value < 50 ? '<span class="badge-budget">Under ₹50</span>' : ''}
                         <div class="card__head">
                             <span class="veg-dot" aria-label="Vegetarian"></span>
                             <span class="card__name">${item.name}</span>
@@ -126,7 +144,29 @@ const UI = (() => {
             </div>`;
         }
 
-        container.innerHTML = html;
+        const prevHeight = container.offsetHeight;
+        if (prevHeight) container.style.minHeight = `${prevHeight}px`;
+
+        container.classList.remove('menu-fade-in');
+        container.classList.add('menu-fade-out');
+
+        requestAnimationFrame(() => {
+            container.innerHTML = html;
+            container.classList.remove('menu-fade-out');
+            container.classList.add('menu-fade-in');
+
+            requestAnimationFrame(() => {
+                container.style.minHeight = '';
+                window.setTimeout(() => container.classList.remove('menu-fade-in'), 220);
+            });
+        });
+
+        _prevQty.clear();
+        MenuData.allItems().forEach(item => {
+            item.prices.forEach(p => {
+                _prevQty.set(`${item.id}-${p.label}`, Cart.qty(item.id, p.label));
+            });
+        });
     };
 
     /* ====================================================================
@@ -137,6 +177,13 @@ const UI = (() => {
         const c = Cart.count();
         badge.textContent = c;
         badge.style.display = c > 0 ? 'flex' : 'none';
+
+        if (c > _lastCartCount) {
+            badge.classList.remove('badge-pop');
+            void badge.offsetWidth;
+            badge.classList.add('badge-pop');
+        }
+        _lastCartCount = c;
     };
 
     /* ====================================================================
