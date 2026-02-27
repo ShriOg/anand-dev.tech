@@ -11,19 +11,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Advanced cinematic mouse glow system -->
-    <div class="cursor-glow-container">
-        <div class="cursor-glow cursor-glow-outer" id="cursorGlowOuter"></div>
-        <div class="cursor-glow cursor-glow-mid" id="cursorGlowMid"></div>
-        <div class="cursor-glow cursor-glow-inner" id="cursorGlowInner"></div>
+    <!-- Three.js particle field -->
+    <div id="particleField" aria-hidden="true"></div>
+
+    <!-- Environmental lighting system -->
+    <div class="env-light" aria-hidden="true">
+        <div class="env-light__halo" id="envHalo"></div>
+        <div class="env-light__glow" id="envGlow"></div>
+        <div class="env-light__core" id="envCore"></div>
     </div>
-    
-    <!-- Animated background gradients -->
-    <div class="background-layer">
-        <div class="radial-gradient"></div>
-        <div class="ambient-glow ambient-glow-1"></div>
-        <div class="ambient-glow ambient-glow-2"></div>
-        <div class="ambient-glow ambient-glow-3"></div>
+
+    <!-- Atmospheric layers -->
+    <div class="atmosphere" aria-hidden="true">
+        <div class="atmosphere__gradient" id="atmGradient"></div>
+        <div class="atmosphere__ambient atmosphere__ambient--1"></div>
+        <div class="atmosphere__ambient atmosphere__ambient--2"></div>
+        <div class="atmosphere__ambient atmosphere__ambient--3"></div>
+        <canvas class="atmosphere__grain" id="atmGrain"></canvas>
     </div>
 
     <!-- Main container -->
@@ -108,6 +112,7 @@
         </section>
     </main>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="script.js"></script>
     <script>
       document.addEventListener('keydown', function(e) {
