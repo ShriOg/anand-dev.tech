@@ -163,125 +163,231 @@ const MenuData = (() => {
     /**
      * Replace categories wholesale (for live API data).
      * Filters out inactive items automatically.
+     * Preserves static category order when the incoming keys match.
      */
     const load = (data) => {
         Object.keys(categories).forEach(k => delete categories[k]);
-        Object.assign(categories, _filterActive(data));
-    };
 
-    /**
-     * Group a flat array of items (from backend) into the categories
-     * structure that the rest of the app expects.
-     */
-    const _groupByCategory = (items) => {
-        const result = {};
-        items.forEach(item => {
-            const key = (item.category || 'other').toLowerCase().replace(/\s+/g, '-');
-            if (!result[key]) {
-                result[key] = { title: item.category || 'Other', icon: '🍽️', items: [] };
-            }
-            result[key].items.push(item);
-        });
-        return result;
+        const active = _filterActive(data);
+
+        // Insert in static order first, then any extra keys
+        for (const key of _staticCategoryOrder) {
+            if (active[key]) categories[key] = active[key];
+        }
+        for (const [key, cat] of Object.entries(active)) {
+            if (!categories[key]) categories[key] = cat;
+        }
     };
 
     /* ============================================================
-       NORMALIZATION — unify any server format to canonical shape
-       { id, name, desc, category, special, active, prices:[{label,value}] }
+       STATIC METADATA — category keys, titles, icons, order.
+       Used as the canonical reference for normalizing server data.
     ============================================================ */
 
-    /** Icons map for known category keys */
-    const _catIcons = {
-        steam: '🥟', fried: '🍤', gravy: '🍲', kurkure: '✨',
-        noodles: '🍜', potato: '🥔', rolls: '🌯', chilli: '🌶️', main: '🍚',
-    };
+    /** Ordered array of canonical category keys (defines tab order) */
+    const _staticCategoryOrder = Object.keys(_staticCategories);
+
+    /** Map of { key → { title, icon } } from static data */
+    const _staticMeta = {};
+    for (const [key, cat] of Object.entries(_staticCategories)) {
+        _staticMeta[key] = { title: cat.title, icon: cat.icon };
+    }
 
     /**
-     * Normalize a single menu item from any server format to canonical.
-     * @param {Object} item — raw item from server
-     * @param {string} [fallbackCategory] — category name if item lacks one
-     * @returns {Object} canonical item
+     * Build a lookup: category title (lowercased) → static key
+     * e.g. "steam momos" → "steam", "chilli potato" → "potato"
      */
-    const _normalizeItem = (item, fallbackCategory) => {
-        let prices = item.prices;
-
-        // Handle single-price items
-        if (!prices && item.price != null) {
-            prices = [{ label: 'Regular', value: Number(item.price) }];
-        }
-
-        // Handle array of numbers or mixed formats
-        if (Array.isArray(prices)) {
-            prices = prices.map(p => {
-                if (typeof p === 'number') return { label: 'Regular', value: p };
-                return {
-                    label: String(p.label || p.size || 'Regular'),
-                    value: Number(p.value ?? p.price ?? 0),
-                };
-            });
-        }
-
-        return {
-            id: Number(item.id ?? item._id),
-            name: String(item.name || ''),
-            desc: String(item.desc || item.description || ''),
-            category: String(item.category || fallbackCategory || 'other'),
-            special: !!item.special,
-            active: item.active !== false,
-            prices: prices || [],
-        };
-    };
+    const _titleToKey = {};
+    for (const [key, cat] of Object.entries(_staticCategories)) {
+        _titleToKey[cat.title.toLowerCase()] = key;
+    }
 
     /**
-     * Normalize a categories object (keys → { title, icon, items[] })
-     * ensuring every item inside matches canonical format.
+     * Build a lookup: item name (lowercased) → static item.
+     * Used for fallback desc when server doesn't send one.
      */
-    const _normalizeCategories = (raw) => {
-        if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
-        const result = {};
-        for (const [key, cat] of Object.entries(raw)) {
-            if (!cat || !Array.isArray(cat.items)) continue;
-            const catKey = key.toLowerCase().replace(/\s+/g, '-');
-            result[catKey] = {
-                title: cat.title || key,
-                icon: cat.icon || _catIcons[catKey] || '🍽️',
-                items: cat.items.map(i => _normalizeItem(i, cat.title || key)),
-            };
+    const _staticItemByName = {};
+    for (const cat of Object.values(_staticCategories)) {
+        for (const item of cat.items) {
+            _staticItemByName[item.name.toLowerCase()] = item;
         }
-        return result;
-    };
+    }
+
+    /* ============================================================
+       NORMALIZATION — convert any server shape into the exact
+       categories structure the UI expects (keys, icons, order).
+       ZERO changes to UI code required.
+    ============================================================ */
 
     /**
-     * Public normalizer: accepts any server data shape, returns
-     * canonical categories object ready for load() or setLiveData().
+     * Resolve a server category string to a static category key.
+     * Tries exact title match first, then keyword heuristics.
      *
-     * Handles:
-     *   - Flat array of items
-     *   - { categories: { key: { title, icon, items[] } } }
-     *   - Top-level { steam: {…}, fried: {…}, … }
+     * @param {string} raw — raw category string from backend
+     * @returns {string} canonical static key, or slugified fallback
+     */
+    const _resolveCategory = (raw) => {
+        if (!raw) return 'other';
+
+        const lower = raw.toLowerCase().trim();
+
+        // Exact title match: "Steam Momos" → "steam"
+        if (_titleToKey[lower]) return _titleToKey[lower];
+
+        // Exact key match: "steam" → "steam"
+        if (_staticMeta[lower]) return lower;
+
+        // Keyword heuristic (order matters — more specific first)
+        const kwMap = [
+            ['kurkure', 'kurkure'], ['gravy', 'gravy'], ['chilli momo', 'chilli'],
+            ['fried momo', 'fried'], ['steam', 'steam'], ['noodle', 'noodles'],
+            ['potato', 'potato'], ['fry', 'potato'], ['roll', 'rolls'],
+            ['fried rice', 'main'], ['manchurian', 'main'], ['paneer chilli', 'main'],
+            ['main', 'main'], ['chilli', 'chilli'],
+        ];
+        for (const [kw, key] of kwMap) {
+            if (lower.includes(kw)) return key;
+        }
+
+        // Slugified fallback for truly unknown categories
+        return lower.replace(/\s+/g, '-');
+    };
+
+    /**
+     * Normalize a single item's prices to [ { label: string, value: number } ].
+     * Handles every known backend format.
+     */
+    const _normalizePrices = (raw) => {
+        if (!raw) return [];
+
+        // Single price shorthand
+        if (typeof raw === 'number') return [{ label: 'Regular', value: raw }];
+
+        if (!Array.isArray(raw)) return [];
+
+        return raw.map(p => {
+            if (typeof p === 'number') return { label: 'Regular', value: p };
+            return {
+                label: String(p.label || p.size || 'Regular'),
+                value: Number(p.value ?? p.price ?? 0),
+            };
+        });
+    };
+
+    /**
+     * Normalize a single server item to the canonical shape the UI expects.
+     *
+     * Canonical shape:
+     *   { id, name, desc, special, prices: [{ label, value }] }
+     *
+     * Server overrides: price, special, active.
+     * Static provides: fallback desc.
+     */
+    const _normalizeItem = (serverItem) => {
+        const id = Number(serverItem.id ?? serverItem._id);
+        const name = String(serverItem.name || '');
+        const prices = _normalizePrices(serverItem.prices || serverItem.price);
+        const special = !!serverItem.special;
+        const active = serverItem.active !== false;
+
+        // Fallback desc from static if server didn't provide one
+        const staticMatch = _staticItemByName[name.toLowerCase()];
+        const desc = String(
+            serverItem.desc || serverItem.description || staticMatch?.desc || ''
+        );
+
+        return { id, name, desc, special, active, prices };
+    };
+
+    /**
+     * normalizeServerMenu(serverData)
+     *
+     * THE SINGLE PUBLIC NORMALIZER.
+     *
+     * Accepts any server response shape and returns an object
+     * with the EXACT same key → { title, icon, items[] } structure
+     * as _staticCategories.  Preserves static category order, icons,
+     * and titles so the UI renders identically.
+     *
+     * Supported input shapes:
+     *   1. Flat array of items    [ { _id, name, category, … } ]
+     *   2. Wrapped categories     { categories: { key: { title, icon, items[] } } }
+     *   3. Top-level categories   { steam: { title, icon, items[] }, … }
      *
      * @param {Array|Object} serverData
-     * @returns {Object} categories object { key: { title, icon, items[] } }
+     * @returns {Object} canonical categories object
      */
     const normalizeMenuFromServer = (serverData) => {
         if (!serverData) return {};
 
-        // Flat array of items
+        /* --- Step A: reduce any shape to a flat array of raw items --- */
+
+        let flatItems = [];
+
         if (Array.isArray(serverData)) {
-            return _groupByCategory(serverData.map(i => _normalizeItem(i)));
+            // Shape 1: flat array
+            flatItems = serverData;
+        } else if (typeof serverData === 'object') {
+            // Shape 2 or 3
+            const root = serverData.categories || serverData;
+            if (typeof root === 'object' && !Array.isArray(root)) {
+                for (const [key, cat] of Object.entries(root)) {
+                    if (!cat || !Array.isArray(cat.items)) continue;
+                    // Inject category name into each item so resolver can work
+                    for (const item of cat.items) {
+                        flatItems.push({
+                            ...item,
+                            category: item.category || cat.title || key,
+                        });
+                    }
+                }
+            }
         }
 
-        // { categories: { … } } wrapper
-        if (serverData.categories && typeof serverData.categories === 'object') {
-            return _normalizeCategories(serverData.categories);
+        if (!flatItems.length) return {};
+
+        /* --- Step B: filter inactive, normalise, bucket by static key --- */
+
+        /** Buckets: key → normalised items[] */
+        const buckets = {};
+
+        for (const raw of flatItems) {
+            if (raw.active === false) continue;          // skip inactive
+
+            const item = _normalizeItem(raw);
+            if (item.active === false) continue;          // double-check
+
+            const key = _resolveCategory(raw.category);
+            if (!buckets[key]) buckets[key] = [];
+            buckets[key].push(item);
         }
 
-        // Top-level category keys { steam: {…}, fried: {…}, … }
-        if (typeof serverData === 'object') {
-            return _normalizeCategories(serverData);
+        /* --- Step C: assemble output in static category order --- */
+
+        const result = {};
+
+        // First: known categories in their original order
+        for (const key of _staticCategoryOrder) {
+            if (!buckets[key] || !buckets[key].length) continue;
+            const meta = _staticMeta[key] || {};
+            result[key] = {
+                title: meta.title || key,
+                icon:  meta.icon  || '🍽️',
+                items: buckets[key],
+            };
         }
 
-        return {};
+        // Then: any genuinely new categories from the server
+        for (const [key, items] of Object.entries(buckets)) {
+            if (result[key]) continue;                    // already placed
+            result[key] = {
+                title: key.charAt(0).toUpperCase() + key.slice(1).replace(/-/g, ' '),
+                icon:  '🍽️',
+                items,
+            };
+        }
+
+        return result;
     };
 
     /* ============================================================
@@ -290,7 +396,7 @@ const MenuData = (() => {
 
     /**
      * Merge live (server) categories into the active menu without
-     * resetting the whole object.  Returns array of changed item IDs
+     * resetting the whole DOM object.  Returns array of changed item IDs
      * so the UI can do a targeted re-render.
      *
      * Rules:
@@ -298,8 +404,9 @@ const MenuData = (() => {
      *   - Changed fields (price, special, active, name, desc) are patched
      *   - Items removed on server are removed locally
      *   - Cart is NOT touched (it stores its own copy of data)
+     *   - Static icons, titles, and category order are preserved
      *
-     * @param {Object} liveCats — normalized categories from server
+     * @param {Object} liveCats — **already** normalised via normalizeMenuFromServer()
      * @returns {number[]} IDs of items that actually changed
      */
     const setLiveData = (liveCats) => {
@@ -308,17 +415,29 @@ const MenuData = (() => {
 
         for (const [key, liveCat] of Object.entries(filtered)) {
             if (!categories[key]) {
-                // Brand-new category from server
-                categories[key] = { ...liveCat, items: liveCat.items.map(i => ({ ...i })) };
+                // Brand-new category from server — adopt static meta if available
+                const meta = _staticMeta[key] || {};
+                categories[key] = {
+                    title: meta.title || liveCat.title || key,
+                    icon:  meta.icon  || liveCat.icon  || '🍽️',
+                    items: liveCat.items.map(i => ({ ...i })),
+                };
                 liveCat.items.forEach(i => changedIds.push(i.id));
                 continue;
             }
 
             const currentCat = categories[key];
 
-            // Merge title / icon if server has better data
-            if (liveCat.title) currentCat.title = liveCat.title;
-            if (liveCat.icon && liveCat.icon !== '🍽️') currentCat.icon = liveCat.icon;
+            // Always prefer static meta for title/icon to keep UI identical
+            const meta = _staticMeta[key];
+            if (meta) {
+                currentCat.title = meta.title;
+                currentCat.icon  = meta.icon;
+            } else {
+                // Non-static category — take server's title/icon if better
+                if (liveCat.title) currentCat.title = liveCat.title;
+                if (liveCat.icon && liveCat.icon !== '🍽️') currentCat.icon = liveCat.icon;
+            }
 
             // Build fast-lookup for current items
             const currentMap = new Map(currentCat.items.map(i => [i.id, i]));
