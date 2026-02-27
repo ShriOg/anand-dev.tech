@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Pramod Fast Food — Menu</title>
+    <meta name="description" content="Pramod Fast Food — Momos, Noodles, Rolls & more. 100% Pure Veg. Order via WhatsApp!">
+    <meta name="theme-color" content="#e85d04">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- ========================= HERO ========================= -->
+    <header class="hero" role="banner">
+        <div class="hero__inner">
+            <span class="hero__emoji" aria-hidden="true">🥟</span>
+            <h1 class="hero__title">Pramod Fast Food</h1>
+            <p class="hero__sub">Momos · Noodles · Rolls · & More</p>
+            <span class="hero__badge" aria-label="100% Pure Vegetarian">🌿 100% Pure Veg</span>
+        </div>
+    </header>
+
+    <!-- ==================== LOYALTY BAR ==================== -->
+    <div class="loyalty-bar" id="loyaltyBar" role="complementary" aria-label="Rewards"></div>
+
+    <!-- ==================== SEARCH + FILTERS ==================== -->
+    <div class="search-bar" role="search" aria-label="Search menu">
+        <div class="search-box">
+            <span class="search-box__icon" aria-hidden="true">🔍</span>
+            <input
+                type="search"
+                class="search-box__input"
+                id="searchInput"
+                placeholder="Search items or descriptions…"
+                autocomplete="off"
+                aria-label="Search menu items"
+            >
+            <button class="search-box__clear" id="searchClear" aria-label="Clear search">✕</button>
+        </div>
+        <div class="filters" id="filterBar" role="group" aria-label="Filter menu">
+            <button class="chip active" data-filter="all"      aria-pressed="true">All</button>
+            <button class="chip"        data-filter="special"   aria-pressed="false">🔥 Special</button>
+            <button class="chip"        data-filter="under50"   aria-pressed="false">Under ₹50</button>
+            <button class="chip"        data-filter="under100"  aria-pressed="false">Under ₹100</button>
+        </div>
+    </div>
+
+    <!-- ==================== CATEGORY TABS ==================== -->
+    <nav class="tabs-wrap" aria-label="Menu categories">
+        <div class="tabs" id="menuTabs" role="tablist">
+            <button class="tab active" data-category="all"     role="tab" aria-selected="true">All</button>
+            <button class="tab"        data-category="steam"   role="tab" aria-selected="false">🥟 Steam</button>
+            <button class="tab"        data-category="fried"   role="tab" aria-selected="false">🍤 Fried</button>
+            <button class="tab"        data-category="gravy"   role="tab" aria-selected="false">🍲 Gravy</button>
+            <button class="tab"        data-category="kurkure" role="tab" aria-selected="false">✨ Kurkure</button>
+            <button class="tab"        data-category="noodles" role="tab" aria-selected="false">🍜 Noodles</button>
+            <button class="tab"        data-category="potato"  role="tab" aria-selected="false">🥔 Potato</button>
+            <button class="tab"        data-category="rolls"   role="tab" aria-selected="false">🌯 Rolls</button>
+            <button class="tab"        data-category="chilli"  role="tab" aria-selected="false">🌶️ Chilli</button>
+            <button class="tab"        data-category="main"    role="tab" aria-selected="false">🍚 Main</button>
+            <span class="tab-indicator" aria-hidden="true"></span>
+        </div>
+    </nav>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="main">
+        <!-- Stats -->
+        <div class="stats" aria-label="Menu statistics">
+            <div class="stat">
+                <div class="stat__val" id="stat-total">0</div>
+                <div class="stat__lbl">Items</div>
+            </div>
+            <div class="stat">
+                <div class="stat__val" id="stat-specials">0</div>
+                <div class="stat__lbl">Specials</div>
+            </div>
+            <div class="stat">
+                <div class="stat__val" id="stat-avg">₹0</div>
+                <div class="stat__lbl">Avg Price</div>
+            </div>
+            <div class="stat">
+                <div class="live-indicator live-indicator--off" id="liveIndicator">
+                    <span class="live-dot"></span> Offline
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu items render here -->
+        <div id="menuContainer" role="feed" aria-label="Menu items"></div>
+    </main>
+
+    <!-- ======================== FOOTER ======================== -->
+    <footer class="footer">
+        <div class="footer__btns">
+            <a href="tel:8595928413" class="footer__btn footer__btn--call" aria-label="Call us">📞 Call Now</a>
+            <a href="https://wa.me/918595928413" class="footer__btn footer__btn--wa" aria-label="Message on WhatsApp">💬 WhatsApp</a>
+        </div>
+        <p class="footer__info">
+            🎉 Party orders available<br>
+            शादी, बर्थडे व पार्टी के आर्डर भी लिए जाते है
+        </p>
+    </footer>
+
+    <!-- ==================== FLOATING UI ==================== -->
+    <button class="btt" id="backToTop" aria-label="Back to top">↑</button>
+
+    <button class="cart-fab" id="cartBtn" aria-label="Open cart">
+        🛒
+        <span class="cart-fab__badge" id="cartBadge" style="display:none">0</span>
+    </button>
+
+    <!-- Cart overlay -->
+    <div class="overlay" id="modalOverlay" aria-hidden="true"></div>
+
+    <!-- Cart modal -->
+    <div class="cart-modal" id="cartModal" role="dialog" aria-label="Shopping cart" aria-modal="true">
+        <div class="cart-modal__handle" aria-hidden="true"></div>
+        <div class="cart-modal__head">
+            <span class="cart-modal__title">
+                <span class="cart-modal__title-icon" aria-hidden="true">🛒</span>
+                Your Cart
+            </span>
+            <button class="cart-modal__close" id="closeCart" aria-label="Close cart">✕</button>
+        </div>
+        <div class="cart-modal__list" id="cartItems">
+            <div class="empty-cart">
+                <div class="empty-cart__icon" aria-hidden="true">🛒</div>
+                <p class="empty-cart__title">Your cart is empty</p>
+                <p class="empty-cart__hint">Add items from the menu to get started</p>
+            </div>
+        </div>
+        <div class="cart-modal__foot" id="cartFooter" hidden>
+            <div class="cart-total">
+                <span>Total</span>
+                <span class="cart-total__val" id="cartTotal">₹0</span>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn">💬 Place Order via WhatsApp</button>
+        </div>
+    </div>
+
+    <!-- ==================== SCRIPTS (order matters) ==================== -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous" defer></script>
+    <script src="js/api.js"></script>
+    <script src="js/menu-data.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
