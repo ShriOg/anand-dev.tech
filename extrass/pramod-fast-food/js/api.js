@@ -26,8 +26,8 @@ const Api = (() => {
         profile: '/api/auth/profile',
     });
 
-    const TIMEOUT_MS = 15000;
-    const COLD_START_RETRY_DELAY = 3000;
+    const TIMEOUT_MS = 8000;
+    const COLD_START_RETRY_DELAY = 2000;
 
     /** JWT token (set after login, if any) */
     let _token = localStorage.getItem('pf_token') || null;

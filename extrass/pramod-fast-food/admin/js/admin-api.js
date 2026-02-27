@@ -13,7 +13,7 @@ const AdminAPI = (() => {
         ? 'http://localhost:3000/api'
         : 'https://anand-os-backend.onrender.com/api';
 
-    const COLD_START_RETRY_DELAY = 3500;
+    const COLD_START_RETRY_DELAY = 2000;
     let _serverAwake = false;
 
     /* ---------- Core fetch wrapper (with cold-start retry) ---------- */
@@ -72,6 +72,13 @@ const AdminAPI = (() => {
 
     const getRecentOrders = (limit = 5) => _fetch(`/restaurant/orders?limit=${limit}&sort=-createdAt`);
 
+    const getTodayOrders = (params = {}) => {
+        const qs = new URLSearchParams();
+        if (params.status) qs.set('status', params.status);
+        const q = qs.toString();
+        return _fetch(`/restaurant/orders/today${q ? '?' + q : ''}`);
+    };
+
     const updateOrderStatus = (orderId, status) =>
         _fetch(`/restaurant/orders/${orderId}/status`, {
             method: 'PATCH',
@@ -92,7 +99,7 @@ const AdminAPI = (() => {
 
     /* ---------- Public surface ---------- */
     return Object.freeze({
-        getStats, getOrders, getRecentOrders,
+        getStats, getOrders, getRecentOrders, getTodayOrders,
         updateOrderStatus,
         getMenu, updateMenuItem,
         getAnalytics,

@@ -39,6 +39,8 @@ const AdminSocket = (() => {
             return;
         }
 
+        _emit('socket:status', { connected: 'connecting' });
+
         const baseUrl = window.location.hostname === 'localhost'
             ? 'http://localhost:3000'
             : 'https://anand-os-backend.onrender.com';
@@ -67,6 +69,10 @@ const AdminSocket = (() => {
         _socket.on('connect_error', (err) => {
             console.warn('[AdminSocket] Connection error:', err.message);
             _updateStatus(false);
+        });
+
+        _socket.on('reconnect_attempt', () => {
+            _emit('socket:status', { connected: 'connecting' });
         });
 
         /* --- Restaurant events --- */

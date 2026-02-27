@@ -67,11 +67,21 @@ const AdminUI = (() => {
     /* ====================================================================
        SOCKET STATUS
     ==================================================================== */
-    const updateSocketStatus = (connected) => {
+    const updateSocketStatus = (status) => {
         const el = $('#socketStatus');
         if (!el) return;
-        el.innerHTML = connected ? '🟢 Live' : '🔴 Offline';
-        el.title = connected ? 'Realtime connected' : 'Realtime disconnected';
+        if (status === 'connecting' || status === true) {
+            if (status === true) {
+                el.innerHTML = '🟢 Live';
+                el.title = 'Realtime connected';
+            } else {
+                el.innerHTML = '🟡 Connecting';
+                el.title = 'Connecting to server…';
+            }
+        } else {
+            el.innerHTML = '🔴 Offline';
+            el.title = 'Realtime disconnected';
+        }
     };
 
     /* ====================================================================

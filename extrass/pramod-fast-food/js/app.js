@@ -104,6 +104,33 @@ document.addEventListener('DOMContentLoaded', () => {
         return d.innerHTML;
     };
 
+    /* ==========  CONNECTION INDICATOR  ========== */
+    const _updateConnectionIndicator = (state) => {
+        let el = document.getElementById('connIndicator');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'connIndicator';
+            el.className = 'conn-indicator';
+            document.body.appendChild(el);
+        }
+        const map = {
+            connected:  { dot: '🟢', label: 'Connected',  cls: 'conn-indicator--on' },
+            connecting: { dot: '🟡', label: 'Connecting', cls: 'conn-indicator--mid' },
+            offline:    { dot: '🔴', label: 'Offline',    cls: 'conn-indicator--off' },
+        };
+        const info = map[state] || map.offline;
+        el.className = `conn-indicator ${info.cls}`;
+        el.innerHTML = `${info.dot} <span>${info.label}</span>`;
+        /* Auto-hide connected indicator after 3s */
+        if (state === 'connected') {
+            clearTimeout(el._hideTimer);
+            el._hideTimer = setTimeout(() => el.classList.add('conn-indicator--hidden'), 3000);
+        } else {
+            clearTimeout(el._hideTimer);
+            el.classList.remove('conn-indicator--hidden');
+        }
+    };
+
     /* ==========  COLD START LISTENER  ========== */
     document.addEventListener('api:cold-start', () => {
         showToast('⏳ Server waking up — please wait…');
@@ -120,6 +147,8 @@ document.addEventListener('DOMContentLoaded', () => {
             ? 'http://localhost:3000'
             : 'https://anand-os-backend.onrender.com';
 
+        _updateConnectionIndicator('connecting');
+
         _customerSocket = io(socketUrl, {
             transports: ['websocket', 'polling'],
             reconnection: true,
@@ -129,6 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         _customerSocket.on('connect', () => {
             console.log('[CustomerSocket] Connected');
+            _updateConnectionIndicator('connected');
             /* Join room for latest order if we have one */
             if (_lastOrderId) {
                 _customerSocket.emit('join:order', _lastOrderId);
@@ -143,6 +173,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         _customerSocket.on('disconnect', () => {
             console.log('[CustomerSocket] Disconnected');
+            _updateConnectionIndicator('offline');
+        });
+
+        _customerSocket.on('reconnect_attempt', () => {
+            _updateConnectionIndicator('connecting');
+        });
+
+        _customerSocket.on('connect_error', () => {
+            _updateConnectionIndicator('offline');
         });
     };
 

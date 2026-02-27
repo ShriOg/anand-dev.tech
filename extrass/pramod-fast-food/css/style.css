@@ -828,3 +828,21 @@ body.modal-open .cart-fab{
     .order-popup__actions{flex-direction:column}
 }
 @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ---------- Connection Indicator ---------- */
+.conn-indicator{
+    position:fixed;bottom:12px;left:12px;z-index:800;
+    display:flex;align-items:center;gap:4px;
+    padding:4px 10px;border-radius:9999px;font-size:11px;font-weight:600;
+    background:rgba(255,255,255,.92);backdrop-filter:blur(6px);
+    box-shadow:0 1px 4px rgba(0,0,0,.12);
+    transition:opacity .4s,transform .4s;
+    pointer-events:none;
+}
+.conn-indicator span{color:#333}
+.conn-indicator--on span{color:#15803d}
+.conn-indicator--mid span{color:#a16207}
+.conn-indicator--off span{color:#b91c1c}
+.conn-indicator--hidden{opacity:0;transform:translateY(8px)}
+@keyframes conn-pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.conn-indicator--mid{animation:conn-pulse 1.2s ease-in-out infinite}

@@ -207,13 +207,16 @@ document.addEventListener('DOMContentLoaded', () => {
     ==================================================================== */
     async function loadDashboard() {
         try {
-            const [stats, recentRes] = await Promise.all([
+            const [statsRes, recentRes] = await Promise.all([
                 AdminAPI.getStats(),
                 AdminAPI.getRecentOrders(5),
             ]);
             _showWakingBanner(false);
+            /* Unwrap { success, data } wrapper */
+            const stats = statsRes?.data || statsRes;
             renderStats(stats);
-            const recent = recentRes?.data || recentRes?.orders || (Array.isArray(recentRes) ? recentRes : []);
+            const recentPayload = recentRes?.data || recentRes;
+            const recent = Array.isArray(recentPayload) ? recentPayload : (recentPayload?.orders || []);
             renderRecentOrders(recent);
         } catch (err) {
             const msg = (err.message || '').includes('Failed to fetch')
@@ -269,8 +272,10 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadLiveOrders() {
         try {
             const statusFilter = $('#ordersStatusFilter')?.value || '';
-            const res = await AdminAPI.getOrders({ status: statusFilter, limit: 50 });
-            liveOrders = res?.data || res?.orders || (Array.isArray(res) ? res : []);
+            const res = await AdminAPI.getTodayOrders({ status: statusFilter });
+            /* Unwrap { success, data } wrapper */
+            const payload = res?.data || res;
+            liveOrders = Array.isArray(payload) ? payload : (payload?.orders || []);
             renderOrderCards(liveOrders);
             updatePendingBadge();
         } catch (err) {
@@ -379,8 +384,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 phone: $('#historyPhoneSearch')?.value.trim() || '',
             };
             const res = await AdminAPI.getOrders(params);
-            const orders = res?.data || res?.orders || (Array.isArray(res) ? res : []);
-            historyTotal = res?.totalPages || Math.ceil((res?.total || orders.length) / 20) || 1;
+            /* Unwrap { success, data } wrapper */
+            const payload = res?.data || res;
+            const orders = Array.isArray(payload) ? payload : (payload?.orders || []);
+            historyTotal = res?.totalPages || payload?.totalPages || Math.ceil((res?.total || payload?.total || orders.length) / 20) || 1;
             allHistoryOrders = orders;
 
             renderHistoryTable(orders);
@@ -429,6 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadMenu() {
         try {
             const res = await AdminAPI.getMenu();
+            /* Unwrap { success, data } wrapper */
             const data = res?.data || res?.categories || res;
 
             /* Flatten nested structure or use flat array */
@@ -440,6 +448,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 menuItems = data;
                 const cats = [...new Set(data.map(i => i.category).filter(Boolean))];
                 menuCategories = cats.map(c => ({ key: c, title: c }));
+            } else if (data && typeof data === 'object') {
+                /* Object with category keys */
+                const cats = Object.keys(data);
+                menuCategories = cats.map(c => ({ key: c, title: data[c]?.title || c }));
+                menuItems = cats.flatMap(c => (data[c]?.items || []).map(i => ({ ...i, category: data[c]?.title || c })));
             } else {
                 menuItems = [];
                 menuCategories = [];
@@ -535,7 +548,9 @@ document.addEventListener('DOMContentLoaded', () => {
     ==================================================================== */
     async function loadAnalytics() {
         try {
-            const data = await AdminAPI.getAnalytics();
+            const res = await AdminAPI.getAnalytics();
+            /* Unwrap { success, data } wrapper */
+            const data = res?.data || res;
             if (!data) return;
 
             /* Orders per day chart */
