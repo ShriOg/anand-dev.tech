@@ -236,6 +236,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast(`Added ${MenuData.findById(numId)?.name || 'item'}`);
                 if (navigator.vibrate) navigator.vibrate(12);
                 break;
+            case 'toggle-suggestions': {
+                const wrapper = btn.closest('.cart-suggestions');
+                const list = wrapper?.querySelector('.cart-suggestions__list');
+                if (!list) break;
+                const open = list.hidden;
+                list.hidden = !open;
+                btn.setAttribute('aria-expanded', String(open));
+                btn.querySelector('.cart-suggestions__chevron').textContent = open ? '\u25b4' : '\u25be';
+                break;
+            }
             case 'clear-cart':
                 Cart.clear();
                 showToast('Cart cleared');

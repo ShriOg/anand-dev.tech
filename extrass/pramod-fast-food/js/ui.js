@@ -210,23 +210,27 @@ const UI = (() => {
        CART MODAL
     ==================================================================== */
 
-    /** Pick 2 random menu items not currently in cart */
+    /** Pick up to 6 random menu items not currently in cart, render as collapsible dropdown */
     const _renderSuggestions = () => {
         const cartIds = new Set(Cart.snapshot().map(i => i.id));
         const available = MenuData.allItems().filter(i => !cartIds.has(i.id));
         if (!available.length) return '';
-        const picks = available.sort(() => Math.random() - 0.5).slice(0, 2);
+        const picks = available.sort(() => Math.random() - 0.5).slice(0, 6);
         return `
         <div class="cart-suggestions">
-            <p class="cart-suggestions__title">You may also like</p>
-            <div class="cart-suggestions__list">
+            <button class="cart-suggestions__toggle" data-action="toggle-suggestions" aria-expanded="false">
+                <span class="cart-suggestions__title">✨ Add more items</span>
+                <span class="cart-suggestions__count">${available.length} available</span>
+                <span class="cart-suggestions__chevron">▾</span>
+            </button>
+            <div class="cart-suggestions__list" hidden>
                 ${picks.map(item => {
                     const p = item.prices[0];
                     return `
                     <div class="suggest-card">
                         <div class="suggest-card__info">
                             <span class="suggest-card__name">${item.name}</span>
-                            <span class="suggest-card__price">₹${p.value}</span>
+                            <span class="suggest-card__meta">${p.label} • ₹${p.value}</span>
                         </div>
                         <button class="suggest-card__add" data-action="suggest-add"
                             data-id="${item.id}" data-size="${p.label}" data-price="${p.value}">+ Add</button>
@@ -234,7 +238,6 @@ const UI = (() => {
                 }).join('')}
             </div>
         </div>`;
-    };
 
     const renderCartModal = () => {
         const listEl   = $('#cartItems');
