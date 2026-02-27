@@ -172,6 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         _customerSocket.on('connect', () => {
             console.log('[CustomerSocket] Connected');
+            debug('Socket Connected');
             _updateConnectionIndicator('connected');
             /* Join room for latest order if we have one */
             if (_lastOrderId) {
@@ -182,11 +183,13 @@ document.addEventListener('DOMContentLoaded', () => {
         _customerSocket.on('restaurant:order-status', (data) => {
             if (!data) return;
             console.log('[CustomerSocket] Order status update:', data);
+            debug('Socket Status Update', data);
             _showOrderNotification(data);
         });
 
         _customerSocket.on('disconnect', () => {
             console.log('[CustomerSocket] Disconnected');
+            debug('Socket Disconnected');
             _updateConnectionIndicator('offline');
         });
 
@@ -367,6 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
        This sets __BACKEND_CONNECTED__ BEFORE user reaches checkout. */
     (async () => {
         if (typeof Api === 'undefined') return;
+        debug('Checking Backend Connection');
         try {
             const res = await Api.request('/api/restaurant/stats');
             const isSuccess = res?.success ?? res?.ok;
@@ -374,15 +378,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isSuccess) {
                 window.__BACKEND_CONNECTED__ = true;
                 console.log('[BackendPing] Backend is connected');
+                debug('Backend Connected');
                 /* Re-render cart modal if open, to hide WhatsApp button */
                 renderCartModal();
             } else {
                 window.__BACKEND_CONNECTED__ = false;
                 console.log('[BackendPing] Backend returned non-success');
+                debug('Backend Disconnected');
             }
         } catch (err) {
             window.__BACKEND_CONNECTED__ = false;
             console.log('[BackendPing] Backend unreachable:', err.message);
+            debug('Backend Disconnected');
         }
     })();
 
@@ -565,6 +572,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (result.ok && result.source === 'server') {
                             /* === Backend accepted the order === */
                             window.__BACKEND_CONNECTED__ = true;
+
+                            /* Save customer data + loyalty points */
+                            if (typeof Customer !== 'undefined') {
+                                const { earnedPoints } = Customer.recordOrder(info, result.total, Cart.snapshot());
+                                if (earnedPoints > 0) {
+                                    showToast(`+${earnedPoints} loyalty points earned!`);
+                                }
+                                UI.renderLoyaltyBar(null); /* re-render from localStorage */
+                            }
+
                             _showOrderResult(true, {
                                 orderId: result.orderId,
                                 total: result.total,
@@ -606,6 +623,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         renderCartModal();
 
                     } catch (err) {
+                        debug('Fatal Error', err);
+                        console.error(err);
                         window.__BACKEND_CONNECTED__ = false;
                         const waData = Cart.sendViaWhatsApp(info);
                         _showOrderResult(false, {
@@ -624,6 +643,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 /* Direct WhatsApp send — bypasses backend entirely */
                 const waInfo = UI.getCustomerInfo();
                 if (!Cart.count()) return;
+
+                /* Save customer data + loyalty points even for WhatsApp orders */
+                if (typeof Customer !== 'undefined') {
+                    const waTotal = Cart.total();
+                    Customer.recordOrder(waInfo, waTotal, Cart.snapshot());
+                    UI.renderLoyaltyBar(null);
+                }
+
                 const waResult = Cart.sendViaWhatsApp(waInfo);
                 if (waResult.url) {
                     window.open(waResult.url, '_blank');
@@ -635,6 +662,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         url: waResult.url,
                         viaWhatsApp: true,
                     });
+                }
+                break;
+            }
+            case 'repeat-order': {
+                /* Restore last order from Customer localStorage */
+                if (typeof Customer !== 'undefined' && Customer.repeatLastOrder()) {
+                    showToast('Last order restored!');
+                } else {
+                    showToast('No previous order found');
                 }
                 break;
             }
@@ -719,8 +755,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateTabIndicator(document.querySelector('.tab.active'));
 
-    /* ==========  LOYALTY BAR (frontend placeholder)  ========== */
+    /* ==========  LOYALTY BAR  ========== */
+    /* Render from localStorage first, then overlay API data if authenticated */
     UI.renderLoyaltyBar(null);
+
+    /* Listen for customer updates (order placed) to refresh bar */
+    document.addEventListener('customer:updated', () => {
+        UI.renderLoyaltyBar(null);
+    });
 
     document.addEventListener('click', (e) => {
         if (e.target.closest('#googleLoginBtn')) {

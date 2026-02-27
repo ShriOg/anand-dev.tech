@@ -175,6 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /* ==========  INIT  ========== */
     function init() {
         console.log('[Admin] init() — booting admin panel…');
+        debug('Admin Booted');
 
         try {
             /* Connect realtime */
@@ -239,6 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ==================================================================== */
     async function loadDashboard() {
         console.log('[Admin] loadDashboard()');
+        debug('Fetching Stats');
         try {
             const [statsRes, recentRes] = await Promise.all([
                 AdminAPI.getStats(),
@@ -249,12 +251,15 @@ document.addEventListener('DOMContentLoaded', () => {
             _showWakingBanner(false);
             /* Unwrap { success, data } wrapper */
             const stats = statsRes?.data || statsRes;
+            debug('Stats Data', stats);
             renderStats(stats);
             const recentPayload = recentRes?.data || recentRes;
             const recent = Array.isArray(recentPayload) ? recentPayload : (recentPayload?.orders || []);
             console.log('[Admin] Rendered', recent.length, 'recent orders');
             renderRecentOrders(recent);
         } catch (err) {
+            debug('Fatal Error', err);
+            console.error(err);
             const msg = (err.message || '').includes('Failed to fetch')
                 ? 'Server is starting up — will retry automatically…'
                 : 'Failed to load dashboard data';
@@ -273,6 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!btn) return;
             const page = btn.dataset.page;
             console.log('[Admin] Sidebar click → page:', page);
+            debug('Sidebar Click', page);
             if (!page || page === currentPage) return;
             currentPage = page;
             switchPage(page);
@@ -310,6 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ==================================================================== */
     async function loadLiveOrders() {
         console.log('[Admin] loadLiveOrders()');
+        debug('Fetching Live Orders');
         try {
             const statusFilter = $('#ordersStatusFilter')?.value || '';
             const res = await AdminAPI.getTodayOrders({ status: statusFilter });
@@ -318,9 +325,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const payload = res?.data || res;
             liveOrders = Array.isArray(payload) ? payload : (payload?.orders || []);
             console.log('[Admin] Live orders count:', liveOrders.length);
+            debug('Orders Received', liveOrders);
             renderOrderCards(liveOrders);
             updatePendingBadge();
         } catch (err) {
+            debug('Fatal Error', err);
+            console.error(err);
             showToast('Failed to load orders', 'error');
         }
     }
@@ -438,6 +448,8 @@ document.addEventListener('DOMContentLoaded', () => {
             renderHistoryTable(orders);
             renderPagination(historyPage, historyTotal);
         } catch (err) {
+            debug('Fatal Error', err);
+            console.error(err);
             showToast('Failed to load history', 'error');
         }
     }
@@ -507,6 +519,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             renderMenuItems(menuItems, menuCategories);
         } catch (err) {
+            debug('Fatal Error', err);
+            console.error(err);
             showToast('Failed to load menu', 'error');
         }
     }
@@ -621,6 +635,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderTopItems(data.topItems);
             }
         } catch (err) {
+            debug('Fatal Error', err);
+            console.error(err);
             showToast('Failed to load analytics', 'error');
         }
     }

@@ -141,6 +141,7 @@ const MenuData = (() => {
     /** Populate categories from static data (immediate, synchronous) */
     const _initStatic = () => {
         categories = _filterActive(_staticCategories);
+        debug('Static Menu Loaded', allItems());
     };
 
     // Start with static data so everything works synchronously
@@ -322,6 +323,7 @@ const MenuData = (() => {
      */
     const normalizeMenuFromServer = (serverData) => {
         if (!serverData) return {};
+        debug('Server Menu Raw', serverData);
 
         /* --- Step A: reduce any shape to a flat array of raw items --- */
 
@@ -489,6 +491,7 @@ const MenuData = (() => {
 
         _isLive = true;
         window.__SERVER_READY__ = true;
+        debug('Menu Hot Swapped');
         return changedIds;
     };
 
@@ -509,6 +512,7 @@ const MenuData = (() => {
         if (isSuccess && res.data) {
             const cats = normalizeMenuFromServer(res.data);
             if (cats && Object.keys(cats).length) {
+                debug('Server Menu Normalized', cats);
                 load(cats);
                 _isLive = true;
                 window.__SERVER_READY__ = true;
@@ -542,6 +546,7 @@ const MenuData = (() => {
             const cats = normalizeMenuFromServer(res.data);
             if (!cats || !Object.keys(cats).length) return { live: false, error: 'Empty menu' };
 
+            debug('Server Menu Normalized', cats);
             const changedIds = setLiveData(cats);
             window.__BACKEND_CONNECTED__ = true;
             return { live: true, changedIds };

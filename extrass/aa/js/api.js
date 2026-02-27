@@ -10,6 +10,14 @@
  */
 'use strict';
 
+/* ========== GLOBAL DEBUG MODE ========== */
+window.__DEBUG__ = true;
+
+function debug(label, data = null) {
+    if (!window.__DEBUG__) return;
+    console.log(`[DEBUG] ${label}`, data ?? '');
+}
+
 const Api = (() => {
 
     /* ---------- Configuration ---------- */
@@ -46,17 +54,20 @@ const Api = (() => {
         const timer = setTimeout(() => controller.abort(), timeout);
 
         try {
+            debug('API Request', { method: opts.method || 'GET', url, body: opts.body ? JSON.parse(opts.body) : undefined });
             const res = await fetch(url, {
                 ...opts,
                 headers,
                 signal: controller.signal,
             });
             clearTimeout(timer);
+            debug('API Response Status', res.status);
 
             let data = null;
             const ct = res.headers.get('content-type') || '';
             if (ct.includes('application/json')) {
                 data = await res.json();
+                debug('API Response Body', data);
             }
 
             if (!res.ok) {
@@ -77,6 +88,7 @@ const Api = (() => {
 
         } catch (err) {
             clearTimeout(timer);
+            debug('API Error', err);
             if (err.name === 'AbortError') {
                 return { ok: false, status: 0, data: null, error: 'Request timed out' };
             }

@@ -22,6 +22,7 @@ const Cart = (() => {
     /* ---------- Public API ---------- */
 
     const add = (itemId, size, price) => {
+        debug('Cart Add', { itemId, size, price });
         const item = MenuData.findById(itemId);
         if (!item) return;
         const key = _key(itemId, size);
@@ -35,6 +36,7 @@ const Cart = (() => {
     };
 
     const update = (itemId, size, price, delta) => {
+        debug('Cart Update', { itemId, size, delta });
         const key = _key(itemId, size);
         if (!_items[key]) {
             if (delta > 0) add(itemId, size, price);
@@ -46,11 +48,13 @@ const Cart = (() => {
     };
 
     const remove = (itemId, size) => {
+        debug('Cart Remove', { itemId, size });
         delete _items[_key(itemId, size)];
         _emit();
     };
 
     const clear = () => {
+        debug('Cart Cleared');
         Object.keys(_items).forEach(k => delete _items[k]);
         _emit();
     };
@@ -122,6 +126,13 @@ const Cart = (() => {
         return `https://wa.me/918595928413?text=${encodeURIComponent(msg)}`;
     };
 
+    /** Map frontend order types to backend enum values */
+    const _mapOrderType = (type) => {
+        if (type === 'Dine-In') return 'DINE_IN';
+        if (type === 'Takeaway') return 'TAKEAWAY';
+        return type;
+    };
+
     /**
      * Submit order to backend API.
      * Does NOT clear the cart — caller clears only on success.
@@ -131,13 +142,14 @@ const Cart = (() => {
      * @returns {Promise<{ok:boolean, orderId?:string, total?:number, source:string, error?:string}>}
      */
     const submitOrder = async (info) => {
+        debug('Submitting Order', info);
         const items = snapshot();
         if (!items.length) return { ok: false, error: 'Cart is empty', source: 'none' };
 
         const payload = {
             customerName: info.name,
             phone: info.phone,
-            orderType: info.orderType,
+            orderType: _mapOrderType(info.orderType),
             items: items.map(i => ({ itemId: i.id, size: i.size, quantity: i.quantity })),
         };
         if (info.orderType === 'Dine-In') {
@@ -146,25 +158,32 @@ const Cart = (() => {
         }
         if (info.note) payload.note = info.note;
 
+        debug('Final Payload', payload);
+
         // Try backend
         if (typeof Api !== 'undefined') {
             try {
                 const res = await Api.placeOrder(payload);
                 const isSuccess = res?.success ?? res?.ok;
                 console.log('[Cart] placeOrder response:', { isSuccess, hasData: !!res?.data, res });
+                debug('Order API Result', res);
 
                 if (isSuccess && res.data) {
                     window.__BACKEND_CONNECTED__ = true;
                     const d = res.data;
                     const backendOrderId = d.orderId || d._id || generateOrderId();
                     const backendTotal = d.total != null ? d.total : total();
+                    debug('Order Success', res.data);
                     return { ok: true, orderId: backendOrderId, total: backendTotal, source: 'server' };
                 }
 
                 // HTTP succeeded but backend returned failure
                 console.warn('[Cart] Backend returned non-success:', res);
+                debug('Order Failed', res);
             } catch (err) {
                 console.warn('[Cart] API order failed:', err.message);
+                debug('Fatal Error', err);
+                console.error(err);
             }
 
             // Backend failed or returned error

@@ -109,6 +109,7 @@ const UI = (() => {
         const category = State.get('category');
         const search   = State.get('search');
         const filter   = State.get('filter');
+        debug('Rendering Menu', { category, search, filter });
 
         const cats = category === 'all' ? MenuData.keys() : [category];
         let html = '';
@@ -243,27 +244,32 @@ const UI = (() => {
 
         /* --- Checkout FORM step --- */
         if (_checkoutStep === 'form') {
+            debug('Checkout Step', 'form');
             if (titleEl) titleEl.innerHTML = '<span class="cart-modal__title-icon">📋</span> Details';
             _renderCheckoutForm(listEl, footerEl);
             return;
         }
         /* --- Order SUMMARY step --- */
         if (_checkoutStep === 'summary') {
+            debug('Checkout Step', 'summary');
             if (titleEl) titleEl.innerHTML = '<span class="cart-modal__title-icon">📦</span> Summary';
             _renderOrderSummary(listEl, footerEl);
             return;
         }
 
         /* --- Default CART step --- */
+        debug('Rendering Cart Modal', Cart.snapshot());
         if (titleEl) titleEl.innerHTML = '<span class="cart-modal__title-icon">🛒</span> Your Cart';
         const items = Cart.snapshot();
 
         if (!items.length) {
+            const hasLastOrder = (typeof Customer !== 'undefined') && Customer.getLastOrder();
             listEl.innerHTML = `
                 <div class="empty-cart">
                     <span class="empty-cart__icon">🛒</span>
                     <p class="empty-cart__title">Your cart is empty</p>
                     <p class="empty-cart__hint">Add items from the menu to get started</p>
+                    ${hasLastOrder ? '<button class="repeat-order-btn" data-action="repeat-order">🔁 Repeat Last Order</button>' : ''}
                 </div>`;
             footerEl.hidden = true;
             return;
@@ -298,7 +304,16 @@ const UI = (() => {
 
     /* ---------- Checkout Form ---------- */
     const _renderCheckoutForm = (listEl, footerEl) => {
-        const ci = _customerInfo;
+        /* Auto-prefill from saved customer data if form fields are empty */
+        const saved = (typeof Customer !== 'undefined') ? Customer.getProfile() : null;
+        const ci = {
+            name: _customerInfo.name || saved?.name || '',
+            phone: _customerInfo.phone || saved?.phone || '',
+            orderType: _customerInfo.orderType || '',
+            persons: _customerInfo.persons || '',
+            table: _customerInfo.table || '',
+            note: _customerInfo.note || '',
+        };
         listEl.innerHTML = `
         <div class="checkout-form">
             <div class="form-group">
@@ -448,17 +463,22 @@ const UI = (() => {
     };
 
     /* ====================================================================
-       LOYALTY BAR (frontend-ready placeholder)
+       LOYALTY BAR
     ==================================================================== */
     const renderLoyaltyBar = (user) => {
         const el = $('#loyaltyBar');
         if (!el) return;
-        if (user) {
+
+        /* Prefer local Customer data over passed-in user (API profile) */
+        const local = (typeof Customer !== 'undefined') ? Customer.getLoyaltyData() : null;
+        const data = local || user;
+
+        if (data && data.name) {
             el.innerHTML = `
-                <span class="loyalty__user">Hi, ${user.name}!</span>
+                <span class="loyalty__user">Hi, ${data.name}! 👋</span>
                 <div class="loyalty__stats">
-                    <span class="loyalty__stat">⭐ ${user.points || 0} pts</span>
-                    <span class="loyalty__stat">🏅 ${user.orders || 0} orders</span>
+                    <span class="loyalty__stat">⭐ ${data.points || 0} pts</span>
+                    <span class="loyalty__stat">🏅 ${data.orders || 0} orders</span>
                 </div>`;
         } else {
             el.innerHTML = `

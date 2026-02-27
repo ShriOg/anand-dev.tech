@@ -6,6 +6,15 @@
  */
 'use strict';
 
+/* ========== GLOBAL DEBUG MODE (admin) ========== */
+if (typeof window.__DEBUG__ === 'undefined') window.__DEBUG__ = true;
+if (typeof debug === 'undefined') {
+    window.debug = function(label, data) {
+        if (!window.__DEBUG__) return;
+        console.log('[DEBUG] ' + label, data ?? '');
+    };
+}
+
 const AdminUI = (() => {
 
     /* ---------- DOM helpers ---------- */
@@ -57,6 +66,7 @@ const AdminUI = (() => {
        PAGE NAVIGATION
     ==================================================================== */
     const switchPage = (pageKey) => {
+        debug('Switching Page', pageKey);
         $$('.page').forEach(p => p.hidden = p.dataset.page !== pageKey);
         $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === pageKey));
 

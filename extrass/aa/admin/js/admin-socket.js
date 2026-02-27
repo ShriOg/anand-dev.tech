@@ -57,12 +57,14 @@ const AdminSocket = (() => {
 
         _socket.on('connect', () => {
             console.log('[AdminSocket] Connected');
+            debug('Socket Connected');
             _updateStatus(true);
             _socket.emit('join:admin');
         });
 
         _socket.on('disconnect', (reason) => {
             console.log('[AdminSocket] Disconnected:', reason);
+            debug('Socket Disconnected');
             _updateStatus(false);
         });
 
@@ -78,11 +80,13 @@ const AdminSocket = (() => {
         /* --- Restaurant events --- */
         _socket.on(_EVENTS.NEW_ORDER, (order) => {
             console.log('[AdminSocket] New order:', order);
+            debug('Socket New Order', order);
             _emit('admin:new-order', order);
         });
 
         _socket.on(_EVENTS.ORDER_UPDATED, (data) => {
             console.log('[AdminSocket] Order updated:', data);
+            debug('Socket Status Update', data);
             _emit('admin:order-updated', data);
         });
     };

@@ -24,6 +24,7 @@ const State = (() => {
     /** Write a value and notify subscribers */
     const set = (key, value) => {
         if (_state[key] === value) return;
+        debug('State Change', { key, value });
         _state[key] = value;
         (_listeners[key] || []).forEach(fn => fn(value));
         (_listeners['*'] || []).forEach(fn => fn(key, value));

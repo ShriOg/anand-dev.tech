@@ -23,6 +23,7 @@ const AdminAPI = (() => {
             ...(options.headers || {}),
         };
 
+        debug('API Request', { method: options.method || 'GET', url: `${BASE_URL}${endpoint}`, body: options.body ? JSON.parse(options.body) : undefined });
         const res = await fetch(`${BASE_URL}${endpoint}`, {
             ...options,
             headers,
@@ -30,6 +31,7 @@ const AdminAPI = (() => {
 
         if (!res.ok) {
             const body = await res.json().catch(() => ({}));
+            debug('API Error', { status: res.status, body });
             if (res.status >= 500) throw new Error('Server waking up… please try again.');
             if (res.status === 401) throw new Error('Admin authentication required.');
             throw new Error(body.message || `HTTP ${res.status}`);
@@ -37,7 +39,10 @@ const AdminAPI = (() => {
 
         _serverAwake = true;
         if (res.status === 204) return null;
-        return await res.json();
+        const data = await res.json();
+        debug('API Response Status', res.status);
+        debug('API Response Body', data);
+        return data;
     };
 
     const _fetch = async (endpoint, options = {}) => {
