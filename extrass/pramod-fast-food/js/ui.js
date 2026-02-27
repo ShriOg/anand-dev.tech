@@ -224,6 +224,7 @@ const UI = (() => {
                 }).join('')}
             </div>
         </div>`;
+    };
 
     const renderCartModal = () => {
         const listEl   = $('#cartItems');
