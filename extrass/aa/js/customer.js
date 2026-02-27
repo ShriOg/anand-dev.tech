@@ -92,7 +92,7 @@ const Customer = (() => {
         // Store last order for repeat
         profile.lastOrder = {
             items: (cartItems || []).map(i => ({
-                id: i.id,
+                itemId: i.itemId,
                 name: i.name,
                 size: i.size,
                 price: i.price,
@@ -115,7 +115,7 @@ const Customer = (() => {
 
     /**
      * Get last order items for "Repeat Last Order".
-     * @returns {Array|null} — array of { id, name, size, price, quantity } or null
+     * @returns {Array|null} — array of { itemId, name, size, price, quantity } or null
      */
     const getLastOrder = () => {
         const profile = _load();
@@ -136,7 +136,7 @@ const Customer = (() => {
         // Re-add each item
         items.forEach(i => {
             for (let q = 0; q < i.quantity; q++) {
-                Cart.add(i.id, i.size, i.price);
+                Cart.add(i.itemId || i.id, i.size, i.price);
             }
         });
 

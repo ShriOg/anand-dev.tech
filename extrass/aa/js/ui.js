@@ -80,8 +80,8 @@ const UI = (() => {
     };
 
     const _cartButton = (item, label, value) => {
-        const q = Cart.qty(item.id, label);
-        const key = `${item.id}-${label}`;
+        const q = Cart.qty(item._id, label);
+        const key = `${item._id}-${label}`;
         const prev = _prevQty.get(key) || 0;
         const morphClass = q > 0 && prev === 0 ? ' cart-ctrl--morph' : '';
 
@@ -89,17 +89,17 @@ const UI = (() => {
             return `
                 <div class="cart-ctrl cart-ctrl--empty${morphClass}">
                     <button class="add-btn" data-action="cart-add"
-                        data-id="${item.id}" data-size="${label}" data-price="${value}">+ Add</button>
+                        data-id="${item._id}" data-size="${label}" data-price="${value}">+ Add</button>
                 </div>`;
         }
         return `
             <div class="cart-ctrl cart-ctrl--qty${morphClass}">
                 <div class="qty-ctrl">
                     <button class="qty-btn" data-action="cart-dec"
-                        data-id="${item.id}" data-size="${label}" data-price="${value}" aria-label="Decrease">−</button>
+                        data-id="${item._id}" data-size="${label}" data-price="${value}" aria-label="Decrease">−</button>
                     <span class="qty-val" aria-live="polite">${q}</span>
                     <button class="qty-btn" data-action="cart-inc"
-                        data-id="${item.id}" data-size="${label}" data-price="${value}" aria-label="Increase">+</button>
+                        data-id="${item._id}" data-size="${label}" data-price="${value}" aria-label="Increase">+</button>
                 </div>
             </div>`;
     };
@@ -185,7 +185,7 @@ const UI = (() => {
         _prevQty.clear();
         MenuData.allItems().forEach(item => {
             item.prices.forEach(p => {
-                _prevQty.set(`${item.id}-${p.label}`, Cart.qty(item.id, p.label));
+                _prevQty.set(`${item._id}-${p.label}`, Cart.qty(item._id, p.label));
             });
         });
     };
@@ -213,8 +213,8 @@ const UI = (() => {
 
     /** Pick 2 random menu items not currently in cart */
     const _renderSuggestions = () => {
-        const cartIds = new Set(Cart.snapshot().map(i => i.id));
-        const available = MenuData.allItems().filter(i => !cartIds.has(i.id));
+        const cartIds = new Set(Cart.snapshot().map(i => i.itemId));
+        const available = MenuData.allItems().filter(i => !cartIds.has(i._id));
         if (!available.length) return '';
         const picks = available.sort(() => Math.random() - 0.5).slice(0, 2);
         return `
@@ -230,7 +230,7 @@ const UI = (() => {
                             <span class="suggest-card__price">₹${p.value}</span>
                         </div>
                         <button class="suggest-card__add" data-action="suggest-add"
-                            data-id="${item.id}" data-size="${p.label}" data-price="${p.value}">+ Add</button>
+                            data-id="${item._id}" data-size="${p.label}" data-price="${p.value}">+ Add</button>
                     </div>`;
                 }).join('')}
             </div>
@@ -285,10 +285,10 @@ const UI = (() => {
                 </div>
                 <div class="cart-row__controls">
                     <button class="cart-row__btn" data-action="cart-modal-dec"
-                        data-id="${i.id}" data-size="${i.size}" data-price="${i.price}" aria-label="Decrease">−</button>
+                        data-id="${i.itemId}" data-size="${i.size}" data-price="${i.price}" aria-label="Decrease">−</button>
                     <span class="cart-row__qty">${i.quantity}</span>
                     <button class="cart-row__btn" data-action="cart-modal-inc"
-                        data-id="${i.id}" data-size="${i.size}" data-price="${i.price}" aria-label="Increase">+</button>
+                        data-id="${i.itemId}" data-size="${i.size}" data-price="${i.price}" aria-label="Increase">+</button>
                 </div>
                 <span class="cart-row__price">₹${i.price * i.quantity}</span>
             </div>`).join('');

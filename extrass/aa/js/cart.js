@@ -10,7 +10,7 @@
 'use strict';
 
 const Cart = (() => {
-    /** @type {Object.<string, {id:number, name:string, size:string, price:number, quantity:number}>} */
+    /** @type {Object.<string, {itemId:string, name:string, size:string, price:number, quantity:number}>} */
     const _items = {};
 
     const _key = (id, size) => `${id}-${size}`;
@@ -30,7 +30,7 @@ const Cart = (() => {
         if (_items[key]) {
             _items[key].quantity += 1;
         } else {
-            _items[key] = { id: itemId, name: item.name, size, price, quantity: 1 };
+            _items[key] = { itemId: String(itemId), name: item.name, size, price, quantity: 1 };
         }
         _emit();
     };
@@ -150,7 +150,7 @@ const Cart = (() => {
             customerName: info.name,
             phone: info.phone,
             orderType: _mapOrderType(info.orderType),
-            items: items.map(i => ({ itemId: i.id, size: i.size, quantity: i.quantity })),
+            items: items.map(i => ({ itemId: i.itemId, size: i.size, quantity: i.quantity })),
         };
         if (info.orderType === 'Dine-In') {
             if (info.persons) payload.persons = Number(info.persons);
@@ -159,6 +159,7 @@ const Cart = (() => {
         if (info.note) payload.note = info.note;
 
         debug('Final Payload', payload);
+        console.log("Submitting Items:", payload.items);
 
         // Try backend
         if (typeof Api !== 'undefined') {

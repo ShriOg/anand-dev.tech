@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const { $, $$, showToast, showConfirm,
             switchPage, updateSocketStatus, renderStats, renderRecentOrders,
-            renderOrderCards, prependOrderCard, renderHistoryTable, renderPagination,
+            renderOrderCards, prependOrderCard, updateOrderCard, renderHistoryTable, renderPagination,
             renderMenuItems, drawBarChart, renderTopItems, playNotifSound,
             exportOrdersCSV } = AdminUI;
 
@@ -177,6 +177,32 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('[Admin] init() — booting admin panel…');
         debug('Admin Booted');
 
+        /* Global error safety net — catch silent failures and show toast */
+        window.addEventListener('error', (e) => {
+            console.error('[Admin] Uncaught error:', e.error || e.message);
+            showToast('Something went wrong — check console', 'error');
+        });
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('[Admin] Unhandled rejection:', e.reason);
+            showToast('Async error — check console', 'error');
+        });
+
+        /* Global click debugger — logs every interactive click (capture phase) */
+        document.addEventListener('click', (e) => {
+            const el = e.target.closest('button, select, [data-action], [data-page], [data-goto], .toggle, .tool-btn');
+            if (!el) return;
+            debug('Click', { tag: el.tagName, id: el.id || undefined, classes: (el.className || '').split?.(' ')?.[0], ...el.dataset });
+        }, true);
+
+        /* Topbar scroll shadow */
+        const pageContainer = $('#pageContainer');
+        const topbar = document.querySelector('.topbar');
+        if (pageContainer && topbar) {
+            window.addEventListener('scroll', () => {
+                topbar.classList.toggle('topbar--scrolled', window.scrollY > 4);
+            }, { passive: true });
+        }
+
         try {
             /* Connect realtime */
             AdminSocket.connect();
@@ -287,6 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
             /* Close sidebar on mobile */
             if (window.innerWidth <= 860) {
                 $('#sidebar').classList.remove('open');
+                document.getElementById('sidebarOverlay')?.classList.remove('sidebar-overlay--visible');
             }
         });
 
@@ -302,6 +329,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function onPageSwitch(page) {
+        debug('Page Switched', page);
+        requestAnimationFrame(() => {
+            const target = document.querySelector(`.page[data-page="${page}"]`);
+            debug('Page Visible Check', { page, hidden: target?.hidden, found: !!target });
+        });
         switch (page) {
             case 'dashboard': loadDashboard(); break;
             case 'orders': loadLiveOrders(); break;
@@ -369,16 +401,24 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
+                select.disabled = true;
+                select.style.opacity = '.5';
                 await AdminAPI.updateOrderStatus(orderId, newStatus);
+                select.disabled = false;
+                select.style.opacity = '';
                 /* Update local state */
                 const order = liveOrders.find(o => (o._id || o.orderId) === orderId);
                 if (order) order.status = newStatus;
 
-                /* Update select class */
+                /* Re-render the card in place for visual consistency */
                 select.className = `status-select status-select--${newStatus.toLowerCase()}`;
                 updatePendingBadge();
+                if (order) updateOrderCard(orderId, order);
+                debug('Order Status Updated', { orderId, newStatus });
                 showToast(`Order updated to ${newStatus}`, 'success');
             } catch (err) {
+                select.disabled = false;
+                select.style.opacity = '';
                 showToast(`Failed to update: ${err.message}`, 'error');
                 const order = liveOrders.find(o => (o._id || o.orderId) === orderId);
                 if (order) select.value = order.status;
@@ -445,6 +485,7 @@ document.addEventListener('DOMContentLoaded', () => {
             historyTotal = res?.totalPages || payload?.totalPages || Math.ceil((res?.total || payload?.total || orders.length) / 20) || 1;
             allHistoryOrders = orders;
 
+            debug('History Data', { count: orders.length, page: historyPage, totalPages: historyTotal });
             renderHistoryTable(orders);
             renderPagination(historyPage, historyTotal);
         } catch (err) {
@@ -517,6 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 menuCategories = [];
             }
 
+            debug('Menu Data', { items: menuItems.length, categories: menuCategories.length });
             renderMenuItems(menuItems, menuCategories);
         } catch (err) {
             debug('Fatal Error', err);
@@ -571,16 +613,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 saveBtn.disabled = true;
-                saveBtn.textContent = '…';
+                saveBtn.classList.add('btn--loading');
+                saveBtn.textContent = '';
                 await AdminAPI.updateMenuItem(itemId, payload);
-                saveBtn.classList.remove('show');
+                saveBtn.classList.remove('btn--loading', 'show');
                 saveBtn.disabled = false;
                 saveBtn.textContent = 'Save';
 
-                /* Update visual state */
+                /* Update visual state + confirm flash */
                 card.classList.toggle('menu-mgmt-card--inactive', !payload.active);
+                card.style.boxShadow = '0 0 0 2px var(--c-green)';
+                setTimeout(() => { card.style.boxShadow = ''; }, 800);
+                debug('Menu Item Saved', { itemId, payload });
                 showToast('Menu item updated', 'success');
             } catch (err) {
+                saveBtn.classList.remove('btn--loading');
                 saveBtn.disabled = false;
                 saveBtn.textContent = 'Save';
                 showToast(`Failed: ${err.message}`, 'error');
@@ -671,17 +718,35 @@ document.addEventListener('DOMContentLoaded', () => {
        SIDEBAR (mobile toggle)
     ==================================================================== */
     function wireSidebar() {
+        /* Create overlay element for mobile sidebar backdrop */
+        let overlay = document.getElementById('sidebarOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'sidebarOverlay';
+            overlay.className = 'sidebar-overlay';
+            document.body.appendChild(overlay);
+        }
+
+        const _closeSidebar = () => {
+            $('#sidebar').classList.remove('open');
+            overlay.classList.remove('sidebar-overlay--visible');
+        };
+
         $('#sidebarToggle')?.addEventListener('click', () => {
-            $('#sidebar').classList.toggle('open');
+            const isOpen = $('#sidebar').classList.toggle('open');
+            overlay.classList.toggle('sidebar-overlay--visible', isOpen);
+            debug('Sidebar Toggle', { open: isOpen });
         });
 
-        /* Close on overlay click (mobile) */
+        overlay.addEventListener('click', _closeSidebar);
+
+        /* Close sidebar on click outside (mobile) */
         document.addEventListener('click', (e) => {
             if (window.innerWidth > 860) return;
             const sidebar = $('#sidebar');
             if (!sidebar.classList.contains('open')) return;
             if (!e.target.closest('.sidebar') && !e.target.closest('#sidebarToggle')) {
-                sidebar.classList.remove('open');
+                _closeSidebar();
             }
         });
 
@@ -703,7 +768,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape') {
             const overlay = $('#confirmOverlay');
             if (overlay && !overlay.hidden) {
-                overlay.hidden = true;
+                $('#confirmCancel')?.click();
             }
         }
     });

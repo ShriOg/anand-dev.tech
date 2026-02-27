@@ -141,6 +141,12 @@ const MenuData = (() => {
     /** Populate categories from static data (immediate, synchronous) */
     const _initStatic = () => {
         categories = _filterActive(_staticCategories);
+        // Stamp string _id on static items so all items use _id consistently
+        for (const cat of Object.values(categories)) {
+            cat.items.forEach(item => {
+                if (!item._id) item._id = String(item.id);
+            });
+        }
         debug('Static Menu Loaded', Object.values(categories).flatMap(c => c.items));
     };
 
@@ -155,8 +161,8 @@ const MenuData = (() => {
     /** Flat list of every item across all categories */
     const allItems = () => Object.values(categories).flatMap(c => c.items);
 
-    /** Lookup a single item by id */
-    const findById = (id) => allItems().find(i => i.id === id);
+    /** Lookup a single item by _id (string) */
+    const findById = (id) => allItems().find(i => i._id === String(id));
 
     /** Category keys */
     const keys = () => Object.keys(categories);
@@ -282,13 +288,13 @@ const MenuData = (() => {
      * Normalize a single server item to the canonical shape the UI expects.
      *
      * Canonical shape:
-     *   { id, name, desc, special, prices: [{ label, value }] }
+     *   { _id, name, desc, special, prices: [{ label, value }] }
      *
      * Server overrides: price, special, active.
      * Static provides: fallback desc.
      */
     const _normalizeItem = (serverItem) => {
-        const id = Number(serverItem.id ?? serverItem._id);
+        const _id = String(serverItem._id || serverItem.id || '');
         const name = String(serverItem.name || '');
         const prices = _normalizePrices(serverItem.prices || serverItem.price);
         const special = !!serverItem.special;
@@ -300,7 +306,7 @@ const MenuData = (() => {
             serverItem.desc || serverItem.description || staticMatch?.desc || ''
         );
 
-        return { id, name, desc, special, active, prices };
+        return { _id, name, desc, special, active, prices };
     };
 
     /**
@@ -412,7 +418,7 @@ const MenuData = (() => {
      *   - Static icons, titles, and category order are preserved
      *
      * @param {Object} liveCats — **already** normalised via normalizeMenuFromServer()
-     * @returns {number[]} IDs of items that actually changed
+     * @returns {string[]} IDs of items that actually changed
      */
     const setLiveData = (liveCats) => {
         const changedIds = [];
@@ -427,7 +433,7 @@ const MenuData = (() => {
                     icon:  meta.icon  || liveCat.icon  || '🍽️',
                     items: liveCat.items.map(i => ({ ...i })),
                 };
-                liveCat.items.forEach(i => changedIds.push(i.id));
+                liveCat.items.forEach(i => changedIds.push(i._id));
                 continue;
             }
 
@@ -445,14 +451,14 @@ const MenuData = (() => {
             }
 
             // Build fast-lookup for current items
-            const currentMap = new Map(currentCat.items.map(i => [i.id, i]));
+            const currentMap = new Map(currentCat.items.map(i => [i._id, i]));
 
             for (const liveItem of liveCat.items) {
-                const existing = currentMap.get(liveItem.id);
+                const existing = currentMap.get(liveItem._id);
                 if (!existing) {
                     // New item
                     currentCat.items.push({ ...liveItem });
-                    changedIds.push(liveItem.id);
+                    changedIds.push(liveItem._id);
                     continue;
                 }
 
@@ -471,20 +477,20 @@ const MenuData = (() => {
                     changed = true;
                 }
 
-                if (changed) changedIds.push(existing.id);
+                if (changed) changedIds.push(existing._id);
             }
 
             // Remove items deleted on server
-            const liveIds = new Set(liveCat.items.map(i => i.id));
-            const removed = currentCat.items.filter(i => !liveIds.has(i.id));
-            removed.forEach(i => changedIds.push(i.id));
-            currentCat.items = currentCat.items.filter(i => liveIds.has(i.id));
+            const liveIds = new Set(liveCat.items.map(i => i._id));
+            const removed = currentCat.items.filter(i => !liveIds.has(i._id));
+            removed.forEach(i => changedIds.push(i._id));
+            currentCat.items = currentCat.items.filter(i => liveIds.has(i._id));
         }
 
         // Remove categories that no longer exist on server
         for (const key of Object.keys(categories)) {
             if (!filtered[key]) {
-                categories[key].items.forEach(i => changedIds.push(i.id));
+                categories[key].items.forEach(i => changedIds.push(i._id));
                 delete categories[key];
             }
         }
@@ -533,7 +539,7 @@ const MenuData = (() => {
      * into the running state.  Does NOT reset to static on failure.
      * Designed for background ping during cold-start.
      *
-     * @returns {Promise<{live:boolean, changedIds?:number[], error?:string}>}
+     * @returns {Promise<{live:boolean, changedIds?:string[], error?:string}>}
      */
     const connectLive = async () => {
         if (typeof Api === 'undefined') return { live: false, error: 'Api not loaded' };

@@ -450,7 +450,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!btn) return;
 
         const { action, id, size, price } = btn.dataset;
-        const itemId   = Number(id);
+        const itemId   = id;
         const priceNum = Number(price);
 
         switch (action) {
@@ -515,19 +515,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!btn) return;
 
         const { action, id, size, price } = btn.dataset;
-        const numId = Number(id);
+        const itemId = id;
         const numPrice = Number(price);
 
         switch (action) {
             case 'cart-modal-inc':
-                Cart.update(numId, size, numPrice, 1);
+                Cart.update(itemId, size, numPrice, 1);
                 break;
             case 'cart-modal-dec':
-                Cart.update(numId, size, numPrice, -1);
+                Cart.update(itemId, size, numPrice, -1);
                 break;
             case 'suggest-add':
-                Cart.add(numId, size, numPrice);
-                showToast(`Added ${MenuData.findById(numId)?.name || 'item'}`);
+                Cart.add(itemId, size, numPrice);
+                showToast(`Added ${MenuData.findById(itemId)?.name || 'item'}`);
                 if (navigator.vibrate) navigator.vibrate(12);
                 break;
             case 'clear-cart':
