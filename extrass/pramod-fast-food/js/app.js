@@ -136,10 +136,87 @@ document.addEventListener('DOMContentLoaded', () => {
     $('#modalOverlay').addEventListener('click', () => toggleCart(false));
     $('#closeCart').addEventListener('click',    () => toggleCart(false));
 
-    $('#cartFooter').addEventListener('click', (e) => {
-        if (e.target.closest('#checkoutBtn')) {
-            const url = Cart.checkoutURL();
-            if (url) window.open(url, '_blank');
+    /* ==========  CART MODAL: delegation for +/−, clear, checkout flow, suggestions  ========== */
+    cartModal.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+
+        const { action, id, size, price } = btn.dataset;
+        const numId = Number(id);
+        const numPrice = Number(price);
+
+        switch (action) {
+            case 'cart-modal-inc':
+                Cart.update(numId, size, numPrice, 1);
+                break;
+            case 'cart-modal-dec':
+                Cart.update(numId, size, numPrice, -1);
+                break;
+            case 'suggest-add':
+                Cart.add(numId, size, numPrice);
+                showToast(`Added ${MenuData.findById(numId)?.name || 'item'}`);
+                if (navigator.vibrate) navigator.vibrate(12);
+                break;
+            case 'clear-cart':
+                Cart.clear();
+                showToast('Cart cleared');
+                break;
+            case 'checkout-start':
+                UI.setCheckoutStep('form');
+                break;
+            case 'checkout-back':
+                UI.setCheckoutStep('cart');
+                break;
+            case 'checkout-review': {
+                const name = $('#custName')?.value.trim();
+                const phone = $('#custPhone')?.value.trim();
+                const orderType = cartModal.querySelector('input[name="orderType"]:checked')?.value || 'Dine-In';
+                const persons = $('#custPersons')?.value;
+                const table = $('#custTable')?.value.trim();
+                const note = $('#custNote')?.value.trim();
+
+                if (!name) { showToast('Please enter your name'); $('#custName')?.focus(); return; }
+                if (!phone || !/^\d{10}$/.test(phone)) { showToast('Enter valid 10-digit phone'); $('#custPhone')?.focus(); return; }
+
+                UI.setCustomerInfo({ name, phone, orderType, persons, table, note });
+                UI.setCheckoutStep('summary');
+                break;
+            }
+            case 'checkout-back-form':
+                UI.setCheckoutStep('form');
+                break;
+            case 'checkout-confirm': {
+                const info = UI.getCustomerInfo();
+                const url = Cart.buildCheckoutMessage(info);
+                if (!url) return;
+
+                btn.disabled = true;
+                btn.textContent = '⏳ Opening…';
+                showToast('Opening WhatsApp...');
+
+                setTimeout(() => {
+                    window.open(url, '_blank');
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btn.textContent = '💬 Confirm & Send';
+                        Cart.clear();
+                        UI.setCheckoutStep('cart');
+                        toggleCart(false);
+                    }, 2500);
+                }, 350);
+                break;
+            }
+        }
+    });
+
+    /* Order-type toggle inside checkout form */
+    cartModal.addEventListener('change', (e) => {
+        if (e.target.name === 'orderType') {
+            const dineIn = $('#dineInFields');
+            if (dineIn) dineIn.hidden = e.target.value === 'Takeaway';
+            cartModal.querySelectorAll('.order-type-opt').forEach(lbl => {
+                lbl.classList.toggle('order-type-opt--active', lbl.querySelector('input').checked);
+            });
         }
     });
 
@@ -209,4 +286,13 @@ document.addEventListener('DOMContentLoaded', () => {
     btt.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
     updateTabIndicator(document.querySelector('.tab.active'));
+
+    /* ==========  LOYALTY BAR (frontend placeholder)  ========== */
+    UI.renderLoyaltyBar(null);
+
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('#googleLoginBtn')) {
+            showToast('Rewards coming soon!');
+        }
+    });
 });

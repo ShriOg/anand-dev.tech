@@ -14,6 +14,8 @@ const UI = (() => {
     /* ---------- Internal state ---------- */
     const _prevQty = new Map();
     let _lastCartCount = 0;
+    let _checkoutStep = 'cart'; // 'cart' | 'form' | 'summary'
+    let _customerInfo = {};
 
     /* ====================================================================
        STATS
@@ -189,10 +191,54 @@ const UI = (() => {
     /* ====================================================================
        CART MODAL
     ==================================================================== */
+
+    /** Pick 2 random menu items not currently in cart */
+    const _renderSuggestions = () => {
+        const cartIds = new Set(Cart.snapshot().map(i => i.id));
+        const available = MenuData.allItems().filter(i => !cartIds.has(i.id));
+        if (!available.length) return '';
+        const picks = available.sort(() => Math.random() - 0.5).slice(0, 2);
+        return `
+        <div class="cart-suggestions">
+            <p class="cart-suggestions__title">You may also like</p>
+            <div class="cart-suggestions__list">
+                ${picks.map(item => {
+                    const p = item.prices[0];
+                    return `
+                    <div class="suggest-card">
+                        <div class="suggest-card__info">
+                            <span class="suggest-card__name">${item.name}</span>
+                            <span class="suggest-card__price">₹${p.value}</span>
+                        </div>
+                        <button class="suggest-card__add" data-action="suggest-add"
+                            data-id="${item.id}" data-size="${p.label}" data-price="${p.value}">+ Add</button>
+                    </div>`;
+                }).join('')}
+            </div>
+        </div>`;
+    };
+
     const renderCartModal = () => {
         const listEl   = $('#cartItems');
         const footerEl = $('#cartFooter');
-        const items    = Cart.snapshot();
+        const titleEl  = $('.cart-modal__title');
+
+        /* --- Checkout FORM step --- */
+        if (_checkoutStep === 'form') {
+            if (titleEl) titleEl.innerHTML = '<span class="cart-modal__title-icon">📋</span> Details';
+            _renderCheckoutForm(listEl, footerEl);
+            return;
+        }
+        /* --- Order SUMMARY step --- */
+        if (_checkoutStep === 'summary') {
+            if (titleEl) titleEl.innerHTML = '<span class="cart-modal__title-icon">📦</span> Summary';
+            _renderOrderSummary(listEl, footerEl);
+            return;
+        }
+
+        /* --- Default CART step --- */
+        if (titleEl) titleEl.innerHTML = '<span class="cart-modal__title-icon">🛒</span> Your Cart';
+        const items = Cart.snapshot();
 
         if (!items.length) {
             listEl.innerHTML = `
@@ -205,18 +251,128 @@ const UI = (() => {
             return;
         }
 
-        listEl.innerHTML = items.map(i => `
+        let html = `<div class="cart-actions"><button class="clear-cart-btn" data-action="clear-cart">🗑 Clear Cart</button></div>`;
+
+        html += items.map(i => `
             <div class="cart-row">
                 <div class="cart-row__info">
                     <span class="cart-row__name">${i.name}</span>
-                    <span class="cart-row__meta">${i.size} × ${i.quantity}</span>
+                    <span class="cart-row__meta">${i.size}</span>
+                </div>
+                <div class="cart-row__controls">
+                    <button class="cart-row__btn" data-action="cart-modal-dec"
+                        data-id="${i.id}" data-size="${i.size}" data-price="${i.price}" aria-label="Decrease">−</button>
+                    <span class="cart-row__qty">${i.quantity}</span>
+                    <button class="cart-row__btn" data-action="cart-modal-inc"
+                        data-id="${i.id}" data-size="${i.size}" data-price="${i.price}" aria-label="Increase">+</button>
                 </div>
                 <span class="cart-row__price">₹${i.price * i.quantity}</span>
             </div>`).join('');
 
-        $('#cartTotal').textContent = `₹${Cart.total()}`;
+        html += _renderSuggestions();
+        listEl.innerHTML = html;
+
         footerEl.hidden = false;
+        footerEl.innerHTML = `
+            <div class="cart-total"><span>Total</span><span class="cart-total__val" id="cartTotal">₹${Cart.total()}</span></div>
+            <button class="checkout-btn" id="checkoutBtn" data-action="checkout-start">💬 Place Order via WhatsApp</button>`;
     };
+
+    /* ---------- Checkout Form ---------- */
+    const _renderCheckoutForm = (listEl, footerEl) => {
+        const ci = _customerInfo;
+        listEl.innerHTML = `
+        <div class="checkout-form">
+            <div class="form-group">
+                <label class="form-label" for="custName">Name *</label>
+                <input type="text" id="custName" class="form-input" placeholder="Your name" required autocomplete="name" value="${ci.name || ''}">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="custPhone">Phone *</label>
+                <input type="tel" id="custPhone" class="form-input" placeholder="10-digit number" maxlength="10" required autocomplete="tel" value="${ci.phone || ''}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Order Type *</label>
+                <div class="order-type-toggle">
+                    <label class="order-type-opt${(!ci.orderType || ci.orderType === 'Dine-In') ? ' order-type-opt--active' : ''}">
+                        <input type="radio" name="orderType" value="Dine-In" ${(!ci.orderType || ci.orderType === 'Dine-In') ? 'checked' : ''}> 🍽 Dine-In
+                    </label>
+                    <label class="order-type-opt${ci.orderType === 'Takeaway' ? ' order-type-opt--active' : ''}">
+                        <input type="radio" name="orderType" value="Takeaway" ${ci.orderType === 'Takeaway' ? 'checked' : ''}> 🥡 Takeaway
+                    </label>
+                </div>
+            </div>
+            <div class="form-group dine-in-fields" id="dineInFields" ${ci.orderType === 'Takeaway' ? 'hidden' : ''}>
+                <div class="form-row">
+                    <div class="form-group form-group--half">
+                        <label class="form-label" for="custPersons">Persons</label>
+                        <input type="number" id="custPersons" class="form-input" placeholder="e.g. 3" min="1" max="50" value="${ci.persons || ''}">
+                    </div>
+                    <div class="form-group form-group--half">
+                        <label class="form-label" for="custTable">Table No.</label>
+                        <input type="text" id="custTable" class="form-input" placeholder="e.g. 4" value="${ci.table || ''}">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="custNote">Note (optional)</label>
+                <textarea id="custNote" class="form-input form-input--textarea" placeholder="Any special request…" rows="2">${ci.note || ''}</textarea>
+            </div>
+        </div>`;
+
+        footerEl.hidden = false;
+        footerEl.innerHTML = `
+            <div class="checkout-nav">
+                <button class="checkout-back-btn" data-action="checkout-back">← Back</button>
+                <button class="checkout-next-btn" data-action="checkout-review">Review Order →</button>
+            </div>`;
+    };
+
+    /* ---------- Order Summary ---------- */
+    const _renderOrderSummary = (listEl, footerEl) => {
+        const ci = _customerInfo;
+        const items = Cart.snapshot();
+
+        let html = `<div class="order-summary">
+            <div class="order-summary__info">
+                <div class="order-summary__row"><span>👤</span><span>${ci.name}</span></div>
+                <div class="order-summary__row"><span>📞</span><span>${ci.phone}</span></div>
+                <div class="order-summary__row"><span>📦</span><span>${ci.orderType}</span></div>`;
+        if (ci.orderType === 'Dine-In') {
+            if (ci.persons) html += `<div class="order-summary__row"><span>👥</span><span>${ci.persons} persons</span></div>`;
+            if (ci.table) html += `<div class="order-summary__row"><span>🪑</span><span>Table ${ci.table}</span></div>`;
+        }
+        if (ci.note) html += `<div class="order-summary__row"><span>📝</span><span>${ci.note}</span></div>`;
+
+        html += `</div><div class="order-summary__divider"></div><div class="order-summary__items">`;
+        items.forEach(i => {
+            html += `
+            <div class="order-summary__item">
+                <div class="order-summary__item-info">
+                    <span class="order-summary__item-name">${i.name}</span>
+                    <span class="order-summary__item-meta">${i.size} × ${i.quantity}</span>
+                </div>
+                <span class="order-summary__item-price">₹${i.price * i.quantity}</span>
+            </div>`;
+        });
+        html += `</div><div class="order-summary__divider"></div>
+            <div class="order-summary__total"><span>Total</span><span class="order-summary__total-val">₹${Cart.total()}</span></div>
+        </div>`;
+
+        listEl.innerHTML = html;
+        footerEl.hidden = false;
+        footerEl.innerHTML = `
+            <div class="checkout-nav">
+                <button class="checkout-back-btn" data-action="checkout-back-form">← Edit</button>
+                <button class="checkout-confirm-btn" data-action="checkout-confirm">💬 Confirm & Send</button>
+            </div>`;
+    };
+
+    /* ---------- Checkout Step Manager ---------- */
+    const setCheckoutStep = (step) => { _checkoutStep = step; renderCartModal(); };
+    const getCheckoutStep = () => _checkoutStep;
+    const setCustomerInfo = (info) => { _customerInfo = info; };
+    const getCustomerInfo = () => ({ ..._customerInfo });
 
     const toggleCart = (force) => {
         const open = force !== undefined ? force : !State.get('cartOpen');
@@ -224,6 +380,10 @@ const UI = (() => {
         $('#cartModal').classList.toggle('show', open);
         $('#modalOverlay').classList.toggle('show', open);
         document.body.style.overflow = open ? 'hidden' : '';
+        if (!open && _checkoutStep !== 'cart') {
+            _checkoutStep = 'cart';
+            renderCartModal();
+        }
     };
 
     /* ====================================================================
@@ -265,11 +425,36 @@ const UI = (() => {
         });
     };
 
+    /* ====================================================================
+       LOYALTY BAR (frontend-ready placeholder)
+    ==================================================================== */
+    const renderLoyaltyBar = (user) => {
+        const el = $('#loyaltyBar');
+        if (!el) return;
+        if (user) {
+            el.innerHTML = `
+                <span class="loyalty__user">Hi, ${user.name}!</span>
+                <div class="loyalty__stats">
+                    <span class="loyalty__stat">⭐ ${user.points || 0} pts</span>
+                    <span class="loyalty__stat">🏅 ${user.orders || 0} orders</span>
+                </div>`;
+        } else {
+            el.innerHTML = `
+                <button class="loyalty__login" id="googleLoginBtn">🎁 Sign in for rewards</button>
+                <div class="loyalty__stats">
+                    <span class="loyalty__stat">⭐ 0 pts</span>
+                    <span class="loyalty__stat">🏅 0 orders</span>
+                </div>`;
+        }
+    };
+
     /* ---------- Public surface ---------- */
     return Object.freeze({
         $, $$,
         renderStats, showSkeleton, renderMenu,
         renderCartBadge, renderCartModal, toggleCart,
         showToast, setActiveTab, setActiveChip,
+        setCheckoutStep, getCheckoutStep, setCustomerInfo, getCustomerInfo,
+        renderLoyaltyBar,
     });
 })();

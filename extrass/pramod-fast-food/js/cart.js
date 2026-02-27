@@ -67,7 +67,7 @@ const Cart = (() => {
     /** Immutable snapshot of cart entries */
     const snapshot = () => Object.values(_items).map(i => ({ ...i }));
 
-    /** Build WhatsApp checkout URL */
+    /** Build WhatsApp checkout URL (legacy) */
     const checkoutURL = () => {
         const items = snapshot();
         if (!items.length) return null;
@@ -80,5 +80,46 @@ const Cart = (() => {
         return `https://wa.me/918595928413?text=${encodeURIComponent(msg)}`;
     };
 
-    return Object.freeze({ add, update, remove, clear, qty, count, total, snapshot, checkoutURL });
+    /** Generate short order ID: PF + base36 timestamp */
+    const generateOrderId = () => 'PF' + Date.now().toString(36).toUpperCase().slice(-6);
+
+    /** Human-readable timestamp */
+    const formatTimestamp = () => {
+        const d = new Date();
+        const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const h = d.getHours(), hr = h % 12 || 12, ap = h >= 12 ? 'PM' : 'AM';
+        return `${d.getDate()} ${M[d.getMonth()]} ${d.getFullYear()}, ${hr}:${String(d.getMinutes()).padStart(2,'0')} ${ap}`;
+    };
+
+    /** Build professional WhatsApp checkout URL with customer info */
+    const buildCheckoutMessage = (info) => {
+        const items = snapshot();
+        if (!items.length) return null;
+
+        const orderId = generateOrderId();
+        const ts = formatTimestamp();
+
+        let msg = `🛒 *New Order — Pramod Fast Food*\n`;
+        msg += `🧾 Order ID: ${orderId}\n`;
+        msg += `🕒 ${ts}\n\n`;
+        msg += `👤 Customer: ${info.name}\n`;
+        msg += `📞 Phone: ${info.phone}\n`;
+        msg += `📦 Order Type: ${info.orderType}\n`;
+        if (info.orderType === 'Dine-In') {
+            if (info.persons) msg += `👥 Persons: ${info.persons}\n`;
+            if (info.table) msg += `🪑 Table: ${info.table}\n`;
+        }
+        if (info.note) msg += `📝 Note: ${info.note}\n`;
+
+        msg += `\n━━━━━━━━━━━━━━━━━━\n`;
+        items.forEach(i => {
+            msg += `• ${i.name}\n  ${i.size} × ${i.quantity}\n  ₹${i.price * i.quantity}\n\n`;
+        });
+        msg += `━━━━━━━━━━━━━━━━━━\n`;
+        msg += `💰 *Total: ₹${total()}*`;
+
+        return `https://wa.me/918595928413?text=${encodeURIComponent(msg)}`;
+    };
+
+    return Object.freeze({ add, update, remove, clear, qty, count, total, snapshot, checkoutURL, buildCheckoutMessage });
 })();
