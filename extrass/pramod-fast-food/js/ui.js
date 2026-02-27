@@ -32,20 +32,6 @@ const UI = (() => {
         if (totalEl) totalEl.textContent = items.length;
         if (specialsEl) specialsEl.textContent = specials;
         if (avgEl) avgEl.textContent = `₹${avg}`;
-
-        // Live indicator
-        const indicator = $('#liveIndicator');
-        if (indicator && typeof MenuData.isLive === 'function') {
-            if (MenuData.isLive()) {
-                indicator.innerHTML = '<span class="live-dot"></span> Live';
-                indicator.classList.add('live-indicator--on');
-                indicator.classList.remove('live-indicator--off');
-            } else {
-                indicator.innerHTML = '<span class="live-dot"></span> Offline';
-                indicator.classList.remove('live-indicator--on');
-                indicator.classList.add('live-indicator--off');
-            }
-        }
     };
 
     /* ====================================================================
