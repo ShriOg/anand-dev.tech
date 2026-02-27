@@ -7,6 +7,17 @@
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('[Admin] DOMContentLoaded fired');
+
+    /* Guard: ensure dependent modules loaded */
+    if (typeof AdminUI === 'undefined') {
+        console.error('[Admin] FATAL: AdminUI not loaded — check script order in HTML.');
+        return;
+    }
+    if (typeof AdminAPI === 'undefined') {
+        console.error('[Admin] FATAL: AdminAPI not loaded — check script order in HTML.');
+        return;
+    }
 
     const { $, $$, showToast, showConfirm,
             switchPage, updateSocketStatus, renderStats, renderRecentOrders,
@@ -162,8 +173,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* ==========  INIT  ========== */
     function init() {
-        /* Connect realtime */
-        AdminSocket.connect();
+        console.log('[Admin] init() — booting admin panel…');
+
+        try {
+            /* Connect realtime */
+            AdminSocket.connect();
+            console.log('[Admin] ✓ Socket initialised');
+        } catch (err) {
+            console.error('[Admin] ✗ Socket connect failed:', err);
+        }
 
         /* Cold-start listener */
         document.addEventListener('admin:cold-start', () => {
@@ -177,13 +195,26 @@ document.addEventListener('DOMContentLoaded', () => {
         /* Auto-refresh stats every 30s */
         statsRefreshTimer = setInterval(loadDashboard, 30000);
 
-        /* Wire navigation */
-        wireNavigation();
-        wireOrderEvents();
-        wireHistoryEvents();
-        wireMenuEvents();
-        wireTheme();
-        wireSidebar();
+        /* Wire navigation & events — each wrapped so one failure doesn’t block the rest */
+        const wireFns = [
+            ['Navigation',   wireNavigation],
+            ['OrderEvents',  wireOrderEvents],
+            ['HistoryEvents',wireHistoryEvents],
+            ['MenuEvents',   wireMenuEvents],
+            ['Theme',        wireTheme],
+            ['Sidebar',      wireSidebar],
+        ];
+
+        for (const [label, fn] of wireFns) {
+            try {
+                fn();
+                console.log(`[Admin] ✓ wire${label}`);
+            } catch (err) {
+                console.error(`[Admin] ✗ wire${label} failed:`, err);
+            }
+        }
+
+        console.log('[Admin] init() complete ✓');
     }
 
     /* ---------- Cold-start banner ---------- */

@@ -242,8 +242,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 8000);
     };
 
-    /* ==========  INITIAL RENDER  ========== */
-    showSkeleton();
+    /* ==========  INITIAL RENDER (NON-BLOCKING)  ========== */
+    /* Render static menu immediately — no skeleton, no waiting for API */
+    State.set('loading', false);
+    renderStats();
+    renderMenu();
 
     /* Initialize customer Socket.IO for order notifications */
     _initCustomerSocket();
@@ -252,20 +255,95 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedOrderId = localStorage.getItem('pf_last_order');
     if (savedOrderId) _lastOrderId = savedOrderId;
 
-    // Fetch menu from API → fall back to static data
-    (async () => {
-        try {
-            const result = await MenuData.fetchFromApi();
-            if (!result.live) {
-                console.warn('[menu] Using static fallback:', result.error);
-            }
-        } catch (err) {
-            console.warn('[menu] Fetch failed, using static data:', err);
+    /* ==========  NON-BLOCKING BACKGROUND CONNECT  ========== */
+    /* While user browses the static menu, silently ping the backend
+       every 3 s. Once the server is awake, deep-merge the live menu
+       into the running state without resetting cart or scroll. */
+
+    const _connectBanner = (() => {
+        const el = document.createElement('div');
+        el.id = 'connectBanner';
+        Object.assign(el.style, {
+            position: 'fixed', top: '0', left: '0', right: '0',
+            zIndex: '9999', background: '#fef3c7', color: '#92400e',
+            textAlign: 'center', padding: '6px 16px',
+            fontSize: '13px', fontWeight: '500',
+            transform: 'translateY(-100%)', transition: 'transform 0.3s ease',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+        });
+        el.innerHTML = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#f59e0b;animation:cbPulse 1.5s infinite"></span> Connecting to live server…';
+
+        /* Add pulse keyframe once */
+        if (!document.getElementById('cbPulseStyle')) {
+            const s = document.createElement('style');
+            s.id = 'cbPulseStyle';
+            s.textContent = '@keyframes cbPulse{0%,100%{opacity:1}50%{opacity:.3}}';
+            document.head.appendChild(s);
         }
-        renderStats();
-        State.set('loading', false);
-        renderMenu();
+
+        document.body.appendChild(el);
+        requestAnimationFrame(() => { el.style.transform = 'translateY(0)'; });
+        return el;
     })();
+
+    let _bgPingTimer = null;
+    let _isPinging = false;
+
+    const _backgroundConnect = async () => {
+        const PING_MS = 3000;
+        const MAX_ATTEMPTS = 40; /* ~2 min max */
+        let attempts = 0;
+
+        const tryConnect = async () => {
+            if (_isPinging) return false;
+            _isPinging = true;
+            attempts++;
+
+            try {
+                const result = await MenuData.connectLive();
+                if (result.live) {
+                    console.log('[live] Connected! Changed items:', result.changedIds?.length || 0);
+                    clearInterval(_bgPingTimer);
+                    _bgPingTimer = null;
+
+                    /* Remove banner smoothly */
+                    _connectBanner.style.transform = 'translateY(-100%)';
+                    setTimeout(() => _connectBanner.remove(), 300);
+
+                    /* Refresh stats & menu (preserves cart & scroll) */
+                    renderStats();
+                    if (result.changedIds && result.changedIds.length > 0) {
+                        renderMenu();
+                    }
+                    return true;
+                }
+            } catch (err) {
+                console.log(`[live] Attempt ${attempts} failed:`, err.message);
+            } finally {
+                _isPinging = false;
+            }
+
+            if (attempts >= MAX_ATTEMPTS) {
+                console.warn('[live] Gave up after', MAX_ATTEMPTS, 'attempts');
+                clearInterval(_bgPingTimer);
+                _bgPingTimer = null;
+                _connectBanner.innerHTML = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444"></span> Offline — using cached menu';
+                setTimeout(() => {
+                    _connectBanner.style.transform = 'translateY(-100%)';
+                    setTimeout(() => _connectBanner.remove(), 300);
+                }, 4000);
+            }
+            return false;
+        };
+
+        /* First attempt immediately */
+        if (await tryConnect()) return;
+
+        /* Keep pinging */
+        _bgPingTimer = setInterval(() => tryConnect(), PING_MS);
+    };
+
+    _backgroundConnect();
 
     // Fetch loyalty profile if authenticated
     (async () => {
@@ -449,7 +527,12 @@ document.addEventListener('DOMContentLoaded', () => {
                             return;
                         }
 
-                        // Order saved — show success popup
+                        // Show fallback toast if server was unavailable
+                        if (result.fallbackMessage) {
+                            showToast(result.fallbackMessage);
+                        }
+
+                        // Order saved (or WhatsApp fallback) — show success popup
                         _showOrderResult(true, {
                             orderId: result.orderId,
                             total: result.total,
@@ -460,21 +543,28 @@ document.addEventListener('DOMContentLoaded', () => {
                         // Track order for status notifications
                         if (result.orderId) _trackOrder(result.orderId);
 
-                        // Refresh loyalty data after successful order
-                        if (typeof Api !== 'undefined' && Api.isAuthenticated()) {
-                            Api.fetchProfile().then(res => {
-                                if (res.ok && res.data) UI.renderLoyaltyBar(res.data);
-                            });
-                        }
-
-                        // Clear cart & reset checkout
-                        setTimeout(() => {
+                        if (result.source === 'whatsapp-fallback') {
+                            /* Server failed — auto-open WhatsApp, keep cart intact */
+                            if (result.url) window.open(result.url, '_blank');
                             btn.disabled = false;
                             btn.textContent = '💬 Confirm & Send';
-                            Cart.clear();
-                            UI.setCheckoutStep('cart');
-                            toggleCart(false);
-                        }, 2000);
+                        } else {
+                            /* Server confirmed — clear cart after short delay */
+                            // Refresh loyalty data after successful server order
+                            if (typeof Api !== 'undefined' && Api.isAuthenticated()) {
+                                Api.fetchProfile().then(res => {
+                                    if (res.ok && res.data) UI.renderLoyaltyBar(res.data);
+                                });
+                            }
+
+                            setTimeout(() => {
+                                btn.disabled = false;
+                                btn.textContent = '💬 Confirm & Send';
+                                Cart.clear();
+                                UI.setCheckoutStep('cart');
+                                toggleCart(false);
+                            }, 2000);
+                        }
 
                     } catch (err) {
                         _showOrderResult(false, { error: 'Network error — your cart is safe' });

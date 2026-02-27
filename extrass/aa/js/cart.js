@@ -147,15 +147,29 @@ const Cart = (() => {
 
         // Try backend first
         if (typeof Api !== 'undefined') {
-            const res = await Api.placeOrder(payload);
-            if (res.ok && res.data) {
-                const backendOrderId = res.data.orderId || res.data._id || generateOrderId();
-                const backendTotal = res.data.total != null ? res.data.total : total();
-                const url = buildCheckoutMessage(info, { orderId: backendOrderId, total: backendTotal });
-                return { ok: true, url, orderId: backendOrderId, total: backendTotal };
+            try {
+                const res = await Api.placeOrder(payload);
+                if (res.ok && res.data) {
+                    const backendOrderId = res.data.orderId || res.data._id || generateOrderId();
+                    const backendTotal = res.data.total != null ? res.data.total : total();
+                    const url = buildCheckoutMessage(info, { orderId: backendOrderId, total: backendTotal });
+                    return { ok: true, url, orderId: backendOrderId, total: backendTotal, source: 'server' };
+                }
+            } catch (err) {
+                console.warn('[Cart] API error, falling back to WhatsApp:', err.message);
             }
-            // Backend failed — return error, keep cart intact
-            return { ok: false, error: res.error || 'Order submission failed' };
+
+            // Backend failed — fallback to WhatsApp, keep cart intact
+            console.warn('[Cart] Server unavailable — using WhatsApp fallback');
+            const fallbackUrl = buildCheckoutMessage(info);
+            return {
+                ok: true,
+                url: fallbackUrl,
+                orderId: generateOrderId(),
+                total: total(),
+                source: 'whatsapp-fallback',
+                fallbackMessage: 'Server waking up — sending via WhatsApp',
+            };
         }
 
         // No API module — fallback to client-side only (WhatsApp)

@@ -10,6 +10,9 @@
  */
 'use strict';
 
+/** Global server readiness flag */
+window.__SERVER_READY__ = false;
+
 const MenuData = (() => {
 
     /** Whether data was successfully loaded from the live API */
@@ -182,6 +185,191 @@ const MenuData = (() => {
         return result;
     };
 
+    /* ============================================================
+       NORMALIZATION — unify any server format to canonical shape
+       { id, name, desc, category, special, active, prices:[{label,value}] }
+    ============================================================ */
+
+    /** Icons map for known category keys */
+    const _catIcons = {
+        steam: '🥟', fried: '🍤', gravy: '🍲', kurkure: '✨',
+        noodles: '🍜', potato: '🥔', rolls: '🌯', chilli: '🌶️', main: '🍚',
+    };
+
+    /**
+     * Normalize a single menu item from any server format to canonical.
+     * @param {Object} item — raw item from server
+     * @param {string} [fallbackCategory] — category name if item lacks one
+     * @returns {Object} canonical item
+     */
+    const _normalizeItem = (item, fallbackCategory) => {
+        let prices = item.prices;
+
+        // Handle single-price items
+        if (!prices && item.price != null) {
+            prices = [{ label: 'Regular', value: Number(item.price) }];
+        }
+
+        // Handle array of numbers or mixed formats
+        if (Array.isArray(prices)) {
+            prices = prices.map(p => {
+                if (typeof p === 'number') return { label: 'Regular', value: p };
+                return {
+                    label: String(p.label || p.size || 'Regular'),
+                    value: Number(p.value ?? p.price ?? 0),
+                };
+            });
+        }
+
+        return {
+            id: Number(item.id ?? item._id),
+            name: String(item.name || ''),
+            desc: String(item.desc || item.description || ''),
+            category: String(item.category || fallbackCategory || 'other'),
+            special: !!item.special,
+            active: item.active !== false,
+            prices: prices || [],
+        };
+    };
+
+    /**
+     * Normalize a categories object (keys → { title, icon, items[] })
+     * ensuring every item inside matches canonical format.
+     */
+    const _normalizeCategories = (raw) => {
+        if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+        const result = {};
+        for (const [key, cat] of Object.entries(raw)) {
+            if (!cat || !Array.isArray(cat.items)) continue;
+            const catKey = key.toLowerCase().replace(/\s+/g, '-');
+            result[catKey] = {
+                title: cat.title || key,
+                icon: cat.icon || _catIcons[catKey] || '🍽️',
+                items: cat.items.map(i => _normalizeItem(i, cat.title || key)),
+            };
+        }
+        return result;
+    };
+
+    /**
+     * Public normalizer: accepts any server data shape, returns
+     * canonical categories object ready for load() or setLiveData().
+     *
+     * Handles:
+     *   - Flat array of items
+     *   - { categories: { key: { title, icon, items[] } } }
+     *   - Top-level { steam: {…}, fried: {…}, … }
+     *
+     * @param {Array|Object} serverData
+     * @returns {Object} categories object { key: { title, icon, items[] } }
+     */
+    const normalizeMenuFromServer = (serverData) => {
+        if (!serverData) return {};
+
+        // Flat array of items
+        if (Array.isArray(serverData)) {
+            return _groupByCategory(serverData.map(i => _normalizeItem(i)));
+        }
+
+        // { categories: { … } } wrapper
+        if (serverData.categories && typeof serverData.categories === 'object') {
+            return _normalizeCategories(serverData.categories);
+        }
+
+        // Top-level category keys { steam: {…}, fried: {…}, … }
+        if (typeof serverData === 'object') {
+            return _normalizeCategories(serverData);
+        }
+
+        return {};
+    };
+
+    /* ============================================================
+       LIVE DATA — deep-merge server data into running menu state
+    ============================================================ */
+
+    /**
+     * Merge live (server) categories into the active menu without
+     * resetting the whole object.  Returns array of changed item IDs
+     * so the UI can do a targeted re-render.
+     *
+     * Rules:
+     *   - New items / categories are added
+     *   - Changed fields (price, special, active, name, desc) are patched
+     *   - Items removed on server are removed locally
+     *   - Cart is NOT touched (it stores its own copy of data)
+     *
+     * @param {Object} liveCats — normalized categories from server
+     * @returns {number[]} IDs of items that actually changed
+     */
+    const setLiveData = (liveCats) => {
+        const changedIds = [];
+        const filtered = _filterActive(liveCats);
+
+        for (const [key, liveCat] of Object.entries(filtered)) {
+            if (!categories[key]) {
+                // Brand-new category from server
+                categories[key] = { ...liveCat, items: liveCat.items.map(i => ({ ...i })) };
+                liveCat.items.forEach(i => changedIds.push(i.id));
+                continue;
+            }
+
+            const currentCat = categories[key];
+
+            // Merge title / icon if server has better data
+            if (liveCat.title) currentCat.title = liveCat.title;
+            if (liveCat.icon && liveCat.icon !== '🍽️') currentCat.icon = liveCat.icon;
+
+            // Build fast-lookup for current items
+            const currentMap = new Map(currentCat.items.map(i => [i.id, i]));
+
+            for (const liveItem of liveCat.items) {
+                const existing = currentMap.get(liveItem.id);
+                if (!existing) {
+                    // New item
+                    currentCat.items.push({ ...liveItem });
+                    changedIds.push(liveItem.id);
+                    continue;
+                }
+
+                // Diff individual fields
+                let changed = false;
+                for (const prop of ['name', 'desc', 'special', 'active']) {
+                    if (existing[prop] !== liveItem[prop]) {
+                        existing[prop] = liveItem[prop];
+                        changed = true;
+                    }
+                }
+
+                // Deep-compare prices
+                if (JSON.stringify(existing.prices) !== JSON.stringify(liveItem.prices)) {
+                    existing.prices = liveItem.prices.map(p => ({ ...p }));
+                    changed = true;
+                }
+
+                if (changed) changedIds.push(existing.id);
+            }
+
+            // Remove items deleted on server
+            const liveIds = new Set(liveCat.items.map(i => i.id));
+            const removed = currentCat.items.filter(i => !liveIds.has(i.id));
+            removed.forEach(i => changedIds.push(i.id));
+            currentCat.items = currentCat.items.filter(i => liveIds.has(i.id));
+        }
+
+        // Remove categories that no longer exist on server
+        for (const key of Object.keys(categories)) {
+            if (!filtered[key]) {
+                categories[key].items.forEach(i => changedIds.push(i.id));
+                delete categories[key];
+            }
+        }
+
+        _isLive = true;
+        window.__SERVER_READY__ = true;
+        return changedIds;
+    };
+
     /**
      * Fetch menu from backend API and load it.
      * Falls back to static data on any failure.
@@ -196,19 +384,11 @@ const MenuData = (() => {
         const res = await Api.fetchMenu();
 
         if (res.ok && res.data) {
-            let cats;
-
-            if (Array.isArray(res.data)) {
-                /* Backend returned flat item array — group into categories */
-                cats = _groupByCategory(res.data);
-            } else {
-                /* Object: { categories: {...} } or top-level { steam:{…}, fried:{…} } */
-                cats = res.data.categories || res.data;
-            }
-
-            if (cats && typeof cats === 'object' && !Array.isArray(cats) && Object.keys(cats).length) {
+            const cats = normalizeMenuFromServer(res.data);
+            if (cats && Object.keys(cats).length) {
                 load(cats);
                 _isLive = true;
+                window.__SERVER_READY__ = true;
                 return { live: true };
             }
         }
@@ -216,11 +396,40 @@ const MenuData = (() => {
         // Fallback to static
         _initStatic();
         _isLive = false;
+        window.__SERVER_READY__ = false;
         return { live: false, error: res.error || 'Empty menu data' };
+    };
+
+    /**
+     * Non-destructive background connect: fetches live menu and deep-merges
+     * into the running state.  Does NOT reset to static on failure.
+     * Designed for background ping during cold-start.
+     *
+     * @returns {Promise<{live:boolean, changedIds?:number[], error?:string}>}
+     */
+    const connectLive = async () => {
+        if (typeof Api === 'undefined') return { live: false, error: 'Api not loaded' };
+
+        try {
+            const res = await Api.fetchMenu();
+            if (!res.ok || !res.data) return { live: false, error: res.error || 'No data' };
+
+            const cats = normalizeMenuFromServer(res.data);
+            if (!cats || !Object.keys(cats).length) return { live: false, error: 'Empty menu' };
+
+            const changedIds = setLiveData(cats);
+            return { live: true, changedIds };
+        } catch (err) {
+            return { live: false, error: err.message || 'Network error' };
+        }
     };
 
     /** Did the last load come from the live API? */
     const isLive = () => _isLive;
 
-    return Object.freeze({ entries, allItems, findById, keys, get, load, fetchFromApi, isLive });
+    return Object.freeze({
+        entries, allItems, findById, keys, get, load,
+        fetchFromApi, connectLive, setLiveData,
+        normalizeMenuFromServer, isLive,
+    });
 })();
