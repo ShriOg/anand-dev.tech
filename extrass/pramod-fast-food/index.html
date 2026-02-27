@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pramod Fast Food — Menu</title>
+    <meta name="description" content="Pramod Fast Food — Momos, Noodles, Rolls & more. Order via WhatsApp!">
+    <meta name="theme-color" content="#e85d04">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Hero Header -->
+    <header class="hero">
+        <div class="hero-content">
+            <span class="hero-emoji">🥟</span>
+            <h1 class="hero-title">Pramod Fast Food</h1>
+            <p class="hero-subtitle">Momos · Noodles · Rolls · & More</p>
+        </div>
+    </header>
+
+    <!-- Search & Filters -->
+    <div class="search-section">
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search menu items...">
+            <button class="search-clear" id="searchClear">✕</button>
+        </div>
+        <div class="filters">
+            <div class="filter-chip active" data-filter="all">All</div>
+            <div class="filter-chip" data-filter="special">🔥 Special</div>
+            <div class="filter-chip" data-filter="under50">Under ₹50</div>
+            <div class="filter-chip" data-filter="under100">Under ₹100</div>
+        </div>
+    </div>
+
+    <!-- Category Tabs -->
+    <nav class="tabs-container">
+        <div class="tabs" id="menuTabs">
+            <button class="tab active" data-category="all">All</button>
+            <button class="tab" data-category="steam">🥟 Steam</button>
+            <button class="tab" data-category="fried">🍤 Fried</button>
+            <button class="tab" data-category="gravy">🍲 Gravy</button>
+            <button class="tab" data-category="kurkure">✨ Kurkure</button>
+            <button class="tab" data-category="noodles">🍜 Noodles</button>
+            <button class="tab" data-category="potato">🥔 Potato</button>
+            <button class="tab" data-category="rolls">🌯 Rolls</button>
+            <button class="tab" data-category="chilli">🌶️ Chilli</button>
+            <button class="tab" data-category="main">🍚 Main</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-value" id="totalItems">0</div>
+                <div class="stat-label">Items</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="specialItems">0</div>
+                <div class="stat-label">Specials</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgPrice">₹0</div>
+                <div class="stat-label">Avg Price</div>
+            </div>
+        </div>
+        <div id="menuContainer"></div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-buttons">
+            <a href="tel:8595928413" class="footer-btn btn-call">📞 Call Now</a>
+            <a href="https://wa.me/918595928413" class="footer-btn btn-whatsapp">💬 WhatsApp</a>
+        </div>
+        <div class="footer-info">
+            🎉 Party orders available<br>
+            शादी, बर्थडे व पार्टी के आर्डर भी लिए जाते है
+        </div>
+    </footer>
+
+    <!-- Back to Top -->
+    <div class="back-to-top" id="backToTop" aria-label="Back to top">↑</div>
+
+    <!-- Floating Cart -->
+    <button class="cart-btn" onclick="toggleCart()" aria-label="Open cart">
+        🛒
+        <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
+    </button>
+
+    <!-- Cart Overlay -->
+    <div class="modal-overlay" id="modalOverlay" onclick="toggleCart()"></div>
+
+    <!-- Cart Modal -->
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-handle"></div>
+        <div class="cart-header">
+            <div class="cart-title">
+                <span class="cart-title-icon">🛒</span> Your Cart
+            </div>
+            <button class="close-cart" onclick="toggleCart()" aria-label="Close cart">✕</button>
+        </div>
+        <div class="cart-items" id="cartItems">
+            <div class="empty-cart">
+                <div class="empty-cart-icon">🛒</div>
+                <div class="empty-cart-text">Your cart is empty</div>
+            </div>
+        </div>
+        <div class="cart-footer" id="cartFooter" style="display: none;">
+            <div class="cart-total">
+                <span>Total</span>
+                <span class="cart-total-value" id="cartTotal">₹0</span>
+            </div>
+            <button class="checkout-btn" onclick="checkout()">💬 Place Order via WhatsApp</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
