@@ -23,11 +23,29 @@ const UI = (() => {
     const renderStats = () => {
         const items = MenuData.allItems();
         const specials = items.filter(i => i.special).length;
-        const avg = Math.round(items.reduce((s, i) => s + i.prices[0].value, 0) / items.length);
+        const avg = items.length ? Math.round(items.reduce((s, i) => s + i.prices[0].value, 0) / items.length) : 0;
 
-        $('#stat-total').textContent = items.length;
-        $('#stat-specials').textContent = specials;
-        $('#stat-avg').textContent = `₹${avg}`;
+        const totalEl = $('#stat-total');
+        const specialsEl = $('#stat-specials');
+        const avgEl = $('#stat-avg');
+
+        if (totalEl) totalEl.textContent = items.length;
+        if (specialsEl) specialsEl.textContent = specials;
+        if (avgEl) avgEl.textContent = `₹${avg}`;
+
+        // Live indicator
+        const indicator = $('#liveIndicator');
+        if (indicator && typeof MenuData.isLive === 'function') {
+            if (MenuData.isLive()) {
+                indicator.innerHTML = '<span class="live-dot"></span> Live';
+                indicator.classList.add('live-indicator--on');
+                indicator.classList.remove('live-indicator--off');
+            } else {
+                indicator.innerHTML = '<span class="live-dot"></span> Offline';
+                indicator.classList.remove('live-indicator--on');
+                indicator.classList.add('live-indicator--off');
+            }
+        }
     };
 
     /* ====================================================================

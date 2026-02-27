@@ -13,25 +13,6 @@ const AdminUI = (() => {
     const $$ = (s, ctx = document) => ctx.querySelectorAll(s);
 
     /* ====================================================================
-       AUTH GUARD
-    ==================================================================== */
-    const hideAuthGuard = () => {
-        const g = $('#authGuard');
-        if (g) { g.classList.add('hide'); setTimeout(() => g.remove(), 400); }
-    };
-
-    const showAuthFailed = (msg) => {
-        const g = $('#authGuard');
-        if (g) {
-            g.innerHTML = `
-                <div class="auth-guard__inner">
-                    <p class="auth-guard__text" style="color:var(--c-red)">${msg || 'Access denied.'}</p>
-                    <a href="/login?redirect=admin" style="color:var(--c-brand);margin-top:12px;display:inline-block;font-weight:600">Go to Login →</a>
-                </div>`;
-        }
-    };
-
-    /* ====================================================================
        TOAST SYSTEM
     ==================================================================== */
     let _toastTimer;
@@ -459,7 +440,6 @@ const AdminUI = (() => {
     /* ---------- Public surface ---------- */
     return Object.freeze({
         $, $$,
-        hideAuthGuard, showAuthFailed,
         showToast, showConfirm,
         switchPage,
         updateSocketStatus,

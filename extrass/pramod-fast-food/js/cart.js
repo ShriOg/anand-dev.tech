@@ -92,11 +92,12 @@ const Cart = (() => {
     };
 
     /** Build professional WhatsApp checkout URL with customer info */
-    const buildCheckoutMessage = (info) => {
+    const buildCheckoutMessage = (info, overrides = {}) => {
         const items = snapshot();
         if (!items.length) return null;
 
-        const orderId = generateOrderId();
+        const orderId = overrides.orderId || generateOrderId();
+        const orderTotal = overrides.total != null ? overrides.total : total();
         const ts = formatTimestamp();
 
         let msg = `🛒 *New Order — Pramod Fast Food*\n`;
@@ -116,10 +117,51 @@ const Cart = (() => {
             msg += `• ${i.name}\n  ${i.size} × ${i.quantity}\n  ₹${i.price * i.quantity}\n\n`;
         });
         msg += `━━━━━━━━━━━━━━━━━━\n`;
-        msg += `💰 *Total: ₹${total()}*`;
+        msg += `💰 *Total: ₹${orderTotal}*`;
 
         return `https://wa.me/918595928413?text=${encodeURIComponent(msg)}`;
     };
 
-    return Object.freeze({ add, update, remove, clear, qty, count, total, snapshot, checkoutURL, buildCheckoutMessage });
+    /**
+     * Submit order to backend API, then build WhatsApp URL.
+     * Does NOT clear the cart — caller clears only on success.
+     *
+     * @param {object} info — { name, phone, orderType, persons?, table?, note? }
+     * @returns {Promise<{ok:boolean, url?:string, orderId?:string, total?:number, error?:string}>}
+     */
+    const submitOrder = async (info) => {
+        const items = snapshot();
+        if (!items.length) return { ok: false, error: 'Cart is empty' };
+
+        const payload = {
+            customerName: info.name,
+            phone: info.phone,
+            orderType: info.orderType,
+            items: items.map(i => ({ itemId: i.id, size: i.size, quantity: i.quantity })),
+        };
+        if (info.orderType === 'Dine-In') {
+            if (info.persons) payload.persons = Number(info.persons);
+            if (info.table) payload.tableNumber = info.table;
+        }
+        if (info.note) payload.note = info.note;
+
+        // Try backend first
+        if (typeof Api !== 'undefined') {
+            const res = await Api.placeOrder(payload);
+            if (res.ok && res.data) {
+                const backendOrderId = res.data.orderId || res.data._id || generateOrderId();
+                const backendTotal = res.data.total != null ? res.data.total : total();
+                const url = buildCheckoutMessage(info, { orderId: backendOrderId, total: backendTotal });
+                return { ok: true, url, orderId: backendOrderId, total: backendTotal };
+            }
+            // Backend failed — return error, keep cart intact
+            return { ok: false, error: res.error || 'Order submission failed' };
+        }
+
+        // No API module — fallback to client-side only (WhatsApp)
+        const url = buildCheckoutMessage(info);
+        return { ok: true, url, orderId: generateOrderId(), total: total() };
+    };
+
+    return Object.freeze({ add, update, remove, clear, qty, count, total, snapshot, checkoutURL, buildCheckoutMessage, submitOrder });
 })();

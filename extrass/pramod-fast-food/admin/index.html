@@ -15,11 +15,20 @@
 </head>
 <body>
 
-    <!-- ==================== LOADING GUARD ==================== -->
-    <div class="auth-guard" id="authGuard">
-        <div class="auth-guard__inner">
-            <div class="auth-guard__spinner"></div>
-            <p class="auth-guard__text">Verifying admin access…</p>
+    <!-- ==================== PASSWORD GATE ==================== -->
+    <div class="gate" id="gate">
+        <div class="gate__card">
+            <span class="gate__icon">🔐</span>
+            <h1 class="gate__title">Admin Access</h1>
+            <p class="gate__sub">Enter password to continue</p>
+            <form class="gate__form" id="gateForm" autocomplete="off">
+                <div class="gate__input-wrap">
+                    <input type="password" class="gate__input" id="gatePassword" placeholder="Password" autofocus required>
+                    <button type="button" class="gate__toggle-pw" id="togglePw" aria-label="Show password">👁️</button>
+                </div>
+                <p class="gate__error" id="gateError" hidden>Wrong password. Try again.</p>
+                <button type="submit" class="gate__btn">Unlock →</button>
+            </form>
         </div>
     </div>
 
@@ -54,7 +63,7 @@
         </nav>
         <div class="sidebar__footer">
             <button class="sidebar__theme-btn" id="themeToggle" aria-label="Toggle dark mode">🌙</button>
-            <button class="sidebar__logout-btn" id="logoutBtn">🚪 Logout</button>
+            <button class="sidebar__logout-btn" id="logoutBtn">🚪 Lock & Exit</button>
         </div>
     </aside>
 

@@ -25,13 +25,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* ==========  INITIAL RENDER  ========== */
     showSkeleton();
-    renderStats();
 
-    // Simulate data-loading delay (swap with real fetch later)
-    setTimeout(() => {
+    // Fetch menu from API → fall back to static data
+    (async () => {
+        try {
+            const result = await MenuData.fetchFromApi();
+            if (!result.live) {
+                console.warn('[menu] Using static fallback:', result.error);
+            }
+        } catch (err) {
+            console.warn('[menu] Fetch failed, using static data:', err);
+        }
+        renderStats();
         State.set('loading', false);
         renderMenu();
-    }, 350);
+    })();
+
+    // Fetch loyalty profile if authenticated
+    (async () => {
+        if (typeof Api !== 'undefined' && Api.isAuthenticated()) {
+            const res = await Api.fetchProfile();
+            if (res.ok && res.data) {
+                UI.renderLoyaltyBar(res.data);
+            } else {
+                UI.renderLoyaltyBar(null);
+            }
+        }
+    })();
 
     /* ==========  STATE → UI SUBSCRIPTIONS  ========== */
     const updateTabIndicator = (activeTab) => {
@@ -187,23 +207,48 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             case 'checkout-confirm': {
                 const info = UI.getCustomerInfo();
-                const url = Cart.buildCheckoutMessage(info);
-                if (!url) return;
+                if (!Cart.count()) return;
 
                 btn.disabled = true;
-                btn.textContent = '⏳ Opening…';
-                showToast('Opening WhatsApp...');
+                btn.textContent = '⏳ Placing order…';
 
-                setTimeout(() => {
-                    window.open(url, '_blank');
-                    setTimeout(() => {
+                (async () => {
+                    try {
+                        const result = await Cart.submitOrder(info);
+
+                        if (!result.ok) {
+                            showToast(result.error || 'Order failed — please try again');
+                            btn.disabled = false;
+                            btn.textContent = '💬 Confirm & Send';
+                            return;
+                        }
+
+                        // Order saved (or fallback succeeded) — open WhatsApp
+                        showToast('Order placed! Opening WhatsApp…');
+                        if (result.url) window.open(result.url, '_blank');
+
+                        // Refresh loyalty data after successful order
+                        if (typeof Api !== 'undefined' && Api.isAuthenticated()) {
+                            Api.fetchProfile().then(res => {
+                                if (res.ok && res.data) UI.renderLoyaltyBar(res.data);
+                            });
+                        }
+
+                        // Clear cart only after backend confirms
+                        setTimeout(() => {
+                            btn.disabled = false;
+                            btn.textContent = '💬 Confirm & Send';
+                            Cart.clear();
+                            UI.setCheckoutStep('cart');
+                            toggleCart(false);
+                        }, 2000);
+
+                    } catch (err) {
+                        showToast('Network error — your cart is safe');
                         btn.disabled = false;
                         btn.textContent = '💬 Confirm & Send';
-                        Cart.clear();
-                        UI.setCheckoutStep('cart');
-                        toggleCart(false);
-                    }, 2500);
-                }, 350);
+                    }
+                })();
                 break;
             }
         }

@@ -721,3 +721,21 @@ body.modal-open .cart-fab{
 .loyalty__user{font-weight:600;color:var(--c-text)}
 .loyalty__stats{display:flex;gap:var(--sp-3)}
 .loyalty__stat{font-weight:600;color:var(--c-text-soft)}
+
+/* ================================================================
+   LIVE / OFFLINE INDICATOR
+   ================================================================ */
+.live-indicator{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:11px;font-weight:600;letter-spacing:.3px;
+    padding:3px 10px;border-radius:var(--r-full);
+    line-height:1;white-space:nowrap;
+}
+.live-dot{
+    width:7px;height:7px;border-radius:50%;display:inline-block;
+}
+.live-indicator--on{color:#059669;background:rgba(5,150,105,.08)}
+.live-indicator--on .live-dot{background:#059669;box-shadow:0 0 4px #059669;animation:pulse-dot 1.6s ease-in-out infinite}
+.live-indicator--off{color:var(--c-text-soft);background:rgba(0,0,0,.04)}
+.live-indicator--off .live-dot{background:#9ca3af}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.35}}

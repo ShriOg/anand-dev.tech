@@ -1,17 +1,21 @@
 /**
  * menu-data.js — Single source of truth for menu items.
  *
- * Structure is backend-ready: swap the hard-coded object
- * with a fetch('/api/menu') and everything downstream stays the same.
+ * Tries to fetch from backend via Api.fetchMenu() first.
+ * If network fails, falls back to the hard-coded static menu.
+ * Only items with active !== false are exposed to downstream consumers.
  *
  * Each category:  { title, icon, items[] }
- * Each item:      { id, name, desc, prices[{label,value}], special? }
+ * Each item:      { id, name, desc, prices[{label,value}], special?, active? }
  */
 'use strict';
 
 const MenuData = (() => {
 
-    const categories = {
+    /** Whether data was successfully loaded from the live API */
+    let _isLive = false;
+
+    const _staticCategories = {
         steam: {
             title: 'Steam Momos',
             icon: '🥟',
@@ -113,6 +117,29 @@ const MenuData = (() => {
         },
     };
 
+    /** Active categories — what downstream modules actually see */
+    let categories = {};
+
+    /** Filter out inactive items from a categories object */
+    const _filterActive = (cats) => {
+        const result = {};
+        for (const [key, cat] of Object.entries(cats)) {
+            const activeItems = cat.items.filter(i => i.active !== false);
+            if (activeItems.length) {
+                result[key] = { ...cat, items: activeItems };
+            }
+        }
+        return result;
+    };
+
+    /** Populate categories from static data (immediate, synchronous) */
+    const _initStatic = () => {
+        categories = _filterActive(_staticCategories);
+    };
+
+    // Start with static data so everything works synchronously
+    _initStatic();
+
     /* ---------- Public helpers ---------- */
 
     /** All categories as an ordered array of [key, data] */
@@ -131,13 +158,45 @@ const MenuData = (() => {
     const get = (key) => categories[key];
 
     /**
-     * Replace categories wholesale (for future API integration).
-     * Usage: MenuData.load(await fetch('/api/menu').then(r => r.json()))
+     * Replace categories wholesale (for live API data).
+     * Filters out inactive items automatically.
      */
     const load = (data) => {
         Object.keys(categories).forEach(k => delete categories[k]);
-        Object.assign(categories, data);
+        Object.assign(categories, _filterActive(data));
     };
 
-    return Object.freeze({ entries, allItems, findById, keys, get, load });
+    /**
+     * Fetch menu from backend API and load it.
+     * Falls back to static data on any failure.
+     * @returns {Promise<{live:boolean, error?:string}>}
+     */
+    const fetchFromApi = async () => {
+        if (typeof Api === 'undefined') {
+            _isLive = false;
+            return { live: false, error: 'Api module not loaded' };
+        }
+
+        const res = await Api.fetchMenu();
+
+        if (res.ok && res.data) {
+            // Backend may return { categories: {...} } or top-level {...}
+            const cats = res.data.categories || res.data;
+            if (cats && typeof cats === 'object' && Object.keys(cats).length) {
+                load(cats);
+                _isLive = true;
+                return { live: true };
+            }
+        }
+
+        // Fallback to static
+        _initStatic();
+        _isLive = false;
+        return { live: false, error: res.error || 'Empty menu data' };
+    };
+
+    /** Did the last load come from the live API? */
+    const isLive = () => _isLive;
+
+    return Object.freeze({ entries, allItems, findById, keys, get, load, fetchFromApi, isLive });
 })();

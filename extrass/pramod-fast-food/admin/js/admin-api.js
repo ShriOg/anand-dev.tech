@@ -2,7 +2,7 @@
  * admin-api.js — API layer for admin dashboard.
  *
  * Handles all HTTP requests to the restaurant API.
- * Manages JWT token, auto-redirects on 401, centralises error handling.
+ * No JWT — auth is handled by the client-side password gate.
  */
 'use strict';
 
@@ -13,19 +13,10 @@ const AdminAPI = (() => {
         ? 'http://localhost:3000/api'
         : '/api';
 
-    const TOKEN_KEY = 'pf_admin_token';
-
-    /* ---------- Token management ---------- */
-    const getToken = () => localStorage.getItem(TOKEN_KEY);
-    const setToken = (t) => localStorage.setItem(TOKEN_KEY, t);
-    const clearToken = () => localStorage.removeItem(TOKEN_KEY);
-
     /* ---------- Core fetch wrapper ---------- */
     const _fetch = async (endpoint, options = {}) => {
-        const token = getToken();
         const headers = {
             'Content-Type': 'application/json',
-            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
             ...(options.headers || {}),
         };
 
@@ -34,12 +25,6 @@ const AdminAPI = (() => {
                 ...options,
                 headers,
             });
-
-            if (res.status === 401) {
-                clearToken();
-                window.location.href = '/login?redirect=admin';
-                throw new Error('Unauthorized');
-            }
 
             if (!res.ok) {
                 const body = await res.json().catch(() => ({}));
@@ -50,34 +35,9 @@ const AdminAPI = (() => {
             if (res.status === 204) return null;
             return await res.json();
         } catch (err) {
-            if (err.message === 'Unauthorized') throw err;
             console.error(`[AdminAPI] ${options.method || 'GET'} ${endpoint}:`, err);
             throw err;
         }
-    };
-
-    /* ---------- Auth ---------- */
-    const verifyAdmin = async () => {
-        const data = await _fetch('/auth/profile');
-        if (!data || data.role !== 'admin') {
-            clearToken();
-            throw new Error('Not admin');
-        }
-        return data;
-    };
-
-    const login = async (email, password) => {
-        const data = await _fetch('/auth/login', {
-            method: 'POST',
-            body: JSON.stringify({ email, password }),
-        });
-        if (data.token) setToken(data.token);
-        return data;
-    };
-
-    const logout = () => {
-        clearToken();
-        window.location.href = '/login';
     };
 
     /* ---------- Dashboard Stats ---------- */
@@ -118,8 +78,6 @@ const AdminAPI = (() => {
 
     /* ---------- Public surface ---------- */
     return Object.freeze({
-        getToken, setToken, clearToken,
-        verifyAdmin, login, logout,
         getStats, getOrders, getRecentOrders,
         updateOrderStatus,
         getMenu, updateMenuItem,
