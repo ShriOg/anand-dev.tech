@@ -240,8 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const wrapper = btn.closest('.cart-suggestions');
                 const list = wrapper?.querySelector('.cart-suggestions__list');
                 if (!list) break;
-                const open = list.hidden;
-                list.hidden = !open;
+                const open = list.classList.toggle('open');
                 btn.setAttribute('aria-expanded', String(open));
                 btn.querySelector('.cart-suggestions__chevron').textContent = open ? '\u25b4' : '\u25be';
                 break;

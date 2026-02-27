@@ -209,7 +209,7 @@ const UI = (() => {
                 <span class="cart-suggestions__count">${available.length} available</span>
                 <span class="cart-suggestions__chevron">▾</span>
             </button>
-            <div class="cart-suggestions__list" hidden>
+            <div class="cart-suggestions__list">
                 ${picks.map(item => {
                     const p = item.prices[0];
                     return `
