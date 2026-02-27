@@ -68,7 +68,9 @@ const Api = (() => {
                 };
             }
             _serverAwake = true;
-            return { ok: true, status: res.status, data };
+            /* Unwrap backend { success, data } envelope so consumers get the real payload */
+            const payload = (data && data.success === true && 'data' in data) ? data.data : data;
+            return { ok: true, status: res.status, data: payload };
 
         } catch (err) {
             clearTimeout(timer);

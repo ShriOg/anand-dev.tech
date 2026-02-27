@@ -167,6 +167,22 @@ const MenuData = (() => {
     };
 
     /**
+     * Group a flat array of items (from backend) into the categories
+     * structure that the rest of the app expects.
+     */
+    const _groupByCategory = (items) => {
+        const result = {};
+        items.forEach(item => {
+            const key = (item.category || 'other').toLowerCase().replace(/\s+/g, '-');
+            if (!result[key]) {
+                result[key] = { title: item.category || 'Other', icon: '🍽️', items: [] };
+            }
+            result[key].items.push(item);
+        });
+        return result;
+    };
+
+    /**
      * Fetch menu from backend API and load it.
      * Falls back to static data on any failure.
      * @returns {Promise<{live:boolean, error?:string}>}
@@ -180,9 +196,17 @@ const MenuData = (() => {
         const res = await Api.fetchMenu();
 
         if (res.ok && res.data) {
-            // Backend may return { categories: {...} } or top-level {...}
-            const cats = res.data.categories || res.data;
-            if (cats && typeof cats === 'object' && Object.keys(cats).length) {
+            let cats;
+
+            if (Array.isArray(res.data)) {
+                /* Backend returned flat item array — group into categories */
+                cats = _groupByCategory(res.data);
+            } else {
+                /* Object: { categories: {...} } or top-level { steam:{…}, fried:{…} } */
+                cats = res.data.categories || res.data;
+            }
+
+            if (cats && typeof cats === 'object' && !Array.isArray(cats) && Object.keys(cats).length) {
                 load(cats);
                 _isLive = true;
                 return { live: true };
