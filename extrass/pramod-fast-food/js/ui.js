@@ -618,7 +618,7 @@ const UI = (() => {
             if (items.length > 4) itemsHtml += `<div class="order-card__item"><span class="order-card__item-name" style="color:var(--c-text-lighter)">+${items.length - 4} more</span><span></span></div>`;
 
             return `
-            <div class="order-card" data-order-id="${order.orderId || ''}" data-id="${order._id || order.orderId || ''}">
+            <div class="order-card" data-order-id="${order.orderId || ''}" data-id="${order._id || ''}">
                 <div class="order-card__head">
                     <span class="order-card__id">${order.orderId || '—'}</span>
                     <span class="order-card__date">${_formatOrderDate(order.date)}</span>
@@ -652,19 +652,12 @@ const UI = (() => {
     ==================================================================== */
     const updateOrderCard = (order) => {
         if (!order) return;
-        const id = order._id || order.orderId;
-        console.log('[UI] updateOrderCard called for:', id, 'status:', order.status);
+        const id = order._id;
         if (!id) return;
 
-        /* Find card by data-id (Mongo _id) or data-order-id (orderId) */
-        const card = document.querySelector(`[data-id="${order._id}"]`)
-                  || document.querySelector(`[data-id="${order.orderId}"]`)
-                  || document.querySelector(`[data-order-id="${order._id}"]`)
-                  || document.querySelector(`[data-order-id="${order.orderId}"]`);
-        if (!card) {
-            console.log('[UI] No order card found for:', id);
-            return;
-        }
+        /* Find card strictly by data-id (Mongo _id) */
+        const card = document.querySelector(`[data-id="${id}"]`);
+        if (!card) return;
 
         const statusKey = (order.status || '').toUpperCase();
 
@@ -702,15 +695,12 @@ const UI = (() => {
             setTimeout(() => {
                 if (card.parentNode) {
                     card.classList.add('order-card--collapsed');
-                    /* Move to bottom of list after collapse animation */
                     setTimeout(() => {
                         if (card.parentNode) card.parentNode.appendChild(card);
                     }, 600);
                 }
             }, 10000);
         }
-
-        console.log('[UI] Order card updated:', id, '→', order.status);
     };
 
     /* ---------- Public surface ---------- */

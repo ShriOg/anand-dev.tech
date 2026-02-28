@@ -152,6 +152,14 @@ const Api = (() => {
     });
 
     /**
+     * Fetch orders by phone number.
+     * @param {string} phone — Customer phone number
+     * @returns {Promise<{ok:boolean, data?:Array, error?:string}>}
+     */
+    const fetchOrdersByPhone = (phone) =>
+        request(`${ENDPOINTS.orders}?phone=${encodeURIComponent(phone)}`);
+
+    /**
      * Fetch authenticated user profile (loyalty data).
      * @returns {Promise<{ok:boolean, data?:{name:string, points:number, orders:number, ...}, error?:string}>}
      */
@@ -174,6 +182,7 @@ const Api = (() => {
         request,
         fetchMenu,
         placeOrder,
+        fetchOrdersByPhone,
         fetchProfile,
         setToken,
         getToken,

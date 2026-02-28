@@ -318,9 +318,12 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('[CustomerSocket] Connected');
             debug('Socket Connected');
             _updateConnectionIndicator('connected');
-            /* Join room for latest order if we have one */
-            if (_lastOrderId) {
-                _customerSocket.emit('join:order', _lastOrderId);
+
+            /* Join user's phone room so only their orders get pushed */
+            const phone = localStorage.getItem('pf_customer_phone');
+            if (phone) {
+                _customerSocket.emit('join-room', phone);
+                console.log('[CustomerSocket] Joined room:', phone);
             }
         });
 
@@ -361,43 +364,35 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         /* Listen for order updates matching saved orders */
-        _customerSocket.on('restaurant:order-updated', (data) => {
-            if (!data) return;
-            const id = data.orderId || data._id;
-            const status = (data.status || '').toUpperCase();
-            console.log('[CustomerSocket] Socket update received:', id, 'status:', status);
-            if (!id) return;
+        _customerSocket.on('restaurant:order-updated', (order) => {
+            if (!order) return;
+            console.log('[CustomerSocket] order-updated:', order._id, order.status);
 
-            /* Throttle: skip if same order notified <3s ago */
-            if (!_shouldNotify(id)) {
-                console.log('[CustomerSocket] Throttled duplicate for:', id);
-                return;
+            /* Instant DOM update */
+            UI.updateOrderCard(order);
+
+            /* Update local storage */
+            const id = order._id || order.orderId;
+            const status = (order.status || '').toUpperCase();
+            if (typeof Customer !== 'undefined' && id) {
+                Customer.updateOrderStatus(id, status);
             }
-
-            /* Try matching by orderId first, then by _id */
-            if (typeof Customer !== 'undefined') {
-                const matchById = Customer.getOrder(data.orderId) || Customer.getOrder(data._id);
-                if (matchById) {
-                    Customer.updateOrderStatus(matchById.orderId, status);
-                }
-            }
-
-            /* Instant DOM update — no full re-render needed */
-            UI.updateOrderCard(data);
 
             /* Sound + push for actionable statuses */
-            if (['PREPARING', 'READY', 'COMPLETED'].includes(status)) {
+            if (_shouldNotify(id) && ['PREPARING', 'READY', 'COMPLETED'].includes(status)) {
                 _playNotifySound();
-                _sendPushNotification(
-                    'Order Update',
-                    `Order ${id} is now ${status}`,
-                    '🥟'
-                );
+                _sendPushNotification('Order Update', `Order is now ${status}`, '🥟');
             }
 
             _showOrderNotification({ orderId: id, status });
             UI.renderGreeting();
-            UI.renderOrdersPanel();
+        });
+
+        /* Listen for order deletions */
+        _customerSocket.on('restaurant:order-deleted', ({ orderId }) => {
+            console.log('[CustomerSocket] order-deleted:', orderId);
+            const card = document.querySelector(`[data-id="${orderId}"]`);
+            if (card) card.remove();
         });
 
         _customerSocket.on('disconnect', () => {
@@ -418,8 +413,43 @@ document.addEventListener('DOMContentLoaded', () => {
     const _trackOrder = (orderId) => {
         _lastOrderId = orderId;
         localStorage.setItem('pf_last_order', orderId);
-        if (_customerSocket && _customerSocket.connected) {
-            _customerSocket.emit('join:order', orderId);
+    };
+
+    /**
+     * Fetch orders from backend by phone number and render them.
+     * Phone comes strictly from localStorage.pf_customer_phone.
+     */
+    const _fetchOrdersByPhone = async () => {
+        if (typeof Api === 'undefined') return;
+        const phone = localStorage.getItem('pf_customer_phone');
+        if (!phone) {
+            console.log('[Orders] No phone in localStorage — skipping fetch');
+            return;
+        }
+        try {
+            const res = await Api.fetchOrdersByPhone(phone);
+            if (res.ok && Array.isArray(res.data)) {
+                console.log('[Orders] Fetched', res.data.length, 'orders for phone:', phone);
+                /* Sync backend orders into local storage */
+                res.data.forEach(order => {
+                    Customer.saveOrder({
+                        orderId: order.orderId || order._id,
+                        _id: order._id,
+                        status: (order.status || 'PENDING').toUpperCase(),
+                        total: order.total,
+                        items: order.items || [],
+                        date: order.createdAt || order.date || new Date().toISOString(),
+                        customerName: order.customerName,
+                        phone: order.phone,
+                    });
+                });
+                UI.renderOrdersPanel();
+                UI.renderGreeting();
+            } else {
+                console.log('[Orders] Fetch failed or empty:', res.error);
+            }
+        } catch (err) {
+            console.warn('[Orders] Fetch error:', err.message);
         }
     };
 
@@ -494,6 +524,9 @@ document.addEventListener('DOMContentLoaded', () => {
     /* Restore last tracked order ID */
     const savedOrderId = localStorage.getItem('pf_last_order');
     if (savedOrderId) _lastOrderId = savedOrderId;
+
+    /* Fetch orders by phone from backend on load */
+    _fetchOrdersByPhone();
 
     /* ==========  NON-BLOCKING BACKGROUND CONNECT  ========== */
     /* While user browses the static menu, silently ping the backend
