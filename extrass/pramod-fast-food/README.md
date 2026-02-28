@@ -37,6 +37,15 @@ Quick start (production-ready checklist)
 4. Add analytics (privacy-compliant) if needed and a robots sitemap for SEO.
 5. Protect any admin pages — they must not be publicly writable.
 
+Production checklist (quick tick-list):
+
+- [ ] Confirm contact details are current in `index.html`.
+- [ ] Optimize and version-control `images/` or `assets/`.
+- [ ] Enable HTTPS and verify TLS certificate.
+- [ ] Test mobile layout and click-to-call on phones.
+- [ ] Configure a basic backup of the repository and assets.
+- [ ] Add a minimal privacy policy if collecting customer data.
+
 Local preview
 -------------
 
@@ -90,6 +99,28 @@ Contact / callback form (static → email using form service):
 	<label>Message<textarea name="message"></textarea></label>
 	<button type="submit">Request Callback</button>
 </form>
+```
+
+Gallery example (responsive grid):
+
+```html
+<section id="gallery">
+	<h2>Gallery</h2>
+	<div class="gallery-grid">
+		<figure>
+			<img src="images/dish-1.jpg" alt="Signature dish">
+			<figcaption>Signature Plate</figcaption>
+		</figure>
+		<figure>
+			<img src="images/interior-1.jpg" alt="Interior view">
+			<figcaption>Cozy interior</figcaption>
+		</figure>
+		<figure>
+			<img src="images/dish-2.jpg" alt="Popular snack">
+			<figcaption>Popular snack</figcaption>
+		</figure>
+	</div>
+</section>
 ```
 
 Online ordering options

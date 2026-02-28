@@ -5,8 +5,8 @@ console.log('[Admin] admin-app.js loaded');
 
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker
-            .register('/extrass/pramod-fast-food/admin/sw.js', {
-                scope: '/extrass/pramod-fast-food/admin/'
+            .register('/extrass/admin/sw.js', {
+                scope: '/extrass/admin/'
             })
             .then(() => console.log('[Admin] PWA Service Worker registered'))
             .catch(err => console.error('[Admin] SW registration failed', err));

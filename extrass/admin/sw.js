@@ -1,5 +1,5 @@
 const CACHE_NAME = "pf-admin-v1";
-const BASE_PATH = "/extrass/pramod-fast-food/admin/";
+const BASE_PATH = "/extrass/admin/";
 
 const STATIC_FILES = [
   BASE_PATH,
