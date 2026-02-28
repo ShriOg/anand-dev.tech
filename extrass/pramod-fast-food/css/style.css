@@ -1230,3 +1230,10 @@ body.modal-open .cart-fab{
 .conn-indicator--hidden{opacity:0;transform:translateY(8px)}
 @keyframes conn-pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .conn-indicator--mid{animation:conn-pulse 1.2s ease-in-out infinite}
+
+/* Readonly phone field in checkout */
+.readonly-phone {
+    opacity: 0.85;
+    background: rgba(255,255,255,0.05);
+    cursor: not-allowed;
+}

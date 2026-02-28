@@ -401,6 +401,22 @@ document.addEventListener('DOMContentLoaded', () => {
         _customerSocket.on('connect_error', () => {
             _updateConnectionIndicator('offline');
         });
+
+        /* Listen for menu updates — clear cache and reload */
+        _customerSocket.on('restaurant:menu-updated', () => {
+            console.log('[CustomerSocket] Menu updated — clearing cache');
+            if (typeof MenuData !== 'undefined' && MenuData.clearCache) {
+                MenuData.clearCache();
+            }
+            /* Re-fetch from server (bypasses cache since we just cleared it) */
+            MenuData.connectLive().then((result) => {
+                if (result.live) {
+                    renderStats();
+                    renderMenu();
+                    showToast('Menu updated! 🔄');
+                }
+            });
+        });
     };
 
     const _trackOrder = (orderId) => {
@@ -781,6 +797,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (!name) { showToast('Please enter your name'); $('#custName')?.focus(); return; }
                 if (!phone || !/^\d{10}$/.test(phone)) { showToast('Enter valid 10-digit phone'); $('#custPhone')?.focus(); return; }
+
+                /* Persist user details for auto-fill on next visit */
+                localStorage.setItem('pf_customer_name', name);
+                localStorage.setItem('pf_customer_phone', phone);
 
                 UI.setCustomerInfo({ name, phone, orderType, persons, table, note });
                 UI.setCheckoutStep('summary');

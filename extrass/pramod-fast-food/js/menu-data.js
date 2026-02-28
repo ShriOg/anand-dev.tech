@@ -534,14 +534,52 @@ const MenuData = (() => {
         return { live: false, error: res.error || 'Empty menu data' };
     };
 
+    /* ============================================================
+       SMART MENU CACHE — 5-minute TTL in localStorage
+    ============================================================ */
+    const CACHE_KEY = 'pf_menu_cache';
+    const CACHE_TIME_KEY = 'pf_menu_cache_time';
+    const FIVE_MIN = 5 * 60 * 1000;
+
+    const _getCached = () => {
+        try {
+            const raw = localStorage.getItem(CACHE_KEY);
+            const ts  = localStorage.getItem(CACHE_TIME_KEY);
+            if (raw && ts && (Date.now() - parseInt(ts, 10) < FIVE_MIN)) {
+                return JSON.parse(raw);
+            }
+        } catch { /* corrupt cache — ignore */ }
+        return null;
+    };
+
+    const _setCache = (data) => {
+        try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+            localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
+        } catch { /* quota exceeded — ignore */ }
+    };
+
+    const clearCache = () => {
+        localStorage.removeItem(CACHE_KEY);
+        localStorage.removeItem(CACHE_TIME_KEY);
+    };
+
     /**
      * Non-destructive background connect: fetches live menu and deep-merges
      * into the running state.  Does NOT reset to static on failure.
-     * Designed for background ping during cold-start.
+     * Uses smart cache with 5-minute TTL to reduce backend load.
      *
      * @returns {Promise<{live:boolean, changedIds?:string[], error?:string}>}
      */
     const connectLive = async () => {
+        /* Try local cache first */
+        const cached = _getCached();
+        if (cached && Object.keys(cached).length) {
+            debug('Menu loaded from cache');
+            const changedIds = setLiveData(cached);
+            return { live: true, changedIds, cached: true };
+        }
+
         if (typeof Api === 'undefined') return { live: false, error: 'Api not loaded' };
 
         try {
@@ -553,6 +591,7 @@ const MenuData = (() => {
             if (!cats || !Object.keys(cats).length) return { live: false, error: 'Empty menu' };
 
             debug('Server Menu Normalized', cats);
+            _setCache(cats);
             const changedIds = setLiveData(cats);
             window.__BACKEND_CONNECTED__ = true;
             return { live: true, changedIds };
@@ -567,6 +606,6 @@ const MenuData = (() => {
     return Object.freeze({
         entries, allItems, findById, keys, get, load,
         fetchFromApi, connectLive, setLiveData,
-        normalizeMenuFromServer, isLive,
+        normalizeMenuFromServer, isLive, clearCache,
     });
 })();

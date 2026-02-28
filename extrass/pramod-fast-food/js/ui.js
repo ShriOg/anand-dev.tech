@@ -306,14 +306,17 @@ const UI = (() => {
     const _renderCheckoutForm = (listEl, footerEl) => {
         /* Auto-prefill from saved customer data if form fields are empty */
         const saved = (typeof Customer !== 'undefined') ? Customer.getProfile() : null;
+        const lsName = localStorage.getItem('pf_customer_name') || '';
+        const lsPhone = localStorage.getItem('pf_customer_phone') || '';
         const ci = {
-            name: _customerInfo.name || saved?.name || '',
-            phone: _customerInfo.phone || saved?.phone || '',
+            name: _customerInfo.name || saved?.name || lsName || '',
+            phone: _customerInfo.phone || saved?.phone || lsPhone || '',
             orderType: _customerInfo.orderType || '',
             persons: _customerInfo.persons || '',
             table: _customerInfo.table || '',
             note: _customerInfo.note || '',
         };
+        const phoneIsStored = !!lsPhone;
         listEl.innerHTML = `
         <div class="checkout-form">
             <div class="form-group">
@@ -322,7 +325,7 @@ const UI = (() => {
             </div>
             <div class="form-group">
                 <label class="form-label" for="custPhone">Phone *</label>
-                <input type="tel" id="custPhone" class="form-input" placeholder="10-digit number" maxlength="10" required autocomplete="tel" value="${ci.phone || ''}">
+                <input type="tel" id="custPhone" class="form-input${phoneIsStored ? ' readonly-phone' : ''}" placeholder="10-digit number" maxlength="10" required autocomplete="tel" value="${ci.phone || ''}"${phoneIsStored ? ' readonly' : ''}>
             </div>
             <div class="form-group">
                 <label class="form-label">Order Type *</label>
