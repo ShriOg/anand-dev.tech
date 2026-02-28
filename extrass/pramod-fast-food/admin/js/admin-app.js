@@ -432,46 +432,41 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentPage === 'orders') loadLiveOrders();
         });
 
-        /* Status change on order card (event delegation) */
-        $('#liveOrdersContainer')?.addEventListener('change', async (e) => {
-            const select = e.target.closest('[data-action="status-change"]');
-            if (!select) return;
+        /* Status change on order card — premium inline buttons (event delegation) */
+        $('#liveOrdersContainer')?.addEventListener('click', async (e) => {
+            const btn = e.target.closest('[data-action="status-change"]');
+            if (!btn || !btn.classList.contains('status-btn')) return;
 
-            const orderId = select.dataset.orderId;
-            const newStatus = select.value;
+            const orderId = btn.dataset.orderId;
+            const newStatus = btn.dataset.status;
+
+            /* Skip if already active */
+            const order = liveOrders.find(o => (o._id || o.orderId) === orderId);
+            if (order && order.status === newStatus) return;
 
             if (newStatus === 'CANCELLED') {
                 const confirmed = await showConfirm('Cancel this order? This cannot be undone.');
-                if (!confirmed) {
-                    /* Revert select */
-                    const order = liveOrders.find(o => (o._id || o.orderId) === orderId);
-                    if (order) select.value = order.status;
-                    return;
-                }
+                if (!confirmed) return;
             }
 
             try {
-                select.disabled = true;
-                select.style.opacity = '.5';
+                btn.disabled = true;
+                btn.style.opacity = '.5';
                 await AdminAPI.updateOrderStatus(orderId, newStatus);
-                select.disabled = false;
-                select.style.opacity = '';
+                btn.disabled = false;
+                btn.style.opacity = '';
                 /* Update local state */
-                const order = liveOrders.find(o => (o._id || o.orderId) === orderId);
                 if (order) order.status = newStatus;
 
                 /* Re-render the card in place for visual consistency */
-                select.className = `status-select status-select--${newStatus.toLowerCase()}`;
                 updatePendingBadge();
                 if (order) updateOrderCard(orderId, order);
                 debug('Order Status Updated', { orderId, newStatus });
                 showToast(`Order updated to ${newStatus}`, 'success');
             } catch (err) {
-                select.disabled = false;
-                select.style.opacity = '';
+                btn.disabled = false;
+                btn.style.opacity = '';
                 showToast(`Failed to update: ${err.message}`, 'error');
-                const order = liveOrders.find(o => (o._id || o.orderId) === orderId);
-                if (order) select.value = order.status;
             }
         });
 

@@ -392,6 +392,22 @@ body{
 .status-select--completed{border-color:var(--c-green);color:var(--c-green-dark)}
 .status-select--cancelled{border-color:var(--c-red);color:var(--c-red)}
 
+/* Premium inline status pill buttons */
+.status-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.status-btn{
+    background:transparent;border:none;padding:7px 14px;
+    border-radius:20px;color:#aaa;cursor:pointer;
+    font:inherit;font-size:11px;font-weight:600;letter-spacing:.03em;
+    transition:all .2s ease;
+}
+.status-btn:hover{color:#fff;background:rgba(255,255,255,.08)}
+.status-btn.active{background:#ff6a00;color:#fff}
+.status-btn.active:hover{background:#e85d04}
+.status-btn[data-status="COMPLETED"].active{background:var(--c-green)}
+.status-btn[data-status="CANCELLED"].active{background:var(--c-red)}
+.status-btn[data-status="PREPARING"].active{background:var(--c-blue)}
+.status-btn[data-status="PENDING"].active{background:var(--c-yellow);color:#000}
+
 .order-card__actions{display:flex;align-items:center;gap:var(--sp-2)}
 
 /* Delete order button */

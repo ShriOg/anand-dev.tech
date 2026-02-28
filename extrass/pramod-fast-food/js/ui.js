@@ -633,6 +633,7 @@ const UI = (() => {
                 <div class="order-card__foot">
                     <span class="order-card__total">₹${order.total || 0}</span>
                     ${isCompleted ? `<button class="order-card__reorder" data-action="panel-reorder" data-order-id="${order.orderId}">🔁 Reorder</button>` : ''}
+                    ${isCancelled ? `<button class="delete-cancelled" data-id="${order._id || order.orderId}">🗑 Delete</button>` : ''}
                 </div>
             </div>`;
         }).join('');

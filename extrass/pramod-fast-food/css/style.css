@@ -1102,6 +1102,16 @@ body.modal-open .cart-fab{
 .order-card__reorder:hover{background:var(--c-brand);color:#fff}
 .order-card__reorder:active{transform:scale(.95)}
 
+/* Delete cancelled order button */
+.delete-cancelled{
+    padding:6px 14px;border-radius:var(--r-full);
+    border:1.5px solid #dc2626;background:transparent;
+    color:#dc2626;font:inherit;font-size:11.5px;font-weight:700;
+    cursor:pointer;transition:all var(--dur);
+}
+.delete-cancelled:hover{background:#dc2626;color:#fff}
+.delete-cancelled:active{transform:scale(.95)}
+
 /* ================================================================
    PREMIUM MICRO-INTERACTIONS
    ================================================================ */

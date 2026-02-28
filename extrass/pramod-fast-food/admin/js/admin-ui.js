@@ -242,12 +242,12 @@ const AdminUI = (() => {
             <div class="order-card__footer">
                 <span class="order-card__total">₹${o.total || 0}</span>
                 <div class="order-card__actions">
-                    <select class="status-select status-select--${statusLower}" data-order-id="${o._id || o.orderId}" data-action="status-change">
-                        <option value="PENDING" ${o.status === 'PENDING' ? 'selected' : ''}>⏳ Pending</option>
-                        <option value="PREPARING" ${o.status === 'PREPARING' ? 'selected' : ''}>🔥 Preparing</option>
-                        <option value="COMPLETED" ${o.status === 'COMPLETED' ? 'selected' : ''}>✅ Completed</option>
-                        <option value="CANCELLED" ${o.status === 'CANCELLED' ? 'selected' : ''}>❌ Cancelled</option>
-                    </select>
+                    <div class="status-buttons">
+                        ${_statusBtn(o, 'PENDING')}
+                        ${_statusBtn(o, 'PREPARING')}
+                        ${_statusBtn(o, 'COMPLETED')}
+                        ${_statusBtn(o, 'CANCELLED')}
+                    </div>
                     <button class="btn-delete-order" data-action="delete-order" data-order-id="${o._id || o.orderId}">🗑 Delete</button>
                 </div>
             </div>
@@ -544,6 +544,11 @@ const AdminUI = (() => {
         const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         const h = dt.getHours(), hr = h % 12 || 12, ap = h >= 12 ? 'PM' : 'AM';
         return `${dt.getDate()} ${M[dt.getMonth()]}, ${hr}:${String(dt.getMinutes()).padStart(2,'0')} ${ap}`;
+    };
+
+    const _statusBtn = (order, status) => {
+        const active = (order.status || 'PENDING').toUpperCase() === status ? 'active' : '';
+        return `<button class="status-btn ${active}" data-order-id="${order._id || order.orderId}" data-status="${status}" data-action="status-change">${status}</button>`;
     };
 
     const _statusBadge = (status) => {

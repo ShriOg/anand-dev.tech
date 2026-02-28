@@ -278,6 +278,14 @@ const Customer = (() => {
     /** Get a specific order by orderId or Mongo _id. */
     const getOrder = (id) => _loadOrders().find(o => o.orderId === id || o._id === id) || null;
 
+    /** Remove an order from local history by orderId or Mongo _id. */
+    const removeOrder = (id) => {
+        const orders = _loadOrders().filter(o => o.orderId !== id && o._id !== id);
+        _saveOrders(orders);
+        document.dispatchEvent(new CustomEvent('orders:updated'));
+        console.log('[Customer] Order removed:', id);
+    };
+
     /** Check if there are any active orders (PENDING or PREPARING). */
     const hasActiveOrders = () => _loadOrders().some(o => o.status === 'PENDING' || o.status === 'PREPARING');
 
@@ -301,6 +309,7 @@ const Customer = (() => {
         updateOrderStatus,
         getOrders,
         getOrder,
+        removeOrder,
         hasActiveOrders,
     });
 })();

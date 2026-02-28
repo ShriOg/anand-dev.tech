@@ -1079,4 +1079,36 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Order restored! 🔁');
         });
     }
+
+    /* Delete cancelled orders from customer panel */
+    document.addEventListener('click', async (e) => {
+        if (!e.target.classList.contains('delete-cancelled')) return;
+
+        const id = e.target.dataset.id;
+        if (!id) return;
+
+        try {
+            const BASE_URL = 'https://anand-os-backend.onrender.com/api';
+            await fetch(`${BASE_URL}/restaurant/orders/${id}`, { method: 'DELETE' });
+
+            /* Remove card from DOM */
+            const card = e.target.closest('.order-card');
+            if (card) {
+                card.style.transition = 'opacity .3s ease, transform .3s ease';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.95)';
+                setTimeout(() => card.remove(), 300);
+            }
+
+            /* Remove from local storage */
+            if (typeof Customer !== 'undefined' && Customer.removeOrder) {
+                Customer.removeOrder(id);
+            }
+
+            showToast('Cancelled order deleted', 'success');
+        } catch (err) {
+            console.error('[Delete] Failed:', err);
+            showToast('Failed to delete order');
+        }
+    });
 });
