@@ -175,7 +175,7 @@ const Cart = (() => {
                     const backendOrderId = d.orderId || d._id || generateOrderId();
                     const backendTotal = d.total != null ? d.total : total();
                     debug('Order Success', res.data);
-                    return { ok: true, orderId: backendOrderId, total: backendTotal, source: 'server' };
+                    return { ok: true, orderId: backendOrderId, _id: d._id || null, total: backendTotal, source: 'server' };
                 }
 
                 // HTTP succeeded but backend returned failure

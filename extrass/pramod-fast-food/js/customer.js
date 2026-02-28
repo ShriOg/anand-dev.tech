@@ -255,25 +255,28 @@ const Customer = (() => {
 
     /**
      * Update an order's status in local history.
-     * @param {string} orderId
+     * @param {string} orderId — can be orderId or Mongo _id
      * @param {string} status — PENDING | PREPARING | COMPLETED | CANCELLED
      */
     const updateOrderStatus = (orderId, status) => {
         const orders = _loadOrders();
-        const order = orders.find(o => o.orderId === orderId);
+        /* Match by orderId first, then by _id */
+        const order = orders.find(o => o.orderId === orderId)
+                   || orders.find(o => o._id === orderId);
         if (order) {
             order.status = status;
             order.updatedAt = new Date().toISOString();
             _saveOrders(orders);
             document.dispatchEvent(new CustomEvent('orders:updated'));
+            console.log('[Customer] Order status updated:', order.orderId, '→', status);
         }
     };
 
     /** Get all saved orders (newest first). */
     const getOrders = () => _loadOrders();
 
-    /** Get a specific order by ID. */
-    const getOrder = (orderId) => _loadOrders().find(o => o.orderId === orderId) || null;
+    /** Get a specific order by orderId or Mongo _id. */
+    const getOrder = (id) => _loadOrders().find(o => o.orderId === id || o._id === id) || null;
 
     /** Check if there are any active orders (PENDING or PREPARING). */
     const hasActiveOrders = () => _loadOrders().some(o => o.status === 'PENDING' || o.status === 'PREPARING');

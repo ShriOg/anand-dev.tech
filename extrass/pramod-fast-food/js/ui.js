@@ -609,12 +609,12 @@ const UI = (() => {
             if (items.length > 4) itemsHtml += `<div class="order-card__item"><span class="order-card__item-name" style="color:var(--c-text-lighter)">+${items.length - 4} more</span><span></span></div>`;
 
             return `
-            <div class="order-card" data-order-id="${order.orderId || ''}">
+            <div class="order-card" data-order-id="${order.orderId || ''}" data-id="${order._id || order.orderId || ''}">
                 <div class="order-card__head">
                     <span class="order-card__id">${order.orderId || '—'}</span>
                     <span class="order-card__date">${_formatOrderDate(order.date)}</span>
                 </div>
-                <span class="order-card__status order-card__status--${statusKey.toLowerCase()}">${statusKey}</span>
+                <span class="order-card__status order-status order-card__status--${statusKey.toLowerCase()}">${statusKey}</span>
                 ${!isCancelled ? _buildTimeline(statusKey) : ''}
                 <div class="order-card__items">${itemsHtml}</div>
                 <div class="order-card__foot">
@@ -638,6 +638,40 @@ const UI = (() => {
         if (open) renderOrdersPanel();
     };
 
+    /* ====================================================================
+       REALTIME ORDER CARD UPDATE (socket-driven, no full re-render)
+    ==================================================================== */
+    const updateOrderCard = (order) => {
+        if (!order) return;
+        const id = order._id || order.orderId;
+        console.log('[UI] updateOrderCard called for:', id, 'status:', order.status);
+        if (!id) return;
+
+        /* Find card by data-id (Mongo _id) or data-order-id (orderId) */
+        const card = document.querySelector(`[data-id="${order._id}"]`)
+                  || document.querySelector(`[data-id="${order.orderId}"]`)
+                  || document.querySelector(`[data-order-id="${order._id}"]`)
+                  || document.querySelector(`[data-order-id="${order.orderId}"]`);
+        if (!card) {
+            console.log('[UI] No order card found for:', id);
+            return;
+        }
+
+        /* Update status badge */
+        const badge = card.querySelector('.order-status');
+        if (badge) {
+            const statusKey = (order.status || '').toUpperCase();
+            badge.textContent = statusKey;
+            badge.className = `order-card__status order-status order-card__status--${statusKey.toLowerCase()}`;
+        }
+
+        /* Pulse animation for visual feedback */
+        card.classList.add('pulse');
+        setTimeout(() => card.classList.remove('pulse'), 600);
+
+        console.log('[UI] Order card updated:', id, '→', order.status);
+    };
+
     /* ---------- Public surface ---------- */
     return Object.freeze({
         $, $$,
@@ -650,5 +684,6 @@ const UI = (() => {
         renderThemeToggle,
         renderOrdersPanel,
         toggleOrdersPanel,
+        updateOrderCard,
     });
 })();

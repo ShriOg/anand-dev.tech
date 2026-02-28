@@ -310,15 +310,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         /* Listen for order updates matching saved orders */
         _customerSocket.on('restaurant:order-updated', (data) => {
-            if (!data || !data.orderId) return;
-            const order = typeof Customer !== 'undefined' ? Customer.getOrder(data.orderId) : null;
-            if (order) {
-                console.log('[CustomerSocket] Order updated:', data);
-                Customer.updateOrderStatus(data.orderId, data.status);
-                _showOrderNotification(data);
-                UI.renderGreeting();
-                UI.renderOrdersPanel();
+            if (!data) return;
+            const id = data.orderId || data._id;
+            console.log('[CustomerSocket] Socket update received:', id, 'status:', data.status);
+            if (!id) return;
+
+            /* Try matching by orderId first, then by _id */
+            if (typeof Customer !== 'undefined') {
+                const matchById = Customer.getOrder(data.orderId) || Customer.getOrder(data._id);
+                if (matchById) {
+                    Customer.updateOrderStatus(matchById.orderId, data.status);
+                }
             }
+
+            /* Instant DOM update — no full re-render needed */
+            UI.updateOrderCard(data);
+
+            _showOrderNotification({ orderId: id, status: data.status });
+            UI.renderGreeting();
+            UI.renderOrdersPanel();
         });
 
         _customerSocket.on('disconnect', () => {
@@ -720,6 +730,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 /* Save to orders history */
                                 Customer.saveOrder({
                                     orderId: result.orderId,
+                                    _id: result._id || null,
                                     status: 'PENDING',
                                     total: result.total,
                                     items: Cart.snapshot(),
