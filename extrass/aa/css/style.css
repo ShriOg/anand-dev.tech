@@ -80,6 +80,35 @@ body{
     pointer-events:none;
 }
 .hero__inner{position:relative;z-index:1}
+
+/* Auth button — top-right of hero */
+.hero__auth{
+    position:absolute;top:14px;right:14px;z-index:2;
+    padding:6px 16px;border-radius:var(--r-full);
+    border:1.5px solid rgba(255,255,255,.45);background:rgba(255,255,255,.12);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+    font:inherit;font-size:12px;font-weight:700;color:#fff;
+    cursor:pointer;transition:all .25s var(--ease);
+    display:flex;align-items:center;gap:5px;
+}
+.hero__auth:hover{
+    background:rgba(255,255,255,.22);border-color:rgba(255,255,255,.7);
+    box-shadow:0 0 16px rgba(255,255,255,.18);
+}
+/* Profile state */
+.hero__auth--profile{
+    padding:0;width:34px;height:34px;
+    border-radius:50%;justify-content:center;
+    border:2px solid rgba(255,255,255,.6);background:rgba(255,255,255,.18);
+}
+.hero__auth--profile:hover{
+    border-color:#fff;background:rgba(255,255,255,.3);
+    box-shadow:0 0 20px rgba(255,255,255,.2);
+}
+.hero__auth-avatar{
+    font-size:14px;font-weight:800;line-height:1;color:#fff;
+    text-transform:uppercase;letter-spacing:0;
+}
 .hero__emoji{font-size:44px;display:block;margin-bottom:var(--sp-1);animation:bounceIn .55s var(--ease);transition:transform .28s var(--ease)}
 .hero__title{font-size:clamp(22px,6vw,30px);font-weight:800;letter-spacing:-.4px;text-shadow:0 2px 10px rgba(0,0,0,.15)}
 .hero__sub{font-size:13px;opacity:.85;margin-top:2px;font-weight:500;letter-spacing:.6px}
@@ -713,25 +742,6 @@ body.modal-open .cart-fab{
 .order-summary__total-val{color:var(--c-green)}
 
 /* ================================================================
-   LOYALTY BAR
-   ================================================================ */
-.loyalty-bar{
-    display:flex;align-items:center;justify-content:space-between;
-    padding:8px var(--sp-4);background:var(--c-surface);
-    border-bottom:1px solid var(--c-border);font-size:12px;
-}
-.loyalty__login{
-    background:none;border:1.5px solid var(--c-border);
-    padding:5px 14px;border-radius:var(--r-full);
-    font:inherit;font-size:12px;font-weight:600;color:var(--c-text-soft);
-    cursor:pointer;transition:all var(--dur);
-}
-.loyalty__login:hover{border-color:var(--c-brand);color:var(--c-brand)}
-.loyalty__user{font-weight:600;color:var(--c-text)}
-.loyalty__stats{display:flex;gap:var(--sp-3)}
-.loyalty__stat{font-weight:600;color:var(--c-text-soft)}
-
-/* ================================================================
    LIVE / OFFLINE INDICATOR
    ================================================================ */
 .live-indicator{
@@ -892,6 +902,53 @@ body.modal-open .cart-fab{
     transition:color var(--dur);
 }
 .name-modal__skip:hover{color:var(--c-text-soft)}
+
+/* ================================================================
+   SIGN UP MODAL
+   ================================================================ */
+.signup-modal{
+    position:fixed;inset:0;z-index:10003;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(0,0,0,.6);backdrop-filter:blur(8px);
+    opacity:0;pointer-events:none;transition:opacity .3s var(--ease);
+}
+.signup-modal--visible{opacity:1;pointer-events:auto}
+.signup-modal__card{
+    background:var(--c-surface);border-radius:20px;
+    padding:36px 28px 28px;max-width:360px;width:88%;
+    text-align:center;position:relative;
+    transform:scale(.92) translateY(20px);
+    transition:transform .4s cubic-bezier(.22,1,.36,1);
+    box-shadow:0 24px 64px rgba(0,0,0,.28);
+}
+.signup-modal--visible .signup-modal__card{transform:scale(1) translateY(0)}
+.signup-modal__close{
+    position:absolute;top:14px;right:14px;
+    background:none;border:none;font-size:18px;color:var(--c-text-lighter);
+    cursor:pointer;padding:4px;line-height:1;transition:color var(--dur);
+}
+.signup-modal__close:hover{color:var(--c-text)}
+.signup-modal__emoji{font-size:44px;display:block;margin-bottom:var(--sp-2)}
+.signup-modal__title{font-size:20px;font-weight:800;color:var(--c-text);margin-bottom:var(--sp-5)}
+.signup-modal__input{
+    width:100%;padding:12px 16px;
+    border:1.5px solid var(--c-border);border-radius:var(--r-md);
+    font:inherit;font-size:15px;text-align:center;
+    background:var(--c-muted);color:var(--c-text);
+    transition:border var(--dur),box-shadow var(--dur);
+    margin-bottom:var(--sp-3);
+}
+.signup-modal__input:focus{outline:none;border-color:var(--c-brand);box-shadow:0 0 0 3px rgba(232,93,4,.12)}
+.signup-modal__input::placeholder{color:var(--c-text-lighter)}
+.signup-modal__btn{
+    width:100%;padding:13px;border:none;border-radius:var(--r-md);
+    background:var(--c-brand);color:#fff;
+    font:inherit;font-size:15px;font-weight:700;cursor:pointer;
+    margin-top:var(--sp-2);
+    transition:background var(--dur),transform .12s,box-shadow .25s;
+}
+.signup-modal__btn:hover{background:var(--c-brand-dark);box-shadow:0 4px 18px rgba(232,93,4,.3)}
+.signup-modal__btn:active{transform:scale(.97)}
 
 /* ================================================================
    GREETING SECTION

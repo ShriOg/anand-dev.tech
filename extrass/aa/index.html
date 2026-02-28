@@ -19,6 +19,7 @@
 
     <!-- ========================= HERO ========================= -->
     <header class="hero" role="banner">
+        <button class="hero__auth" id="heroAuthBtn" aria-label="Sign Up">✏️ Sign Up</button>
         <div class="hero__inner">
             <span class="hero__emoji" aria-hidden="true">🥟</span>
             <h1 class="hero__title">Pramod Fast Food</h1>
@@ -26,6 +27,18 @@
             <span class="hero__badge" aria-label="100% Pure Vegetarian">🌿 100% Pure Veg</span>
         </div>
     </header>
+
+    <!-- ==================== SIGN UP MODAL ==================== -->
+    <div class="signup-modal" id="signupModal" role="dialog" aria-label="Create Account" aria-modal="true">
+        <div class="signup-modal__card">
+            <button class="signup-modal__close" id="signupClose" aria-label="Close">✕</button>
+            <span class="signup-modal__emoji">👤</span>
+            <h2 class="signup-modal__title">Create Your Account</h2>
+            <input type="text" class="signup-modal__input" id="signupName" placeholder="Your name" maxlength="30" autocomplete="given-name">
+            <input type="tel" class="signup-modal__input" id="signupPhone" placeholder="Phone number" maxlength="15" autocomplete="tel">
+            <button class="signup-modal__btn" id="signupSubmit">Sign Up 🚀</button>
+        </div>
+    </div>
 
     <!-- ========================= GREETING ========================= -->
     <div class="greeting" id="greetingBar" hidden>
@@ -39,9 +52,6 @@
             </button>
         </div>
     </div>
-
-    <!-- ==================== LOYALTY BAR ==================== -->
-    <div class="loyalty-bar" id="loyaltyBar" role="complementary" aria-label="Rewards"></div>
 
     <!-- ==================== SEARCH + FILTERS ==================== -->
     <div class="search-bar" role="search" aria-label="Search menu">

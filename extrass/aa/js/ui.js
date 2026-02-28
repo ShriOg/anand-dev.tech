@@ -463,34 +463,6 @@ const UI = (() => {
     };
 
     /* ====================================================================
-       LOYALTY BAR
-    ==================================================================== */
-    const renderLoyaltyBar = (user) => {
-        const el = $('#loyaltyBar');
-        if (!el) return;
-
-        /* Prefer local Customer data over passed-in user (API profile) */
-        const local = (typeof Customer !== 'undefined') ? Customer.getLoyaltyData() : null;
-        const data = local || user;
-
-        if (data && data.name) {
-            el.innerHTML = `
-                <span class="loyalty__user">Hi, ${data.name}! 👋</span>
-                <div class="loyalty__stats">
-                    <span class="loyalty__stat">⭐ ${data.points || 0} pts</span>
-                    <span class="loyalty__stat">🏅 ${data.orders || 0} orders</span>
-                </div>`;
-        } else {
-            el.innerHTML = `
-                <button class="loyalty__login" id="googleLoginBtn">🎁 Sign in for rewards</button>
-                <div class="loyalty__stats">
-                    <span class="loyalty__stat">⭐ 0 pts</span>
-                    <span class="loyalty__stat">🏅 0 orders</span>
-                </div>`;
-        }
-    };
-
-    /* ====================================================================
        GREETING BAR
     ==================================================================== */
     const renderGreeting = () => {
@@ -521,6 +493,29 @@ const UI = (() => {
         }
         if (dot) {
             dot.classList.toggle('greeting__order-dot--active', Customer.hasActiveOrders());
+        }
+    };
+
+    /* ====================================================================
+       HERO AUTH BUTTON (Sign Up / Profile)
+    ==================================================================== */
+    const renderAuthButton = () => {
+        const btn = $('#heroAuthBtn');
+        if (!btn) return;
+        const name = Customer.getName();
+        if (name) {
+            /* Signed-up: show profile icon with initial */
+            const initial = name.charAt(0).toUpperCase();
+            btn.className = 'hero__auth hero__auth--profile';
+            btn.innerHTML = `<span class="hero__auth-avatar">${initial}</span>`;
+            btn.setAttribute('aria-label', name);
+            btn.title = name;
+        } else {
+            /* Not signed up */
+            btn.className = 'hero__auth';
+            btn.innerHTML = '✏️ Sign Up';
+            btn.setAttribute('aria-label', 'Sign Up');
+            btn.title = '';
         }
     };
 
@@ -650,7 +645,7 @@ const UI = (() => {
         renderCartBadge, renderCartModal, toggleCart,
         showToast, setActiveTab, setActiveChip,
         setCheckoutStep, getCheckoutStep, setCustomerInfo, getCustomerInfo,
-        renderLoyaltyBar,
+        renderAuthButton,
         renderGreeting,
         renderThemeToggle,
         renderOrdersPanel,

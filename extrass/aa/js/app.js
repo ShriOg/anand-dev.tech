@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.classList.remove('name-modal--visible');
             setTimeout(() => modal.remove(), 300);
             UI.renderGreeting();
-            UI.renderLoyaltyBar(null);
+            UI.renderAuthButton();
         };
 
         submitBtn.addEventListener('click', () => {
@@ -61,6 +61,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') submitBtn.click();
+        });
+    };
+
+    /* ==========  SIGN UP MODAL  ========== */
+    const _initSignUp = () => {
+        const btn = $('#heroAuthBtn');
+        const modal = $('#signupModal');
+        const nameInput = $('#signupName');
+        const phoneInput = $('#signupPhone');
+        const submitBtn = $('#signupSubmit');
+        const closeBtn = $('#signupClose');
+        if (!btn || !modal) return;
+
+        UI.renderAuthButton();
+
+        const _openModal = () => {
+            if (Customer.hasName()) return; /* already signed up — profile click does nothing for now */
+            requestAnimationFrame(() => modal.classList.add('signup-modal--visible'));
+            setTimeout(() => { if (nameInput) nameInput.focus(); }, 300);
+        };
+
+        const _closeModal = () => {
+            modal.classList.remove('signup-modal--visible');
+        };
+
+        btn.addEventListener('click', _openModal);
+        closeBtn?.addEventListener('click', _closeModal);
+
+        /* Close on backdrop click */
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) _closeModal();
+        });
+
+        submitBtn?.addEventListener('click', () => {
+            const name = nameInput.value.trim();
+            const phone = phoneInput.value.trim();
+            if (!name) { nameInput.focus(); return; }
+            if (!phone) { phoneInput.focus(); return; }
+
+            Customer.setName(name);
+            Customer.setPhone(phone);
+
+            _closeModal();
+            UI.renderAuthButton();
+            UI.renderGreeting();
+            showToast(`Welcome, ${name}! 🎉`);
+        });
+
+        /* Enter key submits */
+        [nameInput, phoneInput].forEach(inp => {
+            inp?.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') submitBtn.click();
+            });
         });
     };
 
@@ -355,6 +408,9 @@ document.addEventListener('DOMContentLoaded', () => {
     /* Show name modal on first visit */
     _initNameModal();
 
+    /* Initialize sign-up / profile button */
+    _initSignUp();
+
     /* Initialize customer Socket.IO for order notifications */
     _initCustomerSocket();
 
@@ -486,13 +542,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fetch loyalty profile if authenticated
     (async () => {
         if (typeof Api !== 'undefined' && Api.isAuthenticated()) {
-            const res = await Api.fetchProfile();
-            const isSuccess = res?.success ?? res?.ok;
-            if (isSuccess && res.data) {
-                UI.renderLoyaltyBar(res.data);
-            } else {
-                UI.renderLoyaltyBar(null);
-            }
+            await Api.fetchProfile();
         }
     })();
 
@@ -669,8 +719,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                 if (earnedPoints > 0) {
                                     showToast(`+${earnedPoints} loyalty points earned!`);
                                 }
-                                UI.renderLoyaltyBar(null); /* re-render from localStorage */
-
                                 /* Save to orders history */
                                 Customer.saveOrder({
                                     orderId: result.orderId,
@@ -692,14 +740,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             });
 
                             if (result.orderId) _trackOrder(result.orderId);
-
-                            // Refresh loyalty data
-                            if (typeof Api !== 'undefined' && Api.isAuthenticated()) {
-                                Api.fetchProfile().then(res => {
-                                    const profOk = res?.success ?? res?.ok;
-                                    if (profOk && res.data) UI.renderLoyaltyBar(res.data);
-                                });
-                            }
 
                             setTimeout(() => {
                                 btn.disabled = false;
@@ -750,7 +790,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (typeof Customer !== 'undefined') {
                     const waTotal = Cart.total();
                     Customer.recordOrder(waInfo, waTotal, Cart.snapshot());
-                    UI.renderLoyaltyBar(null);
                 }
 
                 const waResult = Cart.sendViaWhatsApp(waInfo);
@@ -857,25 +896,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateTabIndicator(document.querySelector('.tab.active'));
 
-    /* ==========  LOYALTY BAR  ========== */
-    /* Render from localStorage first, then overlay API data if authenticated */
-    UI.renderLoyaltyBar(null);
-
-    /* Listen for customer updates (order placed) to refresh bar */
+    /* Listen for customer updates (order placed) to refresh greeting */
     document.addEventListener('customer:updated', () => {
-        UI.renderLoyaltyBar(null);
         UI.renderGreeting();
     });
 
     /* Listen for orders history changes */
     document.addEventListener('orders:updated', () => {
         UI.renderGreeting();
-    });
-
-    document.addEventListener('click', (e) => {
-        if (e.target.closest('#googleLoginBtn')) {
-            showToast('Rewards coming soon!');
-        }
     });
 
     /* ==========  THEME TOGGLE  ========== */

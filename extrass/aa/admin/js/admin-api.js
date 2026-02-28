@@ -92,6 +92,11 @@ const AdminAPI = (() => {
             body: JSON.stringify({ status }),
         });
 
+    const deleteOrder = (orderId) =>
+        _fetch(`/restaurant/orders/${orderId}`, {
+            method: 'DELETE',
+        });
+
     /* ---------- Menu ---------- */
     const getMenu = () => _fetch('/restaurant/menu');
 
@@ -107,7 +112,7 @@ const AdminAPI = (() => {
     /* ---------- Public surface ---------- */
     return Object.freeze({
         getStats, getOrders, getRecentOrders, getTodayOrders,
-        updateOrderStatus,
+        updateOrderStatus, deleteOrder,
         getMenu, updateMenuItem,
         getAnalytics,
     });

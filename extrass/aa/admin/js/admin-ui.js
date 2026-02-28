@@ -236,12 +236,15 @@ const AdminUI = (() => {
             ${o.note ? `<p style="font-size:12px;color:var(--c-text-soft);margin-bottom:var(--sp-3)">📝 ${_esc(o.note)}</p>` : ''}
             <div class="order-card__footer">
                 <span class="order-card__total">₹${o.total || 0}</span>
-                <select class="status-select status-select--${statusLower}" data-order-id="${o._id || o.orderId}" data-action="status-change">
-                    <option value="PENDING" ${o.status === 'PENDING' ? 'selected' : ''}>⏳ Pending</option>
-                    <option value="PREPARING" ${o.status === 'PREPARING' ? 'selected' : ''}>🔥 Preparing</option>
-                    <option value="COMPLETED" ${o.status === 'COMPLETED' ? 'selected' : ''}>✅ Completed</option>
-                    <option value="CANCELLED" ${o.status === 'CANCELLED' ? 'selected' : ''}>❌ Cancelled</option>
-                </select>
+                <div class="order-card__actions">
+                    <select class="status-select status-select--${statusLower}" data-order-id="${o._id || o.orderId}" data-action="status-change">
+                        <option value="PENDING" ${o.status === 'PENDING' ? 'selected' : ''}>⏳ Pending</option>
+                        <option value="PREPARING" ${o.status === 'PREPARING' ? 'selected' : ''}>🔥 Preparing</option>
+                        <option value="COMPLETED" ${o.status === 'COMPLETED' ? 'selected' : ''}>✅ Completed</option>
+                        <option value="CANCELLED" ${o.status === 'CANCELLED' ? 'selected' : ''}>❌ Cancelled</option>
+                    </select>
+                    <button class="btn-delete-order" data-action="delete-order" data-order-id="${o._id || o.orderId}">🗑 Delete</button>
+                </div>
             </div>
         </div>`;
     };

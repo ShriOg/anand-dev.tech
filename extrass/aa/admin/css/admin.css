@@ -386,6 +386,28 @@ body{
 .status-select--completed{border-color:var(--c-green);color:var(--c-green-dark)}
 .status-select--cancelled{border-color:var(--c-red);color:var(--c-red)}
 
+.order-card__actions{display:flex;align-items:center;gap:var(--sp-2)}
+
+/* Delete order button */
+.btn-delete-order{
+    padding:5px 10px;font-size:11px;font-weight:600;
+    border:1.5px solid var(--c-red);border-radius:var(--r-sm);
+    background:transparent;color:var(--c-red);cursor:pointer;
+    transition:background var(--dur),color var(--dur);
+}
+.btn-delete-order:hover{background:var(--c-red);color:#fff}
+.btn-delete-order:disabled{opacity:.5;cursor:not-allowed}
+
+/* Fade-out animation for deleted cards */
+.order-card--fade-out{
+    animation:orderFadeOut .35s var(--ease) forwards;
+    pointer-events:none;
+}
+@keyframes orderFadeOut{
+    0%{opacity:1;transform:scale(1)}
+    100%{opacity:0;transform:scale(.96)}
+}
+
 /* ================================================================
    DATA TABLE (History)
    ================================================================ */

@@ -14,6 +14,7 @@ const Customer = (() => {
 
     const STORAGE_KEY = 'pf_user';
     const NAME_KEY = 'pf_customer_name';
+    const PHONE_KEY = 'pf_customer_phone';
     const THEME_KEY = 'pf_theme';
     const ORDERS_KEY = 'pf_orders';
     const POINTS_PER_100 = 10; // ₹100 = 10 points
@@ -189,6 +190,24 @@ const Customer = (() => {
 
     const hasName = () => !!localStorage.getItem(NAME_KEY);
 
+    /* ---------- Phone persistence ---------- */
+
+    const getPhone = () => localStorage.getItem(PHONE_KEY) || '';
+
+    const setPhone = (phone) => {
+        const trimmed = (phone || '').trim();
+        if (trimmed) {
+            localStorage.setItem(PHONE_KEY, trimmed);
+            const profile = _load();
+            if (profile) {
+                profile.phone = trimmed;
+                _save(profile);
+            }
+        }
+    };
+
+    const hasPhone = () => !!localStorage.getItem(PHONE_KEY);
+
     /* ---------- Theme persistence ---------- */
 
     const getTheme = () => localStorage.getItem(THEME_KEY) || 'light';
@@ -270,6 +289,9 @@ const Customer = (() => {
         getName,
         setName,
         hasName,
+        getPhone,
+        setPhone,
+        hasPhone,
         getTheme,
         setTheme,
         saveOrder,

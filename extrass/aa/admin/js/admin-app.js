@@ -425,6 +425,40 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        /* Delete order button */
+        $('#liveOrdersContainer')?.addEventListener('click', async (e) => {
+            const btn = e.target.closest('[data-action="delete-order"]');
+            if (!btn) return;
+
+            const orderId = btn.dataset.orderId;
+            const confirmed = await showConfirm('Are you sure you want to delete this order?');
+            if (!confirmed) return;
+
+            try {
+                btn.disabled = true;
+                btn.textContent = '…';
+                await AdminAPI.deleteOrder(orderId);
+
+                /* Remove from local state */
+                liveOrders = liveOrders.filter(o => (o._id || o.orderId) !== orderId);
+                updatePendingBadge();
+
+                /* Fade-out animation then remove card */
+                const card = btn.closest('.order-card');
+                if (card) {
+                    card.classList.add('order-card--fade-out');
+                    card.addEventListener('animationend', () => card.remove(), { once: true });
+                }
+
+                debug('Order Deleted', { orderId });
+                showToast('Order deleted successfully', 'success');
+            } catch (err) {
+                btn.disabled = false;
+                btn.textContent = '🗑 Delete';
+                showToast(`Failed to delete: ${err.message}`, 'error');
+            }
+        });
+
         /* Realtime: new order from socket */
         document.addEventListener('admin:new-order', (e) => {
             const order = e.detail;
