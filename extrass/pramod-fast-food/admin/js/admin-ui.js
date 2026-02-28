@@ -142,14 +142,19 @@ const AdminUI = (() => {
     ==================================================================== */
     const renderStats = (data) => {
         if (!data) return;
-        const fmt = (n) => typeof n === 'number' ? n.toLocaleString('en-IN') : '—';
-        const fmtR = (n) => typeof n === 'number' ? '₹' + n.toLocaleString('en-IN') : '—';
 
-        $('#statTotalOrders').textContent = fmt(data.totalOrders);
-        $('#statTodayOrders').textContent = fmt(data.todayOrders);
-        $('#statTotalRevenue').textContent = fmtR(data.totalRevenue);
-        $('#statTodayRevenue').textContent = fmtR(data.todayRevenue);
-        $('#statTotalCustomers').textContent = fmt(data.totalCustomers);
+        const _animateIfNum = (el, val, isRupee) => {
+            if (!el) return;
+            if (typeof val !== 'number') { el.textContent = '—'; return; }
+            if (isRupee) el.dataset.prefix = '₹';
+            animateCounter(el, val);
+        };
+
+        _animateIfNum($('#statTotalOrders'), data.totalOrders);
+        _animateIfNum($('#statTodayOrders'), data.todayOrders);
+        _animateIfNum($('#statTotalRevenue'), data.totalRevenue, true);
+        _animateIfNum($('#statTodayRevenue'), data.todayRevenue, true);
+        _animateIfNum($('#statTotalCustomers'), data.totalCustomers);
     };
 
     /* ====================================================================
@@ -457,6 +462,41 @@ const AdminUI = (() => {
     };
 
     /* ====================================================================
+       ANIMATED COUNTER (for dashboard stats)
+    ==================================================================== */
+    const animateCounter = (element, newValue) => {
+        if (!element) return;
+        /* Parse current displayed number (strip ₹, commas) */
+        const currentText = element.textContent.replace(/[₹,\s—]/g, '');
+        const from = parseInt(currentText, 10) || 0;
+        const to = typeof newValue === 'number' ? newValue : (parseInt(String(newValue).replace(/[₹,\s]/g, ''), 10) || 0);
+        if (from === to) return;
+
+        const isRupee = element.textContent.startsWith('₹') || element.dataset.prefix === '₹';
+        const duration = 600;
+        const startTime = performance.now();
+
+        const step = (now) => {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            /* ease-out cubic */
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = Math.round(from + (to - from) * eased);
+            const formatted = current.toLocaleString('en-IN');
+            element.textContent = isRupee ? '₹' + formatted : formatted;
+
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            } else {
+                /* Add a brief pop effect */
+                element.classList.add('stat-val--pop');
+                setTimeout(() => element.classList.remove('stat-val--pop'), 300);
+            }
+        };
+        requestAnimationFrame(step);
+    };
+
+    /* ====================================================================
        CSV EXPORT
     ==================================================================== */
     const exportOrdersCSV = (orders) => {
@@ -535,6 +575,6 @@ const AdminUI = (() => {
         renderHistoryTable, renderPagination,
         renderMenuItems,
         drawBarChart, renderTopItems,
-        playNotifSound, exportOrdersCSV,
+        playNotifSound, animateCounter, exportOrdersCSV,
     });
 })();

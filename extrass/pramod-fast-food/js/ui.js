@@ -542,7 +542,16 @@ const UI = (() => {
         const statusOrder = { PENDING: 0, PREPARING: 1, COMPLETED: 2, CANCELLED: -1 };
         const current = statusOrder[status] ?? -1;
 
+        /* Progress bar percentage */
+        const progressPct = status === 'PENDING' ? 33 : status === 'PREPARING' ? 66 : status === 'COMPLETED' ? 100 : 0;
+
         let html = '';
+
+        /* Animated progress bar */
+        html += `<div class="order-progress">
+            <div class="order-progress__fill${progressPct === 100 ? ' order-progress__fill--done' : ''}" style="width:${progressPct}%" data-progress></div>
+        </div>`;
+
         steps.forEach((step, i) => {
             const stepIdx = statusOrder[step.key];
             const isDone = current > stepIdx;
@@ -657,17 +666,49 @@ const UI = (() => {
             return;
         }
 
+        const statusKey = (order.status || '').toUpperCase();
+
         /* Update status badge */
         const badge = card.querySelector('.order-status');
         if (badge) {
-            const statusKey = (order.status || '').toUpperCase();
             badge.textContent = statusKey;
             badge.className = `order-card__status order-status order-card__status--${statusKey.toLowerCase()}`;
+        }
+
+        /* Update progress bar */
+        const progressFill = card.querySelector('[data-progress]');
+        if (progressFill) {
+            const pct = statusKey === 'PENDING' ? 33 : statusKey === 'PREPARING' ? 66 : statusKey === 'COMPLETED' ? 100 : 0;
+            progressFill.style.width = `${pct}%`;
+            progressFill.classList.toggle('order-progress__fill--done', pct === 100);
+        }
+
+        /* Re-render timeline dots */
+        const timeline = card.querySelector('.order-timeline');
+        if (timeline) {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = _buildTimeline(statusKey);
+            const newTimeline = tempDiv.querySelector('.order-timeline');
+            if (newTimeline) timeline.replaceWith(newTimeline);
         }
 
         /* Pulse animation for visual feedback */
         card.classList.add('pulse');
         setTimeout(() => card.classList.remove('pulse'), 600);
+
+        /* Auto-collapse completed orders after 10s */
+        if (statusKey === 'COMPLETED') {
+            card.classList.add('order-card--completed');
+            setTimeout(() => {
+                if (card.parentNode) {
+                    card.classList.add('order-card--collapsed');
+                    /* Move to bottom of list after collapse animation */
+                    setTimeout(() => {
+                        if (card.parentNode) card.parentNode.appendChild(card);
+                    }, 600);
+                }
+            }, 10000);
+        }
 
         console.log('[UI] Order card updated:', id, '→', order.status);
     };

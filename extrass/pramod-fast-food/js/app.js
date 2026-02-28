@@ -244,6 +244,58 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('⏳ Server waking up — please wait…');
     });
 
+    /* ==========  NOTIFICATION SOUND  ========== */
+    const _notifySound = new Audio('data:audio/wav;base64,UklGRl4GAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YToGAAD+/wIA/P8EAPv/BgD5/wgA9/8KAPb/CwD1/wwA9f8MAPT/DQD0/w0A9P8NAPX/DAD1/wwA9v8LAPX/DADz/w4A8P8RAPD/EQDx/xAA8v8PAPL/DwDy/w8A8P8RAPP/DgD4/wkA+/8GAP3/BAD+/wMA//8CAP//AgD//wIA//8CAP//AgD+/wMA/f8EAPz/BQD7/wYA+v8HAPn/CAD4/wkA+P8JAPj/CQD5/wgA+v8HAPv/BgD8/wUA/f8EAP7/AwD//wIA//8BAP//AQD//wEA//8BAP//AQD//wEAAAAAAAAAAAAA');
+    _notifySound.volume = 0.7;
+
+    const _playNotifySound = () => {
+        try {
+            _notifySound.currentTime = 0;
+            _notifySound.play().catch(() => {});
+        } catch { /* audio blocked */ }
+    };
+
+    /* ==========  NOTIFICATION THROTTLE (3s per order)  ========== */
+    const _notifThrottle = new Map();
+    const _THROTTLE_MS = 3000;
+
+    const _shouldNotify = (orderId) => {
+        if (!orderId) return true;
+        const last = _notifThrottle.get(orderId);
+        const now = Date.now();
+        if (last && now - last < _THROTTLE_MS) return false;
+        _notifThrottle.set(orderId, now);
+        /* Cleanup old entries */
+        if (_notifThrottle.size > 50) {
+            for (const [k, v] of _notifThrottle) {
+                if (now - v > 30000) _notifThrottle.delete(k);
+            }
+        }
+        return true;
+    };
+
+    /* ==========  WEB PUSH NOTIFICATIONS  ========== */
+    const _requestNotifPermission = () => {
+        if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+            Notification.requestPermission().catch(() => {});
+        }
+    };
+
+    const _sendPushNotification = (title, body, icon) => {
+        if (typeof Notification === 'undefined') return;
+        if (Notification.permission !== 'granted') return;
+        if (!document.hidden) return; /* Only when tab not focused */
+        try {
+            new Notification(title, { body, icon: icon || '🥟', tag: 'pf-order-update' });
+        } catch { /* SW-only context */ }
+    };
+
+    /* Request permission after first user interaction */
+    document.addEventListener('click', function _reqPerm() {
+        _requestNotifPermission();
+        document.removeEventListener('click', _reqPerm);
+    });
+
     /* ==========  CUSTOMER ORDER NOTIFICATIONS (Socket.IO)  ========== */
     let _customerSocket = null;
     let _lastOrderId = null;
@@ -312,21 +364,38 @@ document.addEventListener('DOMContentLoaded', () => {
         _customerSocket.on('restaurant:order-updated', (data) => {
             if (!data) return;
             const id = data.orderId || data._id;
-            console.log('[CustomerSocket] Socket update received:', id, 'status:', data.status);
+            const status = (data.status || '').toUpperCase();
+            console.log('[CustomerSocket] Socket update received:', id, 'status:', status);
             if (!id) return;
+
+            /* Throttle: skip if same order notified <3s ago */
+            if (!_shouldNotify(id)) {
+                console.log('[CustomerSocket] Throttled duplicate for:', id);
+                return;
+            }
 
             /* Try matching by orderId first, then by _id */
             if (typeof Customer !== 'undefined') {
                 const matchById = Customer.getOrder(data.orderId) || Customer.getOrder(data._id);
                 if (matchById) {
-                    Customer.updateOrderStatus(matchById.orderId, data.status);
+                    Customer.updateOrderStatus(matchById.orderId, status);
                 }
             }
 
             /* Instant DOM update — no full re-render needed */
             UI.updateOrderCard(data);
 
-            _showOrderNotification({ orderId: id, status: data.status });
+            /* Sound + push for actionable statuses */
+            if (['PREPARING', 'READY', 'COMPLETED'].includes(status)) {
+                _playNotifySound();
+                _sendPushNotification(
+                    'Order Update',
+                    `Order ${id} is now ${status}`,
+                    '🥟'
+                );
+            }
+
+            _showOrderNotification({ orderId: id, status });
             UI.renderGreeting();
             UI.renderOrdersPanel();
         });

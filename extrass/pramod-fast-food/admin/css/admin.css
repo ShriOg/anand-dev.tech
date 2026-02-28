@@ -793,4 +793,13 @@ body{
 /* --- Stat card skeleton --- */
 .stat-card .stat-card__val{
     min-width:40px;display:inline-block;
+    transition:transform .2s var(--ease);
 }
+
+/* --- Animated counter pop --- */
+@keyframes statValPop{
+    0%{transform:scale(1)}
+    50%{transform:scale(1.12)}
+    100%{transform:scale(1)}
+}
+.stat-val--pop{animation:statValPop .3s var(--ease)}

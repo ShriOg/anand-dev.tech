@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const { $, $$, showToast, showConfirm,
             switchPage, updateSocketStatus, renderStats, renderRecentOrders,
             renderOrderCards, prependOrderCard, updateOrderCard, renderHistoryTable, renderPagination,
-            renderMenuItems, drawBarChart, renderTopItems, playNotifSound,
+            renderMenuItems, drawBarChart, renderTopItems, playNotifSound, animateCounter,
             exportOrdersCSV } = AdminUI;
 
     /* ==========  STATE  ========== */
@@ -201,6 +201,11 @@ document.addEventListener('DOMContentLoaded', () => {
             window.addEventListener('scroll', () => {
                 topbar.classList.toggle('topbar--scrolled', window.scrollY > 4);
             }, { passive: true });
+        }
+
+        /* Request Web Notification permission (admin gets order alerts) */
+        if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+            Notification.requestPermission().catch(() => {});
         }
 
         try {
@@ -450,6 +455,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     card.addEventListener('animationend', () => card.remove(), { once: true });
                 }
 
+                /* Animate counters down */
+                document.dispatchEvent(new CustomEvent('admin:order-deleted'));
+
                 debug('Order Deleted', { orderId });
                 showToast('Order deleted successfully', 'success');
             } catch (err) {
@@ -476,7 +484,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 prependOrderCard(order);
             }
 
+            /* Animate dashboard counters on new order */
+            const todayEl = $('#statTodayOrders');
+            const totalEl = $('#statTotalOrders');
+            if (todayEl) animateCounter(todayEl, (parseInt(todayEl.textContent.replace(/[^\d]/g,''),10)||0) + 1);
+            if (totalEl) animateCounter(totalEl, (parseInt(totalEl.textContent.replace(/[^\d]/g,''),10)||0) + 1);
+
             playNotifSound();
+
+            /* Web push notification for admin (when tab hidden) */
+            if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && document.hidden) {
+                try {
+                    new Notification('New Order!', {
+                        body: `Order from ${order.customerName || 'Customer'} — ₹${order.total || 0}`,
+                        icon: '🥟',
+                        tag: 'pf-admin-order',
+                    });
+                } catch { /* SW-only */ }
+            }
+
             showToast(`New order from ${order.customerName || 'Customer'}!`, 'info');
         });
 
@@ -487,8 +513,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const order = liveOrders.find(o => (o._id || o.orderId) === (data._id || data.orderId));
             if (order) {
                 order.status = data.status;
+                updatePendingBadge();
                 if (currentPage === 'orders') loadLiveOrders();
             }
+        });
+
+        /* Realtime: order deleted — animate counters down */
+        document.addEventListener('admin:order-deleted', () => {
+            const todayEl = $('#statTodayOrders');
+            const totalEl = $('#statTotalOrders');
+            if (todayEl) animateCounter(todayEl, Math.max(0, (parseInt(todayEl.textContent.replace(/[^\d]/g,''),10)||0) - 1));
+            if (totalEl) animateCounter(totalEl, Math.max(0, (parseInt(totalEl.textContent.replace(/[^\d]/g,''),10)||0) - 1));
         });
 
         /* Socket status */
