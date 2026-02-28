@@ -856,52 +856,49 @@ body.modal-open .cart-fab{
 .theme-toggle:active{transform:scale(.9)}
 
 /* ================================================================
-   NAME MODAL (first visit)
+   USER SETUP MODAL (mandatory first visit)
    ================================================================ */
-.name-modal{
-    position:fixed;inset:0;z-index:10002;
+.user-setup{
+    position:fixed;inset:0;z-index:10005;
     display:flex;align-items:center;justify-content:center;
-    background:rgba(0,0,0,.6);backdrop-filter:blur(8px);
+    background:rgba(0,0,0,.7);backdrop-filter:blur(10px);
     opacity:0;pointer-events:none;transition:opacity .3s var(--ease);
 }
-.name-modal--visible{opacity:1;pointer-events:auto}
-.name-modal__card{
+.user-setup--visible{opacity:1;pointer-events:auto}
+.user-setup__card{
     background:var(--c-surface);border-radius:20px;
-    padding:36px 28px 28px;max-width:340px;width:88%;
+    padding:36px 28px 28px;max-width:360px;width:90%;
     text-align:center;
-    transform:scale(.9) translateY(20px);
+    transform:scale(.9) translateY(24px);
     transition:transform .4s cubic-bezier(.22,1,.36,1);
-    box-shadow:0 20px 60px rgba(0,0,0,.25);
+    box-shadow:0 24px 64px rgba(0,0,0,.3);
 }
-.name-modal--visible .name-modal__card{transform:scale(1) translateY(0)}
-.name-modal__emoji{font-size:48px;display:block;margin-bottom:var(--sp-2)}
-.name-modal__title{font-size:20px;font-weight:800;color:var(--c-text);margin-bottom:4px}
-.name-modal__sub{font-size:13px;color:var(--c-text-soft);margin-bottom:var(--sp-5)}
-.name-modal__input{
+.user-setup--visible .user-setup__card{transform:scale(1) translateY(0)}
+.user-setup__emoji{font-size:48px;display:block;margin-bottom:var(--sp-2)}
+.user-setup__title{font-size:20px;font-weight:800;color:var(--c-text);margin-bottom:4px}
+.user-setup__sub{font-size:13px;color:var(--c-text-soft);margin-bottom:var(--sp-5)}
+.user-setup__input{
     width:100%;padding:12px 16px;
     border:1.5px solid var(--c-border);border-radius:var(--r-md);
     font:inherit;font-size:15px;text-align:center;
     background:var(--c-muted);color:var(--c-text);
     transition:border var(--dur),box-shadow var(--dur);
-    margin-bottom:var(--sp-4);
+    margin-bottom:var(--sp-3);
 }
-.name-modal__input:focus{outline:none;border-color:var(--c-brand);box-shadow:0 0 0 3px rgba(232,93,4,.12)}
-.name-modal__input::placeholder{color:var(--c-text-lighter)}
-.name-modal__btn{
+.user-setup__input:focus{outline:none;border-color:var(--c-brand);box-shadow:0 0 0 3px rgba(232,93,4,.12)}
+.user-setup__input::placeholder{color:var(--c-text-lighter)}
+.user-setup__error{
+    font-size:12px;color:#ef4444;margin:0 0 var(--sp-3);
+}
+.user-setup__btn{
     width:100%;padding:13px;border:none;border-radius:var(--r-md);
     background:var(--c-brand);color:#fff;
     font:inherit;font-size:15px;font-weight:700;cursor:pointer;
-    transition:background var(--dur),transform .12s;
+    margin-top:var(--sp-1);
+    transition:background var(--dur),transform .12s,box-shadow .25s;
 }
-.name-modal__btn:hover{background:var(--c-brand-dark)}
-.name-modal__btn:active{transform:scale(.97)}
-.name-modal__skip{
-    display:block;margin-top:var(--sp-3);
-    background:none;border:none;color:var(--c-text-lighter);
-    font:inherit;font-size:12px;cursor:pointer;
-    transition:color var(--dur);
-}
-.name-modal__skip:hover{color:var(--c-text-soft)}
+.user-setup__btn:hover{background:var(--c-brand-dark);box-shadow:0 4px 18px rgba(232,93,4,.3)}
+.user-setup__btn:active{transform:scale(.97)}
 
 /* ================================================================
    SIGN UP MODAL

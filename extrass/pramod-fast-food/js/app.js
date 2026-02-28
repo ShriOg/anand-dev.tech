@@ -30,91 +30,84 @@ document.addEventListener('DOMContentLoaded', () => {
         UI.renderThemeToggle();
     }
 
-    /* ==========  NAME MODAL  ========== */
-    const _initNameModal = () => {
-        if (typeof Customer === 'undefined' || Customer.hasName()) return;
-        const modal = $('#nameModal');
-        const input = $('#nameInput');
-        const submitBtn = $('#nameSubmit');
-        const skipBtn = $('#nameSkip');
+    /* ==========  USER SETUP MODAL (mandatory first visit)  ========== */
+    const _initUserSetup = () => {
+        /* If session already exists, skip modal entirely */
+        const existingName  = localStorage.getItem('pf_customer_name');
+        const existingPhone = localStorage.getItem('pf_customer_phone');
+        if (existingName && existingPhone) {
+            _onSessionReady();
+            return;
+        }
+
+        const modal    = $('#userSetupModal');
+        const nameIn   = $('#setupName');
+        const phoneIn  = $('#setupPhone');
+        const errEl    = $('#setupError');
+        const submitBtn = $('#setupSubmit');
         if (!modal) return;
 
-        requestAnimationFrame(() => modal.classList.add('name-modal--visible'));
-        setTimeout(() => { if (input) input.focus(); }, 400);
+        /* Show modal — cannot be dismissed */
+        requestAnimationFrame(() => modal.classList.add('user-setup--visible'));
+        setTimeout(() => { if (nameIn) nameIn.focus(); }, 400);
 
-        const _close = (name) => {
-            if (name) Customer.setName(name);
-            modal.classList.remove('name-modal--visible');
+        const _showErr = (msg) => {
+            errEl.textContent = msg;
+            errEl.hidden = false;
+        };
+
+        const _submit = () => {
+            errEl.hidden = true;
+            const name  = nameIn.value.trim();
+            const phone = phoneIn.value.replace(/\s/g, '');
+
+            if (!name || name.length < 2) {
+                _showErr('Name must be at least 2 characters');
+                nameIn.focus();
+                return;
+            }
+            if (!/^\d{10}$/.test(phone)) {
+                _showErr('Phone must be exactly 10 digits');
+                phoneIn.focus();
+                return;
+            }
+
+            /* Save session */
+            localStorage.setItem('pf_customer_name', name);
+            localStorage.setItem('pf_customer_phone', phone);
+
+            /* Also push into Customer module for loyalty etc */
+            if (typeof Customer !== 'undefined') {
+                Customer.setName(name);
+                Customer.setPhone(phone);
+            }
+
+            /* Close modal */
+            modal.classList.remove('user-setup--visible');
             setTimeout(() => modal.remove(), 300);
-            UI.renderGreeting();
-            UI.renderAuthButton();
-        };
 
-        submitBtn.addEventListener('click', () => {
-            const name = input.value.trim();
-            if (!name) { input.focus(); return; }
-            _close(name);
             showToast(`Welcome, ${name}! 🎉`);
-        });
-
-        skipBtn.addEventListener('click', () => _close(''));
-
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') submitBtn.click();
-        });
-    };
-
-    /* ==========  SIGN UP MODAL  ========== */
-    const _initSignUp = () => {
-        const btn = $('#heroAuthBtn');
-        const modal = $('#signupModal');
-        const nameInput = $('#signupName');
-        const phoneInput = $('#signupPhone');
-        const submitBtn = $('#signupSubmit');
-        const closeBtn = $('#signupClose');
-        if (!btn || !modal) return;
-
-        UI.renderAuthButton();
-
-        const _openModal = () => {
-            if (Customer.hasName()) return; /* already signed up — profile click does nothing for now */
-            requestAnimationFrame(() => modal.classList.add('signup-modal--visible'));
-            setTimeout(() => { if (nameInput) nameInput.focus(); }, 300);
+            _onSessionReady();
         };
 
-        const _closeModal = () => {
-            modal.classList.remove('signup-modal--visible');
-        };
+        submitBtn.addEventListener('click', _submit);
 
-        btn.addEventListener('click', _openModal);
-        closeBtn?.addEventListener('click', _closeModal);
-
-        /* Close on backdrop click */
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) _closeModal();
-        });
-
-        submitBtn?.addEventListener('click', () => {
-            const name = nameInput.value.trim();
-            const phone = phoneInput.value.trim();
-            if (!name) { nameInput.focus(); return; }
-            if (!phone) { phoneInput.focus(); return; }
-
-            Customer.setName(name);
-            Customer.setPhone(phone);
-
-            _closeModal();
-            UI.renderAuthButton();
-            UI.renderGreeting();
-            showToast(`Welcome, ${name}! 🎉`);
-        });
-
-        /* Enter key submits */
-        [nameInput, phoneInput].forEach(inp => {
+        /* Enter key in either field submits */
+        [nameIn, phoneIn].forEach(inp => {
             inp?.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') submitBtn.click();
+                if (e.key === 'Enter') _submit();
             });
         });
+
+        /* Block closing by backdrop click — do nothing */
+    };
+
+    /** Called once we have name + phone in localStorage */
+    const _onSessionReady = () => {
+        UI.renderGreeting();
+        UI.renderAuthButton();
+        _initCustomerSocket();
+        _fetchOrdersByPhone();
     };
 
     /* ==========  ORDER RESULT POPUP  ========== */
@@ -509,24 +502,12 @@ document.addEventListener('DOMContentLoaded', () => {
     renderStats();
     renderMenu();
 
-    /* Initialize greeting bar */
-    UI.renderGreeting();
-
-    /* Show name modal on first visit */
-    _initNameModal();
-
-    /* Initialize sign-up / profile button */
-    _initSignUp();
-
-    /* Initialize customer Socket.IO for order notifications */
-    _initCustomerSocket();
-
     /* Restore last tracked order ID */
     const savedOrderId = localStorage.getItem('pf_last_order');
     if (savedOrderId) _lastOrderId = savedOrderId;
 
-    /* Fetch orders by phone from backend on load */
-    _fetchOrdersByPhone();
+    /* Gate everything behind user setup — socket + fetch only fire after session exists */
+    _initUserSetup();
 
     /* ==========  NON-BLOCKING BACKGROUND CONNECT  ========== */
     /* While user browses the static menu, silently ping the backend

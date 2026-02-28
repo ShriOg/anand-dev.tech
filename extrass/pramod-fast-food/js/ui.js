@@ -468,10 +468,11 @@ const UI = (() => {
     const renderGreeting = () => {
         const bar = $('#greetingBar');
         if (!bar) return;
-        const name = Customer.getName() || '';
-        const loyalty = Customer.getLoyaltyData();
 
-        if (!name && !loyalty) {
+        /* Read directly from localStorage — single source of truth */
+        const name = localStorage.getItem('pf_customer_name') || '';
+
+        if (!name) {
             bar.hidden = true;
             return;
         }
@@ -481,17 +482,17 @@ const UI = (() => {
         const sub = $('#greetingSub');
         const dot = $('#orderDot');
 
-        const displayName = name || loyalty?.name || 'Guest';
         const hour = new Date().getHours();
         const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
-        if (hi) hi.textContent = `${greeting}, ${displayName}! 👋`;
+        if (hi) hi.textContent = `${greeting}, ${name} 👋`;
         if (sub) {
+            const loyalty = (typeof Customer !== 'undefined') ? Customer.getLoyaltyData() : null;
             const pts = loyalty?.points || 0;
             const orders = loyalty?.orders || 0;
             sub.textContent = pts > 0 ? `⭐ ${pts} pts · 🏅 ${orders} orders` : 'Ready to order something delicious?';
         }
-        if (dot) {
+        if (dot && typeof Customer !== 'undefined') {
             dot.classList.toggle('greeting__order-dot--active', Customer.hasActiveOrders());
         }
     };

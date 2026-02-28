@@ -28,17 +28,7 @@
         </div>
     </header>
 
-    <!-- ==================== SIGN UP MODAL ==================== -->
-    <div class="signup-modal" id="signupModal" role="dialog" aria-label="Create Account" aria-modal="true">
-        <div class="signup-modal__card">
-            <button class="signup-modal__close" id="signupClose" aria-label="Close">✕</button>
-            <span class="signup-modal__emoji">👤</span>
-            <h2 class="signup-modal__title">Create Your Account</h2>
-            <input type="text" class="signup-modal__input" id="signupName" placeholder="Your name" maxlength="30" autocomplete="given-name">
-            <input type="tel" class="signup-modal__input" id="signupPhone" placeholder="Phone number" maxlength="15" autocomplete="tel">
-            <button class="signup-modal__btn" id="signupSubmit">Sign Up 🚀</button>
-        </div>
-    </div>
+    <!-- sign-up modal removed — user-setup modal handles first-time entry -->
 
     <!-- ========================= GREETING ========================= -->
     <div class="greeting" id="greetingBar" hidden>
@@ -168,15 +158,16 @@
         </div>
     </div>
 
-    <!-- ==================== NAME MODAL ==================== -->
-    <div class="name-modal" id="nameModal" role="dialog" aria-label="Welcome" aria-modal="true">
-        <div class="name-modal__card">
-            <span class="name-modal__emoji">🥟</span>
-            <h2 class="name-modal__title">Welcome!</h2>
-            <p class="name-modal__sub">What should we call you?</p>
-            <input type="text" class="name-modal__input" id="nameInput" placeholder="Your name" maxlength="30" autocomplete="given-name">
-            <button class="name-modal__btn" id="nameSubmit">Let's Go! 🚀</button>
-            <button class="name-modal__skip" id="nameSkip">Skip for now</button>
+    <!-- ==================== USER SETUP MODAL (mandatory first visit) ==================== -->
+    <div class="user-setup" id="userSetupModal" role="dialog" aria-label="Welcome" aria-modal="true">
+        <div class="user-setup__card">
+            <span class="user-setup__emoji">🥟</span>
+            <h2 class="user-setup__title">Welcome to Pramod Fast Food</h2>
+            <p class="user-setup__sub">Enter your details to get started</p>
+            <input type="text" class="user-setup__input" id="setupName" placeholder="Your name" maxlength="30" autocomplete="given-name">
+            <input type="tel" class="user-setup__input" id="setupPhone" placeholder="10-digit phone number" maxlength="10" autocomplete="tel">
+            <p class="user-setup__error" id="setupError" hidden></p>
+            <button class="user-setup__btn" id="setupSubmit">Continue →</button>
         </div>
     </div>
 
