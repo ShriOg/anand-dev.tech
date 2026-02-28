@@ -609,6 +609,7 @@ const UI = (() => {
 
         body.innerHTML = orders.map(order => {
             const statusKey = (order.status || 'PENDING').toUpperCase();
+            const isPending   = statusKey === 'PENDING';
             const isCancelled = statusKey === 'CANCELLED';
             const isCompleted = statusKey === 'COMPLETED';
             const items = order.items || [];
@@ -632,8 +633,11 @@ const UI = (() => {
                 <div class="order-card__items">${itemsHtml}</div>
                 <div class="order-card__foot">
                     <span class="order-card__total">₹${order.total || 0}</span>
-                    ${isCompleted ? `<button class="order-card__reorder" data-action="panel-reorder" data-order-id="${order.orderId}">🔁 Reorder</button>` : ''}
-                    ${isCancelled ? `<button class="delete-cancelled" data-id="${order._id || order.orderId}">🗑 Delete</button>` : ''}
+                    <div class="order-card__foot-actions">
+                        ${isPending ? `<button class="cancel-order" data-id="${order._id || order.orderId}">✕ Cancel</button>` : ''}
+                        ${isCompleted ? `<button class="order-card__reorder" data-action="panel-reorder" data-order-id="${order.orderId}">🔁 Reorder</button>` : ''}
+                        ${isCancelled ? `<button class="delete-cancelled" data-id="${order._id || order.orderId}">🗑 Delete</button>` : ''}
+                    </div>
                 </div>
             </div>`;
         }).join('');

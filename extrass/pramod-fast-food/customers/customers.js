@@ -35,15 +35,26 @@ function relativeDate(dateStr) {
 /* ============ Fetch ============ */
 async function loadCustomers() {
     try {
-        const res = await fetch(`${BASE_URL}/restaurant/customers`);
-        const json = await res.json();
+        const [custRes, analyticsRes] = await Promise.all([
+            fetch(`${BASE_URL}/restaurant/customers`),
+            fetch(`${BASE_URL}/restaurant/customers/analytics`),
+        ]);
+        const custJson = await custRes.json();
+        const analyticsJson = await analyticsRes.json();
 
-        if (json.success && Array.isArray(json.data)) {
-            customersData = json.data;
+        if (custJson.success && Array.isArray(custJson.data)) {
+            customersData = custJson.data;
             renderCustomers(customersData);
-            updateSummary(customersData);
         } else {
             showEmpty();
+        }
+
+        /* Use analytics endpoint for accurate revenue/order counts
+           (only counts COMPLETED orders, excludes cancelled/deleted) */
+        if (analyticsJson.success && analyticsJson.data) {
+            updateSummaryFromAnalytics(analyticsJson.data, customersData.length);
+        } else {
+            updateSummaryFallback(customersData);
         }
     } catch (err) {
         console.error('[Customers] Load failed:', err);
@@ -85,7 +96,25 @@ function showEmpty() {
 }
 
 /* ============ Summary cards ============ */
-function updateSummary(customers) {
+/**
+ * Primary: use analytics endpoint (only COMPLETED orders, excludes cancelled/deleted).
+ * This ensures revenue matches the admin dashboard.
+ */
+function updateSummaryFromAnalytics(analytics, customerCount) {
+    const revenue = analytics.totalRevenue || 0;
+    const orders  = analytics.totalOrders  || 0;
+    const count   = analytics.totalCustomers || customerCount || 0;
+    const avg     = count ? Math.round(revenue / count) : 0;
+
+    $totalCust.textContent   = count;
+    $totalRev.textContent    = fmt(revenue);
+    $totalOrders.textContent = orders;
+    $avgSpend.textContent    = fmt(avg);
+    $headerCount.textContent = count + ' total';
+}
+
+/** Fallback: compute from customer records if analytics endpoint unavailable. */
+function updateSummaryFallback(customers) {
     const count = customers.length;
     const revenue = customers.reduce((s, c) => s + (c.totalSpent || 0), 0);
     const orders  = customers.reduce((s, c) => s + (c.totalOrders || 0), 0);

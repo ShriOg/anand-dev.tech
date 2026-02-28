@@ -1080,6 +1080,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    /* Cancel PENDING orders from customer panel */
+    document.addEventListener('click', async (e) => {
+        if (!e.target.classList.contains('cancel-order')) return;
+
+        const id = e.target.dataset.id;
+        if (!id) return;
+
+        try {
+            const BASE_URL = 'https://anand-os-backend.onrender.com/api';
+            const res = await fetch(`${BASE_URL}/restaurant/orders/${id}/cancel`, { method: 'PATCH' });
+            const json = await res.json();
+
+            if (!res.ok) {
+                showToast(json.message || 'Cannot cancel this order', 'error');
+                return;
+            }
+
+            /* Update local storage */
+            if (typeof Customer !== 'undefined') {
+                Customer.updateOrderStatus(id, 'CANCELLED');
+            }
+
+            /* Re-render panel to show updated state */
+            UI.renderOrdersPanel();
+            UI.renderGreeting();
+
+            showToast('Order cancelled', 'success');
+        } catch (err) {
+            console.error('[Cancel] Failed:', err);
+            showToast('Failed to cancel order', 'error');
+        }
+    });
+
     /* Delete cancelled orders from customer panel */
     document.addEventListener('click', async (e) => {
         if (!e.target.classList.contains('delete-cancelled')) return;
