@@ -595,18 +595,30 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!card) return;
             const itemId = card.dataset.itemId;
 
-            /* Gather updated values */
+            /* Retrieve full original item so we send a complete object */
+            const original = menuItems.find(i => (i._id || i.id) === itemId);
+            if (!original) {
+                showToast('Could not find original menu item', 'error');
+                return;
+            }
+
+            /* Gather updated price values, keeping original labels */
             const priceInputs = card.querySelectorAll('.menu-mgmt-price__input');
-            const prices = Array.from(priceInputs).map(inp => ({
-                idx: Number(inp.dataset.priceIdx),
-                value: Number(inp.value),
-            }));
+            const prices = Array.from(priceInputs).map(inp => {
+                const idx = Number(inp.dataset.priceIdx);
+                const orig = (original.prices || [])[idx] || {};
+                return { label: String(orig.label || ''), value: Number(inp.value) };
+            });
 
             const specialChk = card.querySelector('[data-action="toggle-special"]');
             const activeChk = card.querySelector('[data-action="toggle-active"]');
 
+            /* Build full payload using EXACT backend keys — no id */
             const payload = {
-                prices: prices.map(p => p.value),
+                name: original.name,
+                desc: original.desc || original.description || '',
+                category: original.category || '',
+                prices,
                 special: specialChk?.checked || false,
                 active: activeChk?.checked !== false,
             };
