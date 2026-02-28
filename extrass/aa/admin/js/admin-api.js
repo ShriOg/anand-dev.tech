@@ -10,8 +10,10 @@ const AdminAPI = (() => {
 
     /* ---------- Config ---------- */
     const BASE_URL = window.location.hostname === 'localhost'
-        ? 'http://localhost:10000/api'
+        ? 'https://anand-os-backend.onrender.com/api'
         : 'https://anand-os-backend.onrender.com/api';
+
+    console.log('[AdminAPI] Using base:', BASE_URL);
 
     const COLD_START_RETRY_DELAY = 2000;
     let _serverAwake = false;

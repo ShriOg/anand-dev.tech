@@ -251,9 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const _initCustomerSocket = () => {
         if (typeof io === 'undefined') return;
 
-        const socketUrl = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-            ? 'http://localhost:10000'
-            : 'https://anand-os-backend.onrender.com';
+        const socketUrl = 'https://anand-os-backend.onrender.com';
 
         _updateConnectionIndicator('connecting');
 

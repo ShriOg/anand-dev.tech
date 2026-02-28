@@ -24,9 +24,12 @@ const Api = (() => {
 
     const _BASE = (() => {
         const host = location.hostname;
-        if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:10000';
+        if (host === 'localhost' || host === '127.0.0.1')
+            return 'https://anand-os-backend.onrender.com';
         return 'https://anand-os-backend.onrender.com';
     })();
+
+    console.log('[API] Using base:', _BASE);
 
     const ENDPOINTS = Object.freeze({
         menu:    '/api/restaurant/menu',
