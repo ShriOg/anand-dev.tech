@@ -7,6 +7,51 @@
 'use strict';
 console.log('[Admin] admin-app.js loaded');
 
+/* ====================================================================
+   ADMIN PWA — Service Worker Registration & Install Prompt
+==================================================================== */
+(function adminPWA() {
+    // Register admin-scoped service worker
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker
+            .register('/extrass/pramod-fast-food/admin/sw.js', {
+                scope: '/extrass/pramod-fast-food/admin/'
+            })
+            .then(() => console.log('[Admin] PWA Service Worker registered'))
+            .catch(err => console.error('[Admin] SW registration failed', err));
+    }
+
+    // Capture install prompt
+    let deferredPrompt;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        const installBtn = document.querySelector('#adminInstallBtn');
+        if (installBtn) installBtn.style.display = 'inline-flex';
+    });
+
+    document.addEventListener('click', (e) => {
+        if (e.target && e.target.id === 'adminInstallBtn') {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(choice => {
+                    console.log('[Admin] Install:', choice.outcome);
+                    deferredPrompt = null;
+                    const btn = document.querySelector('#adminInstallBtn');
+                    if (btn) btn.style.display = 'none';
+                });
+            }
+        }
+    });
+
+    window.addEventListener('appinstalled', () => {
+        console.log('[Admin] PWA installed successfully');
+        const btn = document.querySelector('#adminInstallBtn');
+        if (btn) btn.style.display = 'none';
+    });
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('[Admin] DOMContentLoaded fired');
 

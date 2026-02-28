@@ -188,16 +188,22 @@ body{
     padding:var(--sp-4);border-top:1px solid rgba(255,255,255,.06);
     display:flex;align-items:center;gap:var(--sp-2);
 }
-.sidebar__theme-btn,.sidebar__logout-btn{
+.sidebar__theme-btn,.sidebar__logout-btn,.sidebar__install-btn{
     background:none;border:1px solid rgba(255,255,255,.1);
     color:var(--sidebar-text);padding:var(--sp-2) var(--sp-3);
     border-radius:var(--r-sm);font:inherit;font-size:12px;
     cursor:pointer;transition:all var(--dur);
 }
-.sidebar__theme-btn:hover,.sidebar__logout-btn:hover{
+.sidebar__theme-btn:hover,.sidebar__logout-btn:hover,.sidebar__install-btn:hover{
     background:rgba(255,255,255,.08);color:#fff;
 }
 .sidebar__logout-btn{flex:1}
+.sidebar__install-btn{
+    width:100%;display:inline-flex;align-items:center;justify-content:center;
+    gap:var(--sp-1);border-color:var(--c-brand);color:var(--c-brand);
+    margin-bottom:var(--sp-2);
+}
+.sidebar__install-btn:hover{background:var(--c-brand);color:#fff}
 
 /* Fix: author display:flex overrides native [hidden] */
 .sidebar[hidden]{display:none}
