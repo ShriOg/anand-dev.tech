@@ -5,24 +5,12 @@
  * All interactions via event delegation on stable containers.
  */
 'use strict';
-console.log('[Admin] admin-app.js loaded');
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('[Admin] DOMContentLoaded fired');
-
-    /* Guard: ensure dependent modules loaded */
-    if (typeof AdminUI === 'undefined') {
-        console.error('[Admin] FATAL: AdminUI not loaded — check script order in HTML.');
-        return;
-    }
-    if (typeof AdminAPI === 'undefined') {
-        console.error('[Admin] FATAL: AdminAPI not loaded — check script order in HTML.');
-        return;
-    }
 
     const { $, $$, showToast, showConfirm,
             switchPage, updateSocketStatus, renderStats, renderRecentOrders,
-            renderOrderCards, prependOrderCard, updateOrderCard, renderHistoryTable, renderPagination,
+            renderOrderCards, prependOrderCard, renderHistoryTable, renderPagination,
             renderMenuItems, drawBarChart, renderTopItems, playNotifSound,
             exportOrdersCSV } = AdminUI;
 
@@ -117,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /* Check session first */
     if (sessionStorage.getItem(GATE_KEY)) {
         hideGate();
-        try { init(); } catch (err) { console.error('[Admin] Boot failed (session restore):', err); }
+        init();
     } else {
         showGate();
     }
@@ -143,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
             input.classList.remove('gate__input--shake');
             error.hidden = true;
             hideGate();
-            try { init(); } catch (err) { console.error('[Admin] Boot failed (gate unlock):', err); }
+            init();
         } else {
             error.hidden = false;
             input.value = '';
@@ -174,42 +162,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* ==========  INIT  ========== */
     function init() {
-        console.log('[Admin] init() — booting admin panel…');
-        debug('Admin Booted');
-
-        /* Global error safety net — catch silent failures and show toast */
-        window.addEventListener('error', (e) => {
-            console.error('[Admin] Uncaught error:', e.error || e.message);
-            showToast('Something went wrong — check console', 'error');
-        });
-        window.addEventListener('unhandledrejection', (e) => {
-            console.error('[Admin] Unhandled rejection:', e.reason);
-            showToast('Async error — check console', 'error');
-        });
-
-        /* Global click debugger — logs every interactive click (capture phase) */
-        document.addEventListener('click', (e) => {
-            const el = e.target.closest('button, select, [data-action], [data-page], [data-goto], .toggle, .tool-btn');
-            if (!el) return;
-            debug('Click', { tag: el.tagName, id: el.id || undefined, classes: (el.className || '').split?.(' ')?.[0], ...el.dataset });
-        }, true);
-
-        /* Topbar scroll shadow */
-        const pageContainer = $('#pageContainer');
-        const topbar = document.querySelector('.topbar');
-        if (pageContainer && topbar) {
-            window.addEventListener('scroll', () => {
-                topbar.classList.toggle('topbar--scrolled', window.scrollY > 4);
-            }, { passive: true });
-        }
-
-        try {
-            /* Connect realtime */
-            AdminSocket.connect();
-            console.log('[Admin] ✓ Socket initialised');
-        } catch (err) {
-            console.error('[Admin] ✗ Socket connect failed:', err);
-        }
+        /* Connect realtime */
+        AdminSocket.connect();
 
         /* Cold-start listener */
         document.addEventListener('admin:cold-start', () => {
@@ -223,26 +177,13 @@ document.addEventListener('DOMContentLoaded', () => {
         /* Auto-refresh stats every 30s */
         statsRefreshTimer = setInterval(loadDashboard, 30000);
 
-        /* Wire navigation & events — each wrapped so one failure doesn’t block the rest */
-        const wireFns = [
-            ['Navigation',   wireNavigation],
-            ['OrderEvents',  wireOrderEvents],
-            ['HistoryEvents',wireHistoryEvents],
-            ['MenuEvents',   wireMenuEvents],
-            ['Theme',        wireTheme],
-            ['Sidebar',      wireSidebar],
-        ];
-
-        for (const [label, fn] of wireFns) {
-            try {
-                fn();
-                console.log(`[Admin] ✓ wire${label}`);
-            } catch (err) {
-                console.error(`[Admin] ✗ wire${label} failed:`, err);
-            }
-        }
-
-        console.log('[Admin] init() complete ✓');
+        /* Wire navigation */
+        wireNavigation();
+        wireOrderEvents();
+        wireHistoryEvents();
+        wireMenuEvents();
+        wireTheme();
+        wireSidebar();
     }
 
     /* ---------- Cold-start banner ---------- */
@@ -265,27 +206,19 @@ document.addEventListener('DOMContentLoaded', () => {
        DASHBOARD
     ==================================================================== */
     async function loadDashboard() {
-        console.log('[Admin] loadDashboard()');
-        debug('Fetching Stats');
         try {
             const [statsRes, recentRes] = await Promise.all([
                 AdminAPI.getStats(),
                 AdminAPI.getRecentOrders(5),
             ]);
-            console.log('[Admin] Stats response:', statsRes);
-            console.log('[Admin] Recent orders response:', recentRes);
             _showWakingBanner(false);
             /* Unwrap { success, data } wrapper */
             const stats = statsRes?.data || statsRes;
-            debug('Stats Data', stats);
             renderStats(stats);
             const recentPayload = recentRes?.data || recentRes;
             const recent = Array.isArray(recentPayload) ? recentPayload : (recentPayload?.orders || []);
-            console.log('[Admin] Rendered', recent.length, 'recent orders');
             renderRecentOrders(recent);
         } catch (err) {
-            debug('Fatal Error', err);
-            console.error(err);
             const msg = (err.message || '').includes('Failed to fetch')
                 ? 'Server is starting up — will retry automatically…'
                 : 'Failed to load dashboard data';
@@ -297,14 +230,10 @@ document.addEventListener('DOMContentLoaded', () => {
        NAVIGATION
     ==================================================================== */
     function wireNavigation() {
-        const sidebar = $('#sidebar');
-        if (!sidebar) { console.error('[Admin] #sidebar not found in DOM'); return; }
-        sidebar.addEventListener('click', (e) => {
+        $('#sidebar').addEventListener('click', (e) => {
             const btn = e.target.closest('.nav-item');
             if (!btn) return;
             const page = btn.dataset.page;
-            console.log('[Admin] Sidebar click → page:', page);
-            debug('Sidebar Click', page);
             if (!page || page === currentPage) return;
             currentPage = page;
             switchPage(page);
@@ -313,7 +242,6 @@ document.addEventListener('DOMContentLoaded', () => {
             /* Close sidebar on mobile */
             if (window.innerWidth <= 860) {
                 $('#sidebar').classList.remove('open');
-                document.getElementById('sidebarOverlay')?.classList.remove('sidebar-overlay--visible');
             }
         });
 
@@ -329,11 +257,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function onPageSwitch(page) {
-        debug('Page Switched', page);
-        requestAnimationFrame(() => {
-            const target = document.querySelector(`.page[data-page="${page}"]`);
-            debug('Page Visible Check', { page, hidden: target?.hidden, found: !!target });
-        });
         switch (page) {
             case 'dashboard': loadDashboard(); break;
             case 'orders': loadLiveOrders(); break;
@@ -347,22 +270,15 @@ document.addEventListener('DOMContentLoaded', () => {
        LIVE ORDERS
     ==================================================================== */
     async function loadLiveOrders() {
-        console.log('[Admin] loadLiveOrders()');
-        debug('Fetching Live Orders');
         try {
             const statusFilter = $('#ordersStatusFilter')?.value || '';
             const res = await AdminAPI.getTodayOrders({ status: statusFilter });
-            console.log('[Admin] Today orders response:', res);
             /* Unwrap { success, data } wrapper */
             const payload = res?.data || res;
             liveOrders = Array.isArray(payload) ? payload : (payload?.orders || []);
-            console.log('[Admin] Live orders count:', liveOrders.length);
-            debug('Orders Received', liveOrders);
             renderOrderCards(liveOrders);
             updatePendingBadge();
         } catch (err) {
-            debug('Fatal Error', err);
-            console.error(err);
             showToast('Failed to load orders', 'error');
         }
     }
@@ -401,68 +317,25 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                select.disabled = true;
-                select.style.opacity = '.5';
                 await AdminAPI.updateOrderStatus(orderId, newStatus);
-                select.disabled = false;
-                select.style.opacity = '';
                 /* Update local state */
                 const order = liveOrders.find(o => (o._id || o.orderId) === orderId);
                 if (order) order.status = newStatus;
 
-                /* Re-render the card in place for visual consistency */
+                /* Update select class */
                 select.className = `status-select status-select--${newStatus.toLowerCase()}`;
                 updatePendingBadge();
-                if (order) updateOrderCard(orderId, order);
-                debug('Order Status Updated', { orderId, newStatus });
                 showToast(`Order updated to ${newStatus}`, 'success');
             } catch (err) {
-                select.disabled = false;
-                select.style.opacity = '';
                 showToast(`Failed to update: ${err.message}`, 'error');
                 const order = liveOrders.find(o => (o._id || o.orderId) === orderId);
                 if (order) select.value = order.status;
             }
         });
 
-        /* Delete order button */
-        $('#liveOrdersContainer')?.addEventListener('click', async (e) => {
-            const btn = e.target.closest('[data-action="delete-order"]');
-            if (!btn) return;
-
-            const orderId = btn.dataset.orderId;
-            const confirmed = await showConfirm('Are you sure you want to delete this order?');
-            if (!confirmed) return;
-
-            try {
-                btn.disabled = true;
-                btn.textContent = '…';
-                await AdminAPI.deleteOrder(orderId);
-
-                /* Remove from local state */
-                liveOrders = liveOrders.filter(o => (o._id || o.orderId) !== orderId);
-                updatePendingBadge();
-
-                /* Fade-out animation then remove card */
-                const card = btn.closest('.order-card');
-                if (card) {
-                    card.classList.add('order-card--fade-out');
-                    card.addEventListener('animationend', () => card.remove(), { once: true });
-                }
-
-                debug('Order Deleted', { orderId });
-                showToast('Order deleted successfully', 'success');
-            } catch (err) {
-                btn.disabled = false;
-                btn.textContent = '🗑 Delete';
-                showToast(`Failed to delete: ${err.message}`, 'error');
-            }
-        });
-
         /* Realtime: new order from socket */
         document.addEventListener('admin:new-order', (e) => {
             const order = e.detail;
-            console.log('[Admin] admin:new-order event received:', order);
             if (!order) return;
 
             /* Deduplicate */
@@ -493,7 +366,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         /* Socket status */
         document.addEventListener('socket:status', (e) => {
-            console.log('[Admin] Socket status:', e.detail?.connected);
             updateSocketStatus(e.detail?.connected);
         });
     }
@@ -502,7 +374,6 @@ document.addEventListener('DOMContentLoaded', () => {
        ORDER HISTORY
     ==================================================================== */
     async function loadHistory() {
-        console.log('[Admin] loadHistory()');
         try {
             const params = {
                 page: historyPage,
@@ -519,12 +390,9 @@ document.addEventListener('DOMContentLoaded', () => {
             historyTotal = res?.totalPages || payload?.totalPages || Math.ceil((res?.total || payload?.total || orders.length) / 20) || 1;
             allHistoryOrders = orders;
 
-            debug('History Data', { count: orders.length, page: historyPage, totalPages: historyTotal });
             renderHistoryTable(orders);
             renderPagination(historyPage, historyTotal);
         } catch (err) {
-            debug('Fatal Error', err);
-            console.error(err);
             showToast('Failed to load history', 'error');
         }
     }
@@ -566,10 +434,8 @@ document.addEventListener('DOMContentLoaded', () => {
        MENU MANAGEMENT
     ==================================================================== */
     async function loadMenu() {
-        console.log('[Admin] loadMenu()');
         try {
             const res = await AdminAPI.getMenu();
-            console.log('[Admin] Menu response:', res);
             /* Unwrap { success, data } wrapper */
             const data = res?.data || res?.categories || res;
 
@@ -592,11 +458,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 menuCategories = [];
             }
 
-            debug('Menu Data', { items: menuItems.length, categories: menuCategories.length });
             renderMenuItems(menuItems, menuCategories);
         } catch (err) {
-            debug('Fatal Error', err);
-            console.error(err);
             showToast('Failed to load menu', 'error');
         }
     }
@@ -629,51 +492,34 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!card) return;
             const itemId = card.dataset.itemId;
 
-            /* Retrieve full original item so we send a complete object */
-            const original = menuItems.find(i => (i._id || i.id) === itemId);
-            if (!original) {
-                showToast('Could not find original menu item', 'error');
-                return;
-            }
-
-            /* Gather updated price values, keeping original labels */
+            /* Gather updated values */
             const priceInputs = card.querySelectorAll('.menu-mgmt-price__input');
-            const prices = Array.from(priceInputs).map(inp => {
-                const idx = Number(inp.dataset.priceIdx);
-                const orig = (original.prices || [])[idx] || {};
-                return { label: String(orig.label || ''), value: Number(inp.value) };
-            });
+            const prices = Array.from(priceInputs).map(inp => ({
+                idx: Number(inp.dataset.priceIdx),
+                value: Number(inp.value),
+            }));
 
             const specialChk = card.querySelector('[data-action="toggle-special"]');
             const activeChk = card.querySelector('[data-action="toggle-active"]');
 
-            /* Build full payload using EXACT backend keys — no id */
             const payload = {
-                name: original.name,
-                desc: original.desc || original.description || '',
-                category: original.category || '',
-                prices,
+                prices: prices.map(p => p.value),
                 special: specialChk?.checked || false,
                 active: activeChk?.checked !== false,
             };
 
             try {
                 saveBtn.disabled = true;
-                saveBtn.classList.add('btn--loading');
-                saveBtn.textContent = '';
+                saveBtn.textContent = '…';
                 await AdminAPI.updateMenuItem(itemId, payload);
-                saveBtn.classList.remove('btn--loading', 'show');
+                saveBtn.classList.remove('show');
                 saveBtn.disabled = false;
                 saveBtn.textContent = 'Save';
 
-                /* Update visual state + confirm flash */
+                /* Update visual state */
                 card.classList.toggle('menu-mgmt-card--inactive', !payload.active);
-                card.style.boxShadow = '0 0 0 2px var(--c-green)';
-                setTimeout(() => { card.style.boxShadow = ''; }, 800);
-                debug('Menu Item Saved', { itemId, payload });
                 showToast('Menu item updated', 'success');
             } catch (err) {
-                saveBtn.classList.remove('btn--loading');
                 saveBtn.disabled = false;
                 saveBtn.textContent = 'Save';
                 showToast(`Failed: ${err.message}`, 'error');
@@ -701,10 +547,8 @@ document.addEventListener('DOMContentLoaded', () => {
        ANALYTICS
     ==================================================================== */
     async function loadAnalytics() {
-        console.log('[Admin] loadAnalytics()');
         try {
             const res = await AdminAPI.getAnalytics();
-            console.log('[Admin] Analytics response:', res);
             /* Unwrap { success, data } wrapper */
             const data = res?.data || res;
             if (!data) return;
@@ -728,8 +572,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderTopItems(data.topItems);
             }
         } catch (err) {
-            debug('Fatal Error', err);
-            console.error(err);
             showToast('Failed to load analytics', 'error');
         }
     }
@@ -764,35 +606,17 @@ document.addEventListener('DOMContentLoaded', () => {
        SIDEBAR (mobile toggle)
     ==================================================================== */
     function wireSidebar() {
-        /* Create overlay element for mobile sidebar backdrop */
-        let overlay = document.getElementById('sidebarOverlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.id = 'sidebarOverlay';
-            overlay.className = 'sidebar-overlay';
-            document.body.appendChild(overlay);
-        }
-
-        const _closeSidebar = () => {
-            $('#sidebar').classList.remove('open');
-            overlay.classList.remove('sidebar-overlay--visible');
-        };
-
         $('#sidebarToggle')?.addEventListener('click', () => {
-            const isOpen = $('#sidebar').classList.toggle('open');
-            overlay.classList.toggle('sidebar-overlay--visible', isOpen);
-            debug('Sidebar Toggle', { open: isOpen });
+            $('#sidebar').classList.toggle('open');
         });
 
-        overlay.addEventListener('click', _closeSidebar);
-
-        /* Close sidebar on click outside (mobile) */
+        /* Close on overlay click (mobile) */
         document.addEventListener('click', (e) => {
             if (window.innerWidth > 860) return;
             const sidebar = $('#sidebar');
             if (!sidebar.classList.contains('open')) return;
             if (!e.target.closest('.sidebar') && !e.target.closest('#sidebarToggle')) {
-                _closeSidebar();
+                sidebar.classList.remove('open');
             }
         });
 
@@ -814,7 +638,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape') {
             const overlay = $('#confirmOverlay');
             if (overlay && !overlay.hidden) {
-                $('#confirmCancel')?.click();
+                overlay.hidden = true;
             }
         }
     });

@@ -6,15 +6,6 @@
  */
 'use strict';
 
-/* ========== GLOBAL DEBUG MODE (admin) ========== */
-if (typeof window.__DEBUG__ === 'undefined') window.__DEBUG__ = true;
-if (typeof debug === 'undefined') {
-    window.debug = function(label, data) {
-        if (!window.__DEBUG__) return;
-        console.log('[DEBUG] ' + label, data ?? '');
-    };
-}
-
 const AdminUI = (() => {
 
     /* ---------- DOM helpers ---------- */
@@ -66,51 +57,11 @@ const AdminUI = (() => {
        PAGE NAVIGATION
     ==================================================================== */
     const switchPage = (pageKey) => {
-        debug('Switching Page', pageKey);
-        const pages = $$('.page');
-        const current = Array.from(pages).find(p => !p.hidden);
-
-        /* Animate out current page, then show new */
-        if (current && current.dataset.page !== pageKey) {
-            /* Force-finish any in-progress exit (rapid clicks) */
-            if (current.classList.contains('page--exit')) {
-                current.classList.remove('page--exit');
-                current.hidden = true;
-            }
-            current.classList.add('page--exit');
-            const _exitTimer = setTimeout(() => {
-                current.classList.remove('page--exit');
-                current.hidden = true;
-                _showPage(pageKey, pages);
-                debug('Page Switch Fallback', pageKey);
-            }, 250);
-            current.addEventListener('animationend', function handler() {
-                clearTimeout(_exitTimer);
-                current.removeEventListener('animationend', handler);
-                current.classList.remove('page--exit');
-                current.hidden = true;
-                _showPage(pageKey, pages);
-            }, { once: true });
-        } else {
-            _showPage(pageKey, pages);
-        }
-
+        $$('.page').forEach(p => p.hidden = p.dataset.page !== pageKey);
         $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === pageKey));
+
         const titles = { dashboard: 'Dashboard', orders: 'Live Orders', history: 'Order History', menu: 'Menu', analytics: 'Analytics' };
         $('#pageTitle').textContent = titles[pageKey] || 'Dashboard';
-    };
-
-    const _showPage = (pageKey, pages) => {
-        pages.forEach(p => {
-            if (p.dataset.page === pageKey) {
-                p.hidden = false;
-                p.style.animation = 'none';
-                void p.offsetWidth; /* reflow */
-                p.style.animation = '';
-            } else {
-                p.hidden = true;
-            }
-        });
     };
 
     /* ====================================================================
@@ -119,21 +70,17 @@ const AdminUI = (() => {
     const updateSocketStatus = (status) => {
         const el = $('#socketStatus');
         if (!el) return;
-        el.classList.remove('topbar__status--live', 'topbar__status--connecting', 'topbar__status--offline');
         if (status === 'connecting' || status === true) {
             if (status === true) {
-                el.textContent = ' Live';
+                el.innerHTML = '🟢 Live';
                 el.title = 'Realtime connected';
-                el.classList.add('topbar__status--live');
             } else {
                 el.innerHTML = '🟡 Connecting';
                 el.title = 'Connecting to server…';
-                el.classList.add('topbar__status--connecting');
             }
         } else {
             el.innerHTML = '🔴 Offline';
             el.title = 'Realtime disconnected';
-            el.classList.add('topbar__status--offline');
         }
     };
 
@@ -159,7 +106,7 @@ const AdminUI = (() => {
         const container = $('#dashRecentOrders');
         if (!container) return;
         if (!orders || !orders.length) {
-            container.innerHTML = _emptyState('📭', 'No recent orders', 'Orders will appear here as they come in');
+            container.innerHTML = '<p style="text-align:center;color:var(--c-text-soft);padding:20px">No recent orders</p>';
             return;
         }
         container.innerHTML = orders.slice(0, 5).map(o => `
@@ -178,7 +125,7 @@ const AdminUI = (() => {
         const target = container || $('#liveOrdersContainer');
         if (!target) return;
         if (!orders || !orders.length) {
-            target.innerHTML = _emptyState('📋', 'No orders found', 'Live orders will show up here in realtime');
+            target.innerHTML = '<p style="text-align:center;color:var(--c-text-soft);padding:40px">No orders found</p>';
             return;
         }
         target.innerHTML = orders.map(o => _orderCardHTML(o)).join('');
@@ -187,25 +134,12 @@ const AdminUI = (() => {
     const prependOrderCard = (order) => {
         const target = $('#liveOrdersContainer');
         if (!target) return;
-        const emptyMsg = target.querySelector('.empty-state') || target.querySelector('.skeleton-rows') || target.querySelector('p');
+        const emptyMsg = target.querySelector('p');
         if (emptyMsg) emptyMsg.remove();
 
         const div = document.createElement('div');
         div.innerHTML = _orderCardHTML(order, true);
         target.prepend(div.firstElementChild);
-    };
-
-    const updateOrderCard = (orderId, updatedOrder) => {
-        const card = document.querySelector(`.order-card[data-order-id="${orderId}"]`);
-        if (!card) return false;
-        const tmp = document.createElement('div');
-        tmp.innerHTML = _orderCardHTML(updatedOrder);
-        const newCard = tmp.firstElementChild;
-        newCard.style.animation = 'none';
-        card.replaceWith(newCard);
-        newCard.style.boxShadow = '0 0 0 2px var(--c-green)';
-        setTimeout(() => { newCard.style.boxShadow = ''; }, 800);
-        return true;
     };
 
     const _orderCardHTML = (o, isNew = false) => {
@@ -236,15 +170,12 @@ const AdminUI = (() => {
             ${o.note ? `<p style="font-size:12px;color:var(--c-text-soft);margin-bottom:var(--sp-3)">📝 ${_esc(o.note)}</p>` : ''}
             <div class="order-card__footer">
                 <span class="order-card__total">₹${o.total || 0}</span>
-                <div class="order-card__actions">
-                    <select class="status-select status-select--${statusLower}" data-order-id="${o._id || o.orderId}" data-action="status-change">
-                        <option value="PENDING" ${o.status === 'PENDING' ? 'selected' : ''}>⏳ Pending</option>
-                        <option value="PREPARING" ${o.status === 'PREPARING' ? 'selected' : ''}>🔥 Preparing</option>
-                        <option value="COMPLETED" ${o.status === 'COMPLETED' ? 'selected' : ''}>✅ Completed</option>
-                        <option value="CANCELLED" ${o.status === 'CANCELLED' ? 'selected' : ''}>❌ Cancelled</option>
-                    </select>
-                    <button class="btn-delete-order" data-action="delete-order" data-order-id="${o._id || o.orderId}">🗑 Delete</button>
-                </div>
+                <select class="status-select status-select--${statusLower}" data-order-id="${o._id || o.orderId}" data-action="status-change">
+                    <option value="PENDING" ${o.status === 'PENDING' ? 'selected' : ''}>⏳ Pending</option>
+                    <option value="PREPARING" ${o.status === 'PREPARING' ? 'selected' : ''}>🔥 Preparing</option>
+                    <option value="COMPLETED" ${o.status === 'COMPLETED' ? 'selected' : ''}>✅ Completed</option>
+                    <option value="CANCELLED" ${o.status === 'CANCELLED' ? 'selected' : ''}>❌ Cancelled</option>
+                </select>
             </div>
         </div>`;
     };
@@ -311,7 +242,7 @@ const AdminUI = (() => {
         }
 
         if (!items || !items.length) {
-            container.innerHTML = _emptyState('🍽️', 'No menu items', 'Menu items will load when the server connects');
+            container.innerHTML = '<p style="text-align:center;color:var(--c-text-soft);padding:40px">No menu items</p>';
             return;
         }
 
@@ -434,7 +365,7 @@ const AdminUI = (() => {
         const container = $('#topItemsContainer');
         if (!container) return;
         if (!items || !items.length) {
-            container.innerHTML = _emptyState('📊', 'No data yet', 'Analytics data will appear after orders come in');
+            container.innerHTML = '<p style="text-align:center;color:var(--c-text-soft);padding:20px">No data yet</p>';
             return;
         }
         container.innerHTML = items.slice(0, 10).map((item, i) => `
@@ -513,14 +444,6 @@ const AdminUI = (() => {
         return `<span class="status-badge status-badge--${cls}">${labels[s] || s}</span>`;
     };
 
-    const _emptyState = (icon, title, sub) => {
-        return `<div class="empty-state">
-            <span class="empty-state__icon">${icon}</span>
-            <p class="empty-state__title">${_esc(title)}</p>
-            <p class="empty-state__sub">${_esc(sub)}</p>
-        </div>`;
-    };
-
     /* ---------- Init confirm dialog ---------- */
     _setupConfirm();
 
@@ -531,7 +454,7 @@ const AdminUI = (() => {
         switchPage,
         updateSocketStatus,
         renderStats, renderRecentOrders,
-        renderOrderCards, prependOrderCard, updateOrderCard,
+        renderOrderCards, prependOrderCard,
         renderHistoryTable, renderPagination,
         renderMenuItems,
         drawBarChart, renderTopItems,

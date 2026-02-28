@@ -10,10 +10,8 @@ const AdminAPI = (() => {
 
     /* ---------- Config ---------- */
     const BASE_URL = window.location.hostname === 'localhost'
-        ? 'https://anand-os-backend.onrender.com/api'
+        ? 'http://localhost:10000/api'
         : 'https://anand-os-backend.onrender.com/api';
-
-    console.log('[AdminAPI] Using base:', BASE_URL);
 
     const COLD_START_RETRY_DELAY = 2000;
     let _serverAwake = false;
@@ -25,7 +23,6 @@ const AdminAPI = (() => {
             ...(options.headers || {}),
         };
 
-        debug('API Request', { method: options.method || 'GET', url: `${BASE_URL}${endpoint}`, body: options.body ? JSON.parse(options.body) : undefined });
         const res = await fetch(`${BASE_URL}${endpoint}`, {
             ...options,
             headers,
@@ -33,7 +30,6 @@ const AdminAPI = (() => {
 
         if (!res.ok) {
             const body = await res.json().catch(() => ({}));
-            debug('API Error', { status: res.status, body });
             if (res.status >= 500) throw new Error('Server waking up… please try again.');
             if (res.status === 401) throw new Error('Admin authentication required.');
             throw new Error(body.message || `HTTP ${res.status}`);
@@ -41,10 +37,7 @@ const AdminAPI = (() => {
 
         _serverAwake = true;
         if (res.status === 204) return null;
-        const data = await res.json();
-        debug('API Response Status', res.status);
-        debug('API Response Body', data);
-        return data;
+        return await res.json();
     };
 
     const _fetch = async (endpoint, options = {}) => {
@@ -94,11 +87,6 @@ const AdminAPI = (() => {
             body: JSON.stringify({ status }),
         });
 
-    const deleteOrder = (orderId) =>
-        _fetch(`/restaurant/orders/${orderId}`, {
-            method: 'DELETE',
-        });
-
     /* ---------- Menu ---------- */
     const getMenu = () => _fetch('/restaurant/menu');
 
@@ -114,7 +102,7 @@ const AdminAPI = (() => {
     /* ---------- Public surface ---------- */
     return Object.freeze({
         getStats, getOrders, getRecentOrders, getTodayOrders,
-        updateOrderStatus, deleteOrder,
+        updateOrderStatus,
         getMenu, updateMenuItem,
         getAnalytics,
     });

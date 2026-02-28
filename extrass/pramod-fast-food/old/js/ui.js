@@ -32,20 +32,6 @@ const UI = (() => {
         if (totalEl) totalEl.textContent = items.length;
         if (specialsEl) specialsEl.textContent = specials;
         if (avgEl) avgEl.textContent = `₹${avg}`;
-
-        // Live indicator
-        const indicator = $('#liveIndicator');
-        if (indicator && typeof MenuData.isLive === 'function') {
-            if (MenuData.isLive()) {
-                indicator.innerHTML = '<span class="live-dot"></span> Live';
-                indicator.classList.add('live-indicator--on');
-                indicator.classList.remove('live-indicator--off');
-            } else {
-                indicator.innerHTML = '<span class="live-dot"></span> Offline';
-                indicator.classList.remove('live-indicator--on');
-                indicator.classList.add('live-indicator--off');
-            }
-        }
     };
 
     /* ====================================================================
@@ -80,8 +66,8 @@ const UI = (() => {
     };
 
     const _cartButton = (item, label, value) => {
-        const q = Cart.qty(item._id, label);
-        const key = `${item._id}-${label}`;
+        const q = Cart.qty(item.id, label);
+        const key = `${item.id}-${label}`;
         const prev = _prevQty.get(key) || 0;
         const morphClass = q > 0 && prev === 0 ? ' cart-ctrl--morph' : '';
 
@@ -89,17 +75,17 @@ const UI = (() => {
             return `
                 <div class="cart-ctrl cart-ctrl--empty${morphClass}">
                     <button class="add-btn" data-action="cart-add"
-                        data-id="${item._id}" data-size="${label}" data-price="${value}">+ Add</button>
+                        data-id="${item.id}" data-size="${label}" data-price="${value}">+ Add</button>
                 </div>`;
         }
         return `
             <div class="cart-ctrl cart-ctrl--qty${morphClass}">
                 <div class="qty-ctrl">
                     <button class="qty-btn" data-action="cart-dec"
-                        data-id="${item._id}" data-size="${label}" data-price="${value}" aria-label="Decrease">−</button>
+                        data-id="${item.id}" data-size="${label}" data-price="${value}" aria-label="Decrease">−</button>
                     <span class="qty-val" aria-live="polite">${q}</span>
                     <button class="qty-btn" data-action="cart-inc"
-                        data-id="${item._id}" data-size="${label}" data-price="${value}" aria-label="Increase">+</button>
+                        data-id="${item.id}" data-size="${label}" data-price="${value}" aria-label="Increase">+</button>
                 </div>
             </div>`;
     };
@@ -109,7 +95,6 @@ const UI = (() => {
         const category = State.get('category');
         const search   = State.get('search');
         const filter   = State.get('filter');
-        debug('Rendering Menu', { category, search, filter });
 
         const cats = category === 'all' ? MenuData.keys() : [category];
         let html = '';
@@ -185,7 +170,7 @@ const UI = (() => {
         _prevQty.clear();
         MenuData.allItems().forEach(item => {
             item.prices.forEach(p => {
-                _prevQty.set(`${item._id}-${p.label}`, Cart.qty(item._id, p.label));
+                _prevQty.set(`${item.id}-${p.label}`, Cart.qty(item.id, p.label));
             });
         });
     };
@@ -211,15 +196,19 @@ const UI = (() => {
        CART MODAL
     ==================================================================== */
 
-    /** Pick 2 random menu items not currently in cart */
+    /** Pick up to 6 random menu items not currently in cart, render as collapsible dropdown */
     const _renderSuggestions = () => {
-        const cartIds = new Set(Cart.snapshot().map(i => i.itemId));
-        const available = MenuData.allItems().filter(i => !cartIds.has(i._id));
+        const cartIds = new Set(Cart.snapshot().map(i => i.id));
+        const available = MenuData.allItems().filter(i => !cartIds.has(i.id));
         if (!available.length) return '';
-        const picks = available.sort(() => Math.random() - 0.5).slice(0, 2);
+        const picks = available.sort(() => Math.random() - 0.5).slice(0, 6);
         return `
         <div class="cart-suggestions">
-            <p class="cart-suggestions__title">You may also like</p>
+            <button class="cart-suggestions__toggle" data-action="toggle-suggestions" aria-expanded="false">
+                <span class="cart-suggestions__title">✨ Add more items</span>
+                <span class="cart-suggestions__count">${available.length} available</span>
+                <span class="cart-suggestions__chevron">▾</span>
+            </button>
             <div class="cart-suggestions__list">
                 ${picks.map(item => {
                     const p = item.prices[0];
@@ -227,10 +216,10 @@ const UI = (() => {
                     <div class="suggest-card">
                         <div class="suggest-card__info">
                             <span class="suggest-card__name">${item.name}</span>
-                            <span class="suggest-card__price">₹${p.value}</span>
+                            <span class="suggest-card__meta">${p.label} • ₹${p.value}</span>
                         </div>
                         <button class="suggest-card__add" data-action="suggest-add"
-                            data-id="${item._id}" data-size="${p.label}" data-price="${p.value}">+ Add</button>
+                            data-id="${item.id}" data-size="${p.label}" data-price="${p.value}">+ Add</button>
                     </div>`;
                 }).join('')}
             </div>
@@ -244,32 +233,27 @@ const UI = (() => {
 
         /* --- Checkout FORM step --- */
         if (_checkoutStep === 'form') {
-            debug('Checkout Step', 'form');
             if (titleEl) titleEl.innerHTML = '<span class="cart-modal__title-icon">📋</span> Details';
             _renderCheckoutForm(listEl, footerEl);
             return;
         }
         /* --- Order SUMMARY step --- */
         if (_checkoutStep === 'summary') {
-            debug('Checkout Step', 'summary');
             if (titleEl) titleEl.innerHTML = '<span class="cart-modal__title-icon">📦</span> Summary';
             _renderOrderSummary(listEl, footerEl);
             return;
         }
 
         /* --- Default CART step --- */
-        debug('Rendering Cart Modal', Cart.snapshot());
         if (titleEl) titleEl.innerHTML = '<span class="cart-modal__title-icon">🛒</span> Your Cart';
         const items = Cart.snapshot();
 
         if (!items.length) {
-            const hasLastOrder = (typeof Customer !== 'undefined') && Customer.getLastOrder();
             listEl.innerHTML = `
                 <div class="empty-cart">
                     <span class="empty-cart__icon">🛒</span>
                     <p class="empty-cart__title">Your cart is empty</p>
                     <p class="empty-cart__hint">Add items from the menu to get started</p>
-                    ${hasLastOrder ? '<button class="repeat-order-btn" data-action="repeat-order">🔁 Repeat Last Order</button>' : ''}
                 </div>`;
             footerEl.hidden = true;
             return;
@@ -285,10 +269,10 @@ const UI = (() => {
                 </div>
                 <div class="cart-row__controls">
                     <button class="cart-row__btn" data-action="cart-modal-dec"
-                        data-id="${i.itemId}" data-size="${i.size}" data-price="${i.price}" aria-label="Decrease">−</button>
+                        data-id="${i.id}" data-size="${i.size}" data-price="${i.price}" aria-label="Decrease">−</button>
                     <span class="cart-row__qty">${i.quantity}</span>
                     <button class="cart-row__btn" data-action="cart-modal-inc"
-                        data-id="${i.itemId}" data-size="${i.size}" data-price="${i.price}" aria-label="Increase">+</button>
+                        data-id="${i.id}" data-size="${i.size}" data-price="${i.price}" aria-label="Increase">+</button>
                 </div>
                 <span class="cart-row__price">₹${i.price * i.quantity}</span>
             </div>`).join('');
@@ -299,21 +283,12 @@ const UI = (() => {
         footerEl.hidden = false;
         footerEl.innerHTML = `
             <div class="cart-total"><span>Total</span><span class="cart-total__val" id="cartTotal">₹${Cart.total()}</span></div>
-            <button class="checkout-btn" id="checkoutBtn" data-action="checkout-start">� Place Order</button>`;
+            <button class="checkout-btn" id="checkoutBtn" data-action="checkout-start">💬 Place Order via WhatsApp</button>`;
     };
 
     /* ---------- Checkout Form ---------- */
     const _renderCheckoutForm = (listEl, footerEl) => {
-        /* Auto-prefill from saved customer data if form fields are empty */
-        const saved = (typeof Customer !== 'undefined') ? Customer.getProfile() : null;
-        const ci = {
-            name: _customerInfo.name || saved?.name || '',
-            phone: _customerInfo.phone || saved?.phone || '',
-            orderType: _customerInfo.orderType || '',
-            persons: _customerInfo.persons || '',
-            table: _customerInfo.table || '',
-            note: _customerInfo.note || '',
-        };
+        const ci = _customerInfo;
         listEl.innerHTML = `
         <div class="checkout-form">
             <div class="form-group">
@@ -394,15 +369,11 @@ const UI = (() => {
 
         listEl.innerHTML = html;
         footerEl.hidden = false;
-
-        const connected = window.__BACKEND_CONNECTED__;
         footerEl.innerHTML = `
             <div class="checkout-nav">
                 <button class="checkout-back-btn" data-action="checkout-back-form">← Edit</button>
-                <button class="checkout-confirm-btn checkout-confirm-btn--primary" data-action="checkout-confirm">✅ Place Order</button>
-                ${!connected ? '<button class="checkout-confirm-btn checkout-confirm-btn--wa" data-action="checkout-wa">💬 Place Order via WhatsApp</button>' : ''}
-            </div>
-            ${!connected ? '<p class="checkout-server-hint">⚠️ Server may be waking up — WhatsApp is available as backup</p>' : ''}`;
+                <button class="checkout-confirm-btn" data-action="checkout-confirm">💬 Confirm & Send</button>
+            </div>`;
     };
 
     /* ---------- Checkout Step Manager ---------- */
@@ -463,179 +434,26 @@ const UI = (() => {
     };
 
     /* ====================================================================
-       GREETING BAR
+       LOYALTY BAR (frontend-ready placeholder)
     ==================================================================== */
-    const renderGreeting = () => {
-        const bar = $('#greetingBar');
-        if (!bar) return;
-        const name = Customer.getName() || '';
-        const loyalty = Customer.getLoyaltyData();
-
-        if (!name && !loyalty) {
-            bar.hidden = true;
-            return;
-        }
-
-        bar.hidden = false;
-        const hi = $('#greetingHi');
-        const sub = $('#greetingSub');
-        const dot = $('#orderDot');
-
-        const displayName = name || loyalty?.name || 'Guest';
-        const hour = new Date().getHours();
-        const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
-
-        if (hi) hi.textContent = `${greeting}, ${displayName}! 👋`;
-        if (sub) {
-            const pts = loyalty?.points || 0;
-            const orders = loyalty?.orders || 0;
-            sub.textContent = pts > 0 ? `⭐ ${pts} pts · 🏅 ${orders} orders` : 'Ready to order something delicious?';
-        }
-        if (dot) {
-            dot.classList.toggle('greeting__order-dot--active', Customer.hasActiveOrders());
-        }
-    };
-
-    /* ====================================================================
-       HERO AUTH BUTTON (Sign Up / Profile)
-    ==================================================================== */
-    const renderAuthButton = () => {
-        const btn = $('#heroAuthBtn');
-        if (!btn) return;
-        const name = Customer.getName();
-        if (name) {
-            /* Signed-up: show profile icon with initial */
-            const initial = name.charAt(0).toUpperCase();
-            btn.className = 'hero__auth hero__auth--profile';
-            btn.innerHTML = `<span class="hero__auth-avatar">${initial}</span>`;
-            btn.setAttribute('aria-label', name);
-            btn.title = name;
-        } else {
-            /* Not signed up */
-            btn.className = 'hero__auth';
-            btn.innerHTML = '✏️ Sign Up';
-            btn.setAttribute('aria-label', 'Sign Up');
-            btn.title = '';
-        }
-    };
-
-    /* ====================================================================
-       THEME TOGGLE
-    ==================================================================== */
-    const renderThemeToggle = () => {
-        const btn = $('#themeToggle');
-        if (!btn) return;
-        const theme = Customer.getTheme();
-        btn.textContent = theme === 'dark' ? '☀️' : '🌙';
-        btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
-    };
-
-    /* ====================================================================
-       ORDERS PANEL
-    ==================================================================== */
-    const _buildTimeline = (status) => {
-        const steps = [
-            { key: 'PENDING',   label: 'Placed',   icon: '⏳' },
-            { key: 'PREPARING', label: 'Preparing', icon: '🔥' },
-            { key: 'COMPLETED', label: 'Ready',     icon: '✅' },
-        ];
-        const statusOrder = { PENDING: 0, PREPARING: 1, COMPLETED: 2, CANCELLED: -1 };
-        const current = statusOrder[status] ?? -1;
-
-        let html = '';
-        steps.forEach((step, i) => {
-            const stepIdx = statusOrder[step.key];
-            const isDone = current > stepIdx;
-            const isActive = current === stepIdx;
-            const dotClass = isDone ? 'order-timeline__dot--done' : isActive ? 'order-timeline__dot--active' : '';
-            const labelClass = isDone ? 'order-timeline__label--done' : isActive ? 'order-timeline__label--active' : '';
-
-            html += `<div class="order-timeline__step">
-                <div class="order-timeline__dot ${dotClass}">${isDone ? '✓' : isActive ? step.icon : ''}</div>
-                <span class="order-timeline__label ${labelClass}">${step.label}</span>
-            </div>`;
-
-            if (i < steps.length - 1) {
-                const lineClass = isDone ? 'order-timeline__line--done' : isActive ? 'order-timeline__line--active' : '';
-                html += `<div class="order-timeline__line ${lineClass}"></div>`;
-            }
-        });
-
-        return `<div class="order-timeline">${html}</div>`;
-    };
-
-    const _formatOrderDate = (dateStr) => {
-        if (!dateStr) return '';
-        const d = new Date(dateStr);
-        const now = new Date();
-        const diffMs = now - d;
-        const diffMin = Math.floor(diffMs / 60000);
-        if (diffMin < 1) return 'Just now';
-        if (diffMin < 60) return `${diffMin}m ago`;
-        const diffHr = Math.floor(diffMin / 60);
-        if (diffHr < 24) return `${diffHr}h ago`;
-        const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-        return `${d.getDate()} ${M[d.getMonth()]}, ${d.getHours() % 12 || 12}:${String(d.getMinutes()).padStart(2,'0')} ${d.getHours() >= 12 ? 'PM' : 'AM'}`;
-    };
-
-    const renderOrdersPanel = () => {
-        const body = $('#ordersList');
-        if (!body) return;
-
-        const orders = Customer.getOrders();
-
-        if (!orders.length) {
-            body.innerHTML = `
-                <div class="orders-panel__empty">
-                    <span class="orders-panel__empty-icon">📦</span>
-                    <p class="orders-panel__empty-text">No orders yet</p>
-                    <p class="orders-panel__empty-hint">Your order history will appear here</p>
+    const renderLoyaltyBar = (user) => {
+        const el = $('#loyaltyBar');
+        if (!el) return;
+        if (user) {
+            el.innerHTML = `
+                <span class="loyalty__user">Hi, ${user.name}!</span>
+                <div class="loyalty__stats">
+                    <span class="loyalty__stat">⭐ ${user.points || 0} pts</span>
+                    <span class="loyalty__stat">🏅 ${user.orders || 0} orders</span>
                 </div>`;
-            return;
+        } else {
+            el.innerHTML = `
+                <button class="loyalty__login" id="googleLoginBtn">🎁 Sign in for rewards</button>
+                <div class="loyalty__stats">
+                    <span class="loyalty__stat">⭐ 0 pts</span>
+                    <span class="loyalty__stat">🏅 0 orders</span>
+                </div>`;
         }
-
-        body.innerHTML = orders.map(order => {
-            const statusKey = (order.status || 'PENDING').toUpperCase();
-            const isCancelled = statusKey === 'CANCELLED';
-            const isCompleted = statusKey === 'COMPLETED';
-            const items = order.items || [];
-
-            let itemsHtml = items.slice(0, 4).map(i =>
-                `<div class="order-card__item">
-                    <span class="order-card__item-name">${i.name || 'Item'}</span>
-                    <span class="order-card__item-qty">${i.size ? i.size + ' × ' : ''}${i.quantity || 1}</span>
-                </div>`
-            ).join('');
-            if (items.length > 4) itemsHtml += `<div class="order-card__item"><span class="order-card__item-name" style="color:var(--c-text-lighter)">+${items.length - 4} more</span><span></span></div>`;
-
-            return `
-            <div class="order-card" data-order-id="${order.orderId || ''}">
-                <div class="order-card__head">
-                    <span class="order-card__id">${order.orderId || '—'}</span>
-                    <span class="order-card__date">${_formatOrderDate(order.date)}</span>
-                </div>
-                <span class="order-card__status order-card__status--${statusKey.toLowerCase()}">${statusKey}</span>
-                ${!isCancelled ? _buildTimeline(statusKey) : ''}
-                <div class="order-card__items">${itemsHtml}</div>
-                <div class="order-card__foot">
-                    <span class="order-card__total">₹${order.total || 0}</span>
-                    ${isCompleted ? `<button class="order-card__reorder" data-action="panel-reorder" data-order-id="${order.orderId}">🔁 Reorder</button>` : ''}
-                </div>
-            </div>`;
-        }).join('');
-    };
-
-    const toggleOrdersPanel = (force) => {
-        const panel = $('#ordersPanel');
-        const overlay = $('#ordersOverlay');
-        if (!panel || !overlay) return;
-
-        const open = force !== undefined ? force : !panel.classList.contains('orders-panel--visible');
-        panel.classList.toggle('orders-panel--visible', open);
-        overlay.classList.toggle('orders-overlay--visible', open);
-        document.body.style.overflow = open ? 'hidden' : '';
-
-        if (open) renderOrdersPanel();
     };
 
     /* ---------- Public surface ---------- */
@@ -645,10 +463,6 @@ const UI = (() => {
         renderCartBadge, renderCartModal, toggleCart,
         showToast, setActiveTab, setActiveChip,
         setCheckoutStep, getCheckoutStep, setCustomerInfo, getCustomerInfo,
-        renderAuthButton,
-        renderGreeting,
-        renderThemeToggle,
-        renderOrdersPanel,
-        toggleOrdersPanel,
+        renderLoyaltyBar,
     });
 })();

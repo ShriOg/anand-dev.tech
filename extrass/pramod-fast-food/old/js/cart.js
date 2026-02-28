@@ -10,7 +10,7 @@
 'use strict';
 
 const Cart = (() => {
-    /** @type {Object.<string, {itemId:string, name:string, size:string, price:number, quantity:number}>} */
+    /** @type {Object.<string, {id:number, name:string, size:string, price:number, quantity:number}>} */
     const _items = {};
 
     const _key = (id, size) => `${id}-${size}`;
@@ -22,7 +22,6 @@ const Cart = (() => {
     /* ---------- Public API ---------- */
 
     const add = (itemId, size, price) => {
-        debug('Cart Add', { itemId, size, price });
         const item = MenuData.findById(itemId);
         if (!item) return;
         const key = _key(itemId, size);
@@ -30,13 +29,12 @@ const Cart = (() => {
         if (_items[key]) {
             _items[key].quantity += 1;
         } else {
-            _items[key] = { itemId: String(itemId), name: item.name, size, price, quantity: 1 };
+            _items[key] = { id: itemId, name: item.name, size, price, quantity: 1 };
         }
         _emit();
     };
 
     const update = (itemId, size, price, delta) => {
-        debug('Cart Update', { itemId, size, delta });
         const key = _key(itemId, size);
         if (!_items[key]) {
             if (delta > 0) add(itemId, size, price);
@@ -48,13 +46,11 @@ const Cart = (() => {
     };
 
     const remove = (itemId, size) => {
-        debug('Cart Remove', { itemId, size });
         delete _items[_key(itemId, size)];
         _emit();
     };
 
     const clear = () => {
-        debug('Cart Cleared');
         Object.keys(_items).forEach(k => delete _items[k]);
         _emit();
     };
@@ -126,93 +122,23 @@ const Cart = (() => {
         return `https://wa.me/918595928413?text=${encodeURIComponent(msg)}`;
     };
 
-    /** Map frontend order types to backend enum values */
-    const _mapOrderType = (type) => {
-        if (type === 'Dine-In') return 'DINE_IN';
-        if (type === 'Takeaway') return 'TAKEAWAY';
-        return type;
-    };
-
     /**
-     * Submit order to backend API.
+     * Submit order — pure frontend WhatsApp checkout.
+     * Generates a local order ID and builds the WhatsApp URL.
      * Does NOT clear the cart — caller clears only on success.
-     * Does NOT build WhatsApp URL on success — backend handles the order.
      *
      * @param {object} info — { name, phone, orderType, persons?, table?, note? }
-     * @returns {Promise<{ok:boolean, orderId?:string, total?:number, source:string, error?:string}>}
+     * @returns {{ok:boolean, url?:string, orderId?:string, total?:number, error?:string}}
      */
-    const submitOrder = async (info) => {
-        debug('Submitting Order', info);
+    const submitOrder = (info) => {
         const items = snapshot();
-        if (!items.length) return { ok: false, error: 'Cart is empty', source: 'none' };
+        if (!items.length) return { ok: false, error: 'Cart is empty' };
 
-        const payload = {
-            customerName: info.name,
-            phone: info.phone,
-            orderType: _mapOrderType(info.orderType),
-            items: items.map(i => ({ itemId: i.itemId, size: i.size, quantity: i.quantity })),
-        };
-        if (info.orderType === 'Dine-In') {
-            if (info.persons) payload.persons = Number(info.persons);
-            if (info.table) payload.tableNumber = info.table;
-        }
-        if (info.note) payload.note = info.note;
-
-        debug('Final Payload', payload);
-        console.log("Submitting Items:", payload.items);
-
-        // Try backend
-        if (typeof Api !== 'undefined') {
-            try {
-                const res = await Api.placeOrder(payload);
-                const isSuccess = res?.success ?? res?.ok;
-                console.log('[Cart] placeOrder response:', { isSuccess, hasData: !!res?.data, res });
-                debug('Order API Result', res);
-
-                if (isSuccess && res.data) {
-                    window.__BACKEND_CONNECTED__ = true;
-                    const d = res.data;
-                    const backendOrderId = d.orderId || d._id || generateOrderId();
-                    const backendTotal = d.total != null ? d.total : total();
-                    debug('Order Success', res.data);
-                    return { ok: true, orderId: backendOrderId, total: backendTotal, source: 'server' };
-                }
-
-                // HTTP succeeded but backend returned failure
-                console.warn('[Cart] Backend returned non-success:', res);
-                debug('Order Failed', res);
-            } catch (err) {
-                console.warn('[Cart] API order failed:', err.message);
-                debug('Fatal Error', err);
-                console.error(err);
-            }
-
-            // Backend failed or returned error
-            window.__BACKEND_CONNECTED__ = false;
-            return {
-                ok: false,
-                error: 'Server temporarily unavailable',
-                source: 'server-down',
-            };
-        }
-
-        // No API module — caller should use sendViaWhatsApp()
-        return { ok: false, error: 'No API available', source: 'no-api' };
-    };
-
-    /**
-     * Build WhatsApp checkout URL and return it.
-     * Used as fallback when backend is down.
-     *
-     * @param {object} info — { name, phone, orderType, persons?, table?, note? }
-     * @returns {{url:string, orderId:string, total:number}}
-     */
-    const sendViaWhatsApp = (info) => {
         const orderId = generateOrderId();
         const orderTotal = total();
         const url = buildCheckoutMessage(info, { orderId, total: orderTotal });
-        return { url, orderId, total: orderTotal };
+        return { ok: true, url, orderId, total: orderTotal };
     };
 
-    return Object.freeze({ add, update, remove, clear, qty, count, total, snapshot, checkoutURL, buildCheckoutMessage, submitOrder, sendViaWhatsApp });
+    return Object.freeze({ add, update, remove, clear, qty, count, total, snapshot, checkoutURL, buildCheckoutMessage, submitOrder });
 })();
