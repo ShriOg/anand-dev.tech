@@ -218,7 +218,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.3.1675466862/camera_utils.min.js"></script>
 
     <script>
-        // ========== CONFIGURATION ==========
+
         const CONFIG = {
             PARTICLE_COUNT: 8000,
             MORPH_SPEED: 0.03,
@@ -231,7 +231,6 @@
             MAX_SCALE: 6
         };
 
-        // ========== GLOBAL STATE ==========
         const state = {
             currentShape: 'sphere',
             targetPositions: null,
@@ -250,7 +249,6 @@
             time: 0
         };
 
-        // ========== THREE.JS SETUP ==========
         let scene, camera, renderer, particles, particleGeometry;
         let positions, colors, targetColors;
 
@@ -274,7 +272,7 @@
 
         function createParticles() {
             particleGeometry = new THREE.BufferGeometry();
-            
+
             positions = new Float32Array(CONFIG.PARTICLE_COUNT * 3);
             colors = new Float32Array(CONFIG.PARTICLE_COUNT * 3);
             targetColors = new Float32Array(CONFIG.PARTICLE_COUNT * 3);
@@ -284,7 +282,7 @@
                 positions[i] = (Math.random() - 0.5) * 10;
                 positions[i + 1] = (Math.random() - 0.5) * 10;
                 positions[i + 2] = (Math.random() - 0.5) * 10;
-                
+
                 colors[i] = 0;
                 colors[i + 1] = 1;
                 colors[i + 2] = 1;
@@ -306,7 +304,6 @@
             scene.add(particles);
         }
 
-        // ========== SHAPE GENERATORS ==========
         const ShapeGenerators = {
             sphere: (i, total) => {
                 const phi = Math.acos(-1 + (2 * i) / total);
@@ -367,15 +364,15 @@
                 const burstIndex = i % bursts;
                 const particlesPerBurst = Math.floor(total / bursts);
                 const localIndex = Math.floor(i / bursts);
-                
+
                 const centerX = (burstIndex - 2) * 2;
                 const centerY = Math.sin(burstIndex * 1.5) * 1.5;
                 const centerZ = Math.cos(burstIndex * 1.2) * 0.5;
-                
+
                 const phi = Math.acos(-1 + (2 * localIndex) / particlesPerBurst);
                 const theta = Math.sqrt(particlesPerBurst * Math.PI) * phi;
                 const radius = 0.8 + Math.random() * 0.8;
-                
+
                 return {
                     x: centerX + radius * Math.cos(theta) * Math.sin(phi),
                     y: centerY + radius * Math.sin(theta) * Math.sin(phi),
@@ -406,12 +403,11 @@
             });
         }
 
-        // ========== MEDIAPIPE HANDS SETUP ==========
         let hands, webcamCamera;
 
         async function initMediaPipe() {
             const videoElement = document.getElementById('webcam');
-            
+
             hands = new Hands({
                 locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/${file}`
             });
@@ -446,19 +442,17 @@
                 state.gestureData.isHandDetected = true;
                 document.getElementById('hand-status').classList.add('active');
 
-                // Index finger tip (landmark 8)
                 const indexTip = landmarks[8];
                 state.gestureData.position.x = (indexTip.x - 0.5) * 10;
                 state.gestureData.position.y = -(indexTip.y - 0.5) * 10;
 
-                // Pinch detection (thumb tip - landmark 4, index tip - landmark 8)
                 const thumbTip = landmarks[4];
                 const pinchDist = Math.sqrt(
                     Math.pow(thumbTip.x - indexTip.x, 2) +
                     Math.pow(thumbTip.y - indexTip.y, 2) +
                     Math.pow(thumbTip.z - indexTip.z, 2)
                 );
-                
+
                 state.gestureData.pinchDistance = pinchDist;
                 const pinchScale = THREE.MathUtils.mapLinear(
                     pinchDist, 0.02, 0.2,
@@ -466,7 +460,6 @@
                 );
                 state.gestureData.scale = THREE.MathUtils.clamp(pinchScale, CONFIG.MIN_SCALE, CONFIG.MAX_SCALE);
 
-                // Hand horizontal position for hue
                 const wrist = landmarks[0];
                 state.gestureData.hue = wrist.x;
 
@@ -476,7 +469,6 @@
             }
         }
 
-        // ========== ANIMATION LOOP ==========
         function smoothGestureData() {
             const s = CONFIG.GESTURE_SMOOTHING;
             state.smoothedGesture.position.x += (state.gestureData.position.x - state.smoothedGesture.position.x) * s;
@@ -493,22 +485,18 @@
             for (let i = 0; i < CONFIG.PARTICLE_COUNT; i++) {
                 const idx = i * 3;
 
-                // Smooth morphing to target positions
                 const targetX = state.targetPositions[idx];
                 const targetY = state.targetPositions[idx + 1];
                 const targetZ = state.targetPositions[idx + 2];
 
-                // Add noise
                 const noiseX = Math.sin(time * 0.5 + i * 0.01) * CONFIG.NOISE_AMPLITUDE;
                 const noiseY = Math.cos(time * 0.3 + i * 0.02) * CONFIG.NOISE_AMPLITUDE;
                 const noiseZ = Math.sin(time * 0.4 + i * 0.015) * CONFIG.NOISE_AMPLITUDE;
 
-                // Lerp positions
                 posAttr.array[idx] += ((targetX + noiseX) * state.smoothedGesture.scale - posAttr.array[idx]) * CONFIG.MORPH_SPEED;
                 posAttr.array[idx + 1] += ((targetY + noiseY) * state.smoothedGesture.scale - posAttr.array[idx + 1]) * CONFIG.MORPH_SPEED;
                 posAttr.array[idx + 2] += ((targetZ + noiseZ) * state.smoothedGesture.scale - posAttr.array[idx + 2]) * CONFIG.MORPH_SPEED;
 
-                // Update colors based on hue
                 const hue = (state.smoothedGesture.hue + i / CONFIG.PARTICLE_COUNT * 0.2) % 1;
                 const color = new THREE.Color().setHSL(hue, 0.9, 0.6);
                 colAttr.array[idx] = color.r;
@@ -519,7 +507,6 @@
             posAttr.needsUpdate = true;
             colAttr.needsUpdate = true;
 
-            // Apply gesture-based position offset
             if (state.gestureData.isHandDetected) {
                 particles.position.x += (state.smoothedGesture.position.x * 0.5 - particles.position.x) * 0.05;
                 particles.position.y += (state.smoothedGesture.position.y * 0.5 - particles.position.y) * 0.05;
@@ -528,19 +515,18 @@
                 particles.position.y += (0 - particles.position.y) * 0.02;
             }
 
-            // Subtle rotation
             particles.rotation.y += CONFIG.ROTATION_SPEED;
             particles.rotation.x = Math.sin(time * 0.1) * 0.1;
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            
+
             state.time += 0.016;
-            
+
             smoothGestureData();
             updateParticles();
-            
+
             renderer.render(scene, camera);
         }
 
@@ -550,7 +536,6 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        // ========== UI EVENT HANDLERS ==========
         function initUI() {
             document.querySelectorAll('.shape-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -559,14 +544,13 @@
             });
         }
 
-        // ========== INITIALIZATION ==========
         async function init() {
             initThree();
             initUI();
             await initMediaPipe();
-            
+
             document.getElementById('loading').classList.add('hidden');
-            
+
             animate();
         }
 

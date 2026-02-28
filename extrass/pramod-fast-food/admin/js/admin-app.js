@@ -1,17 +1,8 @@
-/**
- * admin-app.js — Orchestrator: wires auth → events → API → UI.
- *
- * Single DOMContentLoaded entry point.
- * All interactions via event delegation on stable containers.
- */
 'use strict';
 console.log('[Admin] admin-app.js loaded');
 
-/* ====================================================================
-   ADMIN PWA — Service Worker Registration & Install Prompt
-==================================================================== */
 (function adminPWA() {
-    // Register admin-scoped service worker
+
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker
             .register('/extrass/pramod-fast-food/admin/sw.js', {
@@ -21,7 +12,6 @@ console.log('[Admin] admin-app.js loaded');
             .catch(err => console.error('[Admin] SW registration failed', err));
     }
 
-    // Capture install prompt
     let deferredPrompt;
 
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -55,7 +45,6 @@ console.log('[Admin] admin-app.js loaded');
 document.addEventListener('DOMContentLoaded', () => {
     console.log('[Admin] DOMContentLoaded fired');
 
-    /* Guard: ensure dependent modules loaded */
     if (typeof AdminUI === 'undefined') {
         console.error('[Admin] FATAL: AdminUI not loaded — check script order in HTML.');
         return;
@@ -71,34 +60,30 @@ document.addEventListener('DOMContentLoaded', () => {
             renderMenuItems, drawBarChart, renderTopItems, playNotifSound, animateCounter,
             exportOrdersCSV } = AdminUI;
 
-    /* ==========  STATE  ========== */
     let currentPage = 'dashboard';
     let liveOrders = [];
     let historyPage = 1;
     let historyTotal = 1;
-    let allHistoryOrders = [];  /* cached for CSV export */
+    let allHistoryOrders = [];
     let menuItems = [];
     let menuCategories = [];
     let pendingCount = 0;
     let statsRefreshTimer = null;
 
-    /* ==========  PASSWORD GATE  ========== */
     const HASH = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
     const GATE_KEY = 'adminUnlocked';
 
-    /** SHA-256 hash via Web Crypto API (with fallback for non-HTTPS) */
     async function sha256(text) {
-        // crypto.subtle requires secure context (HTTPS or localhost)
+
         if (crypto.subtle) {
             const encoded = new TextEncoder().encode(text);
             const buffer = await crypto.subtle.digest('SHA-256', encoded);
             return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
-        // Fallback: simple JS SHA-256 for non-secure contexts
+
         return _sha256Fallback(text);
     }
 
-    /** Pure-JS SHA-256 fallback (no external deps) */
     function _sha256Fallback(str) {
         const K = [
             0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
@@ -159,7 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
         sidebar.hidden = false;
     }
 
-    /* Check session first */
     if (sessionStorage.getItem(GATE_KEY)) {
         hideGate();
         try { init(); } catch (err) { console.error('[Admin] Boot failed (session restore):', err); }
@@ -167,7 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showGate();
     }
 
-    /* Gate form submission */
     $('#gateForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const input = $('#gatePassword');
@@ -181,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.textContent = 'Verifying…';
 
         const hash = await sha256(pw);
-        console.log('[gate] hash:', hash); /* debug: remove later */
+        console.log('[gate] hash:', hash);
 
         if (hash === HASH) {
             sessionStorage.setItem(GATE_KEY, '1');
@@ -194,14 +177,13 @@ document.addEventListener('DOMContentLoaded', () => {
             input.value = '';
             input.focus();
             input.classList.remove('gate__input--shake');
-            void input.offsetWidth; /* reflow to re-trigger */
+            void input.offsetWidth;
             input.classList.add('gate__input--shake');
             btn.disabled = false;
             btn.textContent = 'Unlock →';
         }
     });
 
-    /* Show/hide password toggle */
     $('#togglePw')?.addEventListener('click', () => {
         const input = $('#gatePassword');
         const btn = $('#togglePw');
@@ -217,12 +199,10 @@ document.addEventListener('DOMContentLoaded', () => {
         input.focus();
     });
 
-    /* ==========  INIT  ========== */
     function init() {
         console.log('[Admin] init() — booting admin panel…');
         debug('Admin Booted');
 
-        /* Global error safety net — catch silent failures and show toast */
         window.addEventListener('error', (e) => {
             console.error('[Admin] Uncaught error:', e.error || e.message);
             showToast('Something went wrong — check console', 'error');
@@ -232,14 +212,12 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Async error — check console', 'error');
         });
 
-        /* Global click debugger — logs every interactive click (capture phase) */
         document.addEventListener('click', (e) => {
             const el = e.target.closest('button, select, [data-action], [data-page], [data-goto], .toggle, .tool-btn');
             if (!el) return;
             debug('Click', { tag: el.tagName, id: el.id || undefined, classes: (el.className || '').split?.(' ')?.[0], ...el.dataset });
         }, true);
 
-        /* Topbar scroll shadow */
         const pageContainer = $('#pageContainer');
         const topbar = document.querySelector('.topbar');
         if (pageContainer && topbar) {
@@ -248,32 +226,27 @@ document.addEventListener('DOMContentLoaded', () => {
             }, { passive: true });
         }
 
-        /* Request Web Notification permission (admin gets order alerts) */
         if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
             Notification.requestPermission().catch(() => {});
         }
 
         try {
-            /* Connect realtime */
+
             AdminSocket.connect();
             console.log('[Admin] ✓ Socket initialised');
         } catch (err) {
             console.error('[Admin] ✗ Socket connect failed:', err);
         }
 
-        /* Cold-start listener */
         document.addEventListener('admin:cold-start', () => {
             showToast('⏳ Server waking up — hang tight…', 'info');
             _showWakingBanner(true);
         });
 
-        /* Load initial data */
         loadDashboard();
 
-        /* Auto-refresh stats every 30s */
         statsRefreshTimer = setInterval(loadDashboard, 30000);
 
-        /* Wire navigation & events — each wrapped so one failure doesn’t block the rest */
         const wireFns = [
             ['Navigation',   wireNavigation],
             ['OrderEvents',  wireOrderEvents],
@@ -295,7 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('[Admin] init() complete ✓');
     }
 
-    /* ---------- Cold-start banner ---------- */
     function _showWakingBanner(show) {
         let banner = $('#coldStartBanner');
         if (show && !banner) {
@@ -311,9 +283,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /* ====================================================================
-       DASHBOARD
-    ==================================================================== */
     async function loadDashboard() {
         console.log('[Admin] loadDashboard()');
         debug('Fetching Stats');
@@ -325,7 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('[Admin] Stats response:', statsRes);
             console.log('[Admin] Recent orders response:', recentRes);
             _showWakingBanner(false);
-            /* Unwrap { success, data } wrapper */
+
             const stats = statsRes?.data || statsRes;
             debug('Stats Data', stats);
             renderStats(stats);
@@ -343,9 +312,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /* ====================================================================
-       NAVIGATION
-    ==================================================================== */
     function wireNavigation() {
         const sidebar = $('#sidebar');
         if (!sidebar) { console.error('[Admin] #sidebar not found in DOM'); return; }
@@ -360,14 +326,12 @@ document.addEventListener('DOMContentLoaded', () => {
             switchPage(page);
             onPageSwitch(page);
 
-            /* Close sidebar on mobile */
             if (window.innerWidth <= 860) {
                 $('#sidebar').classList.remove('open');
                 document.getElementById('sidebarOverlay')?.classList.remove('sidebar-overlay--visible');
             }
         });
 
-        /* "View All" links */
         document.addEventListener('click', (e) => {
             const goto = e.target.closest('[data-goto]');
             if (!goto) return;
@@ -393,9 +357,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /* ====================================================================
-       LIVE ORDERS
-    ==================================================================== */
     async function loadLiveOrders() {
         console.log('[Admin] loadLiveOrders()');
         debug('Fetching Live Orders');
@@ -403,7 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const statusFilter = $('#ordersStatusFilter')?.value || '';
             const res = await AdminAPI.getTodayOrders({ status: statusFilter });
             console.log('[Admin] Today orders response:', res);
-            /* Unwrap { success, data } wrapper */
+
             const payload = res?.data || res;
             liveOrders = Array.isArray(payload) ? payload : (payload?.orders || []);
             console.log('[Admin] Live orders count:', liveOrders.length);
@@ -427,12 +388,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function wireOrderEvents() {
-        /* Status filter */
+
         $('#ordersStatusFilter')?.addEventListener('change', () => {
             if (currentPage === 'orders') loadLiveOrders();
         });
 
-        /* Status change on order card — premium inline buttons (event delegation) */
         $('#liveOrdersContainer')?.addEventListener('click', async (e) => {
             const btn = e.target.closest('[data-action="status-change"]');
             if (!btn || !btn.classList.contains('status-btn')) return;
@@ -440,7 +400,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const orderId = btn.dataset.orderId;
             const newStatus = btn.dataset.status;
 
-            /* Skip if already active */
             const order = liveOrders.find(o => (o._id || o.orderId) === orderId);
             if (order && order.status === newStatus) return;
 
@@ -455,10 +414,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 await AdminAPI.updateOrderStatus(orderId, newStatus);
                 btn.disabled = false;
                 btn.style.opacity = '';
-                /* Update local state */
+
                 if (order) order.status = newStatus;
 
-                /* Re-render the card in place for visual consistency */
                 updatePendingBadge();
                 if (order) updateOrderCard(orderId, order);
                 debug('Order Status Updated', { orderId, newStatus });
@@ -470,7 +428,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        /* Delete order button */
         $('#liveOrdersContainer')?.addEventListener('click', async (e) => {
             const btn = e.target.closest('[data-action="delete-order"]');
             if (!btn) return;
@@ -484,18 +441,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.textContent = '…';
                 await AdminAPI.deleteOrder(orderId);
 
-                /* Remove from local state */
                 liveOrders = liveOrders.filter(o => (o._id || o.orderId) !== orderId);
                 updatePendingBadge();
 
-                /* Fade-out animation then remove card */
                 const card = btn.closest('.order-card');
                 if (card) {
                     card.classList.add('order-card--fade-out');
                     card.addEventListener('animationend', () => card.remove(), { once: true });
                 }
 
-                /* Animate counters down */
                 document.dispatchEvent(new CustomEvent('admin:order-deleted'));
 
                 debug('Order Deleted', { orderId });
@@ -507,13 +461,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        /* Realtime: new order from socket */
         document.addEventListener('admin:new-order', (e) => {
             const order = e.detail;
             console.log('[Admin] admin:new-order event received:', order);
             if (!order) return;
 
-            /* Deduplicate */
             const exists = liveOrders.find(o => (o._id || o.orderId) === (order._id || order.orderId));
             if (exists) return;
 
@@ -524,7 +476,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 prependOrderCard(order);
             }
 
-            /* Animate dashboard counters on new order */
             const todayEl = $('#statTodayOrders');
             const totalEl = $('#statTotalOrders');
             if (todayEl) animateCounter(todayEl, (parseInt(todayEl.textContent.replace(/[^\d]/g,''),10)||0) + 1);
@@ -532,7 +483,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             playNotifSound();
 
-            /* Web push notification for admin (when tab hidden) */
             if (typeof Notification !== 'undefined' && Notification.permission === 'granted' && document.hidden) {
                 try {
                     new Notification('New Order!', {
@@ -540,13 +490,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         icon: '🥟',
                         tag: 'pf-admin-order',
                     });
-                } catch { /* SW-only */ }
+                } catch {  }
             }
 
             showToast(`New order from ${order.customerName || 'Customer'}!`, 'info');
         });
 
-        /* Realtime: order status update */
         document.addEventListener('admin:order-updated', (e) => {
             const data = e.detail;
             if (!data) return;
@@ -558,7 +507,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        /* Realtime: order deleted — animate counters down */
         document.addEventListener('admin:order-deleted', () => {
             const todayEl = $('#statTodayOrders');
             const totalEl = $('#statTotalOrders');
@@ -566,16 +514,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (totalEl) animateCounter(totalEl, Math.max(0, (parseInt(totalEl.textContent.replace(/[^\d]/g,''),10)||0) - 1));
         });
 
-        /* Socket status */
         document.addEventListener('socket:status', (e) => {
             console.log('[Admin] Socket status:', e.detail?.connected);
             updateSocketStatus(e.detail?.connected);
         });
     }
 
-    /* ====================================================================
-       ORDER HISTORY
-    ==================================================================== */
     async function loadHistory() {
         console.log('[Admin] loadHistory()');
         try {
@@ -588,7 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 phone: $('#historyPhoneSearch')?.value.trim() || '',
             };
             const res = await AdminAPI.getOrders(params);
-            /* Unwrap { success, data } wrapper */
+
             const payload = res?.data || res;
             const orders = Array.isArray(payload) ? payload : (payload?.orders || []);
             historyTotal = res?.totalPages || payload?.totalPages || Math.ceil((res?.total || payload?.total || orders.length) / 20) || 1;
@@ -605,13 +549,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function wireHistoryEvents() {
-        /* Filters */
+
         $('#historySearchBtn')?.addEventListener('click', () => {
             historyPage = 1;
             loadHistory();
         });
 
-        /* Enter key on phone search */
         $('#historyPhoneSearch')?.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') { historyPage = 1; loadHistory(); }
         });
@@ -621,7 +564,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentPage === 'history') loadHistory();
         });
 
-        /* Pagination */
         $('#historyPagination')?.addEventListener('click', (e) => {
             const btn = e.target.closest('[data-page]');
             if (!btn || btn.disabled) return;
@@ -631,26 +573,21 @@ document.addEventListener('DOMContentLoaded', () => {
             loadHistory();
         });
 
-        /* CSV export */
         $('#exportCsvBtn')?.addEventListener('click', () => {
             exportOrdersCSV(allHistoryOrders);
         });
     }
 
-    /* ====================================================================
-       MENU MANAGEMENT
-    ==================================================================== */
     async function loadMenu() {
         console.log('[Admin] loadMenu()');
         try {
             const res = await AdminAPI.getMenu();
             console.log('[Admin] Menu response:', res);
-            /* Unwrap { success, data } wrapper */
+
             const data = res?.data || res?.categories || res;
 
-            /* Flatten nested structure or use flat array */
             if (Array.isArray(data) && data[0]?.items) {
-                /* Nested: { key, title, items[] } */
+
                 menuCategories = data.map(c => ({ key: c.key || c._id, title: c.title || c.key }));
                 menuItems = data.flatMap(c => c.items.map(i => ({ ...i, category: c.title || c.key })));
             } else if (Array.isArray(data)) {
@@ -658,7 +595,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cats = [...new Set(data.map(i => i.category).filter(Boolean))];
                 menuCategories = cats.map(c => ({ key: c, title: c }));
             } else if (data && typeof data === 'object') {
-                /* Object with category keys */
+
                 const cats = Object.keys(data);
                 menuCategories = cats.map(c => ({ key: c, title: data[c]?.title || c }));
                 menuItems = cats.flatMap(c => (data[c]?.items || []).map(i => ({ ...i, category: data[c]?.title || c })));
@@ -680,7 +617,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = $('#menuMgmtContainer');
         if (!container) return;
 
-        /* Track dirty state — show save button */
         container.addEventListener('input', (e) => {
             const card = e.target.closest('.menu-mgmt-card');
             if (!card) return;
@@ -695,7 +631,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (saveBtn) saveBtn.classList.add('show');
         });
 
-        /* Save button */
         container.addEventListener('click', async (e) => {
             const saveBtn = e.target.closest('[data-action="save-menu-item"]');
             if (!saveBtn) return;
@@ -704,14 +639,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!card) return;
             const itemId = card.dataset.itemId;
 
-            /* Retrieve full original item so we send a complete object */
             const original = menuItems.find(i => (i._id || i.id) === itemId);
             if (!original) {
                 showToast('Could not find original menu item', 'error');
                 return;
             }
 
-            /* Gather updated price values, keeping original labels */
             const priceInputs = card.querySelectorAll('.menu-mgmt-price__input');
             const prices = Array.from(priceInputs).map(inp => {
                 const idx = Number(inp.dataset.priceIdx);
@@ -722,7 +655,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const specialChk = card.querySelector('[data-action="toggle-special"]');
             const activeChk = card.querySelector('[data-action="toggle-active"]');
 
-            /* Build full payload using EXACT backend keys — no id */
             const payload = {
                 name: original.name,
                 desc: original.desc || original.description || '',
@@ -741,7 +673,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveBtn.disabled = false;
                 saveBtn.textContent = 'Save';
 
-                /* Update visual state + confirm flash */
                 card.classList.toggle('menu-mgmt-card--inactive', !payload.active);
                 card.style.boxShadow = '0 0 0 2px var(--c-green)';
                 setTimeout(() => { card.style.boxShadow = ''; }, 800);
@@ -755,14 +686,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        /* Category filter */
         $('#menuCategoryFilter')?.addEventListener('change', (e) => {
             const val = e.target.value;
             const filtered = val ? menuItems.filter(i => i.category === val) : menuItems;
             renderMenuItems(filtered, []);
         });
 
-        /* Search */
         $('#menuSearchInput')?.addEventListener('input', (e) => {
             const q = e.target.value.toLowerCase();
             const catVal = $('#menuCategoryFilter')?.value || '';
@@ -772,33 +701,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /* ====================================================================
-       ANALYTICS
-    ==================================================================== */
     async function loadAnalytics() {
         console.log('[Admin] loadAnalytics()');
         try {
             const res = await AdminAPI.getAnalytics();
             console.log('[Admin] Analytics response:', res);
-            /* Unwrap { success, data } wrapper */
+
             const data = res?.data || res;
             if (!data) return;
 
-            /* Orders per day chart */
             if (data.ordersPerDay) {
                 const labels = data.ordersPerDay.map(d => d.label || d.date || '');
                 const values = data.ordersPerDay.map(d => d.count || d.value || 0);
                 drawBarChart('chartOrders', labels, values, '#e85d04');
             }
 
-            /* Revenue per day chart */
             if (data.revenuePerDay) {
                 const labels = data.revenuePerDay.map(d => d.label || d.date || '');
                 const values = data.revenuePerDay.map(d => d.total || d.value || 0);
                 drawBarChart('chartRevenue', labels, values, '#10b981');
             }
 
-            /* Top items */
             if (data.topItems) {
                 renderTopItems(data.topItems);
             }
@@ -809,9 +732,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /* ====================================================================
-       THEME TOGGLE
-    ==================================================================== */
     function wireTheme() {
         const saved = localStorage.getItem('pf_admin_theme');
         if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
@@ -835,11 +755,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btn) btn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
     }
 
-    /* ====================================================================
-       SIDEBAR (mobile toggle)
-    ==================================================================== */
     function wireSidebar() {
-        /* Create overlay element for mobile sidebar backdrop */
+
         let overlay = document.getElementById('sidebarOverlay');
         if (!overlay) {
             overlay = document.createElement('div');
@@ -861,7 +778,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         overlay.addEventListener('click', _closeSidebar);
 
-        /* Close sidebar on click outside (mobile) */
         document.addEventListener('click', (e) => {
             if (window.innerWidth > 860) return;
             const sidebar = $('#sidebar');
@@ -871,7 +787,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        /* Logout — clear session, reload */
         $('#logoutBtn')?.addEventListener('click', async () => {
             const ok = await showConfirm('Lock the admin panel?');
             if (ok) {
@@ -881,11 +796,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /* ====================================================================
-       KEYBOARD SHORTCUTS
-    ==================================================================== */
     document.addEventListener('keydown', (e) => {
-        /* Escape to close confirm */
+
         if (e.key === 'Escape') {
             const overlay = $('#confirmOverlay');
             if (overlay && !overlay.hidden) {

@@ -14,7 +14,7 @@
       border-radius: 1rem;
       overflow: hidden;
     }
-    
+
     .chat-viewer-header {
       display: flex;
       align-items: center;
@@ -23,7 +23,7 @@
       background: var(--bg-tertiary);
       border-bottom: 1px solid var(--border-default);
     }
-    
+
     .chat-viewer-back {
       width: 2.5rem;
       height: 2.5rem;
@@ -37,27 +37,27 @@
       justify-content: center;
       transition: all 0.2s ease;
     }
-    
+
     .chat-viewer-back:hover {
       background: var(--her-accent-subtle);
       color: var(--her-accent);
     }
-    
+
     .chat-viewer-info {
       flex: 1;
     }
-    
+
     .chat-viewer-name {
       font-size: 1rem;
       font-weight: 500;
       color: var(--text-primary);
     }
-    
+
     .chat-viewer-platform {
       font-size: 0.75rem;
       color: var(--text-tertiary);
     }
-    
+
     .chat-messages-list {
       flex: 1;
       padding: 1.5rem;
@@ -66,7 +66,7 @@
       flex-direction: column;
       gap: 0.75rem;
     }
-    
+
     .imported-msg {
       max-width: 80%;
       padding: 0.75rem 1rem;
@@ -74,34 +74,34 @@
       font-size: 0.875rem;
       line-height: 1.5;
     }
-    
+
     .imported-msg.them {
       background: var(--bg-tertiary);
       color: var(--text-primary);
       align-self: flex-start;
       border-bottom-left-radius: 0.25rem;
     }
-    
+
     .imported-msg.me {
       background: var(--her-accent);
       color: white;
       align-self: flex-end;
       border-bottom-right-radius: 0.25rem;
     }
-    
+
     .chat-list-container {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 1.5rem;
       padding: 1.5rem;
     }
-    
+
     .no-chats {
       text-align: center;
       padding: 4rem 2rem;
       color: var(--text-muted);
     }
-    
+
     .no-chats-icon {
       font-size: 3rem;
       margin-bottom: 1rem;
@@ -109,21 +109,19 @@
   </style>
 </head>
 <body>
-  <!-- Auth Check -->
+
   <div id="authCheck" class="auth-checking">
     <div class="auth-checking-spinner"></div>
   </div>
-  
-  <!-- Ambient Background -->
+
   <div class="her-ambient-bg">
     <div class="her-ambient-orb her-ambient-orb-1"></div>
     <div class="her-ambient-orb her-ambient-orb-2"></div>
     <div class="her-ambient-orb her-ambient-orb-3"></div>
   </div>
-  
-  <!-- Main App -->
+
   <div id="chatsApp" class="her-app">
-    <!-- Header -->
+
     <header class="her-header">
       <div class="her-header-left">
         <a href="../personal.html" class="her-back-btn">← Back</a>
@@ -135,10 +133,9 @@
         </button>
       </div>
     </header>
-    
-    <!-- Content -->
+
     <main class="her-main" style="padding: 0;">
-      <!-- Chat List View -->
+
       <div id="chatListView">
         <div id="chatList" class="chat-list-container"></div>
         <div id="noChats" class="no-chats" style="display: none;">
@@ -152,8 +149,7 @@
           </button>
         </div>
       </div>
-      
-      <!-- Chat Viewer -->
+
       <div id="chatViewerView" class="chat-viewer" style="display: none;">
         <div class="chat-viewer-header">
           <button class="chat-viewer-back" onclick="ChatsApp.closeViewer()">←</button>
@@ -166,11 +162,9 @@
         <div class="chat-messages-list" id="chatMessagesView"></div>
       </div>
     </main>
-    
-    <!-- Toast Container -->
+
     <div id="toastContainer" class="her-toast-container"></div>
-    
-    <!-- Modal -->
+
     <div id="modalOverlay" class="her-modal-overlay">
       <div class="her-modal">
         <div class="her-modal-header">
@@ -181,28 +175,28 @@
       </div>
     </div>
   </div>
-  
+
   <script src="../js/database.js"></script>
   <script>
     const ChatsApp = {
       SESSION_KEY: 'ps_session_active',
       chats: [],
       currentChat: null,
-      
+
       async init() {
         if (sessionStorage.getItem(this.SESSION_KEY) !== 'true') {
           window.location.href = '../index.html';
           return;
         }
-        
+
         document.getElementById('authCheck').classList.add('hidden');
         document.getElementById('chatsApp').classList.add('visible');
-        
+
         await Database.init();
         await this.loadChats();
         this.bindEvents();
       },
-      
+
       bindEvents() {
         document.getElementById('importBtn')?.addEventListener('click', () => this.openImportModal());
         document.getElementById('modalOverlay')?.addEventListener('click', (e) => {
@@ -210,7 +204,7 @@
         });
         document.getElementById('modalClose')?.addEventListener('click', () => this.closeModal());
       },
-      
+
       async loadChats() {
         try {
           this.chats = await Database.getAll('imported_chats') || [];
@@ -220,17 +214,17 @@
           this.renderChats();
         }
       },
-      
+
       renderChats() {
         const container = document.getElementById('chatList');
         const empty = document.getElementById('noChats');
-        
+
         if (this.chats.length === 0) {
           container.innerHTML = '';
           empty.style.display = 'block';
           return;
         }
-        
+
         empty.style.display = 'none';
         container.innerHTML = this.chats.map(chat => `
           <div class="her-imported-chat-card" onclick="ChatsApp.viewChat('${chat.id}')">
@@ -247,35 +241,35 @@
           </div>
         `).join('');
       },
-      
+
       async viewChat(id) {
         const chat = this.chats.find(c => c.id === id);
         if (!chat) return;
-        
+
         this.currentChat = chat;
-        
+
         document.getElementById('viewerName').textContent = chat.name;
         document.getElementById('viewerPlatform').textContent = `${chat.platform} · ${chat.messages?.length || 0} messages`;
-        
+
         document.getElementById('chatMessagesView').innerHTML = (chat.messages || []).map(msg => `
           <div class="imported-msg them">${this.escapeHtml(msg.content)}</div>
         `).join('');
-        
+
         document.getElementById('chatListView').style.display = 'none';
         document.getElementById('chatViewerView').style.display = 'flex';
       },
-      
+
       closeViewer() {
         document.getElementById('chatListView').style.display = 'block';
         document.getElementById('chatViewerView').style.display = 'none';
         this.currentChat = null;
       },
-      
+
       async deleteChat() {
         if (!this.currentChat) return;
-        
+
         if (!confirm('Delete this chat permanently?')) return;
-        
+
         try {
           await Database.delete('imported_chats', this.currentChat.id);
           this.closeViewer();
@@ -285,7 +279,7 @@
           this.toast('Failed to delete', 'error');
         }
       },
-      
+
       openImportModal() {
         document.getElementById('modalTitle').textContent = 'Import Chat';
         document.getElementById('modalBody').innerHTML = `
@@ -310,22 +304,22 @@
         `;
         this.openModal();
       },
-      
+
       async importChat() {
         const platform = document.getElementById('importPlatform')?.value;
         const name = document.getElementById('importName')?.value?.trim();
         const content = document.getElementById('importContent')?.value?.trim();
-        
+
         if (!name || !content) {
           this.toast('Please fill all fields', 'error');
           return;
         }
-        
+
         const messages = content.split('\n').filter(l => l.trim()).map(line => ({
           content: line.trim(),
           timestamp: Date.now()
         }));
-        
+
         try {
           await Database.add('imported_chats', {
             id: crypto.randomUUID(),
@@ -334,7 +328,7 @@
             messages,
             importedAt: Date.now()
           });
-          
+
           this.closeModal();
           await this.loadChats();
           this.toast(`Imported ${messages.length} messages`, 'success');
@@ -342,15 +336,15 @@
           this.toast('Failed to import', 'error');
         }
       },
-      
+
       openModal() {
         document.getElementById('modalOverlay')?.classList.add('visible');
       },
-      
+
       closeModal() {
         document.getElementById('modalOverlay')?.classList.remove('visible');
       },
-      
+
       toast(message, type = 'info') {
         const container = document.getElementById('toastContainer');
         const toast = document.createElement('div');
@@ -362,19 +356,19 @@
           setTimeout(() => toast.remove(), 300);
         }, 3000);
       },
-      
+
       escapeHtml(str) {
         if (!str) return '';
         const div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;
       },
-      
+
       formatDate(ts) {
         return ts ? new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
       }
     };
-    
+
     document.addEventListener('DOMContentLoaded', () => ChatsApp.init());
   </script>
 </body>

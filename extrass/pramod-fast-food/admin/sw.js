@@ -1,7 +1,3 @@
-/**
- * Admin Service Worker — scoped to /extrass/pramod-fast-food/admin/
- * Isolated from customer PWA. Caches admin shell for offline use.
- */
 const CACHE_NAME = "pf-admin-v1";
 const BASE_PATH = "/extrass/pramod-fast-food/admin/";
 

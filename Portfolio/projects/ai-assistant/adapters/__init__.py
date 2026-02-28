@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from actions.schema import Action, ActionResult, ActionType
 
-
 class BaseAdapter(ABC):
     @abstractmethod
     def execute(self, action: Action) -> ActionResult:
@@ -70,7 +69,7 @@ class BaseAdapter(ABC):
             ActionType.LOCK_SCREEN: lambda: self.lock_screen(),
             ActionType.GET_BATTERY: lambda: self.get_battery(),
         }
-        
+
         handler = handlers.get(action.action_type)
         if handler:
             return handler()

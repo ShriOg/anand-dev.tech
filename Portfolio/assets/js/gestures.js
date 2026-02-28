@@ -1,20 +1,11 @@
-/**
- * GESTURES
- * Touch and pointer gesture handling
- * Handles: swipe, drag-to-dismiss, tap outside
- * Mobile-first, performance optimized
- */
-
 const Gestures = (function() {
   'use strict';
 
-  // Constants
   const SWIPE_THRESHOLD = 80;
   const VELOCITY_THRESHOLD = 0.4;
   const TAP_THRESHOLD = 10;
   const TOUCH_TARGET_MIN = 44;
 
-  // State
   let touchState = {
     startX: 0,
     startY: 0,
@@ -27,9 +18,6 @@ const Gestures = (function() {
 
   let registeredHandlers = new Map();
 
-  /**
-   * Calculate swipe direction and metrics
-   */
   function calculateSwipe(startX, startY, endX, endY, deltaTime) {
     const deltaX = endX - startX;
     const deltaY = endY - startY;
@@ -38,7 +26,6 @@ const Gestures = (function() {
     const absX = Math.abs(deltaX);
     const absY = Math.abs(deltaY);
 
-    // Determine primary direction
     let direction = null;
     if (absX > absY && absX > TAP_THRESHOLD) {
       direction = deltaX > 0 ? 'right' : 'left';
@@ -55,18 +42,15 @@ const Gestures = (function() {
       absX,
       absY,
       isSwipe: direction !== null && (
-        absX > SWIPE_THRESHOLD || 
-        absY > SWIPE_THRESHOLD || 
-        Math.abs(velocityX) > VELOCITY_THRESHOLD || 
+        absX > SWIPE_THRESHOLD ||
+        absY > SWIPE_THRESHOLD ||
+        Math.abs(velocityX) > VELOCITY_THRESHOLD ||
         Math.abs(velocityY) > VELOCITY_THRESHOLD
       ),
       isTap: absX < TAP_THRESHOLD && absY < TAP_THRESHOLD
     };
   }
 
-  /**
-   * Create drag-to-dismiss handler for an element
-   */
   function enableDragToDismiss(element, options = {}) {
     const {
       direction = 'down',
@@ -83,7 +67,7 @@ const Gestures = (function() {
     let startScrollTop = 0;
 
     function handleTouchStart(e) {
-      // Only handle if scrolled to top for down swipe
+
       if (direction === 'down' && element.scrollTop > 0) {
         return;
       }
@@ -99,32 +83,28 @@ const Gestures = (function() {
       const currentY = e.touches[0].clientY;
       const deltaY = currentY - startY;
 
-      // For down direction, only drag if pulling down at scroll top
       if (direction === 'down') {
         if (element.scrollTop > 0) {
           return;
         }
         if (deltaY < 0) {
-          return; // Allow normal scroll up
+          return;
         }
       }
 
-      // Start dragging if moved enough
       if (!isDragging && Math.abs(deltaY) > 10) {
         isDragging = true;
       }
 
       if (isDragging && deltaY > 0) {
         e.preventDefault();
-        
-        // Apply resistance
+
         const resistedDelta = deltaY * resistance;
         element.style.transform = `translateY(${resistedDelta}px)`;
         element.style.transition = 'none';
 
-        // Calculate opacity
         const progress = Math.min(resistedDelta / (threshold * 2), 1);
-        
+
         if (onDragMove) {
           onDragMove({ deltaY: resistedDelta, progress });
         }
@@ -138,7 +118,6 @@ const Gestures = (function() {
       const deltaY = currentY - startY;
       const resistedDelta = deltaY * resistance;
 
-      // Reset styles
       element.style.transition = '';
       element.style.transform = '';
 
@@ -146,7 +125,6 @@ const Gestures = (function() {
         onDragEnd({ deltaY: resistedDelta });
       }
 
-      // Check if should dismiss
       if (resistedDelta > threshold) {
         if (onDismiss) onDismiss();
       }
@@ -154,12 +132,10 @@ const Gestures = (function() {
       isDragging = false;
     }
 
-    // Bind events
     element.addEventListener('touchstart', handleTouchStart, { passive: true });
     element.addEventListener('touchmove', handleTouchMove, { passive: false });
     element.addEventListener('touchend', handleTouchEnd, { passive: true });
 
-    // Return cleanup function
     return function cleanup() {
       element.removeEventListener('touchstart', handleTouchStart);
       element.removeEventListener('touchmove', handleTouchMove);
@@ -167,18 +143,14 @@ const Gestures = (function() {
     };
   }
 
-  /**
-   * Enable tap-outside-to-close
-   */
   function enableTapOutside(element, callback) {
     function handleTap(e) {
-      // Check if tap was outside element
+
       if (!element.contains(e.target)) {
         callback(e);
       }
     }
 
-    // Use click for better compatibility
     document.addEventListener('click', handleTap);
 
     return function cleanup() {
@@ -186,9 +158,6 @@ const Gestures = (function() {
     };
   }
 
-  /**
-   * Register swipe handler on element
-   */
   function onSwipe(element, direction, callback) {
     let startX, startY, startTime;
 
@@ -225,9 +194,6 @@ const Gestures = (function() {
     return cleanup;
   }
 
-  /**
-   * Check if touch target meets minimum size
-   */
   function checkTouchTarget(element) {
     const rect = element.getBoundingClientRect();
     return {
@@ -238,31 +204,21 @@ const Gestures = (function() {
     };
   }
 
-  /**
-   * Prevent scroll during gesture
-   */
   function preventScroll() {
     document.body.style.overflow = 'hidden';
     document.body.style.touchAction = 'none';
   }
 
-  /**
-   * Restore scroll after gesture
-   */
   function restoreScroll() {
     document.body.style.overflow = '';
     document.body.style.touchAction = '';
   }
 
-  /**
-   * Clean up all registered handlers
-   */
   function cleanup() {
     registeredHandlers.forEach((cleanupFn) => cleanupFn());
     registeredHandlers.clear();
   }
 
-  // Public API
   return {
     enableDragToDismiss,
     enableTapOutside,
@@ -278,7 +234,6 @@ const Gestures = (function() {
   };
 })();
 
-// Export for module systems
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = Gestures;
 }

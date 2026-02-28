@@ -1,8 +1,6 @@
-// API_BASE_URL and WEBOS_BASE provided by config.js
-
 async function apiRequest(endpoint, options = {}) {
   const token = localStorage.getItem('accessToken');
-  
+
   const headers = {
     ...options.headers,
   };

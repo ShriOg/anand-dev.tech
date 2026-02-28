@@ -1,20 +1,3 @@
-/**
- * ═══════════════════════════════════════════════════════════════════════════════
- * SECURE AI BACKEND SERVER
- * Single shared backend for Professional AI and Her AI
- * ═══════════════════════════════════════════════════════════════════════════════
- * 
- * SECURITY:
- * - API key stored in environment variable ONLY
- * - Never exposed to frontend
- * - Never logged or returned in responses
- * 
- * MODES:
- * - professional: Technical assistant for portfolio/career
- * - her: Personal companion-style assistant
- * ═══════════════════════════════════════════════════════════════════════════════
- */
-
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -24,36 +7,24 @@ const helmet = require('helmet');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// ═══════════════════════════════════════════════════════════
-// SECURITY MIDDLEWARE
-// ═══════════════════════════════════════════════════════════
-
-// Security headers
 app.use(helmet());
 
-// CORS configuration
 app.use(cors({
   origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'https://anand-dev.tech'],
   methods: ['POST'],
   credentials: true
 }));
 
-// Body parser with size limit
 app.use(express.json({ limit: '10kb' }));
 
-// Rate limiting - 30 requests per minute per IP
 const limiter = rateLimit({
-  windowMs: 60 * 1000, // 1 minute
+  windowMs: 60 * 1000,
   max: 30,
   message: { error: 'Too many requests. Please wait a moment.' },
   standardHeaders: true,
   legacyHeaders: false
 });
 app.use('/api/', limiter);
-
-// ═══════════════════════════════════════════════════════════
-// SYSTEM PROMPTS - MODE CONFIGURATIONS
-// ═══════════════════════════════════════════════════════════
 
 const SYSTEM_PROMPTS = {
   professional: `You are a Senior Technical Assistant for a professional portfolio space.
@@ -124,68 +95,55 @@ RESPONSE RULES:
 - Mirror emotional states gently`
 };
 
-// ═══════════════════════════════════════════════════════════
-// REQUEST VALIDATION & SANITIZATION
-// ═══════════════════════════════════════════════════════════
-
 function validateRequest(req, res, next) {
   const { mode, messages } = req.body;
-  
-  // Validate mode
+
   if (!mode || !['professional', 'her'].includes(mode)) {
-    return res.status(400).json({ 
-      error: 'Invalid mode. Must be "professional" or "her".' 
+    return res.status(400).json({
+      error: 'Invalid mode. Must be "professional" or "her".'
     });
   }
-  
-  // Validate messages
+
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
-    return res.status(400).json({ 
-      error: 'Messages array is required.' 
+    return res.status(400).json({
+      error: 'Messages array is required.'
     });
   }
-  
-  // Validate message structure and length
+
   for (const msg of messages) {
     if (!msg.role || !['user', 'assistant'].includes(msg.role)) {
-      return res.status(400).json({ 
-        error: 'Each message must have a role (user/assistant).' 
+      return res.status(400).json({
+        error: 'Each message must have a role (user/assistant).'
       });
     }
     if (typeof msg.content !== 'string') {
-      return res.status(400).json({ 
-        error: 'Each message must have content.' 
+      return res.status(400).json({
+        error: 'Each message must have content.'
       });
     }
     if (msg.content.length > 4000) {
-      return res.status(400).json({ 
-        error: 'Message content exceeds maximum length (4000 chars).' 
+      return res.status(400).json({
+        error: 'Message content exceeds maximum length (4000 chars).'
       });
     }
   }
-  
-  // Limit conversation history
+
   if (messages.length > 20) {
     req.body.messages = messages.slice(-20);
   }
-  
+
   next();
 }
 
-// ═══════════════════════════════════════════════════════════
-// AI API INTEGRATION (OpenAI)
-// ═══════════════════════════════════════════════════════════
-
 async function callOpenAI(mode, messages) {
   const apiKey = process.env.OPENAI_API_KEY;
-  
+
   if (!apiKey) {
     throw new Error('AI service not configured');
   }
-  
+
   const systemPrompt = SYSTEM_PROMPTS[mode];
-  
-  // Build messages array with system prompt
+
   const apiMessages = [
     { role: 'system', content: systemPrompt },
     ...messages.map(m => ({
@@ -193,11 +151,10 @@ async function callOpenAI(mode, messages) {
       content: m.content
     }))
   ];
-  
-  // Timeout controller
+
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-  
+  const timeout = setTimeout(() => controller.abort(), 30000);
+
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -215,9 +172,9 @@ async function callOpenAI(mode, messages) {
       }),
       signal: controller.signal
     });
-    
+
     clearTimeout(timeout);
-    
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       console.error('═══════════════════════════════════════════════════════');
@@ -230,10 +187,10 @@ async function callOpenAI(mode, messages) {
       console.error('═══════════════════════════════════════════════════════');
       throw new Error(`AI service error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
     }
-    
+
     const data = await response.json();
     return data.choices[0]?.message?.content || '';
-    
+
   } catch (error) {
     clearTimeout(timeout);
     console.error('═══════════════════════════════════════════════════════');
@@ -249,24 +206,19 @@ async function callOpenAI(mode, messages) {
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-// DUPLICATE REQUEST PREVENTION
-// ═══════════════════════════════════════════════════════════
-
 const recentRequests = new Map();
-const REQUEST_DEDUP_WINDOW = 2000; // 2 seconds
+const REQUEST_DEDUP_WINDOW = 2000;
 
 function isDuplicateRequest(key) {
   const now = Date.now();
   const lastRequest = recentRequests.get(key);
-  
+
   if (lastRequest && (now - lastRequest) < REQUEST_DEDUP_WINDOW) {
     return true;
   }
-  
+
   recentRequests.set(key, now);
-  
-  // Clean old entries periodically
+
   if (recentRequests.size > 1000) {
     for (const [k, v] of recentRequests.entries()) {
       if (now - v > REQUEST_DEDUP_WINDOW * 5) {
@@ -274,56 +226,38 @@ function isDuplicateRequest(key) {
       }
     }
   }
-  
+
   return false;
 }
 
-// ═══════════════════════════════════════════════════════════
-// API ROUTES
-// ═══════════════════════════════════════════════════════════
-
-/**
- * POST /api/chat
- * Main AI chat endpoint
- * 
- * Body:
- * - mode: "professional" | "her"
- * - messages: [{ role: "user"|"assistant", content: string }]
- * 
- * Response:
- * - success: boolean
- * - response: string (AI response)
- * - error: string (if failed)
- */
 app.post('/api/chat', validateRequest, async (req, res) => {
   const { mode, messages } = req.body;
-  
-  // Create request fingerprint for dedup
+
   const lastMessage = messages[messages.length - 1];
   const requestKey = `${mode}:${lastMessage.content.substring(0, 50)}`;
-  
+
   if (isDuplicateRequest(requestKey)) {
     return res.status(429).json({
       success: false,
       error: 'Duplicate request detected. Please wait.'
     });
   }
-  
+
   try {
     console.log(`[AI Backend] ${mode} mode request - ${messages.length} messages`);
-    
+
     const aiResponse = await callOpenAI(mode, messages);
-    
+
     if (!aiResponse) {
       throw new Error('Empty response from AI');
     }
-    
+
     res.json({
       success: true,
       response: aiResponse,
       mode: mode
     });
-    
+
   } catch (error) {
     console.error('═══════════════════════════════════════════════════════');
     console.error('[AI Backend] /api/chat Error');
@@ -333,14 +267,13 @@ app.post('/api/chat', validateRequest, async (req, res) => {
     console.error('Error:', error.message);
     console.error('Full Error:', error);
     console.error('═══════════════════════════════════════════════════════');
-    
-    // Don't expose internal errors
-    const userMessage = error.message.includes('timeout') 
+
+    const userMessage = error.message.includes('timeout')
       ? 'Request timed out. Please try again.'
       : error.message.includes('not configured')
         ? 'AI service is temporarily unavailable.'
         : 'Something went wrong. Please try again.';
-    
+
     res.status(500).json({
       success: false,
       error: userMessage
@@ -348,51 +281,41 @@ app.post('/api/chat', validateRequest, async (req, res) => {
   }
 });
 
-/**
- * POST /api/chat/action
- * Specific AI actions (improve, summarize, etc.)
- * 
- * Body:
- * - mode: "professional" | "her"
- * - action: string (action type)
- * - data: object (action-specific data)
- */
 app.post('/api/chat/action', validateRequest, async (req, res) => {
   const { mode, action, data } = req.body;
-  
-  // Build action-specific prompt
+
   const actionPrompts = {
     improve_description: `Improve this project description for a technical portfolio. Make it clear, concise, and recruiter-friendly.\n\nTitle: ${data?.title}\nDescription: ${data?.description}\nTech: ${data?.tech?.join(', ')}\n\nRespond with ONLY the improved description.`,
-    
+
     convert_bullets: `Convert this description into clear bullet points:\n\n${data?.description}\n\nRespond with ONLY bullet points.`,
-    
+
     suggest_title: `Suggest a better project title (3-6 words):\nCurrent: ${data?.title}\nDescription: ${data?.description}\n\nRespond with ONLY the suggested title.`,
-    
+
     suggest_tech: `Suggest relevant technologies for this project:\n${data?.description}\n\nRespond with a comma-separated list of technologies.`,
-    
+
     summarize: `Summarize this content briefly:\n\n${data?.content}\n\nRespond with ONLY the summary.`,
-    
+
     expand: `Expand this content with more detail:\n\n${data?.content}\n\nRespond with the expanded content.`
   };
-  
+
   const prompt = actionPrompts[action];
   if (!prompt) {
-    return res.status(400).json({ 
-      success: false, 
-      error: 'Invalid action type.' 
+    return res.status(400).json({
+      success: false,
+      error: 'Invalid action type.'
     });
   }
-  
+
   try {
     const messages = [{ role: 'user', content: prompt }];
     const aiResponse = await callOpenAI(mode, messages);
-    
+
     res.json({
       success: true,
       response: aiResponse,
       action: action
     });
-    
+
   } catch (error) {
     console.error('═══════════════════════════════════════════════════════');
     console.error('[AI Backend] /api/chat/action Error');
@@ -409,29 +332,22 @@ app.post('/api/chat/action', validateRequest, async (req, res) => {
   }
 });
 
-// Health check
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
+  res.json({
+    status: 'ok',
     timestamp: new Date().toISOString(),
     configured: !!process.env.OPENAI_API_KEY
   });
 });
 
-// 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Not found' });
 });
 
-// Error handler
 app.use((err, req, res, next) => {
   console.error('[AI Backend] Unhandled error:', err);
   res.status(500).json({ error: 'Internal server error' });
 });
-
-// ═══════════════════════════════════════════════════════════
-// START SERVER
-// ═══════════════════════════════════════════════════════════
 
 app.listen(PORT, () => {
   console.log(`[AI Backend] Server running on port ${PORT}`);

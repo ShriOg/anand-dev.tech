@@ -1,25 +1,15 @@
-/**
- * ═══════════════════════════════════════════════════════════
- * PRIVATE SPACE - MEMORY MODULE
- * Multi-layer AI memory system
- * ═══════════════════════════════════════════════════════════
- */
-
 const PSMemory = (function() {
   'use strict';
 
   const MEMORY_TYPES = {
-    SHORT_TERM: 'short-term',    // Current session only
-    WORKING: 'working',          // Active projects/ideas
-    LONG_TERM: 'long-term'       // Permanent, user-approved
+    SHORT_TERM: 'short-term',
+    WORKING: 'working',
+    LONG_TERM: 'long-term'
   };
 
   let _shortTermMemory = [];
   let _pendingMemory = [];
 
-  /**
-   * Load memory view
-   */
   async function load() {
     const container = document.querySelector('#section-memory .ps-workspace');
     if (!container) return;
@@ -29,10 +19,8 @@ const PSMemory = (function() {
 
     container.innerHTML = `
       <div class="ps-memory">
-        <!-- Pending Memory Requests -->
         <div class="ps-memory-pending" id="memoryPending"></div>
 
-        <!-- Short-term Memory (Session) -->
         <div class="ps-memory-section ps-memory-short-term">
           <div class="ps-memory-section-header">
             <div class="ps-memory-section-title">
@@ -47,7 +35,6 @@ const PSMemory = (function() {
           </div>
         </div>
 
-        <!-- Working Memory -->
         <div class="ps-memory-section ps-memory-working">
           <div class="ps-memory-section-header">
             <div class="ps-memory-section-title">
@@ -71,7 +58,6 @@ const PSMemory = (function() {
           </div>
         </div>
 
-        <!-- Long-term Memory -->
         <div class="ps-memory-section ps-memory-long-term">
           <div class="ps-memory-section-header">
             <div class="ps-memory-section-title">
@@ -91,9 +77,6 @@ const PSMemory = (function() {
     renderPendingMemory();
   }
 
-  /**
-   * Render memory items
-   */
   function renderMemoryItems(items, type) {
     if (!items || items.length === 0) {
       return `
@@ -126,9 +109,6 @@ const PSMemory = (function() {
     `).join('');
   }
 
-  /**
-   * Render pending memory requests
-   */
   function renderPendingMemory() {
     const container = document.getElementById('memoryPending');
     if (!container) return;
@@ -157,9 +137,6 @@ const PSMemory = (function() {
     `).join('');
   }
 
-  /**
-   * Add to short-term memory (session only)
-   */
   function addShortTerm(key, value, source = null) {
     const item = {
       id: PSCrypto.generateId(),
@@ -169,8 +146,7 @@ const PSMemory = (function() {
       createdAt: Date.now()
     };
     _shortTermMemory.push(item);
-    
-    // Limit short-term memory
+
     if (_shortTermMemory.length > 50) {
       _shortTermMemory.shift();
     }
@@ -178,13 +154,10 @@ const PSMemory = (function() {
     return item;
   }
 
-  /**
-   * Add to working memory (persistent)
-   */
   async function addWorkingMemory() {
     const keyInput = document.getElementById('workingMemoryKey');
     const valueInput = document.getElementById('workingMemoryValue');
-    
+
     const key = keyInput?.value.trim();
     const value = valueInput?.value.trim();
 
@@ -194,17 +167,14 @@ const PSMemory = (function() {
     }
 
     await add(MEMORY_TYPES.WORKING, key, value);
-    
+
     if (keyInput) keyInput.value = '';
     if (valueInput) valueInput.value = '';
-    
+
     PSUI.toast('Added to working memory', 'success');
     load();
   }
 
-  /**
-   * Request to add to long-term memory (requires user approval)
-   */
   function requestLongTerm(key, value, reason = null) {
     const item = {
       id: PSCrypto.generateId(),
@@ -215,29 +185,23 @@ const PSMemory = (function() {
     };
     _pendingMemory.push(item);
     renderPendingMemory();
-    
+
     PSUI.toast('AI is requesting to save a memory', 'info');
     return item.id;
   }
 
-  /**
-   * Approve pending memory request
-   */
   async function approvePending(id) {
     const index = _pendingMemory.findIndex(m => m.id === id);
     if (index === -1) return;
 
     const item = _pendingMemory[index];
     await add(MEMORY_TYPES.LONG_TERM, item.key, item.value, 'AI suggested');
-    
+
     _pendingMemory.splice(index, 1);
     PSUI.toast('Memory saved', 'success');
     load();
   }
 
-  /**
-   * Reject pending memory request
-   */
   function rejectPending(id) {
     const index = _pendingMemory.findIndex(m => m.id === id);
     if (index !== -1) {
@@ -247,9 +211,6 @@ const PSMemory = (function() {
     }
   }
 
-  /**
-   * Add memory to storage
-   */
   async function add(type, key, value, source = null) {
     const item = {
       id: PSCrypto.generateId(),
@@ -264,9 +225,6 @@ const PSMemory = (function() {
     return item;
   }
 
-  /**
-   * Get memories by type
-   */
   async function getByType(type) {
     try {
       return await PSStorage.getByIndex(PSStorage.STORES.MEMORY, 'type', type);
@@ -275,9 +233,6 @@ const PSMemory = (function() {
     }
   }
 
-  /**
-   * Get all memories (for AI context)
-   */
   async function getAllForContext() {
     const working = await getByType(MEMORY_TYPES.WORKING);
     const longTerm = await getByType(MEMORY_TYPES.LONG_TERM);
@@ -289,9 +244,6 @@ const PSMemory = (function() {
     };
   }
 
-  /**
-   * Edit memory
-   */
   async function editMemory(id, type) {
     let items;
     if (type === MEMORY_TYPES.SHORT_TERM) {
@@ -323,7 +275,7 @@ const PSMemory = (function() {
           onClick: async () => {
             const newKey = document.getElementById('editMemoryKey').value.trim();
             const newValue = document.getElementById('editMemoryValue').value.trim();
-            
+
             if (newKey && newValue) {
               if (type === MEMORY_TYPES.SHORT_TERM) {
                 item.key = newKey;
@@ -342,9 +294,6 @@ const PSMemory = (function() {
     });
   }
 
-  /**
-   * Forget (delete) memory
-   */
   async function forgetMemory(id, type) {
     PSUI.confirm('Are you sure you want to forget this memory?', async () => {
       if (type === MEMORY_TYPES.SHORT_TERM) {
@@ -355,26 +304,20 @@ const PSMemory = (function() {
       } else {
         await PSStorage.remove(PSStorage.STORES.MEMORY, id);
       }
-      
+
       PSUI.toast('Memory forgotten', 'success');
       load();
     });
   }
 
-  /**
-   * Clear short-term memory
-   */
   function clearShortTerm() {
     _shortTermMemory = [];
   }
 
-  /**
-   * Search memories
-   */
   async function search(query) {
     const allMemories = await getAllForContext();
     const lowerQuery = query.toLowerCase();
-    
+
     const results = [];
 
     for (const [type, items] of Object.entries(allMemories)) {
@@ -391,18 +334,12 @@ const PSMemory = (function() {
     return results;
   }
 
-  /**
-   * Escape HTML
-   */
   function escapeHtml(str) {
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
   }
 
-  /**
-   * Format date
-   */
   function formatDate(timestamp) {
     const date = new Date(timestamp);
     const now = new Date();

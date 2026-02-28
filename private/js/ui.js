@@ -1,10 +1,3 @@
-/**
- * ═══════════════════════════════════════════════════════════
- * PRIVATE SPACE - UI MODULE
- * Core UI state management and interactions
- * ═══════════════════════════════════════════════════════════
- */
-
 const PSUI = (function() {
   'use strict';
 
@@ -15,27 +8,20 @@ const PSUI = (function() {
   let _focusLongPressTimer = null;
 
   const SECTIONS = [
-    'chat', 'pro-chat', 'notes', 'images', 'log', 'memory', 
+    'chat', 'pro-chat', 'notes', 'images', 'log', 'memory',
     'projects', 'navigation', 'pages', 'site-settings', 'settings'
   ];
 
-  /**
-   * Initialize UI
-   */
   function init() {
     bindEvents();
     renderSidebar();
     navigateTo('chat');
   }
 
-  /**
-   * Bind UI events
-   */
   function bindEvents() {
-    // Sidebar toggle
+
     document.getElementById('sidebarToggle')?.addEventListener('click', toggleSidebar);
-    
-    // Navigation items
+
     document.querySelectorAll('[data-nav]').forEach(item => {
       item.addEventListener('click', (e) => {
         const section = e.currentTarget.dataset.nav;
@@ -43,7 +29,6 @@ const PSUI = (function() {
       });
     });
 
-    // Mobile navigation
     document.querySelectorAll('.ps-mobile-nav-item').forEach(item => {
       item.addEventListener('click', (e) => {
         const section = e.currentTarget.dataset.nav;
@@ -51,27 +36,21 @@ const PSUI = (function() {
       });
     });
 
-    // AI Panel toggle
     document.getElementById('aiPanelToggle')?.addEventListener('click', toggleAIPanel);
     document.getElementById('aiPanelClose')?.addEventListener('click', () => toggleAIPanel(false));
 
-    // Focus mode
     document.getElementById('focusModeToggle')?.addEventListener('click', toggleFocusMode);
     document.querySelector('.ps-focus-exit')?.addEventListener('click', () => toggleFocusMode(false));
 
-    // Keyboard shortcuts
     document.addEventListener('keydown', handleKeyboard);
 
-    // Mobile long press for focus mode exit
     document.addEventListener('touchstart', handleTouchStart);
     document.addEventListener('touchend', handleTouchEnd);
 
-    // Window events for lock on close
     window.addEventListener('beforeunload', () => {
       PSAuth.lock();
     });
 
-    // Activity tracker for auto-lock
     ['click', 'keydown', 'scroll', 'touchstart'].forEach(event => {
       document.addEventListener(event, () => {
         if (PSAuth.resetAutoLock) PSAuth.resetAutoLock();
@@ -79,30 +58,23 @@ const PSUI = (function() {
     });
   }
 
-  /**
-   * Navigate to section
-   */
   function navigateTo(section) {
     if (!SECTIONS.includes(section)) return;
 
     _currentSection = section;
 
-    // Update sidebar nav items
     document.querySelectorAll('.ps-nav-item[data-section]').forEach(item => {
       item.classList.toggle('active', item.dataset.section === section);
     });
 
-    // Update mobile nav items
     document.querySelectorAll('.ps-mobile-nav-item[data-section]').forEach(item => {
       item.classList.toggle('active', item.dataset.section === section);
     });
 
-    // Update sections
     document.querySelectorAll('.ps-section').forEach(sec => {
       sec.classList.toggle('active', sec.id === `section-${section}`);
     });
 
-    // Update page title
     const titles = {
       'chat': 'Her Mode 💕',
       'pro-chat': 'Professional Mode ⚡',
@@ -119,13 +91,9 @@ const PSUI = (function() {
     const pageTitle = document.querySelector('.ps-page-title');
     if (pageTitle) pageTitle.textContent = titles[section] || section;
 
-    // Load section data
     loadSection(section);
   }
 
-  /**
-   * Load section content
-   */
   async function loadSection(section) {
     switch (section) {
       case 'chat':
@@ -184,18 +152,12 @@ const PSUI = (function() {
     }
   }
 
-  /**
-   * Toggle sidebar
-   */
   function toggleSidebar(collapsed) {
     const sidebar = document.querySelector('.ps-sidebar');
     _sidebarCollapsed = typeof collapsed === 'boolean' ? collapsed : !_sidebarCollapsed;
     sidebar.classList.toggle('collapsed', _sidebarCollapsed);
   }
 
-  /**
-   * Toggle AI panel
-   */
   function toggleAIPanel(show) {
     const panel = document.querySelector('.ps-ai-panel');
     _aiPanelCollapsed = typeof show === 'boolean' ? !show : !_aiPanelCollapsed;
@@ -203,15 +165,12 @@ const PSUI = (function() {
     panel.classList.toggle('active', !_aiPanelCollapsed);
   }
 
-  /**
-   * Toggle focus mode
-   */
   function toggleFocusMode(enabled) {
     _focusMode = typeof enabled === 'boolean' ? enabled : !_focusMode;
     document.body.setAttribute('data-focus-mode', _focusMode);
-    
+
     if (_focusMode) {
-      // Show exit hint briefly
+
       const exitBtn = document.querySelector('.ps-focus-exit');
       exitBtn.style.opacity = '0.5';
       setTimeout(() => {
@@ -220,31 +179,25 @@ const PSUI = (function() {
     }
   }
 
-  /**
-   * Handle keyboard shortcuts
-   */
   function handleKeyboard(e) {
-    // Escape exits focus mode
+
     if (e.key === 'Escape' && _focusMode) {
       toggleFocusMode(false);
       return;
     }
 
-    // Ctrl/Cmd + Shift + F toggles focus mode
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'F') {
       e.preventDefault();
       toggleFocusMode();
       return;
     }
 
-    // Ctrl/Cmd + K opens AI panel
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
       e.preventDefault();
       toggleAIPanel(true);
       return;
     }
 
-    // Number keys for navigation (1-7)
     if ((e.ctrlKey || e.metaKey) && e.key >= '1' && e.key <= '7') {
       e.preventDefault();
       const index = parseInt(e.key) - 1;
@@ -254,20 +207,14 @@ const PSUI = (function() {
     }
   }
 
-  /**
-   * Handle touch start for long press
-   */
   function handleTouchStart(e) {
     if (!_focusMode) return;
-    
+
     _focusLongPressTimer = setTimeout(() => {
       toggleFocusMode(false);
     }, 800);
   }
 
-  /**
-   * Handle touch end
-   */
   function handleTouchEnd() {
     if (_focusLongPressTimer) {
       clearTimeout(_focusLongPressTimer);
@@ -275,9 +222,6 @@ const PSUI = (function() {
     }
   }
 
-  /**
-   * Render sidebar
-   */
   function renderSidebar() {
     const nav = document.querySelector('.ps-sidebar-nav');
     if (!nav) return;
@@ -322,7 +266,6 @@ const PSUI = (function() {
       </div>
     `;
 
-    // Rebind nav events
     document.querySelectorAll('[data-nav]').forEach(item => {
       item.addEventListener('click', (e) => {
         navigateTo(e.currentTarget.dataset.nav);
@@ -330,12 +273,9 @@ const PSUI = (function() {
     });
   }
 
-  /**
-   * Show toast notification
-   */
   function toast(message, type = 'info', duration = 3000) {
     const container = document.querySelector('.ps-toast-container') || createToastContainer();
-    
+
     const icons = {
       success: '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
       error: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
@@ -380,15 +320,12 @@ const PSUI = (function() {
     setTimeout(() => toast.remove(), 200);
   }
 
-  /**
-   * Show modal
-   */
   function modal(options) {
     const { title, content, actions = [], onClose } = options;
 
     const overlay = document.createElement('div');
     overlay.className = 'ps-modal-overlay active';
-    
+
     overlay.innerHTML = `
       <div class="ps-modal">
         <div class="ps-modal-header">
@@ -433,9 +370,6 @@ const PSUI = (function() {
     return { close: closeModal, element: overlay };
   }
 
-  /**
-   * Confirm dialog
-   */
   function confirm(message, onConfirm) {
     return modal({
       title: 'Confirm',
@@ -447,9 +381,6 @@ const PSUI = (function() {
     });
   }
 
-  /**
-   * Show mobile menu with more options
-   */
   function showMobileMenu() {
     const menuItems = [
       { icon: '📝', label: 'Notes', section: 'notes' },
@@ -467,7 +398,7 @@ const PSUI = (function() {
       content: `
         <div class="ps-mobile-menu-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--ps-space-3);">
           ${menuItems.map(item => `
-            <button class="ps-mobile-menu-item" 
+            <button class="ps-mobile-menu-item"
                     style="display: flex; flex-direction: column; align-items: center; gap: var(--ps-space-2); padding: var(--ps-space-4); background: var(--ps-bg-tertiary); border-radius: var(--ps-radius-lg); border: 1px solid var(--ps-border-subtle);"
                     ${item.section ? `data-section="${item.section}"` : ''}
                     ${item.action ? `data-action="true"` : ''}
@@ -480,7 +411,6 @@ const PSUI = (function() {
       `
     });
 
-    // Handle lock action separately
     setTimeout(() => {
       const lockBtn = document.querySelector('[data-action="true"]');
       if (lockBtn) {
@@ -492,9 +422,6 @@ const PSUI = (function() {
     }, 100);
   }
 
-  /**
-   * Hide modal (utility function)
-   */
   function hideModal() {
     const overlay = document.querySelector('.ps-modal-overlay.active');
     if (overlay) {
@@ -503,14 +430,11 @@ const PSUI = (function() {
     }
   }
 
-  /**
-   * Show modal (simplified for command palette etc)
-   */
   function showModal(header, content) {
     const modalOverlay = document.getElementById('modalOverlay');
     const modalHeader = document.getElementById('modalHeader');
     const modalBody = document.getElementById('modalBody');
-    
+
     if (modalOverlay && modalHeader && modalBody) {
       modalHeader.innerHTML = header;
       modalBody.innerHTML = content;
@@ -518,23 +442,14 @@ const PSUI = (function() {
     }
   }
 
-  /**
-   * Toggle AI panel (for chat sidebar)
-   */
   function toggleAI() {
     toggleAIPanel();
   }
 
-  /**
-   * Get current section
-   */
   function getCurrentSection() {
     return _currentSection;
   }
 
-  /**
-   * Check if in focus mode
-   */
   function isFocusMode() {
     return _focusMode;
   }

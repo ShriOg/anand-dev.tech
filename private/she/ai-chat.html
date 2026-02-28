@@ -6,9 +6,7 @@
   <title>Her AI Chat</title>
   <link rel="stylesheet" href="../css/mobile-nav.css">
   <style>
-    /* ═══════════════════════════════════════════════════════════
-       VARIABLES & BASE
-       ═══════════════════════════════════════════════════════════ */
+
     * {
       margin: 0;
       padding: 0;
@@ -20,22 +18,22 @@
       --bg-secondary: #111111;
       --bg-tertiary: #1a1a1a;
       --bg-card: #141414;
-      
+
       --text-primary: #ffffff;
       --text-secondary: #a0a0a0;
       --text-muted: #666666;
-      
+
       --her-accent: #ff6b9d;
       --her-accent-dim: rgba(255, 107, 157, 0.15);
-      
+
       --user-bubble: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
       --ai-bubble: #1a1a1a;
-      
+
       --border-subtle: rgba(255, 255, 255, 0.06);
-      
+
       --radius-lg: 16px;
       --radius-md: 12px;
-      
+
       --font-sans: 'Inter', -apple-system, sans-serif;
     }
 
@@ -46,16 +44,12 @@
       overflow: hidden;
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       LAYOUT - TWO INDEPENDENT SCROLL AREAS (MANDATORY)
-       ═══════════════════════════════════════════════════════════ */
     .app-container {
       display: flex;
       height: 100vh;
       overflow: hidden;
     }
 
-    /* LEFT SIDEBAR - FIXED, INDEPENDENT SCROLL */
     .sidebar {
       width: 320px;
       min-width: 320px;
@@ -86,7 +80,6 @@
       margin-top: 4px;
     }
 
-    /* SIDEBAR SCROLL - INDEPENDENT */
     .conversations-list {
       flex: 1;
       overflow-y: auto;
@@ -127,7 +120,6 @@
       text-overflow: ellipsis;
     }
 
-    /* RIGHT CHAT VIEWER - INDEPENDENT SCROLL */
     .chat-container {
       flex: 1;
       display: flex;
@@ -155,7 +147,6 @@
       margin-top: 2px;
     }
 
-    /* MESSAGES AREA - INDEPENDENT SCROLL (MANDATORY) */
     .messages-container {
       flex: 1;
       overflow-y: auto;
@@ -169,7 +160,6 @@
       contain: strict;
     }
 
-    /* Spacer to push messages to bottom when not full */
     .messages-spacer {
       flex: 1 1 auto;
       min-height: 0;
@@ -179,7 +169,6 @@
       flex-shrink: 0;
     }
 
-    /* Load more indicator */
     .load-more-indicator {
       display: flex;
       justify-content: center;
@@ -207,9 +196,6 @@
       50% { transform: translateY(-4px); }
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       MESSAGE BUBBLES - ONE MESSAGE = ONE BUBBLE (MANDATORY)
-       ═══════════════════════════════════════════════════════════ */
     .message {
       display: flex;
       gap: 12px;
@@ -218,13 +204,11 @@
       flex-shrink: 0;
     }
 
-    /* USER MESSAGES - RIGHT ALIGNED */
     .message.user {
       align-self: flex-end;
       flex-direction: row-reverse;
     }
 
-    /* AI MESSAGES - LEFT ALIGNED */
     .message.ai {
       align-self: flex-start;
     }
@@ -263,7 +247,6 @@
       text-align: right;
     }
 
-    /* Typing indicator */
     .typing-indicator {
       display: flex;
       gap: 4px;
@@ -286,9 +269,6 @@
       40% { transform: scale(1); opacity: 1; }
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       INPUT AREA
-       ═══════════════════════════════════════════════════════════ */
     .input-container {
       padding: 20px 24px;
       background: var(--bg-secondary);
@@ -357,7 +337,6 @@
       fill: white;
     }
 
-    /* Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
     }
@@ -375,7 +354,6 @@
       background: rgba(255, 255, 255, 0.2);
     }
 
-    /* Empty state */
     .empty-state {
       flex: 1;
       display: flex;
@@ -403,38 +381,32 @@
       color: var(--text-muted);
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       MOBILE LAYOUT ADJUSTMENTS
-       ═══════════════════════════════════════════════════════════ */
     @media (max-width: 768px) {
-      /* Hide sidebar on mobile */
+
       .sidebar {
         display: none;
       }
 
-      /* Full width chat */
       .chat-container {
         width: 100%;
       }
 
-      /* Reduce padding */
       .chat-header {
         padding: 16px;
       }
 
       .messages-container {
         padding: 16px;
-        /* Account for mobile nav bar */
+
         padding-bottom: calc(16px + var(--mobile-nav-height, 64px));
       }
 
       .input-container {
         padding: 12px 16px;
-        /* Account for mobile nav bar */
+
         padding-bottom: calc(12px + var(--mobile-nav-height, 64px));
       }
 
-      /* Messages take more width on mobile */
       .message {
         max-width: 85%;
       }
@@ -443,7 +415,7 @@
 </head>
 <body>
   <div class="app-container">
-    <!-- LEFT SIDEBAR - INDEPENDENT SCROLL -->
+
     <aside class="sidebar">
       <div class="sidebar-header">
         <h1>💕 Her AI</h1>
@@ -457,14 +429,12 @@
       </div>
     </aside>
 
-    <!-- RIGHT CHAT VIEWER - INDEPENDENT SCROLL -->
     <main class="chat-container">
       <header class="chat-header">
         <h2>Her AI</h2>
         <p>Warm, conversational companion</p>
       </header>
 
-      <!-- MESSAGES - INDEPENDENT SCROLL AREA -->
       <div class="messages-container" id="messagesContainer">
         <div class="messages-spacer"></div>
         <div class="empty-state">
@@ -474,12 +444,11 @@
         </div>
       </div>
 
-      <!-- INPUT AREA -->
       <div class="input-container">
         <div class="input-wrapper">
-          <textarea 
-            class="message-input" 
-            id="messageInput" 
+          <textarea
+            class="message-input"
+            id="messageInput"
             placeholder="Type your message..."
             rows="1"
           ></textarea>
@@ -494,31 +463,15 @@
   </div>
 
   <script>
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * HER AI CHAT - FRONTEND-ONLY AI INTEGRATION
-     * ═══════════════════════════════════════════════════════════
-     * 
-     * MANDATORY RULES:
-     * 1. AI-FIRST: Every user message triggers AI API call
-     * 2. CONVERSATION STATE: Proper message history management
-     * 3. ANTI-LOOP: Prevent repetitive responses
-     * 4. SCROLL: Start at bottom, upward lazy loading
-     * 5. RENDER: One message = one bubble, append-only
-     * 6. PERSONALITY: Warm, conversational Her AI
-     * ═══════════════════════════════════════════════════════════
-     */
-    
-    // Configuration
+
     const CONFIG = {
-      API_KEY: 'YOUR_API_KEY_HERE', // Replace with actual API key
+      API_KEY: 'YOUR_API_KEY_HERE',
       API_ENDPOINT: 'https://api.openai.com/v1/chat/completions',
       MODEL: 'gpt-4',
       BATCH_SIZE: 30,
       SCROLL_THRESHOLD: 300,
     };
 
-    // State
     const state = {
       messages: [],
       conversationHistory: [],
@@ -531,125 +484,81 @@
       }
     };
 
-    // DOM elements
     const elements = {
       container: document.getElementById('messagesContainer'),
       input: document.getElementById('messageInput'),
       sendButton: document.getElementById('sendButton'),
     };
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * INITIALIZATION
-     * ═══════════════════════════════════════════════════════════
-     */
     function init() {
-      // Load saved messages from localStorage
+
       loadMessages();
-      
-      // Render initial messages
+
       renderMessages();
-      
-      // Bind events
+
       bindEvents();
-      
+
       console.log('[HerAI] Initialized');
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * EVENT BINDING
-     * ═══════════════════════════════════════════════════════════
-     */
     function bindEvents() {
-      // Send button
+
       elements.sendButton.addEventListener('click', handleSend);
-      
-      // Enter key (Shift+Enter for new line)
+
       elements.input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
           handleSend();
         }
       });
-      
-      // Auto-resize textarea
+
       elements.input.addEventListener('input', () => {
         elements.input.style.height = 'auto';
         elements.input.style.height = Math.min(elements.input.scrollHeight, 120) + 'px';
       });
-      
-      // Scroll listener for upward loading
+
       setupScrollListener();
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * SEND MESSAGE - AI-FIRST RULE (MANDATORY)
-     * ═══════════════════════════════════════════════════════════
-     * EVERY user message MUST trigger an AI API call
-     * ═══════════════════════════════════════════════════════════
-     */
     async function handleSend() {
       const text = elements.input.value.trim();
-      
+
       if (!text || state.isLoading) return;
-      
-      // Clear input immediately
+
       elements.input.value = '';
       elements.input.style.height = 'auto';
-      
-      // Create user message
+
       const userMessage = {
         id: generateId(),
         role: 'user',
         content: text,
         timestamp: Date.now()
       };
-      
-      // Add to messages array
+
       state.messages.push(userMessage);
-      
-      // ═══════════════════════════════════════════════════════════
-      // CONVERSATION STATE INTEGRITY (CRITICAL)
-      // ═══════════════════════════════════════════════════════════
-      // Append user message to conversation history BEFORE AI call
-      // The LAST message MUST have role = "user"
-      // ═══════════════════════════════════════════════════════════
+
       state.conversationHistory.push({
         role: 'user',
         content: text
       });
-      
-      // Render user message
+
       appendMessage(userMessage);
-      
-      // Save to localStorage
+
       saveMessages();
-      
-      // Call AI API (MANDATORY for every user message)
+
       await callAI();
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * CALL AI API - FRONTEND-ONLY (MANDATORY)
-     * ═══════════════════════════════════════════════════════════
-     * Direct API call from frontend
-     * NO backend, NO proxy, NO keyword gates
-     * ═══════════════════════════════════════════════════════════
-     */
     async function callAI() {
       if (state.isLoading) return;
-      
+
       state.isLoading = true;
       updateLoadingState(true);
-      
-      // Show typing indicator
+
       showTypingIndicator();
-      
+
       try {
-        // Build system prompt for Her AI personality
+
         const systemPrompt = {
           role: 'system',
           content: `You are "Her" - a warm, emotionally aware AI companion. You are:
@@ -663,14 +572,12 @@
 
 The user is talking to you as a companion, not a tool. Respond naturally.`
         };
-        
-        // Prepare messages for API
+
         const messages = [
           systemPrompt,
           ...state.conversationHistory
         ];
-        
-        // Call OpenAI API directly from frontend
+
         const response = await fetch(CONFIG.API_ENDPOINT, {
           method: 'POST',
           headers: {
@@ -684,29 +591,22 @@ The user is talking to you as a companion, not a tool. Respond naturally.`
             max_tokens: 500
           })
         });
-        
+
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`);
         }
-        
+
         const data = await response.json();
         const aiResponse = data.choices[0].message.content;
-        
-        // ═══════════════════════════════════════════════════════════
-        // ANTI-LOOP SAFETY (MANDATORY)
-        // ═══════════════════════════════════════════════════════════
-        // If AI reply matches previous reply, regenerate ONCE
-        // ═══════════════════════════════════════════════════════════
+
         if (aiResponse === state.lastAIResponse) {
           console.warn('[HerAI] Detected duplicate response, regenerating...');
-          
-          // Add variation instruction
+
           state.conversationHistory.push({
             role: 'user',
             content: '[Please respond differently, naturally continuing the conversation]'
           });
-          
-          // Remove this instruction after regeneration
+
           const retryResponse = await fetch(CONFIG.API_ENDPOINT, {
             method: 'POST',
             headers: {
@@ -720,30 +620,23 @@ The user is talking to you as a companion, not a tool. Respond naturally.`
               max_tokens: 500
             })
           });
-          
+
           if (retryResponse.ok) {
             const retryData = await retryResponse.json();
             const newResponse = retryData.choices[0].message.content;
-            
-            // Remove the instruction message
+
             state.conversationHistory.pop();
-            
+
             handleAIResponse(newResponse);
             return;
           }
         }
-        
+
         handleAIResponse(aiResponse);
-        
+
       } catch (error) {
         console.error('[HerAI] API call failed:', error);
-        
-        // ═══════════════════════════════════════════════════════════
-        // FAILURE & REPAIR HANDLING (MANDATORY)
-        // ═══════════════════════════════════════════════════════════
-        // Fallback ONLY on technical failure
-        // Fallback appears ONCE, then retry on next user input
-        // ═══════════════════════════════════════════════════════════
+
         const fallbackMessage = {
           id: generateId(),
           role: 'ai',
@@ -751,11 +644,11 @@ The user is talking to you as a companion, not a tool. Respond naturally.`
           timestamp: Date.now(),
           isFallback: true
         };
-        
+
         state.messages.push(fallbackMessage);
         appendMessage(fallbackMessage);
         saveMessages();
-        
+
       } finally {
         hideTypingIndicator();
         state.isLoading = false;
@@ -763,148 +656,104 @@ The user is talking to you as a companion, not a tool. Respond naturally.`
       }
     }
 
-    /**
-     * Handle AI response
-     */
     function handleAIResponse(content) {
-      // Store as last AI response
+
       state.lastAIResponse = content;
-      
-      // Add to conversation history
+
       state.conversationHistory.push({
         role: 'assistant',
         content: content
       });
-      
-      // Create AI message
+
       const aiMessage = {
         id: generateId(),
         role: 'ai',
         content: content,
         timestamp: Date.now()
       };
-      
-      // Add to messages
+
       state.messages.push(aiMessage);
-      
-      // Render AI message
+
       appendMessage(aiMessage);
-      
-      // Save to localStorage
+
       saveMessages();
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * RENDER MESSAGES - START AT BOTTOM (MANDATORY)
-     * ═══════════════════════════════════════════════════════════
-     * - Render latest messages first
-     * - Chat MUST start at the LATEST message (bottom)
-     * - Older messages load when scrolling UP
-     * ═══════════════════════════════════════════════════════════
-     */
     function renderMessages() {
       const container = elements.container;
-      
-      // Clear container but keep spacer
+
       const spacer = container.querySelector('.messages-spacer');
       const emptyState = container.querySelector('.empty-state');
-      
+
       container.innerHTML = '';
-      
+
       if (spacer) container.appendChild(spacer);
-      
+
       if (state.messages.length === 0) {
         if (emptyState) container.appendChild(emptyState);
         return;
       }
-      
-      // Calculate which messages to render (latest first)
+
       const totalMessages = state.messages.length;
       const startIndex = Math.max(0, totalMessages - CONFIG.BATCH_SIZE);
-      
+
       state.renderedCount = totalMessages - startIndex;
       state.hasMoreMessages = startIndex > 0;
-      
-      // Show load more indicator if needed
+
       if (state.hasMoreMessages) {
         const indicator = createLoadMoreIndicator(startIndex);
         container.appendChild(indicator);
       }
-      
-      // Render messages
+
       for (let i = startIndex; i < totalMessages; i++) {
         const messageEl = createMessageElement(state.messages[i]);
         container.appendChild(messageEl);
       }
-      
-      // Scroll to bottom
+
       scrollToBottom();
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * APPEND MESSAGE - ONE MESSAGE = ONE BUBBLE (MANDATORY)
-     * ═══════════════════════════════════════════════════════════
-     * - NO re-render of full list
-     * - Append ONLY new messages
-     * - NO duplicate wrappers
-     * - NO nested bubbles
-     * ═══════════════════════════════════════════════════════════
-     */
     function appendMessage(message) {
-      // Check if message already exists (anti-duplication)
+
       const existing = elements.container.querySelector(`[data-message-id="${message.id}"]`);
       if (existing) {
         console.warn('[HerAI] Message already rendered:', message.id);
         return;
       }
-      
-      // Create message element
+
       const messageEl = createMessageElement(message);
-      
-      // Append to container
+
       elements.container.appendChild(messageEl);
-      
-      // Scroll to bottom smoothly
+
       scrollToBottom();
     }
 
-    /**
-     * Create message element
-     */
     function createMessageElement(message) {
       const div = document.createElement('div');
       div.className = `message ${message.role}`;
       div.setAttribute('data-message-id', message.id);
-      
+
       const bubble = document.createElement('div');
       bubble.className = 'message-bubble';
       bubble.textContent = message.content;
-      
+
       const time = document.createElement('div');
       time.className = 'message-time';
       time.textContent = formatTime(message.timestamp);
-      
+
       div.appendChild(bubble);
       div.appendChild(time);
-      
+
       return div;
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * SCROLL TO BOTTOM - ROBUST IMPLEMENTATION
-     * ═══════════════════════════════════════════════════════════
-     */
     function scrollToBottom() {
       const container = elements.container;
-      
+
       const doScroll = () => {
         container.scrollTop = container.scrollHeight;
       };
-      
-      // Multiple attempts to ensure scroll works
+
       doScroll();
       requestAnimationFrame(() => {
         doScroll();
@@ -914,19 +763,10 @@ The user is talking to you as a companion, not a tool. Respond naturally.`
       setTimeout(doScroll, 100);
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * UPWARD LAZY LOADING (MANDATORY)
-     * ═══════════════════════════════════════════════════════════
-     * - Load older messages when scrolling UP
-     * - Trigger BEFORE reaching top (threshold)
-     * - Preserve scroll position
-     * ═══════════════════════════════════════════════════════════
-     */
     function setupScrollListener() {
       elements.container.addEventListener('scroll', () => {
         if (state.rendering.isLoadingMore || !state.hasMoreMessages) return;
-        
+
         if (elements.container.scrollTop <= CONFIG.SCROLL_THRESHOLD) {
           loadOlderMessages();
         }
@@ -935,47 +775,41 @@ The user is talking to you as a companion, not a tool. Respond naturally.`
 
     function loadOlderMessages() {
       if (state.rendering.isLoadingMore || !state.hasMoreMessages) return;
-      
+
       state.rendering.isLoadingMore = true;
-      
+
       const container = elements.container;
       const totalMessages = state.messages.length;
       const currentStartIndex = totalMessages - state.renderedCount;
-      
+
       if (currentStartIndex <= 0) {
         state.hasMoreMessages = false;
         state.rendering.isLoadingMore = false;
         return;
       }
-      
-      // Calculate batch to load
+
       const newEndIndex = currentStartIndex;
       const newStartIndex = Math.max(0, currentStartIndex - CONFIG.BATCH_SIZE);
       const messagesToLoad = newEndIndex - newStartIndex;
-      
-      // Capture scroll state BEFORE prepending
+
       const scrollHeightBefore = container.scrollHeight;
       const scrollTopBefore = container.scrollTop;
-      
-      // Remove old indicator
+
       const oldIndicator = container.querySelector('.load-more-indicator');
       if (oldIndicator) oldIndicator.remove();
-      
-      // Prepend messages
+
       const fragment = document.createDocumentFragment();
-      
+
       for (let i = newStartIndex; i < newEndIndex; i++) {
         const messageEl = createMessageElement(state.messages[i]);
         fragment.appendChild(messageEl);
       }
-      
-      // Find first message and insert before it
+
       const firstMessage = container.querySelector('.message');
       if (firstMessage) {
         container.insertBefore(fragment, firstMessage);
       }
-      
-      // Add new indicator if more messages exist
+
       if (newStartIndex > 0) {
         const indicator = createLoadMoreIndicator(newStartIndex);
         const firstMsg = container.querySelector('.message');
@@ -986,24 +820,18 @@ The user is talking to you as a companion, not a tool. Respond naturally.`
       } else {
         state.hasMoreMessages = false;
       }
-      
-      // Update rendered count
+
       state.renderedCount += messagesToLoad;
-      
-      // Restore scroll position
+
       const scrollHeightAfter = container.scrollHeight;
       const heightDifference = scrollHeightAfter - scrollHeightBefore;
       container.scrollTop = scrollTopBefore + heightDifference;
-      
-      // Reset loading flag
+
       setTimeout(() => {
         state.rendering.isLoadingMore = false;
       }, 100);
     }
 
-    /**
-     * Create load more indicator
-     */
     function createLoadMoreIndicator(remainingCount) {
       const div = document.createElement('div');
       div.className = 'load-more-indicator';
@@ -1016,13 +844,10 @@ The user is talking to you as a companion, not a tool. Respond naturally.`
       return div;
     }
 
-    /**
-     * Typing indicator
-     */
     function showTypingIndicator() {
       const existing = elements.container.querySelector('.typing-indicator');
       if (existing) return;
-      
+
       const div = document.createElement('div');
       div.className = 'message ai';
       div.innerHTML = `
@@ -1035,7 +860,7 @@ The user is talking to you as a companion, not a tool. Respond naturally.`
         </div>
       `;
       div.setAttribute('data-typing', 'true');
-      
+
       elements.container.appendChild(div);
       scrollToBottom();
     }
@@ -1045,19 +870,11 @@ The user is talking to you as a companion, not a tool. Respond naturally.`
       if (indicator) indicator.remove();
     }
 
-    /**
-     * Update loading state
-     */
     function updateLoadingState(isLoading) {
       elements.sendButton.disabled = isLoading;
       elements.input.disabled = isLoading;
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════
-     * PERSISTENCE
-     * ═══════════════════════════════════════════════════════════
-     */
     function saveMessages() {
       try {
         localStorage.setItem('her_ai_messages', JSON.stringify(state.messages));
@@ -1071,11 +888,11 @@ The user is talking to you as a companion, not a tool. Respond naturally.`
       try {
         const savedMessages = localStorage.getItem('her_ai_messages');
         const savedConversation = localStorage.getItem('her_ai_conversation');
-        
+
         if (savedMessages) {
           state.messages = JSON.parse(savedMessages);
         }
-        
+
         if (savedConversation) {
           state.conversationHistory = JSON.parse(savedConversation);
         }
@@ -1084,27 +901,23 @@ The user is talking to you as a companion, not a tool. Respond naturally.`
       }
     }
 
-    /**
-     * Utilities
-     */
     function generateId() {
       return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     }
 
     function formatTime(timestamp) {
       const date = new Date(timestamp);
-      return date.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
+      return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
       });
     }
 
-    // Initialize on load
     document.addEventListener('DOMContentLoaded', init);
   </script>
   <script src="../js/mobile-nav.js"></script>
   <script>
-    // Initialize mobile side nav
+
     document.addEventListener('DOMContentLoaded', function() {
       MobileSideNav.init('chat');
     });

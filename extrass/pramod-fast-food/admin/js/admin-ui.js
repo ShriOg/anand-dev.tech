@@ -1,12 +1,5 @@
-/**
- * admin-ui.js — All DOM rendering for the admin dashboard.
- *
- * Pure rendering functions: read data → write DOM.
- * No side-effects outside their target containers.
- */
 'use strict';
 
-/* ========== GLOBAL DEBUG MODE (admin) ========== */
 if (typeof window.__DEBUG__ === 'undefined') window.__DEBUG__ = true;
 if (typeof debug === 'undefined') {
     window.debug = function(label, data) {
@@ -17,13 +10,9 @@ if (typeof debug === 'undefined') {
 
 const AdminUI = (() => {
 
-    /* ---------- DOM helpers ---------- */
     const $ = (s, ctx = document) => ctx.querySelector(s);
     const $$ = (s, ctx = document) => ctx.querySelectorAll(s);
 
-    /* ====================================================================
-       TOAST SYSTEM
-    ==================================================================== */
     let _toastTimer;
     const showToast = (message, type = 'info') => {
         let el = $('#adminToast');
@@ -39,9 +28,6 @@ const AdminUI = (() => {
         _toastTimer = setTimeout(() => el.classList.remove('admin-toast--visible'), 2800);
     };
 
-    /* ====================================================================
-       CONFIRM DIALOG
-    ==================================================================== */
     let _confirmResolve = null;
     const showConfirm = (message) => {
         return new Promise((resolve) => {
@@ -62,17 +48,13 @@ const AdminUI = (() => {
         });
     };
 
-    /* ====================================================================
-       PAGE NAVIGATION
-    ==================================================================== */
     const switchPage = (pageKey) => {
         debug('Switching Page', pageKey);
         const pages = $$('.page');
         const current = Array.from(pages).find(p => !p.hidden);
 
-        /* Animate out current page, then show new */
         if (current && current.dataset.page !== pageKey) {
-            /* Force-finish any in-progress exit (rapid clicks) */
+
             if (current.classList.contains('page--exit')) {
                 current.classList.remove('page--exit');
                 current.hidden = true;
@@ -105,7 +87,7 @@ const AdminUI = (() => {
             if (p.dataset.page === pageKey) {
                 p.hidden = false;
                 p.style.animation = 'none';
-                void p.offsetWidth; /* reflow */
+                void p.offsetWidth;
                 p.style.animation = '';
             } else {
                 p.hidden = true;
@@ -113,9 +95,6 @@ const AdminUI = (() => {
         });
     };
 
-    /* ====================================================================
-       SOCKET STATUS
-    ==================================================================== */
     const updateSocketStatus = (status) => {
         const el = $('#socketStatus');
         if (!el) return;
@@ -137,9 +116,6 @@ const AdminUI = (() => {
         }
     };
 
-    /* ====================================================================
-       DASHBOARD STATS
-    ==================================================================== */
     const renderStats = (data) => {
         if (!data) return;
 
@@ -157,9 +133,6 @@ const AdminUI = (() => {
         _animateIfNum($('#statTotalCustomers'), data.totalCustomers);
     };
 
-    /* ====================================================================
-       DASHBOARD RECENT ORDERS
-    ==================================================================== */
     const renderRecentOrders = (orders) => {
         const container = $('#dashRecentOrders');
         if (!container) return;
@@ -176,9 +149,6 @@ const AdminUI = (() => {
             </div>`).join('');
     };
 
-    /* ====================================================================
-       LIVE ORDER CARDS
-    ==================================================================== */
     const renderOrderCards = (orders, container) => {
         const target = container || $('#liveOrdersContainer');
         if (!target) return;
@@ -254,9 +224,6 @@ const AdminUI = (() => {
         </div>`;
     };
 
-    /* ====================================================================
-       ORDER HISTORY TABLE
-    ==================================================================== */
     const renderHistoryTable = (orders) => {
         const tbody = $('#historyTableBody');
         if (!tbody) return;
@@ -297,14 +264,10 @@ const AdminUI = (() => {
         target.innerHTML = html;
     };
 
-    /* ====================================================================
-       MENU MANAGEMENT
-    ==================================================================== */
     const renderMenuItems = (items, categories) => {
         const container = $('#menuMgmtContainer');
         if (!container) return;
 
-        /* Populate category filter dropdown */
         const catFilter = $('#menuCategoryFilter');
         if (catFilter && categories && catFilter.options.length <= 1) {
             categories.forEach(c => {
@@ -354,9 +317,6 @@ const AdminUI = (() => {
         }).join('');
     };
 
-    /* ====================================================================
-       ANALYTICS CHARTS (Lightweight Canvas)
-    ==================================================================== */
     const drawBarChart = (canvasId, labels, values, color = '#e85d04') => {
         const canvas = document.getElementById(canvasId);
         if (!canvas) return;
@@ -376,10 +336,8 @@ const AdminUI = (() => {
         const chartH = H - pad.top - pad.bottom;
         const maxVal = Math.max(...values, 1);
 
-        /* Clear */
         ctx.clearRect(0, 0, W, H);
 
-        /* Grid lines */
         ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--c-border').trim() || '#e5e7eb';
         ctx.lineWidth = 0.5;
         for (let i = 0; i <= 4; i++) {
@@ -387,7 +345,6 @@ const AdminUI = (() => {
             ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
         }
 
-        /* Y axis labels */
         ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--c-text-soft').trim() || '#6b7280';
         ctx.font = '11px Inter, sans-serif';
         ctx.textAlign = 'right';
@@ -397,7 +354,6 @@ const AdminUI = (() => {
             ctx.fillText(val, pad.left - 8, y + 4);
         }
 
-        /* Bars */
         const barGap = 8;
         const barW = Math.max(16, (chartW - barGap * (labels.length + 1)) / labels.length);
         const totalBarArea = barW * labels.length + barGap * (labels.length + 1);
@@ -408,7 +364,6 @@ const AdminUI = (() => {
             const barH = (val / maxVal) * chartH;
             const y = pad.top + chartH - barH;
 
-            /* Bar */
             ctx.beginPath();
             const r = Math.min(4, barW / 2);
             ctx.moveTo(x, y + r);
@@ -422,13 +377,11 @@ const AdminUI = (() => {
             ctx.fill();
             ctx.globalAlpha = 1;
 
-            /* Value on top */
             ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--c-text').trim() || '#111827';
             ctx.font = 'bold 11px Inter, sans-serif';
             ctx.textAlign = 'center';
             if (val > 0) ctx.fillText(val, x + barW / 2, y - 6);
 
-            /* X label */
             ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--c-text-soft').trim() || '#6b7280';
             ctx.font = '11px Inter, sans-serif';
             ctx.fillText(labels[i], x + barW / 2, H - pad.bottom + 18);
@@ -450,9 +403,6 @@ const AdminUI = (() => {
             </div>`).join('');
     };
 
-    /* ====================================================================
-       NOTIFICATION SOUND
-    ==================================================================== */
     const playNotifSound = () => {
         const audio = document.getElementById('notifSound');
         if (audio) {
@@ -461,12 +411,9 @@ const AdminUI = (() => {
         }
     };
 
-    /* ====================================================================
-       ANIMATED COUNTER (for dashboard stats)
-    ==================================================================== */
     const animateCounter = (element, newValue) => {
         if (!element) return;
-        /* Parse current displayed number (strip ₹, commas) */
+
         const currentText = element.textContent.replace(/[₹,\s—]/g, '');
         const from = parseInt(currentText, 10) || 0;
         const to = typeof newValue === 'number' ? newValue : (parseInt(String(newValue).replace(/[₹,\s]/g, ''), 10) || 0);
@@ -479,7 +426,7 @@ const AdminUI = (() => {
         const step = (now) => {
             const elapsed = now - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            /* ease-out cubic */
+
             const eased = 1 - Math.pow(1 - progress, 3);
             const current = Math.round(from + (to - from) * eased);
             const formatted = current.toLocaleString('en-IN');
@@ -488,7 +435,7 @@ const AdminUI = (() => {
             if (progress < 1) {
                 requestAnimationFrame(step);
             } else {
-                /* Add a brief pop effect */
+
                 element.classList.add('stat-val--pop');
                 setTimeout(() => element.classList.remove('stat-val--pop'), 300);
             }
@@ -496,9 +443,6 @@ const AdminUI = (() => {
         requestAnimationFrame(step);
     };
 
-    /* ====================================================================
-       CSV EXPORT
-    ==================================================================== */
     const exportOrdersCSV = (orders) => {
         if (!orders || !orders.length) return showToast('No data to export', 'error');
         const headers = ['Order ID', 'Customer', 'Phone', 'Type', 'Items', 'Total', 'Status', 'Date'];
@@ -527,9 +471,6 @@ const AdminUI = (() => {
         showToast('CSV exported', 'success');
     };
 
-    /* ====================================================================
-       HELPERS
-    ==================================================================== */
     const _esc = (s) => {
         if (!s) return '';
         const d = document.createElement('div');
@@ -566,10 +507,8 @@ const AdminUI = (() => {
         </div>`;
     };
 
-    /* ---------- Init confirm dialog ---------- */
     _setupConfirm();
 
-    /* ---------- Public surface ---------- */
     return Object.freeze({
         $, $$,
         showToast, showConfirm,

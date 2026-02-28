@@ -1,14 +1,9 @@
-/**
- * customers.js — Fetch, render, and search customers.
- * Standalone page — no dependency on admin modules.
- */
 'use strict';
 
 const BASE_URL = 'https://anand-os-backend.onrender.com/api';
 
 let customersData = [];
 
-/* ============ DOM refs ============ */
 const $body         = document.getElementById('customersBody');
 const $search       = document.getElementById('searchInput');
 const $searchCount  = document.getElementById('searchCount');
@@ -19,7 +14,6 @@ const $totalOrders  = document.getElementById('totalOrders');
 const $avgSpend     = document.getElementById('avgSpend');
 const $empty        = document.getElementById('emptyState');
 
-/* ============ Helpers ============ */
 const fmt = n => '₹' + Number(n || 0).toLocaleString('en-IN');
 
 function relativeDate(dateStr) {
@@ -32,7 +26,6 @@ function relativeDate(dateStr) {
     return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: '2-digit' });
 }
 
-/* ============ Fetch ============ */
 async function loadCustomers() {
     try {
         const [custRes, analyticsRes] = await Promise.all([
@@ -49,8 +42,6 @@ async function loadCustomers() {
             showEmpty();
         }
 
-        /* Use analytics endpoint for accurate revenue/order counts
-           (only counts COMPLETED orders, excludes cancelled/deleted) */
         if (analyticsJson.success && analyticsJson.data) {
             updateSummaryFromAnalytics(analyticsJson.data, customersData.length);
         } else {
@@ -59,12 +50,11 @@ async function loadCustomers() {
     } catch (err) {
         console.error('[Customers] Load failed:', err);
         $body.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--c-red)">Failed to load — server may be waking up. Retrying…</td></tr>`;
-        // Retry once after 4s (Render cold start)
+
         setTimeout(loadCustomers, 4000);
     }
 }
 
-/* ============ Render table ============ */
 function renderCustomers(customers) {
     $empty.hidden = customers.length > 0;
     $body.innerHTML = '';
@@ -95,11 +85,6 @@ function showEmpty() {
     $body.innerHTML = '';
 }
 
-/* ============ Summary cards ============ */
-/**
- * Primary: use analytics endpoint (only COMPLETED orders, excludes cancelled/deleted).
- * This ensures revenue matches the admin dashboard.
- */
 function updateSummaryFromAnalytics(analytics, customerCount) {
     const revenue = analytics.totalRevenue || 0;
     const orders  = analytics.totalOrders  || 0;
@@ -113,7 +98,6 @@ function updateSummaryFromAnalytics(analytics, customerCount) {
     $headerCount.textContent = count + ' total';
 }
 
-/** Fallback: compute from customer records if analytics endpoint unavailable. */
 function updateSummaryFallback(customers) {
     const count = customers.length;
     const revenue = customers.reduce((s, c) => s + (c.totalSpent || 0), 0);
@@ -127,7 +111,6 @@ function updateSummaryFallback(customers) {
     $headerCount.textContent = count + ' total';
 }
 
-/* ============ Search ============ */
 $search.addEventListener('input', () => {
     const q = $search.value.trim().toLowerCase();
 
@@ -146,7 +129,6 @@ $search.addEventListener('input', () => {
     $searchCount.textContent = filtered.length + ' / ' + customersData.length;
 });
 
-/* ============ XSS-safe escape ============ */
 function esc(str) {
     if (!str) return '';
     const d = document.createElement('div');
@@ -154,5 +136,4 @@ function esc(str) {
     return d.innerHTML;
 }
 
-/* ============ Init ============ */
 loadCustomers();

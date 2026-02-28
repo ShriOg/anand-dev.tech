@@ -1,18 +1,7 @@
-/* 
-   ANAND DEV OS — Responsive Styles
-   Mobile-first approach with progressive enhancement
-*/
-
-/* ══════════════════════════════════════════════════════════════════════════
-   BASE MOBILE STYLES (Default - Mobile First)
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* On mobile, nav__links is hidden - mobile.js creates bottom sheet navigation */
 .nav__links {
   display: none;
 }
 
-/* On mobile, hide nav__links--open state too (bottom sheet is used instead) */
 .nav__links--open {
   display: none;
 }
@@ -103,10 +92,6 @@
   font-size: var(--text-xs);
   white-space: nowrap;
 }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   TABLET BREAKPOINT (768px and up)
-   ══════════════════════════════════════════════════════════════════════════ */
 
 @media (min-width: 768px) {
   .nav__toggle {
@@ -267,10 +252,6 @@
   }
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   DESKTOP BREAKPOINT (1024px and up)
-   ══════════════════════════════════════════════════════════════════════════ */
-
 @media (min-width: 1024px) {
   .nav {
     padding: var(--space-4) 0;
@@ -331,7 +312,7 @@
   .focus-card__actions {
     opacity: 0;
     transform: translateY(8px);
-    transition: 
+    transition:
       opacity 150ms var(--ease-out),
       transform 150ms var(--ease-out);
   }
@@ -368,10 +349,6 @@
   }
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   LARGE DESKTOP BREAKPOINT (1280px and up)
-   ══════════════════════════════════════════════════════════════════════════ */
-
 @media (min-width: 1280px) {
   .featured-grid {
     gap: var(--space-8);
@@ -385,10 +362,6 @@
     padding: 0 var(--space-8);
   }
 }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   MOBILE BOTTOM SHEET NAVIGATION
-   ══════════════════════════════════════════════════════════════════════════ */
 
 .mobile-bottom-sheet__backdrop {
   position: fixed;
@@ -481,10 +454,6 @@
   width: 100%;
   height: 100%;
 }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   MOBILE PROJECT MODAL
-   ══════════════════════════════════════════════════════════════════════════ */
 
 .mobile-project-modal {
   position: fixed;
@@ -653,20 +622,12 @@
   pointer-events: none;
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   BODY STATES
-   ══════════════════════════════════════════════════════════════════════════ */
-
 body.mobile-menu-open,
 body.mobile-modal-open {
   overflow: hidden;
   position: fixed;
   width: 100%;
 }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   HIRE PAGE RESPONSIVE
-   ══════════════════════════════════════════════════════════════════════════ */
 
 .hire-hero {
   padding: var(--space-20) 0 var(--space-10);
@@ -776,10 +737,6 @@ body.mobile-modal-open {
   color: var(--text-secondary);
   margin-bottom: var(--space-4);
 }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   DEV-OS PAGE RESPONSIVE
-   ══════════════════════════════════════════════════════════════════════════ */
 
 .dev-os__tabs {
   display: flex;
@@ -914,10 +871,6 @@ body.mobile-modal-open {
   }
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   LAB PAGE RESPONSIVE
-   ══════════════════════════════════════════════════════════════════════════ */
-
 .lab-demo {
   border-radius: var(--radius-lg);
 }
@@ -959,10 +912,6 @@ body.mobile-modal-open {
     font-size: var(--text-sm);
   }
 }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   TOUCH TARGET ENHANCEMENTS
-   ══════════════════════════════════════════════════════════════════════════ */
 
 @media (hover: none) and (pointer: coarse) {
   .btn {
@@ -1008,10 +957,6 @@ body.mobile-modal-open {
   }
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   SAFE AREA INSETS
-   ══════════════════════════════════════════════════════════════════════════ */
-
 @supports (padding: env(safe-area-inset-bottom)) {
   .footer {
     padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom));
@@ -1026,10 +971,6 @@ body.mobile-modal-open {
   }
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   REDUCED MOTION
-   ══════════════════════════════════════════════════════════════════════════ */
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1040,19 +981,11 @@ body.mobile-modal-open {
   }
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   FOCUS VISIBLE IMPROVEMENTS
-   ══════════════════════════════════════════════════════════════════════════ */
-
 @media (hover: hover) {
   :focus:not(:focus-visible) {
     outline: none;
   }
 }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   NAV TOGGLE ANIMATION
-   ══════════════════════════════════════════════════════════════════════════ */
 
 .nav__toggle--active span:nth-child(1) {
   transform: rotate(45deg) translate(5px, 5px);
@@ -1074,10 +1007,6 @@ body.mobile-modal-open {
   transition: transform 300ms ease;
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   TECH STACK RESPONSIVE
-   ══════════════════════════════════════════════════════════════════════════ */
-
 .focus-overlay__tech-stack {
   display: flex;
   flex-wrap: wrap;
@@ -1095,4 +1024,3 @@ body.mobile-modal-open {
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
 }
-

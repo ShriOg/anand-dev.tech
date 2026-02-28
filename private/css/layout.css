@@ -1,9 +1,3 @@
-/* ═══════════════════════════════════════════════════════════
-   PRIVATE SPACE - LAYOUT
-   Nothing OS Inspired × Minimal × Calm
-   ═══════════════════════════════════════════════════════════ */
-
-/* App Container */
 .ps-app {
   display: none;
   min-height: 100vh;
@@ -25,16 +19,12 @@
   }
 }
 
-/* Main Layout */
 .ps-layout {
   display: flex;
   width: 100%;
   min-height: 100vh;
 }
 
-/* ═══════════════════════════════════
-   SIDEBAR - Quiet, Minimal Navigation
-   ═══════════════════════════════════ */
 .ps-sidebar {
   width: var(--ps-sidebar-width);
   height: 100vh;
@@ -46,7 +36,7 @@
   display: flex;
   flex-direction: column;
   z-index: var(--ps-z-sticky);
-  transition: 
+  transition:
     width var(--ps-duration-slow) var(--ps-ease-smooth),
     transform var(--ps-duration-slow) var(--ps-ease-smooth);
 }
@@ -88,7 +78,7 @@
   justify-content: center;
   border-radius: var(--ps-radius-lg);
   color: var(--ps-text-muted);
-  transition: 
+  transition:
     background var(--ps-duration-normal) var(--ps-ease-smooth),
     color var(--ps-duration-normal) var(--ps-ease-smooth);
 }
@@ -131,7 +121,7 @@
   color: var(--ps-text-muted);
   font-size: var(--ps-text-sm);
   font-weight: var(--ps-weight-medium);
-  transition: 
+  transition:
     background var(--ps-duration-normal) var(--ps-ease-smooth),
     color var(--ps-duration-normal) var(--ps-ease-smooth),
     opacity var(--ps-duration-normal) var(--ps-ease-smooth);
@@ -150,14 +140,12 @@
   opacity: 0.6;
 }
 
-/* Clean active state - no stuck highlights */
 .ps-nav-item.active {
   background: rgba(255, 255, 255, 0.035);
   color: var(--ps-text-primary);
   opacity: 1;
 }
 
-/* Thin left indicator bar */
 .ps-nav-item.active::before {
   content: '';
   position: absolute;
@@ -171,7 +159,6 @@
   opacity: 0.6;
 }
 
-/* Her Mode pink accent for active nav */
 [data-ai-mode="her"] .ps-nav-item.active {
   background: var(--ps-her-accent-muted);
 }
@@ -217,15 +204,11 @@
   display: none;
 }
 
-/* Sidebar Footer */
 .ps-sidebar-footer {
   padding: var(--ps-space-4);
   border-top: 1px solid var(--ps-border-subtle);
 }
 
-/* ═══════════════════════════════════
-   MAIN CONTENT
-   ═══════════════════════════════════ */
 .ps-main {
   flex: 1;
   margin-left: var(--ps-sidebar-width);
@@ -239,9 +222,6 @@
   margin-left: var(--ps-sidebar-collapsed);
 }
 
-/* ═══════════════════════════════════
-   TOP BAR - Minimal Header
-   ═══════════════════════════════════ */
 .ps-topbar {
   height: var(--ps-header-height);
   padding: 0 var(--ps-space-8);
@@ -283,7 +263,7 @@
   justify-content: center;
   border-radius: var(--ps-radius-md);
   color: var(--ps-text-muted);
-  transition: 
+  transition:
     background var(--ps-duration-normal) var(--ps-ease-smooth),
     color var(--ps-duration-normal) var(--ps-ease-smooth),
     opacity var(--ps-duration-normal) var(--ps-ease-smooth);
@@ -307,7 +287,6 @@
   height: 18px;
 }
 
-/* AI Panel Toggle Button - when AI panel is collapsed */
 .ps-topbar-btn.ps-ai-toggle {
   position: relative;
 }
@@ -329,9 +308,6 @@
   opacity: 1;
 }
 
-/* ═══════════════════════════════════
-   CONTENT AREA
-   ═══════════════════════════════════ */
 .ps-content {
   flex: 1;
   display: flex;
@@ -344,9 +320,6 @@
   overflow-y: auto;
 }
 
-/* ═══════════════════════════════════
-   AI PANEL - Intelligent Sidebar
-   ═══════════════════════════════════ */
 .ps-ai-panel {
   width: var(--ps-ai-panel-width);
   height: calc(100vh - var(--ps-header-height));
@@ -357,7 +330,7 @@
   border-left: 1px solid var(--ps-border-subtle);
   display: flex;
   flex-direction: column;
-  transition: 
+  transition:
     width var(--ps-duration-slow) var(--ps-ease-smooth),
     opacity var(--ps-duration-slow) var(--ps-ease-smooth);
 }
@@ -385,7 +358,6 @@
   opacity: 0.6;
 }
 
-/* Her Mode indicator in AI panel header */
 [data-ai-mode="her"] .ps-ai-panel-title {
   color: var(--ps-her-accent-text);
   opacity: 0.8;
@@ -400,7 +372,7 @@
   border-radius: var(--ps-radius-md);
   color: var(--ps-text-muted);
   opacity: 0.4;
-  transition: 
+  transition:
     background var(--ps-duration-normal) var(--ps-ease-smooth),
     color var(--ps-duration-normal) var(--ps-ease-smooth),
     opacity var(--ps-duration-normal) var(--ps-ease-smooth);
@@ -417,14 +389,12 @@
   opacity: 0.7;
 }
 
-/* AI Panel Content */
 .ps-ai-panel-content {
   flex: 1;
   padding: var(--ps-space-4);
   overflow-y: auto;
 }
 
-/* AI Panel Empty State - Calm & Minimal */
 .ps-ai-panel-empty {
   display: flex;
   flex-direction: column;
@@ -451,9 +421,6 @@
   opacity: 0.5;
 }
 
-/* ═══════════════════════════════════
-   SECTION WRAPPER
-   ═══════════════════════════════════ */
 .ps-section {
   display: none;
   animation: ps-section-enter var(--ps-duration-normal) var(--ps-ease-out);
@@ -474,9 +441,6 @@
   }
 }
 
-/* ═══════════════════════════════════
-   NAV SECTION LABELS
-   ═══════════════════════════════════ */
 .ps-nav .ps-nav-section {
   margin-top: var(--ps-space-6);
   margin-bottom: var(--ps-space-2);
@@ -501,13 +465,11 @@
   display: none;
 }
 
-/* Section Title Icons */
 .ps-section-title .ps-title-icon {
   margin-right: var(--ps-space-2);
   font-size: var(--ps-text-lg);
 }
 
-/* Text Utilities */
 .ps-text-muted {
   color: var(--ps-text-muted);
 }

@@ -1,15 +1,7 @@
-/**
- * ═══════════════════════════════════════════════════════════
- * PERSONAL SPACE - ABHILASHA AI APPLICATION
- * Emotional AI Chat with Streaming, Imported Chats, Photos, Videos
- * ═══════════════════════════════════════════════════════════
- */
-
 const HerApp = {
   SESSION_KEY: 'ps_session_active',
   currentSection: 'chat',
-  
-  // Chat state
+
   sessions: [],
   currentSession: null,
   isTyping: false,
@@ -17,17 +9,15 @@ const HerApp = {
   memories: [],
   currentMood: null,
   streamingMessageEl: null,
-  
-  // Photos/Videos state
+
   photos: [],
   videos: [],
   currentPhotoIndex: 0,
-  
-  // Daily/Mood state
+
   todayEntry: null,
   selectedMood: null,
   moods: [],
-  
+
   moodEmojis: {
     happy: '😊',
     loved: '🥰',
@@ -38,20 +28,17 @@ const HerApp = {
     angry: '😠',
     excited: '🤩'
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // INITIALIZATION
-  // ═══════════════════════════════════════════════════════════
+
   async init() {
-    // Auth check - redirect to lock screen if not authenticated
+
     if (!this.isAuthenticated()) {
       window.location.href = '/private/';
       return;
     }
-    
+
     document.getElementById('authCheck').classList.add('hidden');
     document.getElementById('herApp').classList.add('visible');
-    
+
     await this.initDatabase();
     await this.loadTrainingData();
     await this.loadMemories();
@@ -60,49 +47,45 @@ const HerApp = {
     await this.loadPhotos();
     await this.loadVideos();
     await this.loadDailyEntry();
-    
+
     this.bindEvents();
     this.bindAIStatusEvents();
     this.bindMobileNavEvents();
     this.renderSessions();
     this.setDates();
-    
+
     if (this.sessions.length > 0) {
       this.loadSession(this.sessions[0].id);
     }
-    
-    // Check AI relay status on init
+
     this.checkAIStatus();
-    
+
     console.log('[Abhilasha] Initialized');
   },
-  
+
   isAuthenticated() {
     return sessionStorage.getItem(this.SESSION_KEY) === 'true';
   },
-  
+
   async initDatabase() {
     if (typeof Database !== 'undefined') {
       await Database.init();
     }
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // MOBILE NAVIGATION
-  // ═══════════════════════════════════════════════════════════
+
   bindMobileNavEvents() {
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const sidebarClose = document.getElementById('sidebarClose');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     const sidebar = document.getElementById('sidebar');
-    
+
     console.log('[Mobile Nav] Binding events...', {
       mobileMenuBtn: !!mobileMenuBtn,
       sidebarClose: !!sidebarClose,
       sidebarOverlay: !!sidebarOverlay,
       sidebar: !!sidebar
     });
-    
+
     if (mobileMenuBtn) {
       mobileMenuBtn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -112,7 +95,7 @@ const HerApp = {
         sidebarOverlay?.classList.add('visible');
       });
     }
-    
+
     if (sidebarClose) {
       sidebarClose.addEventListener('click', (e) => {
         e.preventDefault();
@@ -121,13 +104,13 @@ const HerApp = {
         sidebarOverlay?.classList.remove('visible');
       });
     }
-    
+
     if (sidebarOverlay) {
       sidebarOverlay.addEventListener('click', () => {
         console.log('[Mobile Nav] Overlay clicked');
         sidebar?.classList.remove('open');
         sidebarOverlay?.classList.remove('visible');
-        // Failsafe: always reset pointer-events and visibility
+
         sidebarOverlay.style.pointerEvents = 'none';
         sidebarOverlay.style.visibility = 'hidden';
         sidebarOverlay.style.opacity = '0';
@@ -136,24 +119,24 @@ const HerApp = {
           sidebarOverlay.style.visibility = '';
           sidebarOverlay.style.opacity = '';
         }, 400);
-        // Also ensure sidebar is always interactable
+
         if (sidebar) sidebar.style.pointerEvents = 'auto';
       });
     }
   },
-  
+
   closeMobileNav() {
     const sidebar = document.getElementById('sidebar');
     const sidebarOverlay = document.getElementById('sidebarOverlay');
     if (sidebar) sidebar.classList.remove('open');
     if (sidebarOverlay) {
       sidebarOverlay.classList.remove('visible');
-      // Failsafe: always reset pointer-events and visibility
+
       sidebarOverlay.style.pointerEvents = 'none';
       sidebarOverlay.style.visibility = 'hidden';
       sidebarOverlay.style.opacity = '0';
     }
-    // Also, after a short delay, clear any inline styles (let CSS handle it)
+
     setTimeout(() => {
       if (sidebarOverlay) {
         sidebarOverlay.style.pointerEvents = '';
@@ -162,36 +145,33 @@ const HerApp = {
       }
     }, 400);
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // AI CONNECTION STATUS
-  // ═══════════════════════════════════════════════════════════
+
   bindAIStatusEvents() {
-    // Listen for AI connection status changes
+
     window.addEventListener('ai-connection-status', (e) => {
       const { message, isConnecting } = e.detail;
       this.updateAIStatusUI(isConnecting, message);
     });
   },
-  
+
   async checkAIStatus() {
     if (typeof AIService !== 'undefined') {
-      // On website, always ready (direct OpenAI)
+
       if (!AIService.isLocalhost) {
         this.updateAIStatusUI(false, '');
         return;
       }
-      // On localhost, check relay
+
       const isOnline = await AIService.checkRelayHealth();
       this.updateAIStatusUI(!isOnline, isOnline ? '' : 'Connecting...');
     }
   },
-  
+
   updateAIStatusUI(isConnecting, message) {
     const statusEl = document.getElementById('chatStatus');
     const bannerEl = document.getElementById('aiBanner');
     const bannerTextEl = document.getElementById('aiBannerText');
-    
+
     if (statusEl) {
       if (isConnecting) {
         statusEl.textContent = 'Connecting...';
@@ -202,7 +182,7 @@ const HerApp = {
         statusEl.classList.remove('connecting', 'offline');
       }
     }
-    
+
     if (bannerEl) {
       if (isConnecting && message) {
         bannerEl.classList.add('visible');
@@ -212,7 +192,7 @@ const HerApp = {
       }
     }
   },
-  
+
   setDates() {
     const today = new Date();
     const dateStr = today.toLocaleDateString('en-US', {
@@ -220,40 +200,34 @@ const HerApp = {
       month: 'long',
       day: 'numeric'
     });
-    
+
     const todayDate = document.getElementById('todayDate');
     const moodDate = document.getElementById('moodDate');
-    
+
     if (todayDate) todayDate.textContent = dateStr;
     if (moodDate) moodDate.textContent = dateStr;
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // EVENT BINDING
-  // ═══════════════════════════════════════════════════════════
+
   bindEvents() {
-    // Sidebar Navigation (desktop & mobile)
+
     document.querySelectorAll('.her-nav-item[data-section]').forEach(item => {
-      // Only bind to <button> nav items (not <a> links)
+
       if (item.tagName === 'BUTTON') {
         item.addEventListener('click', (e) => {
           e.preventDefault();
           this.navigateTo(item.dataset.section);
-          // On mobile, close sidebar after navigation
+
           if (window.innerWidth <= 1024) {
             this.closeMobileNav();
           }
         });
       }
     });
-    
-    // Lock button
+
     document.getElementById('lockBtn')?.addEventListener('click', () => this.lock());
-    
-    // Sidebar toggle
+
     document.getElementById('sidebarToggle')?.addEventListener('click', () => this.toggleSidebar());
-    
-    // Chat - Remove all previous listeners before binding
+
     const sendBtn = document.getElementById('sendBtn');
     const input = document.getElementById('chatInput');
     const form = document.getElementById('chatForm');
@@ -263,10 +237,10 @@ const HerApp = {
     if (input) {
       input.replaceWith(input.cloneNode(true));
     }
-    // Re-query after replace
+
     const newSendBtn = document.getElementById('sendBtn');
     const newInput = document.getElementById('chatInput');
-    // Guard with requestInProgress
+
     this.requestInProgress = false;
     if (newSendBtn) {
       newSendBtn.addEventListener('click', async () => {
@@ -288,44 +262,37 @@ const HerApp = {
       });
       newInput.addEventListener('input', () => this.autoResizeInput(newInput));
     }
-    // Log AIService available
+
     if (typeof AIService !== 'undefined') {
       console.log('[Abhilasha] AIService available');
     }
-    
-    // Training modal
+
     document.getElementById('toggleTrainingBtn')?.addEventListener('click', () => this.openTrainingModal());
-    
-    // Import chat
+
     document.getElementById('importChatBtn')?.addEventListener('click', () => this.openImportModal());
-    
-    // Photos
+
     document.getElementById('uploadPhotoBtn')?.addEventListener('click', () => {
       document.getElementById('photoUploadInput')?.click();
     });
     document.getElementById('photoUploadInput')?.addEventListener('change', (e) => this.handlePhotoUpload(e));
-    
-    // Videos
+
     document.getElementById('uploadVideoBtn')?.addEventListener('click', () => {
       document.getElementById('videoUploadInput')?.click();
     });
     document.getElementById('videoUploadInput')?.addEventListener('change', (e) => this.handleVideoUpload(e));
-    
-    // Lightbox
+
     document.getElementById('lightboxClose')?.addEventListener('click', () => this.closeLightbox());
     document.getElementById('lightboxPrev')?.addEventListener('click', () => this.prevPhoto());
     document.getElementById('lightboxNext')?.addEventListener('click', () => this.nextPhoto());
     document.getElementById('lightbox')?.addEventListener('click', (e) => {
       if (e.target.id === 'lightbox') this.closeLightbox();
     });
-    
-    // Video player
+
     document.getElementById('videoPlayerClose')?.addEventListener('click', () => this.closeVideoPlayer());
     document.getElementById('videoPlayer')?.addEventListener('click', (e) => {
       if (e.target.id === 'videoPlayer') this.closeVideoPlayer();
     });
-    
-    // Daily Entry
+
     document.getElementById('saveDailyBtn')?.addEventListener('click', () => this.saveDailyEntry());
     document.getElementById('dailyTextarea')?.addEventListener('input', () => this.updateDailyCharCount());
     document.querySelectorAll('.her-prompt-btn').forEach(btn => {
@@ -333,26 +300,22 @@ const HerApp = {
         document.getElementById('dailyPrompt').textContent = btn.dataset.prompt;
       });
     });
-    
-    // Mood
+
     document.querySelectorAll('.her-mood-option').forEach(opt => {
       opt.addEventListener('click', () => this.selectMood(opt.dataset.mood));
     });
     document.getElementById('saveMoodBtn')?.addEventListener('click', () => this.saveMood());
     document.getElementById('changeMoodBtn')?.addEventListener('click', () => this.editMood());
-    
-    // Memories
+
     document.getElementById('newMemoryBtn')?.addEventListener('click', () => this.showMemoryForm());
     document.getElementById('cancelMemoryBtn')?.addEventListener('click', () => this.hideMemoryForm());
     document.getElementById('saveMemoryBtn')?.addEventListener('click', () => this.saveMemory());
-    
-    // Modal
+
     document.getElementById('modalOverlay')?.addEventListener('click', (e) => {
       if (e.target === document.getElementById('modalOverlay')) this.closeModal();
     });
     document.getElementById('modalClose')?.addEventListener('click', () => this.closeModal());
-    
-    // Keyboard
+
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         this.closeLightbox();
@@ -365,20 +328,16 @@ const HerApp = {
       }
     });
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // NAVIGATION
-  // ═══════════════════════════════════════════════════════════
+
   navigateTo(section) {
-    // Remove 'active' from all nav items first (failsafe)
+
     document.querySelectorAll('.her-nav-item').forEach(item => {
       item.classList.remove('active');
     });
-    // Set active only on the correct nav item
+
     const activeNav = document.querySelector(`.her-nav-item[data-section='${section}']`);
     if (activeNav) activeNav.classList.add('active');
 
-    // Hide all sections, show only the selected one
     document.querySelectorAll('.her-section').forEach(sec => {
       sec.classList.remove('active');
     });
@@ -387,7 +346,6 @@ const HerApp = {
 
     this.currentSection = section;
 
-    // Load section data
     switch (section) {
       case 'photos':
         this.loadPhotos();
@@ -408,27 +366,24 @@ const HerApp = {
         this.loadImportedChats();
         break;
     }
-    // Always close sidebar on mobile after navigation
+
     if (window.innerWidth <= 1024) {
       this.closeMobileNav();
     }
   },
-  
+
   toggleSidebar() {
     document.getElementById('sidebar')?.classList.toggle('open');
   },
-  
+
   lock() {
     sessionStorage.removeItem(this.SESSION_KEY);
     window.location.href = 'index.html';
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // CHAT SESSIONS
-  // ═══════════════════════════════════════════════════════════
+
   async loadSessions() {
     if (typeof Database === 'undefined') return;
-    
+
     try {
       this.sessions = await Database.getAll('her_mode_chats');
       this.sessions.sort((a, b) => (b.updatedAt || b.timestamp) - (a.updatedAt || a.timestamp));
@@ -436,11 +391,11 @@ const HerApp = {
       this.sessions = [];
     }
   },
-  
+
   renderSessions() {
     const container = document.getElementById('chatSessions');
     if (!container) return;
-    
+
     if (this.sessions.length === 0) {
       container.innerHTML = `
         <div style="padding: 1rem; text-align: center; color: var(--text-muted); font-size: 0.75rem;">
@@ -449,14 +404,14 @@ const HerApp = {
       `;
       return;
     }
-    
+
     container.innerHTML = this.sessions.map(session => {
       const preview = this.getSessionPreview(session);
       const isActive = session.id === this.currentSession?.id;
       const time = this.formatRelativeTime(session.updatedAt || session.timestamp);
-      
+
       return `
-        <button class="her-chat-session-item ${isActive ? 'active' : ''}" 
+        <button class="her-chat-session-item ${isActive ? 'active' : ''}"
                 data-id="${session.id}"
                 onclick="HerApp.loadSession('${session.id}')">
           <span class="her-chat-session-preview">${this.escapeHtml(preview)}</span>
@@ -465,7 +420,7 @@ const HerApp = {
       `;
     }).join('');
   },
-  
+
   getSessionPreview(session) {
     if (!session.messages || session.messages.length === 0) {
       return 'New conversation';
@@ -474,20 +429,20 @@ const HerApp = {
     const content = lastMsg.content || '';
     return content.substring(0, 40) + (content.length > 40 ? '...' : '');
   },
-  
+
   formatRelativeTime(timestamp) {
     if (!timestamp) return '';
     const now = Date.now();
     const diff = now - timestamp;
-    
+
     if (diff < 60000) return 'Now';
     if (diff < 3600000) return Math.floor(diff / 60000) + 'm';
     if (diff < 86400000) return Math.floor(diff / 3600000) + 'h';
     if (diff < 604800000) return Math.floor(diff / 86400000) + 'd';
-    
+
     return new Date(timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   },
-  
+
   startNewSession() {
     this.currentSession = {
       id: crypto.randomUUID(),
@@ -495,15 +450,15 @@ const HerApp = {
       createdAt: Date.now(),
       updatedAt: Date.now()
     };
-    
+
     this.renderMessages();
     this.renderSessions();
     document.getElementById('chatInput')?.focus();
   },
-  
+
   async loadSession(sessionId) {
     if (typeof Database === 'undefined') return;
-    
+
     try {
       const session = await Database.get('her_mode_chats', sessionId);
       if (session) {
@@ -515,13 +470,13 @@ const HerApp = {
       console.warn('Could not load session:', e);
     }
   },
-  
+
   async saveSession() {
     if (!this.currentSession || this.currentSession.messages.length === 0) return;
     if (typeof Database === 'undefined') return;
-    
+
     this.currentSession.updatedAt = Date.now();
-    
+
     try {
       await Database.put('her_mode_chats', this.currentSession);
       await this.loadSessions();
@@ -530,64 +485,56 @@ const HerApp = {
       console.warn('Could not save session:', e);
     }
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // MESSAGES - WITH STREAMING
-  // ═══════════════════════════════════════════════════════════
+
   async sendMessage() {
     const input = document.getElementById('chatInput');
     const content = input?.value?.trim();
-    
+
     if (!content || this.isTyping) return;
-    
+
     if (!this.currentSession) {
       this.startNewSession();
     }
-    
-    // Add user message
+
     this.currentSession.messages.push({
       role: 'user',
       content,
       timestamp: Date.now()
     });
-    
+
     input.value = '';
     input.style.height = 'auto';
-    
+
     this.renderMessages();
     this.scrollToBottom();
-    
-    // Use streaming response
+
     await this.generateStreamingResponse(content);
-    
+
     await this.saveSession();
     this.scrollToBottom();
   },
-  
+
   async generateStreamingResponse(userMessage) {
     this.isTyping = true;
-    
-    // Show streaming message bubble
+
     this.showStreamingBubble();
-    
+
     try {
-      // Build conversation history INCLUDING the new user message
+
       const conversationHistory = this.currentSession?.messages
         ?.slice(-10)
         ?.map(m => ({ role: m.role, content: m.content })) || [];
-      
+
       console.log('[Abhilasha] Sending', conversationHistory.length, 'messages to AI');
       console.log('[Abhilasha] Last message:', conversationHistory[conversationHistory.length - 1]?.content);
-      
+
       let fullResponse = '';
-      
-      // Use AIService - MUST call real API
+
       if (typeof AIService !== 'undefined') {
         console.log('[Abhilasha] AIService available, calling chatStream...');
 
-        // Try streaming first
         const result = await AIService.chatStream('her', conversationHistory, (chunk, accumulated) => {
-          // Normalize chunk for safety
+
           const safeChunk = typeof AIService.normalizeAIContent === 'function' ? AIService.normalizeAIContent(chunk) : chunk;
           const safeAccum = typeof AIService.normalizeAIContent === 'function' ? AIService.normalizeAIContent(accumulated) : accumulated;
           console.log('[Abhilasha] Stream chunk received:', safeChunk?.substring(0, 20));
@@ -600,7 +547,7 @@ const HerApp = {
         if (result.success && result.response) {
           fullResponse = typeof AIService.normalizeAIContent === 'function' ? AIService.normalizeAIContent(result.response) : result.response;
         } else {
-          // Streaming failed - try non-streaming...
+
           console.log('[Abhilasha] Streaming failed, trying non-streaming...');
           const fallbackResult = await AIService.chat('her', conversationHistory);
           console.log('[Abhilasha] Non-stream result:', fallbackResult.success, fallbackResult.error || '');
@@ -609,53 +556,51 @@ const HerApp = {
             fullResponse = typeof AIService.normalizeAIContent === 'function' ? AIService.normalizeAIContent(fallbackResult.response) : fallbackResult.response;
             await this.typewriterEffect(fullResponse);
           } else {
-            // API FAILED - Show system message, NOT fake response
+
             fullResponse = "Abhilasha is quiet right now… something's off 💭";
             console.error('[Abhilasha] API FAILED:', fallbackResult.error);
           }
         }
       } else {
-        // No AIService - system error
+
         console.error('[Abhilasha] AIService not available!');
         fullResponse = "Abhilasha is quiet right now… something's off 💭";
       }
-      
-      // Finalize the message
+
       this.hideStreamingBubble();
-      
+
       this.currentSession.messages.push({
         role: 'assistant',
         content: fullResponse,
         timestamp: Date.now()
       });
-      
+
       this.renderMessages();
-      
+
     } catch (e) {
       console.warn('[Abhilasha] Response error:', e);
       this.hideStreamingBubble();
-      
+
       this.currentSession.messages.push({
         role: 'assistant',
         content: "Kuch technical issue hua... firse try karo? 💭",
         timestamp: Date.now(),
         error: true
       });
-      
+
       this.renderMessages();
     }
-    
+
     this.isTyping = false;
   },
-  
+
   showStreamingBubble() {
     const container = document.getElementById('chatMessages');
     if (!container) return;
-    
-    // Remove empty state if present
+
     const emptyEl = container.querySelector('.her-chat-empty');
     if (emptyEl) emptyEl.style.display = 'none';
-    
+
     const streamEl = document.createElement('div');
     streamEl.className = 'her-message her-message-assistant her-streaming-message';
     streamEl.id = 'streamingMessage';
@@ -668,23 +613,23 @@ const HerApp = {
     this.streamingMessageEl = streamEl;
     this.scrollToBottom();
   },
-  
+
   updateStreamingBubble(text) {
     const bubble = document.querySelector('#streamingMessage .her-message-bubble');
     if (bubble) {
       bubble.innerHTML = this.formatMessage(text) + '<span class="her-streaming-cursor">▋</span>';
     }
   },
-  
+
   hideStreamingBubble() {
     document.getElementById('streamingMessage')?.remove();
     this.streamingMessageEl = null;
   },
-  
+
   async typewriterEffect(text) {
     const words = text.split(' ');
     let accumulated = '';
-    
+
     for (let i = 0; i < words.length; i++) {
       accumulated += (i > 0 ? ' ' : '') + words[i];
       this.updateStreamingBubble(accumulated);
@@ -692,25 +637,23 @@ const HerApp = {
       await this.delay(30 + Math.random() * 40);
     }
   },
-  
+
   async generateLocalResponse(userMessage) {
     await this.delay(600 + Math.random() * 800);
-    
+
     const msg = userMessage.toLowerCase();
-    
-    // Simple greeting responses
+
     if (this.detectGreeting(msg)) {
       return this.getGreetingResponse();
     }
-    
-    // Fallback
+
     return this.getConversationalResponse(msg);
   },
-  
+
   renderMessages() {
     const container = document.getElementById('chatMessages');
     if (!container) return;
-    
+
     if (!this.currentSession || this.currentSession.messages.length === 0) {
       container.innerHTML = `
         <div class="her-chat-empty">
@@ -720,10 +663,9 @@ const HerApp = {
       `;
       return;
     }
-    
+
     console.log('[Abhilasha] Rendering', this.currentSession.messages.length, 'messages');
-    
-    // Remove duplicate messages by id+content
+
     const seen = new Set();
     const uniqueMessages = this.currentSession.messages.filter(msg => {
       const key = msg.timestamp + ':' + msg.content;
@@ -738,7 +680,7 @@ const HerApp = {
         hour: 'numeric',
         minute: '2-digit'
       });
-      // Instagram-style bubble classes
+
       const bubbleClass = isUser ? 'her-message-bubble-user' : 'her-message-bubble-assistant';
       return `
         <div class="her-message ${isUser ? 'her-message-user' : 'her-message-assistant'}">
@@ -747,11 +689,11 @@ const HerApp = {
         </div>
       `;
     }).join('');
-    // Remove blur from chat area if present
+
     container.classList.remove('blur');
     this.scrollToBottom();
   },
-  
+
   formatMessage(content) {
     if (!content) return '';
     return content
@@ -763,16 +705,15 @@ const HerApp = {
       .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
       .replace(/\*([^*]+)\*/g, '<em>$1</em>');
   },
-  
+
   showTyping() {
     this.isTyping = true;
     const container = document.getElementById('chatMessages');
     if (!container) return;
-    
-    // Remove empty state if present
+
     const emptyEl = container.querySelector('.her-chat-empty');
     if (emptyEl) emptyEl.style.display = 'none';
-    
+
     const typingEl = document.createElement('div');
     typingEl.className = 'her-message her-message-assistant her-typing-indicator';
     typingEl.id = 'typingIndicator';
@@ -786,34 +727,31 @@ const HerApp = {
     container.appendChild(typingEl);
     this.scrollToBottom();
   },
-  
+
   hideTyping() {
     this.isTyping = false;
     document.getElementById('typingIndicator')?.remove();
   },
-  
+
   scrollToBottom() {
     const container = document.getElementById('chatMessages');
     if (container) {
       container.scrollTop = container.scrollHeight;
     }
   },
-  
+
   autoResizeInput(textarea) {
     if (!textarea) return;
     textarea.style.height = 'auto';
     textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // EXPORT CHAT
-  // ═══════════════════════════════════════════════════════════
+
   showExportOptions() {
     if (!this.currentSession || this.currentSession.messages.length === 0) {
       this.showToast('No messages to export');
       return;
     }
-    
+
     const html = `
       <div class="her-export-options">
         <h3>Export Chat</h3>
@@ -840,26 +778,26 @@ const HerApp = {
         </div>
       </div>
     `;
-    
+
     this.openModal('Export Chat', html);
   },
-  
+
   exportChat(format) {
     if (!this.currentSession) return;
-    
+
     const session = this.currentSession;
     const dateStr = new Date(session.createdAt).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
     });
-    
+
     let content, filename, mimeType;
-    
+
     if (format === 'txt') {
-      // Plain text format
+
       const lines = [`Abhilasha Chat - ${dateStr}`, '═'.repeat(40), ''];
-      
+
       session.messages.forEach(msg => {
         const time = new Date(msg.timestamp).toLocaleTimeString('en-US', {
           hour: 'numeric',
@@ -870,13 +808,13 @@ const HerApp = {
         lines.push(msg.content);
         lines.push('');
       });
-      
+
       content = lines.join('\n');
       filename = `abhilasha-chat-${Date.now()}.txt`;
       mimeType = 'text/plain';
-      
+
     } else {
-      // JSON format
+
       const exportData = {
         exportedAt: new Date().toISOString(),
         session: {
@@ -891,13 +829,12 @@ const HerApp = {
           timestamp: new Date(msg.timestamp).toISOString()
         }))
       };
-      
+
       content = JSON.stringify(exportData, null, 2);
       filename = `abhilasha-chat-${Date.now()}.json`;
       mimeType = 'application/json';
     }
-    
-    // Download
+
     const blob = new Blob([content], { type: mimeType });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -907,35 +844,35 @@ const HerApp = {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     this.closeModal();
     this.showToast(`Chat exported as ${format.toUpperCase()}`);
   },
-  
+
   detectSadness(msg) {
     const sadWords = ['sad', 'dukhi', 'upset', 'hurt', 'cry', 'ro', 'rona', 'miss', 'yaad', 'alone', 'akela', 'lonely', 'tired', 'thak', 'stressed'];
     return sadWords.some(w => msg.includes(w));
   },
-  
+
   detectHappiness(msg) {
     const happyWords = ['happy', 'khush', 'excited', 'yay', 'amazing', 'great', 'awesome', 'love', 'pyaar', 'mast', 'badhiya'];
     return happyWords.some(w => msg.includes(w));
   },
-  
+
   detectLove(msg) {
     const loveWords = ['love you', 'miss you', 'pyaar', 'i love', 'tumse', 'tujhe', 'care', 'special'];
     return loveWords.some(w => msg.includes(w));
   },
-  
+
   detectGreeting(msg) {
     const greetings = ['hi', 'hello', 'hey', 'hii', 'hiii', 'namaste', 'good morning', 'good night', 'gm', 'gn'];
     return greetings.some(w => msg.startsWith(w) || msg === w);
   },
-  
+
   detectQuestion(msg) {
     return msg.includes('?') || msg.startsWith('kya') || msg.startsWith('kaisa') || msg.startsWith('kaise') || msg.startsWith('what') || msg.startsWith('how');
   },
-  
+
   getSadnessResponse() {
     const responses = [
       "Kya hua? 🥺",
@@ -947,7 +884,7 @@ const HerApp = {
     ];
     return responses[Math.floor(Math.random() * responses.length)];
   },
-  
+
   getHappyResponse() {
     const responses = [
       "Acha acha! 💗",
@@ -958,7 +895,7 @@ const HerApp = {
     ];
     return responses[Math.floor(Math.random() * responses.length)];
   },
-  
+
   getLoveResponse() {
     const responses = [
       "Aww 💗",
@@ -969,10 +906,10 @@ const HerApp = {
     ];
     return responses[Math.floor(Math.random() * responses.length)];
   },
-  
+
   getGreetingResponse() {
     const hour = new Date().getHours();
-    
+
     if (hour < 12) {
       return "Gm! ✨";
     } else if (hour < 17) {
@@ -983,7 +920,7 @@ const HerApp = {
       return "Hmm itna late? 👀";
     }
   },
-  
+
   getQuestionResponse(msg) {
     const responses = [
       "Hmm 🤔",
@@ -994,7 +931,7 @@ const HerApp = {
     ];
     return responses[Math.floor(Math.random() * responses.length)];
   },
-  
+
   getConversationalResponse(msg) {
     const responses = [
       "Acha acha 💭",
@@ -1008,7 +945,7 @@ const HerApp = {
     ];
     return responses[Math.floor(Math.random() * responses.length)];
   },
-  
+
   findTrainedResponse(msg) {
     for (const data of this.trainingData) {
       if (msg.includes(data.input?.toLowerCase())) {
@@ -1017,17 +954,17 @@ const HerApp = {
     }
     return null;
   },
-  
+
   findRelevantMemories(msg) {
     return this.memories.filter(m => {
       const content = m.content?.toLowerCase() || '';
       return msg.split(' ').some(word => content.includes(word) && word.length > 3);
     });
   },
-  
+
   getMoodContext() {
     if (!this.currentMood) return '';
-    
+
     const moodInfluence = {
       happy: 'positive and cheerful',
       sad: 'comforting and supportive',
@@ -1035,35 +972,32 @@ const HerApp = {
       stressed: 'calming and reassuring',
       neutral: 'balanced'
     };
-    
+
     return moodInfluence[this.currentMood.mood] || '';
   },
-  
+
   delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // TRAINING DATA
-  // ═══════════════════════════════════════════════════════════
+
   async loadTrainingData() {
     if (typeof Database === 'undefined') return;
-    
+
     try {
       this.trainingData = await Database.getAll('her_training_data');
     } catch (e) {
       this.trainingData = [];
     }
   },
-  
+
   openTrainingModal() {
     document.getElementById('modalTitle').textContent = 'Style Training';
-    
+
     document.getElementById('modalBody').innerHTML = `
       <p style="color: var(--text-tertiary); font-size: 0.8125rem; margin-bottom: 1.5rem;">
         Add examples to train Her Mode's conversational style. These shape how She responds - the TONE and PACING, not the exact words.
       </p>
-      
+
       <div class="her-training-form">
         <div class="her-training-form-row">
           <div class="her-form-group">
@@ -1082,7 +1016,7 @@ const HerApp = {
           Add Training Example
         </button>
       </div>
-      
+
       <div class="her-training-list">
         <h4>Training Examples</h4>
         <div id="trainingList">
@@ -1090,15 +1024,15 @@ const HerApp = {
         </div>
       </div>
     `;
-    
+
     this.openModal();
   },
-  
+
   renderTrainingList() {
     if (this.trainingData.length === 0) {
       return '<p style="color: var(--text-muted); font-size: 0.8125rem; text-align: center; padding: 1rem;">No training examples yet. Add examples above to shape Her Mode\'s style.</p>';
     }
-    
+
     return this.trainingData.map(data => `
       <div class="her-training-item">
         <div class="her-training-item-content">
@@ -1109,30 +1043,30 @@ const HerApp = {
       </div>
     `).join('');
   },
-  
+
   async addTrainingData() {
     const input = document.getElementById('trainingInput')?.value?.trim();
     const output = document.getElementById('trainingOutput')?.value?.trim();
-    
+
     if (!input || !output) {
       this.toast('Please fill both fields', 'error');
       return;
     }
-    
+
     try {
       await Database.add('her_training_data', { input, output, addedAt: Date.now() });
       await this.loadTrainingData();
-      
+
       document.getElementById('trainingInput').value = '';
       document.getElementById('trainingOutput').value = '';
       document.getElementById('trainingList').innerHTML = this.renderTrainingList();
-      
+
       this.toast('Training data added', 'success');
     } catch (e) {
       this.toast('Failed to add training data', 'error');
     }
   },
-  
+
   async deleteTrainingData(id) {
     try {
       await Database.delete('her_training_data', id);
@@ -1143,90 +1077,82 @@ const HerApp = {
       this.toast('Failed to delete', 'error');
     }
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // MEMORIES
-  // ═══════════════════════════════════════════════════════════
+
   async loadMemories() {
     if (typeof Database === 'undefined') return;
-    
+
     try {
       this.memories = await Database.getAll('memories');
     } catch (e) {
       this.memories = [];
     }
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // IMPORT CHATS - Delegates to ImportedChatViewer
-  // ═══════════════════════════════════════════════════════════
+
   openImportModal() {
-    // Use ImportedChatViewer if available
+
     if (typeof ImportedChatViewer !== 'undefined' && ImportedChatViewer.showImportModal) {
       ImportedChatViewer.showImportModal();
       return;
     }
-    
-    // Fallback modal
+
     document.getElementById('modalTitle').textContent = 'Import Chat';
-    
+
     document.getElementById('modalBody').innerHTML = `
       <p style="color: var(--text-tertiary); font-size: 0.8125rem; margin-bottom: 1.5rem;">
         Import conversations from WhatsApp or Instagram for style reference.
       </p>
-      
+
       <div class="her-import-form">
         <div class="her-import-tabs">
           <button class="her-import-tab active" data-platform="whatsapp" onclick="HerApp.selectImportPlatform(this)">WhatsApp</button>
           <button class="her-import-tab" data-platform="instagram" onclick="HerApp.selectImportPlatform(this)">Instagram</button>
         </div>
-        
+
         <div class="her-form-group">
           <label>Chat Name</label>
           <input type="text" id="importName" class="her-input" placeholder="e.g., Our Chat">
         </div>
-        
+
         <div class="her-form-group">
           <label>Paste Chat Export</label>
-          <textarea id="importContent" class="her-textarea" rows="10" 
+          <textarea id="importContent" class="her-textarea" rows="10"
             placeholder="Paste your exported chat here...&#10;&#10;WhatsApp format:&#10;1/1/24, 10:30 AM - You: Hey!&#10;1/1/24, 10:31 AM - Her: Hiii!&#10;&#10;Instagram format:&#10;You: Hey there&#10;username: Hello!"></textarea>
         </div>
-        
+
         <div class="her-form-actions">
           <button class="her-btn her-btn-secondary" onclick="HerApp.closeModal()">Cancel</button>
           <button class="her-btn her-btn-primary" onclick="HerApp.importChat()">Import Chat</button>
         </div>
       </div>
     `;
-    
+
     this.importPlatform = 'whatsapp';
     this.openModal();
   },
-  
+
   selectImportPlatform(btn) {
     document.querySelectorAll('.her-import-tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
     this.importPlatform = btn.dataset.platform;
   },
-  
+
   async importChat() {
     const name = document.getElementById('importName')?.value?.trim();
     const content = document.getElementById('importContent')?.value?.trim();
     const platform = this.importPlatform || 'whatsapp';
-    
+
     if (!content) {
       this.toast('Please paste chat content', 'error');
       return;
     }
-    
-    // Parse chat based on platform
+
     const messages = this.parseChatExport(platform, content);
-    
+
     if (messages.length === 0) {
       this.toast('Could not parse any messages. Check the format.', 'error');
       return;
     }
-    
+
     const importedChat = {
       id: crypto.randomUUID(),
       platform,
@@ -1235,13 +1161,12 @@ const HerApp = {
       messageCount: messages.length,
       importedAt: Date.now()
     };
-    
+
     try {
       await Database.add('imported_chats', importedChat);
       this.closeModal();
       this.toast(`Imported ${messages.length} messages`, 'success');
-      
-      // Refresh ImportedChatViewer if available
+
       if (typeof ImportedChatViewer !== 'undefined') {
         await ImportedChatViewer.loadChats();
         ImportedChatViewer.render();
@@ -1252,30 +1177,29 @@ const HerApp = {
       this.toast('Failed to import chat', 'error');
     }
   },
-  
+
   parseChatExport(platform, content) {
     const messages = [];
-    
-    // Detect if content is HTML (Instagram HTML export)
+
     if (content.trim().startsWith('<') || content.includes('class="_a6-g')) {
       return this.parseInstagramHtml(content);
     }
-    
+
     const lines = content.split('\n').filter(l => l.trim());
-    
+
     if (platform === 'whatsapp') {
-      // WhatsApp format: "DD/MM/YY, HH:MM am/pm - Name: Message"
+
       const waRegex = /^(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s*(\d{1,2}:\d{2}(?:\s*[AP]M)?)\s*-\s*([^:]+):\s*(.+)$/i;
-      
+
       lines.forEach(line => {
         const match = line.match(waRegex);
         if (match) {
           const [, date, time, sender, text] = match;
-          // Skip system messages
+
           if (this.isWhatsAppSystemMessage(sender, text)) return;
-          
-          const isUser = sender.toLowerCase().includes('anand') || 
-                        sender.toLowerCase().includes('you') || 
+
+          const isUser = sender.toLowerCase().includes('anand') ||
+                        sender.toLowerCase().includes('you') ||
                         sender.toLowerCase() === 'me';
           messages.push({
             sender: isUser ? 'user' : 'other',
@@ -1286,14 +1210,14 @@ const HerApp = {
         }
       });
     } else {
-      // Instagram text format: "username: message" or "You: message"
+
       const igRegex = /^([^:]+):\s*(.+)$/;
-      
+
       lines.forEach(line => {
         const match = line.match(igRegex);
         if (match) {
           const [, sender, text] = match;
-          const isUser = sender.toLowerCase() === 'you' || 
+          const isUser = sender.toLowerCase() === 'you' ||
                         sender.toLowerCase() === 'me' ||
                         sender.toLowerCase() === 'as';
           messages.push({
@@ -1304,8 +1228,7 @@ const HerApp = {
         }
       });
     }
-    
-    // Fallback: if no messages parsed, treat each line as a message
+
     if (messages.length === 0) {
       lines.forEach((line, idx) => {
         if (line.trim()) {
@@ -1317,38 +1240,33 @@ const HerApp = {
         }
       });
     }
-    
+
     return messages;
   },
-  
-  // Parse Instagram HTML export format
+
   parseInstagramHtml(htmlContent) {
     const messages = [];
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlContent, 'text/html');
-    
-    // Instagram HTML format: div.pam._3-95._2ph-._a6-g.uiBoxWhite.noborder
+
     const messageBlocks = doc.querySelectorAll('div.pam._3-95._2ph-._a6-g.uiBoxWhite.noborder');
-    
+
     messageBlocks.forEach(block => {
       const senderEl = block.querySelector('h2._a6-h');
       const contentEl = block.querySelector('div._a6-p');
       const timestampEl = block.querySelector('div._a6-o');
-      
+
       if (!senderEl || !contentEl) return;
-      
+
       const senderName = senderEl.textContent.trim();
       const timestamp = timestampEl ? timestampEl.textContent.trim() : '';
-      
-      // Extract text content, preserving structure
+
       const textContent = this.extractInstagramText(contentEl);
-      
-      // Skip system messages
+
       if (this.isInstagramSystemMessage(textContent)) return;
-      
-      // AS is the user
+
       const isUser = senderName.toLowerCase() === 'as';
-      
+
       messages.push({
         sender: isUser ? 'user' : 'other',
         isUser,
@@ -1357,15 +1275,13 @@ const HerApp = {
         senderName: senderName
       });
     });
-    
-    // Instagram exports are in reverse chronological order, so reverse
+
     return messages.reverse();
   },
-  
-  // Extract text from Instagram message content
+
   extractInstagramText(element) {
     let text = '';
-    
+
     const processNode = (node) => {
       if (node.nodeType === Node.TEXT_NODE) {
         text += node.textContent;
@@ -1381,12 +1297,11 @@ const HerApp = {
         }
       }
     };
-    
+
     element.childNodes.forEach(processNode);
     return text.trim().replace(/\n{3,}/g, '\n\n');
   },
-  
-  // Check if Instagram message is a system message
+
   isInstagramSystemMessage(text) {
     const systemPatterns = [
       /^liked a message$/i,
@@ -1396,8 +1311,7 @@ const HerApp = {
     ];
     return systemPatterns.some(p => p.test(text.trim()));
   },
-  
-  // Check if WhatsApp message is a system message
+
   isWhatsAppSystemMessage(sender, text) {
     const systemPatterns = [
       /messages and calls are end-to-end encrypted/i,
@@ -1409,19 +1323,17 @@ const HerApp = {
     ];
     return systemPatterns.some(p => p.test(text));
   },
-  
+
   async loadImportedChats() {
-    // Delegate to ImportedChatViewer if available
+
     if (typeof ImportedChatViewer !== 'undefined') {
       await ImportedChatViewer.loadChats();
       ImportedChatViewer.render();
       return;
     }
-    
-    // Load pre-existing chats from folders
+
     const preloadedChats = await this.loadPreexistingChats();
-    
-    // Load user-imported chats from database
+
     let dbChats = [];
     if (typeof Database !== 'undefined') {
       try {
@@ -1430,17 +1342,14 @@ const HerApp = {
         console.warn('Could not load imported chats from DB:', e);
       }
     }
-    
-    // Combine preloaded and user-imported chats
+
     const allChats = [...preloadedChats, ...dbChats];
     this.renderImportedChats(allChats);
   },
-  
-  // Load pre-existing chats from insta/ and Whatsapp/ folders
+
   async loadPreexistingChats() {
     const chats = [];
-    
-    // Define pre-existing chat files
+
     const preexistingFiles = [
       {
         path: 'she/chats/insta/message_1.html',
@@ -1450,26 +1359,26 @@ const HerApp = {
       },
       {
         path: 'she/chats/Whatsapp/WhatsApp Chat with Abhilasha Jha.txt',
-        platform: 'whatsapp', 
+        platform: 'whatsapp',
         name: 'WhatsApp - Abhilasha',
         format: 'text'
       }
     ];
-    
+
     for (const file of preexistingFiles) {
       try {
         const response = await fetch(file.path);
         if (!response.ok) continue;
-        
+
         const content = await response.text();
         let messages = [];
-        
+
         if (file.format === 'html') {
           messages = this.parseInstagramHtml(content);
         } else {
           messages = this.parseChatExport(file.platform, content);
         }
-        
+
         if (messages.length > 0) {
           chats.push({
             id: `preloaded-${file.platform}-${file.name.replace(/\s+/g, '-').toLowerCase()}`,
@@ -1485,24 +1394,24 @@ const HerApp = {
         console.warn(`Could not load preexisting chat: ${file.path}`, e);
       }
     }
-    
+
     return chats;
   },
-  
+
   renderImportedChats(chats) {
     const grid = document.getElementById('importedChatsGrid');
     const empty = document.getElementById('importedChatsEmpty');
-    
+
     if (!grid) return;
-    
+
     if (!chats || chats.length === 0) {
       grid.innerHTML = '';
       if (empty) empty.style.display = 'block';
       return;
     }
-    
+
     if (empty) empty.style.display = 'none';
-    
+
     grid.innerHTML = chats.map(chat => `
       <div class="her-imported-chat-card" onclick="HerApp.viewImportedChat('${chat.id}')">
         <div class="her-imported-chat-header">
@@ -1518,18 +1427,16 @@ const HerApp = {
       </div>
     `).join('');
   },
-  
+
   async viewImportedChat(id) {
-    // Find the chat
+
     let chat = null;
-    
-    // Check preloaded chats first
+
     if (id.startsWith('preloaded-')) {
       const preloadedChats = await this.loadPreexistingChats();
       chat = preloadedChats.find(c => c.id === id);
     }
-    
-    // Check database chats
+
     if (!chat && typeof Database !== 'undefined') {
       try {
         const dbChats = await Database.getAll('imported_chats') || [];
@@ -1538,24 +1445,22 @@ const HerApp = {
         console.warn('Could not load chat from DB:', e);
       }
     }
-    
+
     if (!chat) {
       this.toast('Chat not found', 'error');
       return;
     }
-    
-    // Show the chat viewer
+
     const viewer = document.getElementById('importedChatViewer');
     const grid = document.getElementById('importedChatsGrid');
     const empty = document.getElementById('importedChatsEmpty');
-    
+
     if (viewer) {
-      // Hide grid, show viewer
+
       if (grid) grid.style.display = 'none';
       if (empty) empty.style.display = 'none';
       viewer.style.display = 'flex';
-      
-      // Render chat viewer
+
       viewer.innerHTML = `
         <div class="her-chat-viewer-header">
           <button class="her-btn-icon" onclick="HerApp.closeImportedChatViewer()">
@@ -1578,32 +1483,27 @@ const HerApp = {
           `).join('')}
         </div>
       `;
-      
-      // Scroll to top of messages
+
       const messagesContainer = document.getElementById('chatMessages');
       if (messagesContainer) {
         messagesContainer.scrollTop = 0;
       }
     }
   },
-  
+
   closeImportedChatViewer() {
     const viewer = document.getElementById('importedChatViewer');
     const grid = document.getElementById('importedChatsGrid');
-    
+
     if (viewer) viewer.style.display = 'none';
     if (grid) grid.style.display = 'grid';
-    
-    // Re-render to show chats
+
     this.loadImportedChats();
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // PHOTOS SECTION
-  // ═══════════════════════════════════════════════════════════
+
   async loadPhotos() {
     if (typeof Database === 'undefined') return;
-    
+
     try {
       this.photos = await Database.getAll('images');
       this.photos.sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
@@ -1613,21 +1513,21 @@ const HerApp = {
       console.warn('Could not load photos:', e);
     }
   },
-  
+
   renderPhotos() {
     const grid = document.getElementById('photosGrid');
     const empty = document.getElementById('photosEmpty');
-    
+
     if (!grid) return;
-    
+
     if (!this.photos || this.photos.length === 0) {
       grid.innerHTML = '';
       if (empty) empty.style.display = 'block';
       return;
     }
-    
+
     if (empty) empty.style.display = 'none';
-    
+
     grid.innerHTML = this.photos.map((photo, index) => `
       <div class="her-photo-item" onclick="HerApp.openLightbox(${index})">
         <img src="${photo.data}" alt="${this.escapeHtml(photo.name || 'Photo')}" loading="lazy">
@@ -1637,19 +1537,19 @@ const HerApp = {
       </div>
     `).join('');
   },
-  
+
   async handlePhotoUpload(e) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    
+
     const uploadPromises = [];
-    
+
     for (const file of files) {
       if (!file.type.startsWith('image/')) continue;
-      
+
       uploadPromises.push(this.processPhotoFile(file));
     }
-    
+
     try {
       await Promise.all(uploadPromises);
       this.toast(`Uploaded ${uploadPromises.length} photo(s)`, 'success');
@@ -1657,14 +1557,14 @@ const HerApp = {
     } catch (err) {
       this.toast('Failed to upload some photos', 'error');
     }
-    
+
     e.target.value = '';
   },
-  
+
   async processPhotoFile(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      
+
       reader.onload = async (ev) => {
         const photoData = {
           id: crypto.randomUUID(),
@@ -1674,7 +1574,7 @@ const HerApp = {
           size: file.size,
           addedAt: Date.now()
         };
-        
+
         try {
           await Database.add('images', photoData);
           resolve();
@@ -1682,46 +1582,43 @@ const HerApp = {
           reject(err);
         }
       };
-      
+
       reader.onerror = () => reject(reader.error);
       reader.readAsDataURL(file);
     });
   },
-  
+
   openLightbox(index) {
     this.currentPhotoIndex = index;
     const photo = this.photos[index];
-    
+
     if (!photo) return;
-    
+
     document.getElementById('lightboxImage').src = photo.data;
     document.getElementById('lightbox')?.classList.add('visible');
     document.body.style.overflow = 'hidden';
   },
-  
+
   closeLightbox() {
     document.getElementById('lightbox')?.classList.remove('visible');
     document.body.style.overflow = '';
   },
-  
+
   prevPhoto() {
     if (this.photos.length === 0) return;
     this.currentPhotoIndex = (this.currentPhotoIndex - 1 + this.photos.length) % this.photos.length;
     document.getElementById('lightboxImage').src = this.photos[this.currentPhotoIndex].data;
   },
-  
+
   nextPhoto() {
     if (this.photos.length === 0) return;
     this.currentPhotoIndex = (this.currentPhotoIndex + 1) % this.photos.length;
     document.getElementById('lightboxImage').src = this.photos[this.currentPhotoIndex].data;
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // VIDEOS SECTION
-  // ═══════════════════════════════════════════════════════════
+
   async loadVideos() {
     if (typeof Database === 'undefined') return;
-    
+
     try {
       this.videos = await Database.getAll('videos');
       this.videos.sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0));
@@ -1731,21 +1628,21 @@ const HerApp = {
       console.warn('Could not load videos:', e);
     }
   },
-  
+
   renderVideos() {
     const grid = document.getElementById('videosGrid');
     const empty = document.getElementById('videosEmpty');
-    
+
     if (!grid) return;
-    
+
     if (!this.videos || this.videos.length === 0) {
       grid.innerHTML = '';
       if (empty) empty.style.display = 'block';
       return;
     }
-    
+
     if (empty) empty.style.display = 'none';
-    
+
     grid.innerHTML = this.videos.map((video, index) => `
       <div class="her-video-card" onclick="HerApp.playVideo(${index})">
         <div class="her-video-thumbnail">
@@ -1759,30 +1656,30 @@ const HerApp = {
       </div>
     `).join('');
   },
-  
+
   async handleVideoUpload(e) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-    
+
     for (const file of files) {
       if (!file.type.startsWith('video/')) continue;
-      
+
       try {
         await this.processVideoFile(file);
       } catch (err) {
         console.warn('Failed to upload video:', err);
       }
     }
-    
+
     this.toast('Video(s) uploaded', 'success');
     await this.loadVideos();
     e.target.value = '';
   },
-  
+
   async processVideoFile(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      
+
       reader.onload = async (ev) => {
         const videoData = {
           id: crypto.randomUUID(),
@@ -1792,7 +1689,7 @@ const HerApp = {
           size: file.size,
           addedAt: Date.now()
         };
-        
+
         try {
           await Database.add('videos', videoData);
           resolve();
@@ -1800,62 +1697,59 @@ const HerApp = {
           reject(err);
         }
       };
-      
+
       reader.onerror = () => reject(reader.error);
       reader.readAsDataURL(file);
     });
   },
-  
+
   playVideo(index) {
     const video = this.videos[index];
     if (!video) return;
-    
+
     const videoEl = document.getElementById('videoPlayerVideo');
     if (videoEl) {
       videoEl.src = video.data;
       videoEl.play();
     }
-    
+
     document.getElementById('videoPlayer')?.classList.add('visible');
     document.body.style.overflow = 'hidden';
   },
-  
+
   closeVideoPlayer() {
     const videoEl = document.getElementById('videoPlayerVideo');
     if (videoEl) {
       videoEl.pause();
       videoEl.src = '';
     }
-    
+
     document.getElementById('videoPlayer')?.classList.remove('visible');
     document.body.style.overflow = '';
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // DAILY ENTRY SECTION
-  // ═══════════════════════════════════════════════════════════
+
   async loadDailyEntry() {
     if (typeof Database === 'undefined') return;
-    
+
     try {
       const today = new Date().toISOString().split('T')[0];
       const entries = await Database.getAll('journal');
-      
+
       this.todayEntry = entries.find(e => e.date === today);
       this.dailyHistory = entries.filter(e => e.date !== today).sort((a, b) => new Date(b.date) - new Date(a.date));
-      
+
       const textarea = document.getElementById('dailyTextarea');
       if (textarea && this.todayEntry) {
         textarea.value = this.todayEntry.content || '';
         this.updateDailyCharCount();
       }
-      
+
       this.renderDailyHistory();
     } catch (e) {
       console.warn('Could not load daily entry:', e);
     }
   },
-  
+
   updateDailyCharCount() {
     const textarea = document.getElementById('dailyTextarea');
     const counter = document.getElementById('dailyCharCount');
@@ -1863,25 +1757,25 @@ const HerApp = {
       counter.textContent = textarea.value.length;
     }
   },
-  
+
   async saveDailyEntry() {
     const textarea = document.getElementById('dailyTextarea');
     const content = textarea?.value?.trim();
-    
+
     if (!content) {
       this.toast('Write something first', 'error');
       return;
     }
-    
+
     const today = new Date().toISOString().split('T')[0];
-    
+
     const entry = {
       id: this.todayEntry?.id || crypto.randomUUID(),
       date: today,
       content,
       updatedAt: Date.now()
     };
-    
+
     try {
       await Database.put('journal', entry);
       this.todayEntry = entry;
@@ -1891,16 +1785,16 @@ const HerApp = {
       this.toast('Failed to save entry', 'error');
     }
   },
-  
+
   renderDailyHistory() {
     const container = document.getElementById('dailyHistory');
     if (!container) return;
-    
+
     if (!this.dailyHistory || this.dailyHistory.length === 0) {
       container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 2rem;">No previous entries yet</p>';
       return;
     }
-    
+
     container.innerHTML = this.dailyHistory.slice(0, 10).map(entry => `
       <div class="her-daily-history-item">
         <div class="her-daily-history-date">${this.formatFullDate(entry.date)}</div>
@@ -1908,7 +1802,7 @@ const HerApp = {
       </div>
     `).join('');
   },
-  
+
   formatFullDate(dateStr) {
     return new Date(dateStr).toLocaleDateString('en-US', {
       weekday: 'long',
@@ -1917,20 +1811,17 @@ const HerApp = {
       year: 'numeric'
     });
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // MOOD SECTION
-  // ═══════════════════════════════════════════════════════════
+
   async loadMoodData() {
     if (typeof Database === 'undefined') return;
-    
+
     try {
       const today = new Date().toISOString().split('T')[0];
       const moods = await Database.getAll('mood');
-      
+
       this.currentMood = moods.find(m => m.date === today);
       this.moodHistory = moods.filter(m => m.date !== today).sort((a, b) => new Date(b.date) - new Date(a.date));
-      
+
       this.renderMoodUI();
       this.renderMoodHistory();
     } catch (e) {
@@ -1938,11 +1829,11 @@ const HerApp = {
       console.warn('Could not load mood:', e);
     }
   },
-  
+
   renderMoodUI() {
     const selector = document.getElementById('moodSelector');
     const current = document.getElementById('currentMoodDisplay');
-    
+
     if (this.currentMood) {
       if (selector) selector.style.display = 'none';
       if (current) {
@@ -1959,10 +1850,10 @@ const HerApp = {
       if (current) current.style.display = 'none';
     }
   },
-  
+
   selectMood(mood) {
     this.selectedMood = mood;
-    
+
     document.querySelectorAll('.her-mood-option').forEach(opt => {
       const isSelected = opt.dataset.mood === mood;
       opt.classList.toggle('selected', isSelected);
@@ -1971,21 +1862,21 @@ const HerApp = {
       }
     });
   },
-  
+
   editMood() {
     this.currentMood = null;
     this.renderMoodUI();
   },
-  
+
   async saveMood() {
     if (!this.selectedMood) {
       this.toast('Select a mood first', 'error');
       return;
     }
-    
+
     const note = document.getElementById('moodNote')?.value?.trim() || '';
     const today = new Date().toISOString().split('T')[0];
-    
+
     const moodEntry = {
       id: crypto.randomUUID(),
       date: today,
@@ -1993,7 +1884,7 @@ const HerApp = {
       note,
       recordedAt: Date.now()
     };
-    
+
     try {
       await Database.add('mood', moodEntry);
       this.toast('Mood saved 💕', 'success');
@@ -2003,16 +1894,16 @@ const HerApp = {
       this.toast('Failed to save mood', 'error');
     }
   },
-  
+
   renderMoodHistory() {
     const container = document.getElementById('moodHistory');
     if (!container) return;
-    
+
     if (!this.moodHistory || this.moodHistory.length === 0) {
       container.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 2rem;">No mood history yet</p>';
       return;
     }
-    
+
     container.innerHTML = this.moodHistory.slice(0, 14).map(entry => `
       <div class="her-mood-history-item">
         <span class="her-mood-history-emoji">${this.moodEmojis[entry.mood] || '💭'}</span>
@@ -2023,13 +1914,10 @@ const HerApp = {
       </div>
     `).join('');
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // MEMORIES SECTION (Full CRUD)
-  // ═══════════════════════════════════════════════════════════
+
   async loadMemoriesSection() {
     if (typeof Database === 'undefined') return;
-    
+
     try {
       this.memories = await Database.getAll('memories');
       this.memories.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
@@ -2039,21 +1927,21 @@ const HerApp = {
       console.warn('Could not load memories:', e);
     }
   },
-  
+
   renderMemories() {
     const grid = document.getElementById('memoriesGrid');
     const empty = document.getElementById('memoriesEmpty');
-    
+
     if (!grid) return;
-    
+
     if (!this.memories || this.memories.length === 0) {
       grid.innerHTML = '';
       if (empty) empty.style.display = 'block';
       return;
     }
-    
+
     if (empty) empty.style.display = 'none';
-    
+
     grid.innerHTML = this.memories.map(memory => `
       <div class="her-memory-card">
         <div class="her-memory-header">
@@ -2066,12 +1954,12 @@ const HerApp = {
       </div>
     `).join('');
   },
-  
+
   showMemoryForm() {
     document.getElementById('memoryForm')?.classList.add('visible');
     document.getElementById('memoryTitle')?.focus();
   },
-  
+
   hideMemoryForm() {
     document.getElementById('memoryForm')?.classList.remove('visible');
     document.getElementById('memoryTitle').value = '';
@@ -2079,18 +1967,18 @@ const HerApp = {
     document.getElementById('memoryDate').value = '';
     document.getElementById('memoryMood').value = '';
   },
-  
+
   async saveMemory() {
     const title = document.getElementById('memoryTitle')?.value?.trim();
     const content = document.getElementById('memoryContent')?.value?.trim();
     const date = document.getElementById('memoryDate')?.value;
     const mood = document.getElementById('memoryMood')?.value;
-    
+
     if (!title || !content) {
       this.toast('Title and content are required', 'error');
       return;
     }
-    
+
     const memory = {
       id: crypto.randomUUID(),
       title,
@@ -2099,7 +1987,7 @@ const HerApp = {
       mood: mood || null,
       createdAt: Date.now()
     };
-    
+
     try {
       await Database.add('memories', memory);
       this.hideMemoryForm();
@@ -2109,7 +1997,7 @@ const HerApp = {
       this.toast('Failed to save memory', 'error');
     }
   },
-  
+
   async deleteMemory(id) {
     const confirmed = await this.showConfirm({
       icon: '🗑️',
@@ -2118,9 +2006,9 @@ const HerApp = {
       confirmText: 'Delete',
       cancelText: 'Keep'
     });
-    
+
     if (!confirmed) return;
-    
+
     try {
       await Database.delete('memories', id);
       this.toast('Memory deleted', 'success');
@@ -2129,10 +2017,7 @@ const HerApp = {
       this.toast('Failed to delete memory', 'error');
     }
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // CONFIRMATION DIALOG
-  // ═══════════════════════════════════════════════════════════
+
   showConfirm({ icon = '⚠️', title = 'Are you sure?', message = '', confirmText = 'Confirm', cancelText = 'Cancel', danger = true } = {}) {
     return new Promise((resolve) => {
       const overlay = document.getElementById('confirmOverlay');
@@ -2141,104 +2026,94 @@ const HerApp = {
       const messageEl = document.getElementById('confirmMessage');
       const confirmBtn = document.getElementById('confirmAction');
       const cancelBtn = document.getElementById('confirmCancel');
-      
+
       if (!overlay) {
         resolve(false);
         return;
       }
-      
+
       iconEl.textContent = icon;
       titleEl.textContent = title;
       messageEl.textContent = message;
       confirmBtn.textContent = confirmText;
       cancelBtn.textContent = cancelText;
-      
+
       if (danger) {
         confirmBtn.className = 'her-btn her-btn-danger';
       } else {
         confirmBtn.className = 'her-btn her-btn-primary';
       }
-      
+
       overlay.classList.add('visible');
-      
+
       const cleanup = () => {
         overlay.classList.remove('visible');
         confirmBtn.removeEventListener('click', onConfirm);
         cancelBtn.removeEventListener('click', onCancel);
         overlay.removeEventListener('click', onOverlayClick);
       };
-      
+
       const onConfirm = () => {
         cleanup();
         resolve(true);
       };
-      
+
       const onCancel = () => {
         cleanup();
         resolve(false);
       };
-      
+
       const onOverlayClick = (e) => {
         if (e.target === overlay) {
           cleanup();
           resolve(false);
         }
       };
-      
+
       confirmBtn.addEventListener('click', onConfirm);
       cancelBtn.addEventListener('click', onCancel);
       overlay.addEventListener('click', onOverlayClick);
     });
   },
 
-  // ═══════════════════════════════════════════════════════════
-  // MODAL
-  // ═══════════════════════════════════════════════════════════
   openModal() {
     document.getElementById('modalOverlay')?.classList.add('visible');
   },
-  
+
   closeModal() {
     document.getElementById('modalOverlay')?.classList.remove('visible');
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // TOAST
-  // ═══════════════════════════════════════════════════════════
+
   toast(message, type = 'info') {
     const container = document.getElementById('toastContainer');
     if (!container) return;
-    
+
     const toast = document.createElement('div');
     toast.className = `her-toast ${type}`;
     toast.textContent = message;
     container.appendChild(toast);
-    
+
     setTimeout(() => {
       toast.classList.add('hiding');
       setTimeout(() => toast.remove(), 300);
     }, 3000);
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // UTILITIES
-  // ═══════════════════════════════════════════════════════════
+
   escapeHtml(str) {
     if (!str) return '';
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
   },
-  
+
   formatDate(timestamp) {
     if (!timestamp) return '';
-    return new Date(timestamp).toLocaleDateString('en-US', { 
-      month: 'short', 
+    return new Date(timestamp).toLocaleDateString('en-US', {
+      month: 'short',
       day: 'numeric',
       year: 'numeric'
     });
   }
 };
 
-// Initialize on load
 document.addEventListener('DOMContentLoaded', () => HerApp.init());

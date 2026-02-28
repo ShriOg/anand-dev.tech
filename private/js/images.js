@@ -1,10 +1,3 @@
-/**
- * ═══════════════════════════════════════════════════════════
- * PRIVATE SPACE - IMAGES MODULE
- * Local image vault with tags and notes
- * ═══════════════════════════════════════════════════════════
- */
-
 const PSImages = (function() {
   'use strict';
 
@@ -13,17 +6,11 @@ const PSImages = (function() {
   let _searchQuery = '';
   let _selectedImage = null;
 
-  /**
-   * Load images view
-   */
   async function load() {
     await loadImages();
     render();
   }
 
-  /**
-   * Load all images from storage
-   */
   async function loadImages() {
     try {
       _images = await PSStorage.getAll(PSStorage.STORES.IMAGES);
@@ -33,9 +20,6 @@ const PSImages = (function() {
     }
   }
 
-  /**
-   * Render images interface
-   */
   function render() {
     const container = document.querySelector('#section-images .ps-workspace');
     if (!container) return;
@@ -45,8 +29,8 @@ const PSImages = (function() {
     container.innerHTML = `
       <div class="ps-images">
         <div class="ps-images-header">
-          <input type="text" class="ps-input ps-input-search ps-images-search" 
-                 placeholder="Search images..." 
+          <input type="text" class="ps-input ps-input-search ps-images-search"
+                 placeholder="Search images..."
                  value="${escapeHtml(_searchQuery)}"
                  oninput="PSImages.search(this.value)">
           <div class="ps-images-filters">
@@ -76,9 +60,6 @@ const PSImages = (function() {
     `;
   }
 
-  /**
-   * Render upload area (empty state)
-   */
   function renderUploadArea() {
     return `
       <div class="ps-upload-area" onclick="PSImages.triggerUpload()" ondragover="PSImages.handleDragOver(event)" ondrop="PSImages.handleDrop(event)" ondragleave="this.classList.remove('dragover')">
@@ -93,9 +74,6 @@ const PSImages = (function() {
     `;
   }
 
-  /**
-   * Render image card
-   */
   function renderImageCard(image) {
     return `
       <div class="ps-image-card" onclick="PSImages.openImage('${image.id}')">
@@ -132,30 +110,21 @@ const PSImages = (function() {
     `;
   }
 
-  /**
-   * Filter images based on search
-   */
   function filterImages() {
     if (!_searchQuery) return _images;
-    
+
     const query = _searchQuery.toLowerCase();
-    return _images.filter(img => 
+    return _images.filter(img =>
       (img.name || '').toLowerCase().includes(query) ||
       (img.notes || '').toLowerCase().includes(query) ||
       (img.tags || []).some(tag => tag.toLowerCase().includes(query))
     );
   }
 
-  /**
-   * Trigger file upload
-   */
   function triggerUpload() {
     document.getElementById('imageUpload')?.click();
   }
 
-  /**
-   * Handle file upload
-   */
   async function handleUpload(event) {
     const files = event.target.files;
     if (!files || files.length === 0) return;
@@ -169,7 +138,7 @@ const PSImages = (function() {
 
       try {
         const dataUrl = await readFileAsDataUrl(file);
-        
+
         const image = {
           id: PSCrypto.generateId(),
           name: file.name,
@@ -191,14 +160,10 @@ const PSImages = (function() {
 
     render();
     PSUI.toast(`Uploaded ${files.length} image(s)`, 'success');
-    
-    // Reset input
+
     event.target.value = '';
   }
 
-  /**
-   * Read file as data URL
-   */
   function readFileAsDataUrl(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -208,30 +173,21 @@ const PSImages = (function() {
     });
   }
 
-  /**
-   * Handle drag over
-   */
   function handleDragOver(event) {
     event.preventDefault();
     event.currentTarget.classList.add('dragover');
   }
 
-  /**
-   * Handle drop
-   */
   async function handleDrop(event) {
     event.preventDefault();
     event.currentTarget.classList.remove('dragover');
-    
+
     const files = event.dataTransfer?.files;
     if (files && files.length > 0) {
       await handleUpload({ target: { files } });
     }
   }
 
-  /**
-   * Open image detail
-   */
   function openImage(imageId) {
     const image = _images.find(img => img.id === imageId);
     if (!image) return;
@@ -254,7 +210,7 @@ const PSImages = (function() {
                 Added: ${new Date(image.createdAt).toLocaleDateString()}
               </p>
             </div>
-            
+
             <div class="ps-image-modal-section">
               <div class="ps-image-modal-label">Tags</div>
               <div class="ps-editor-tags-list" style="margin-bottom: 8px;">
@@ -265,14 +221,14 @@ const PSImages = (function() {
                   </span>
                 `).join('')}
               </div>
-              <input type="text" class="ps-input ps-input-sm" 
-                     placeholder="Add tag..." 
+              <input type="text" class="ps-input ps-input-sm"
+                     placeholder="Add tag..."
                      onkeydown="PSImages.handleTagInput(event, '${image.id}')">
             </div>
-            
+
             <div class="ps-image-modal-section">
               <div class="ps-image-modal-label">Notes</div>
-              <textarea class="ps-textarea ps-image-notes" 
+              <textarea class="ps-textarea ps-image-notes"
                         placeholder="Add notes about this image..."
                         onchange="PSImages.updateNotes('${image.id}', this.value)">${escapeHtml(image.notes || '')}</textarea>
             </div>
@@ -286,14 +242,11 @@ const PSImages = (function() {
     });
   }
 
-  /**
-   * Handle tag input
-   */
   async function handleTagInput(event, imageId) {
     if (event.key === 'Enter' || event.key === ',') {
       event.preventDefault();
       const tag = event.target.value.trim().replace(',', '');
-      
+
       if (tag) {
         const image = _images.find(img => img.id === imageId);
         if (image) {
@@ -301,7 +254,7 @@ const PSImages = (function() {
           if (!image.tags.includes(tag)) {
             image.tags.push(tag);
             await PSStorage.save(PSStorage.STORES.IMAGES, image);
-            openImage(imageId); // Refresh modal
+            openImage(imageId);
           }
         }
       }
@@ -309,21 +262,15 @@ const PSImages = (function() {
     }
   }
 
-  /**
-   * Remove tag
-   */
   async function removeTag(imageId, tag) {
     const image = _images.find(img => img.id === imageId);
     if (image && image.tags) {
       image.tags = image.tags.filter(t => t !== tag);
       await PSStorage.save(PSStorage.STORES.IMAGES, image);
-      openImage(imageId); // Refresh modal
+      openImage(imageId);
     }
   }
 
-  /**
-   * Update notes
-   */
   async function updateNotes(imageId, notes) {
     const image = _images.find(img => img.id === imageId);
     if (image) {
@@ -332,9 +279,6 @@ const PSImages = (function() {
     }
   }
 
-  /**
-   * Download image
-   */
   function downloadImage(imageId) {
     const image = _images.find(img => img.id === imageId);
     if (!image) return;
@@ -345,53 +289,37 @@ const PSImages = (function() {
     link.click();
   }
 
-  /**
-   * Delete image
-   */
   function deleteImage(imageId) {
     PSUI.confirm('Are you sure you want to delete this image?', async () => {
       await PSStorage.remove(PSStorage.STORES.IMAGES, imageId);
       _images = _images.filter(img => img.id !== imageId);
-      
-      // Close modal if open
+
       document.querySelector('.ps-modal-overlay')?.remove();
-      
+
       PSUI.toast('Image deleted', 'success');
       render();
     });
   }
 
-  /**
-   * Set view mode
-   */
   function setView(mode) {
     _viewMode = mode;
     render();
   }
 
-  /**
-   * Search images
-   */
   function search(query) {
     _searchQuery = query;
     render();
   }
 
-  /**
-   * Format date
-   */
   function formatDate(timestamp) {
     if (!timestamp) return '';
-    return new Date(timestamp).toLocaleDateString([], { 
-      month: 'short', 
+    return new Date(timestamp).toLocaleDateString([], {
+      month: 'short',
       day: 'numeric',
       year: 'numeric'
     });
   }
 
-  /**
-   * Format file size
-   */
   function formatSize(bytes) {
     if (!bytes) return '0 B';
     const units = ['B', 'KB', 'MB', 'GB'];
@@ -403,9 +331,6 @@ const PSImages = (function() {
     return `${bytes.toFixed(1)} ${units[i]}`;
   }
 
-  /**
-   * Escape HTML
-   */
   function escapeHtml(str) {
     if (!str) return '';
     const div = document.createElement('div');

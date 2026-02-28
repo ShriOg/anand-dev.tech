@@ -1,10 +1,3 @@
-/**
- * ═══════════════════════════════════════════════════════════
- * PRIVATE SPACE - STORAGE MODULE
- * IndexedDB wrapper with encryption support
- * ═══════════════════════════════════════════════════════════
- */
-
 const PSStorage = (function() {
   'use strict';
 
@@ -23,9 +16,6 @@ const PSStorage = (function() {
 
   let _db = null;
 
-  /**
-   * Initialize IndexedDB
-   */
   function init() {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -39,44 +29,37 @@ const PSStorage = (function() {
       request.onupgradeneeded = (event) => {
         const db = event.target.result;
 
-        // Notes store
         if (!db.objectStoreNames.contains(STORES.NOTES)) {
           const notesStore = db.createObjectStore(STORES.NOTES, { keyPath: 'id' });
           notesStore.createIndex('folder', 'folder', { unique: false });
           notesStore.createIndex('updatedAt', 'updatedAt', { unique: false });
         }
 
-        // Images store
         if (!db.objectStoreNames.contains(STORES.IMAGES)) {
           const imagesStore = db.createObjectStore(STORES.IMAGES, { keyPath: 'id' });
           imagesStore.createIndex('createdAt', 'createdAt', { unique: false });
         }
 
-        // Logs store
         if (!db.objectStoreNames.contains(STORES.LOGS)) {
           const logsStore = db.createObjectStore(STORES.LOGS, { keyPath: 'date' });
         }
 
-        // Memory store
         if (!db.objectStoreNames.contains(STORES.MEMORY)) {
           const memoryStore = db.createObjectStore(STORES.MEMORY, { keyPath: 'id' });
           memoryStore.createIndex('type', 'type', { unique: false });
         }
 
-        // Projects store
         if (!db.objectStoreNames.contains(STORES.PROJECTS)) {
           const projectsStore = db.createObjectStore(STORES.PROJECTS, { keyPath: 'id' });
           projectsStore.createIndex('updatedAt', 'updatedAt', { unique: false });
         }
 
-        // Chat store
         if (!db.objectStoreNames.contains(STORES.CHAT)) {
           const chatStore = db.createObjectStore(STORES.CHAT, { keyPath: 'id' });
           chatStore.createIndex('sessionId', 'sessionId', { unique: false });
           chatStore.createIndex('createdAt', 'createdAt', { unique: false });
         }
 
-        // Settings store
         if (!db.objectStoreNames.contains(STORES.SETTINGS)) {
           db.createObjectStore(STORES.SETTINGS, { keyPath: 'key' });
         }
@@ -84,9 +67,6 @@ const PSStorage = (function() {
     });
   }
 
-  /**
-   * Get database connection
-   */
   async function getDB() {
     if (!_db) {
       await init();
@@ -94,20 +74,16 @@ const PSStorage = (function() {
     return _db;
   }
 
-  /**
-   * Save encrypted item
-   */
   async function save(storeName, data) {
     const db = await getDB();
     const encrypted = await PSCrypto.encrypt(JSON.stringify(data));
-    
+
     const item = {
       id: data.id || PSCrypto.generateId(),
       data: encrypted,
       updatedAt: Date.now()
     };
 
-    // Copy index fields unencrypted for querying
     if (data.folder !== undefined) item.folder = data.folder;
     if (data.type !== undefined) item.type = data.type;
     if (data.sessionId !== undefined) item.sessionId = data.sessionId;
@@ -125,9 +101,6 @@ const PSStorage = (function() {
     });
   }
 
-  /**
-   * Get and decrypt item
-   */
   async function get(storeName, id) {
     const db = await getDB();
 
@@ -152,9 +125,6 @@ const PSStorage = (function() {
     });
   }
 
-  /**
-   * Get all items from store (decrypted)
-   */
   async function getAll(storeName) {
     const db = await getDB();
 
@@ -180,9 +150,6 @@ const PSStorage = (function() {
     });
   }
 
-  /**
-   * Get items by index
-   */
   async function getByIndex(storeName, indexName, value) {
     const db = await getDB();
 
@@ -209,9 +176,6 @@ const PSStorage = (function() {
     });
   }
 
-  /**
-   * Delete item
-   */
   async function remove(storeName, id) {
     const db = await getDB();
 
@@ -225,9 +189,6 @@ const PSStorage = (function() {
     });
   }
 
-  /**
-   * Clear entire store
-   */
   async function clearStore(storeName) {
     const db = await getDB();
 
@@ -241,9 +202,6 @@ const PSStorage = (function() {
     });
   }
 
-  /**
-   * Get count of items in store
-   */
   async function count(storeName) {
     const db = await getDB();
 
@@ -257,12 +215,9 @@ const PSStorage = (function() {
     });
   }
 
-  /**
-   * Export all data (encrypted)
-   */
   async function exportAll() {
     const data = {};
-    
+
     for (const storeName of Object.values(STORES)) {
       const db = await getDB();
       data[storeName] = await new Promise((resolve, reject) => {
@@ -277,9 +232,6 @@ const PSStorage = (function() {
     return data;
   }
 
-  /**
-   * Import data (must be pre-encrypted)
-   */
   async function importAll(data) {
     const db = await getDB();
 
@@ -297,9 +249,6 @@ const PSStorage = (function() {
     return true;
   }
 
-  /**
-   * Delete entire database
-   */
   function deleteDatabase() {
     return new Promise((resolve, reject) => {
       if (_db) {
@@ -313,7 +262,6 @@ const PSStorage = (function() {
     });
   }
 
-  // Settings helpers
   async function getSetting(key, defaultValue = null) {
     try {
       const result = await get(STORES.SETTINGS, key);

@@ -8,15 +8,15 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="robots" content="noindex, nofollow">
   <title>Personal Space - Abhilasha</title>
-  
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  
+
   <link rel="stylesheet" href="css/personal.css">
 </head>
 <body>
-  <!-- Auth Check Overlay -->
+
   <div class="auth-check" id="authCheck">
     <div class="auth-check-content">
       <div class="auth-spinner"></div>
@@ -24,16 +24,14 @@
     </div>
   </div>
 
-  <!-- Ambient Background -->
   <div class="her-ambient">
     <div class="her-ambient-orb orb-1"></div>
     <div class="her-ambient-orb orb-2"></div>
     <div class="her-ambient-orb orb-3"></div>
   </div>
 
-  <!-- Main App -->
   <div class="her-app" id="herApp">
-    <!-- Sidebar -->
+
     <aside class="her-sidebar" id="sidebar">
       <div class="her-sidebar-header">
         <a href="index.html" class="her-logo">
@@ -52,32 +50,32 @@
         <div class="her-nav-section">
           <span class="her-nav-label">Connect</span>
         </div>
-        
+
         <button class="her-nav-item active" data-section="chat">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
           <span>Abhilasha</span>
         </button>
-        
+
         <a href="she/chats.html" class="her-nav-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
           </svg>
           <span>Imported Chats</span>
         </a>
-        
+
         <div class="her-nav-section">
           <span class="her-nav-label">Gallery</span>
         </div>
-        
+
         <a href="she/index.html" class="her-nav-item">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
           </svg>
           <span>She Gallery</span>
         </a>
-        
+
         <button class="her-nav-item" data-section="photos">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
@@ -86,7 +84,7 @@
           </svg>
           <span>Photos</span>
         </button>
-        
+
         <button class="her-nav-item" data-section="videos">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polygon points="23 7 16 12 23 17 23 7"/>
@@ -94,11 +92,11 @@
           </svg>
           <span>Videos</span>
         </button>
-        
+
         <div class="her-nav-section">
           <span class="her-nav-label">Rituals</span>
         </div>
-        
+
         <button class="her-nav-item" data-section="daily">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 20h9"/>
@@ -106,7 +104,7 @@
           </svg>
           <span>Daily Entry</span>
         </button>
-        
+
         <button class="her-nav-item" data-section="mood">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="10"/>
@@ -116,7 +114,7 @@
           </svg>
           <span>Mood</span>
         </button>
-        
+
         <button class="her-nav-item" data-section="memories">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
@@ -132,7 +130,7 @@
           </svg>
           <span>Back to Dashboard</span>
         </a>
-        
+
         <button class="her-nav-item her-nav-lock" id="lockBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
@@ -143,12 +141,11 @@
       </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="her-main">
-      <!-- Chat Section -->
+
       <section class="her-section active" id="section-chat">
         <div class="her-chat-layout">
-          <!-- Chat Sidebar -->
+
           <aside class="her-chat-sidebar" id="chatSidebar">
             <div class="her-chat-sidebar-header">
               <span>Conversations</span>
@@ -160,20 +157,19 @@
               </button>
             </div>
             <div class="her-chat-sessions" id="chatSessions">
-              <!-- Sessions loaded dynamically -->
+
             </div>
           </aside>
-          
-          <!-- Chat Main -->
+
           <div class="her-chat-main">
-            <!-- AI Connection Banner -->
+
             <div class="her-ai-banner" id="aiBanner">
               <div class="spinner"></div>
               <span id="aiBannerText">Connecting...</span>
             </div>
-            
+
             <div class="her-chat-header">
-              <!-- Mobile Menu Toggle -->
+
               <button class="her-mobile-menu-btn" id="mobileMenuBtn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <line x1="3" y1="12" x2="21" y2="12"/>
@@ -181,7 +177,7 @@
                   <line x1="3" y1="18" x2="21" y2="18"/>
                 </svg>
               </button>
-              
+
               <div class="her-chat-header-info">
                 <span class="her-chat-header-icon">💕</span>
                 <div class="her-chat-header-text">
@@ -206,15 +202,15 @@
                 </button>
               </div>
             </div>
-            
+
             <div class="her-chat-messages" id="chatMessages">
-              <!-- Messages loaded dynamically -->
+
               <div class="her-chat-empty">
                 <span class="her-chat-empty-icon">💭</span>
                 <p>Kuch baat karo...</p>
               </div>
             </div>
-            
+
             <div class="her-chat-input-container">
               <div class="her-chat-input-wrapper">
                 <textarea class="her-chat-input" id="chatInput" placeholder="Type a message..." rows="1"></textarea>
@@ -230,7 +226,6 @@
         </div>
       </section>
 
-      <!-- Imported Chats Section -->
       <section class="her-section" id="section-imported-chats">
         <div class="her-section-header">
           <div class="her-section-title-group">
@@ -248,15 +243,15 @@
             </button>
           </div>
         </div>
-        
+
         <div class="her-workspace">
           <div class="her-imported-chats-section">
-            <!-- Chat List (Left) -->
+
             <div class="her-imported-chats-list">
               <div class="her-imported-chats-grid" id="importedChatsGrid">
-                <!-- Imported chats loaded dynamically -->
+
               </div>
-              
+
               <div class="her-empty-state" id="importedChatsEmpty">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                   <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
@@ -265,17 +260,16 @@
                 <p>Add WhatsApp (.txt) or Instagram exported chats to view them here.</p>
               </div>
             </div>
-            
-            <!-- Chat Viewer (Right) -->
+
             <div class="her-chat-viewer" id="importedChatViewer" style="display: none;">
-              <!-- Chat Header -->
+
               <div class="her-chat-viewer-header">
                 <button class="her-chat-viewer-back" id="chatViewerBack" style="display: none;">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="15 18 9 12 15 6"/>
                   </svg>
                 </button>
-                
+
                 <div class="her-chat-viewer-title-group">
                   <div class="her-chat-viewer-title">
                     <span class="her-chat-viewer-platform-icon" id="viewerPlatformIcon">💬</span>
@@ -285,7 +279,7 @@
                     </div>
                   </div>
                 </div>
-                
+
                 <div class="her-chat-viewer-controls">
                   <button class="her-chat-viewer-btn" id="toggleReflectionBtn" title="Toggle reflection mode">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -294,7 +288,7 @@
                       <path d="M12 8h.01"/>
                     </svg>
                   </button>
-                  
+
                   <button class="her-chat-viewer-btn" id="toggleHeatmapBtn" title="Toggle emotion heatmap">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M12 2L2 7l10 5 10-5-10-5z"/>
@@ -302,7 +296,7 @@
                       <path d="M2 12l10 5 10-5"/>
                     </svg>
                   </button>
-                  
+
                   <button class="her-chat-viewer-btn" id="toggleLockBtn" title="Lock this chat">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
@@ -311,21 +305,18 @@
                   </button>
                 </div>
               </div>
-              
-              <!-- Search Bar -->
+
               <div class="her-chat-viewer-search-bar">
                 <input type="text" id="chatSearchInput" class="her-chat-search-input" placeholder="Search messages...">
                 <span class="her-chat-search-count" id="chatSearchCount"></span>
                 <button class="her-chat-search-clear" id="chatSearchClear" style="display: none;">×</button>
               </div>
-              
-              <!-- Messages Container with Scrubber -->
+
               <div class="her-chat-viewer-scroll-wrapper">
                 <div class="her-chat-viewer-messages" id="viewerMessages">
-                  <!-- Messages loaded dynamically -->
+
                 </div>
-                
-                <!-- Timeline Scrubber -->
+
                 <div class="her-timeline-scrubber" id="timelineScrubber">
                   <div class="her-timeline-track" id="timelineTrack">
                     <div class="her-timeline-thumb" id="timelineThumb"></div>
@@ -333,13 +324,11 @@
                   <div class="her-timeline-tooltip" id="timelineTooltip"></div>
                 </div>
               </div>
-              
-              <!-- Empty State -->
+
               <div class="her-chat-viewer-empty-state" id="chatViewerEmptyState" style="display: none;">
                 <p>No messages to display</p>
               </div>
-              
-              <!-- Locked State -->
+
               <div class="her-chat-locked-overlay" id="chatLockedOverlay" style="display: none;">
                 <div class="her-chat-locked-content">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -355,7 +344,6 @@
         </div>
       </section>
 
-      <!-- Media Viewer Modal -->
       <div class="her-media-viewer-overlay" id="mediaViewerOverlay" style="display: none;">
         <button class="her-media-viewer-close" id="mediaViewerClose">×</button>
         <button class="her-media-viewer-nav her-media-viewer-prev" id="mediaViewerPrev">‹</button>
@@ -366,7 +354,6 @@
         </div>
       </div>
 
-      <!-- Timeline Comparison Modal -->
       <div class="her-comparison-overlay" id="comparisonOverlay" style="display: none;">
         <div class="her-comparison-modal">
           <div class="her-comparison-header">
@@ -374,18 +361,17 @@
             <p class="her-comparison-subtitle">Observe patterns across conversations</p>
             <button class="her-comparison-close" id="comparisonClose">×</button>
           </div>
-          
+
           <div class="her-comparison-body">
-            <!-- Chat Selection -->
+
             <div class="her-comparison-selection" id="comparisonSelection">
               <p class="her-comparison-hint">Select 2 or more chats to compare</p>
               <div class="her-comparison-chat-list" id="comparisonChatList">
-                <!-- Chat checkboxes loaded dynamically -->
+
               </div>
               <button class="her-btn her-btn-primary" id="startComparisonBtn" disabled>Compare Selected</button>
             </div>
-            
-            <!-- Comparison View -->
+
             <div class="her-comparison-view" id="comparisonView" style="display: none;">
               <div class="her-comparison-controls">
                 <button class="her-comparison-back-btn" id="comparisonBackBtn">
@@ -399,18 +385,15 @@
                   <button class="her-comparison-view-btn" data-view="sidebyside">Side by Side</button>
                 </div>
               </div>
-              
-              <!-- Shared Time Scale -->
+
               <div class="her-comparison-timescale" id="comparisonTimescale">
-                <!-- Time markers generated dynamically -->
+
               </div>
-              
-              <!-- Timeline Arcs Container -->
+
               <div class="her-comparison-arcs" id="comparisonArcs">
-                <!-- Timeline arcs rendered dynamically -->
+
               </div>
-              
-              <!-- Phase Details -->
+
               <div class="her-comparison-phase-details" id="comparisonPhaseDetails" style="display: none;">
                 <div class="her-phase-detail-content">
                   <span class="her-phase-detail-date" id="phaseDetailDate"></span>
@@ -422,7 +405,6 @@
         </div>
       </div>
 
-      <!-- Reflection Panel (Slide-in) -->
       <div class="her-reflection-panel" id="reflectionPanel" style="display: none;">
         <div class="her-reflection-header">
           <span class="her-reflection-icon">🧠</span>
@@ -430,14 +412,13 @@
           <button class="her-reflection-dismiss" id="reflectionDismiss">×</button>
         </div>
         <div class="her-reflection-content" id="reflectionContent">
-          <!-- Reflection text appears here -->
+
         </div>
         <div class="her-reflection-footer">
           <span class="her-reflection-note">A quiet observation, not a conclusion</span>
         </div>
       </div>
 
-      <!-- Save to Memories Modal -->
       <div class="her-save-memory-overlay" id="saveMemoryOverlay" style="display: none;">
         <div class="her-save-memory-modal">
           <div class="her-save-memory-header">
@@ -445,23 +426,23 @@
             <h3>Save to Memories</h3>
             <button class="her-save-memory-close" id="saveMemoryClose">×</button>
           </div>
-          
+
           <div class="her-save-memory-body">
             <div class="her-save-memory-preview">
               <div class="her-save-memory-quote" id="saveMemoryQuote">
-                <!-- Message text preview -->
+
               </div>
               <div class="her-save-memory-source" id="saveMemorySource">
-                <!-- Source chat name and date -->
+
               </div>
             </div>
-            
+
             <div class="her-save-memory-form">
               <div class="her-form-group">
                 <label for="saveMemoryTitle">Title (optional)</label>
                 <input type="text" id="saveMemoryTitle" class="her-input" placeholder="A moment worth remembering...">
               </div>
-              
+
               <div class="her-form-group">
                 <label for="saveMemoryMood">Mood</label>
                 <select id="saveMemoryMood" class="her-select">
@@ -474,14 +455,14 @@
                   <option value="excited">🤩 Excited</option>
                 </select>
               </div>
-              
+
               <div class="her-form-group">
                 <label for="saveMemoryNote">Add a note (optional)</label>
                 <textarea id="saveMemoryNote" class="her-textarea" placeholder="Why this moment matters..." rows="3"></textarea>
               </div>
             </div>
           </div>
-          
+
           <div class="her-save-memory-footer">
             <button class="her-btn her-btn-secondary" id="saveMemoryCancelBtn">Cancel</button>
             <button class="her-btn her-btn-primary" id="saveMemoryConfirmBtn">Save Memory</button>
@@ -489,7 +470,6 @@
         </div>
       </div>
 
-      <!-- Photos Section -->
       <section class="her-section" id="section-photos">
         <div class="her-section-header">
           <div class="her-section-title-group">
@@ -522,7 +502,6 @@
         </div>
       </section>
 
-      <!-- Videos Section -->
       <section class="her-section" id="section-videos">
         <div class="her-section-header">
           <div class="her-section-title-group">
@@ -554,7 +533,6 @@
         </div>
       </section>
 
-      <!-- Daily Entry Section -->
       <section class="her-section" id="section-daily">
         <div class="her-section-header">
           <div class="her-section-title-group">
@@ -584,7 +562,6 @@
         </div>
       </section>
 
-      <!-- Mood Section -->
       <section class="her-section" id="section-mood">
         <div class="her-section-header">
           <div class="her-section-title-group">
@@ -621,7 +598,6 @@
         </div>
       </section>
 
-      <!-- Memories Section -->
       <section class="her-section" id="section-memories">
         <div class="her-section-header">
           <div class="her-section-title-group">
@@ -669,10 +645,8 @@
     </main>
   </div>
 
-  <!-- Toast Container -->
   <div class="her-toast-container" id="toastContainer"></div>
 
-  <!-- Confirmation Dialog -->
   <div class="her-confirm-overlay" id="confirmOverlay">
     <div class="her-confirm-dialog">
       <span class="her-confirm-icon" id="confirmIcon">🗑️</span>
@@ -685,7 +659,6 @@
     </div>
   </div>
 
-  <!-- Modal Overlay -->
   <div class="her-modal-overlay" id="modalOverlay">
     <div class="her-modal" id="modalContent">
       <div class="her-modal-header">
@@ -698,15 +671,13 @@
         </button>
       </div>
       <div class="her-modal-body" id="modalBody">
-        <!-- Modal content loaded dynamically -->
+
       </div>
     </div>
   </div>
 
-  <!-- Mobile Sidebar Overlay -->
   <div class="her-sidebar-overlay" id="sidebarOverlay"></div>
 
-  <!-- Lightbox -->
   <div class="her-lightbox" id="lightbox">
     <button class="her-lightbox-close" id="lightboxClose">×</button>
     <button class="her-lightbox-nav her-lightbox-prev" id="lightboxPrev">‹</button>
@@ -714,7 +685,6 @@
     <img id="lightboxImage" src="" alt="">
   </div>
 
-  <!-- Video Player -->
   <div class="her-video-player" id="videoPlayer">
     <button class="her-lightbox-close" id="videoPlayerClose">×</button>
     <video id="videoPlayerVideo" controls></video>

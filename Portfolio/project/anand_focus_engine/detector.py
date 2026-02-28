@@ -21,20 +21,19 @@ class DetectionResult:
         if self.timestamp is None:
             self.timestamp = datetime.now()
 
-
 class WindowDetector:
     def __init__(self, config_path: str):
         with open(config_path, 'r') as f:
             self.config = json.load(f)
-        
+
         self.blocked_sites: Set[str] = set(self.config.get("blocked_sites", []))
         self.blocked_window_titles: Set[str] = set(self.config.get("blocked_window_titles", []))
         self.detection_callbacks: List[Callable[[DetectionResult], None]] = []
-        
+
         self.user32 = ctypes.windll.user32
         self.kernel32 = ctypes.windll.kernel32
         self.psapi = ctypes.windll.psapi
-        
+
         self._detection_thread: Optional[threading.Thread] = None
         self._running = False
         self._lock = threading.RLock()
@@ -46,10 +45,10 @@ class WindowDetector:
     def _get_active_window_title(self) -> str:
         hwnd = self.user32.GetForegroundWindow()
         length = self.user32.GetWindowTextLength(hwnd)
-        
+
         if length == 0:
             return ""
-        
+
         buffer = ctypes.create_unicode_buffer(length + 1)
         self.user32.GetWindowTextW(hwnd, buffer, length + 1)
         return buffer.value
@@ -58,20 +57,20 @@ class WindowDetector:
         try:
             pid = ctypes.c_ulong()
             self.user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
-            
+
             process_handle = self.kernel32.OpenProcess(
                 0x0400 | 0x0010,
                 False,
                 pid.value
             )
-            
+
             if not process_handle:
                 return ""
-            
+
             buffer = (ctypes.c_char * 260)()
             self.psapi.GetModuleFileNameExA(process_handle, None, buffer, 260)
             self.kernel32.CloseHandle(process_handle)
-            
+
             process_path = buffer.value.decode('utf-8', errors='ignore')
             return Path(process_path).name if process_path else ""
         except Exception:
@@ -92,17 +91,17 @@ class WindowDetector:
 
     def detect_distraction_by_title(self) -> Optional[DetectionResult]:
         title = self._get_active_window_title()
-        
+
         if not title:
             return None
-        
+
         if self._is_blocked_title(title):
             return DetectionResult(
                 detected=True,
                 window_title=title,
                 detection_type="window_title"
             )
-        
+
         for blocked in self.blocked_sites:
             if blocked.lower() in title.lower():
                 return DetectionResult(
@@ -110,44 +109,44 @@ class WindowDetector:
                     window_title=title,
                     detection_type="site_in_title"
                 )
-        
+
         return DetectionResult(detected=False, window_title=title)
 
     def detect_distraction_by_process(self) -> Optional[DetectionResult]:
         hwnd = self.user32.GetForegroundWindow()
         process_name = self._get_process_name_from_hwnd(hwnd)
-        
+
         if not process_name:
             return None
-        
+
         if self._is_blocked_site(process_name):
             return DetectionResult(
                 detected=True,
                 process_name=process_name,
                 detection_type="browser_process"
             )
-        
+
         return None
 
     def detect_distraction(self) -> Optional[DetectionResult]:
         result = self.detect_distraction_by_title()
-        
+
         if result and result.detected:
             return result
-        
+
         result = self.detect_distraction_by_process()
         if result and result.detected:
             return result
-        
+
         return None
 
     def start_detection_loop(self, interval_seconds: float = 1.0) -> None:
         with self._lock:
             if self._running:
                 return
-            
+
             self._running = True
-        
+
         self._detection_thread = threading.Thread(
             target=self._detection_loop_worker,
             args=(interval_seconds,),
@@ -158,18 +157,18 @@ class WindowDetector:
     def stop_detection_loop(self) -> None:
         with self._lock:
             self._running = False
-        
+
         if self._detection_thread:
             self._detection_thread.join(timeout=5.0)
             self._detection_thread = None
 
     def _detection_loop_worker(self, interval_seconds: float) -> None:
         import time
-        
+
         while self._running:
             try:
                 result = self.detect_distraction()
-                
+
                 if result:
                     with self._lock:
                         for callback in self.detection_callbacks:
@@ -177,7 +176,7 @@ class WindowDetector:
                                 callback(result)
                             except Exception:
                                 pass
-                
+
                 time.sleep(interval_seconds)
             except Exception:
                 with self._lock:

@@ -1,12 +1,3 @@
-/* 
-   ANAND DEV OS — Layout Styles
-   Container, sections, grid systems, and structural elements
-*/
-
-/* ══════════════════════════════════════════════════════════════════════════
-   CONTAINERS
-   ══════════════════════════════════════════════════════════════════════════ */
-
 .container {
   width: 100%;
   max-width: var(--max-width);
@@ -21,10 +12,6 @@
 .container--wide {
   max-width: var(--max-width-wide);
 }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   SECTIONS
-   ══════════════════════════════════════════════════════════════════════════ */
 
 .section {
   padding: clamp(3rem, 8vw, 6rem) 0;
@@ -64,10 +51,6 @@
   max-width: 600px;
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   NAVIGATION
-   ══════════════════════════════════════════════════════════════════════════ */
-
 .nav {
   position: fixed;
   top: 0;
@@ -80,7 +63,7 @@
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-primary);
   transform: translateY(0);
-  transition: transform var(--duration-normal) var(--ease-out), 
+  transition: transform var(--duration-normal) var(--ease-out),
               background var(--duration-normal) var(--ease-out);
 }
 
@@ -169,7 +152,7 @@
   width: 20px;
   height: 2px;
   background: var(--text-primary);
-  transition: transform var(--duration-fast) var(--ease-out), 
+  transition: transform var(--duration-fast) var(--ease-out),
               opacity var(--duration-fast) var(--ease-out);
 }
 
@@ -184,10 +167,6 @@
 .nav__toggle--active span:nth-child(3) {
   transform: rotate(-45deg) translate(5px, -5px);
 }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   HERO
-   ══════════════════════════════════════════════════════════════════════════ */
 
 .hero {
   position: relative;
@@ -297,10 +276,6 @@
   animation: fadeInUp 0.8s var(--ease-out) 0.6s forwards;
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   FOOTER
-   ══════════════════════════════════════════════════════════════════════════ */
-
 .footer {
   padding: var(--space-8) 0;
   border-top: 1px solid var(--border-primary);
@@ -341,10 +316,6 @@
   color: var(--text-muted);
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   GRIDS
-   ══════════════════════════════════════════════════════════════════════════ */
-
 .projects-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -383,10 +354,6 @@
   direction: ltr;
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   FEATURED PROJECTS SECTION
-   ══════════════════════════════════════════════════════════════════════════ */
-
 .featured-projects {
   padding: clamp(3rem, 8vw, 6rem) 0;
 }
@@ -409,10 +376,6 @@
   font-size: var(--text-3xl);
   font-weight: 600;
 }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   SKILLS SECTION
-   ══════════════════════════════════════════════════════════════════════════ */
 
 .skills-section {
   padding: clamp(2rem, 5vw, 4rem) 0;

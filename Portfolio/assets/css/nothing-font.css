@@ -1,15 +1,3 @@
-/* 
-   NOTHING-STYLE FONT
-   Dot-matrix / technical aesthetic
-   Locally hosted for offline support
-*/
-
-/* 
-   Using system fonts with Nothing-inspired styling
-   The actual Nothing Phone uses custom NDot fonts, 
-   but we create a similar feel with monospace + spacing
-*/
-
 @font-face {
   font-family: 'Nothing Dot';
   src: local('JetBrains Mono'), local('SF Mono'), local('Consolas'), local('Monaco');
@@ -18,14 +6,12 @@
   font-display: swap;
 }
 
-/* Nothing font utility class */
 .font-nothing {
   font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
   letter-spacing: 0.05em;
   font-variant-numeric: tabular-nums;
 }
 
-/* Nothing dot-matrix style text */
 .nothing-text {
   font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
   letter-spacing: 0.1em;
@@ -33,7 +19,6 @@
   font-weight: 400;
 }
 
-/* Nothing large display numbers */
 .nothing-display {
   font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
   font-weight: 300;

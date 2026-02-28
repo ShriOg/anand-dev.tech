@@ -1,15 +1,3 @@
-#!/usr/bin/env python3
-<#
-.SYNOPSIS
-    Anand Focus Engine™ - God Mode Launcher (PowerShell)
-    
-.DESCRIPTION
-    Windows 10/11 64-bit focus lockdown system launcher
-    
-.NOTES
-    Requires Python 3.14 (64-bit)
-#>
-
 param(
     [ValidateSet("interactive", "daemon")]
     [string]$Mode = "interactive"

@@ -1,37 +1,27 @@
-/**
- * ═══════════════════════════════════════════════════════════
- * PROFESSIONAL SPACE - AI ACTIONS MANAGER
- * Chat-based interface for managing projects, links, navigation
- * ═══════════════════════════════════════════════════════════
- */
-
 const AIActions = {
   chatHistory: [],
   pendingAction: null,
   pendingData: {},
-  
-  // ═══════════════════════════════════════════════════════════
-  // INITIALIZATION
-  // ═══════════════════════════════════════════════════════════
+
   init() {
     this.bindEvents();
     console.log('[AI Actions] Initialized');
   },
-  
+
   bindEvents() {
     const input = document.getElementById('aiChatInput');
     const sendBtn = document.getElementById('aiChatSend');
-    
+
     input?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         this.handleInput();
       }
     });
-    
+
     sendBtn?.addEventListener('click', () => this.handleInput());
   },
-  
+
   handleSuggestion(text) {
     const input = document.getElementById('aiChatInput');
     if (input) {
@@ -39,38 +29,31 @@ const AIActions = {
       this.handleInput();
     }
   },
-  
+
   handleInput() {
     const input = document.getElementById('aiChatInput');
     const message = input?.value.trim();
-    
+
     if (!message) return;
-    
-    // Add user message to chat
+
     this.addMessage('user', message);
     input.value = '';
-    
-    // Process the message
+
     this.processMessage(message);
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // MESSAGE PROCESSING
-  // ═══════════════════════════════════════════════════════════
+
   processMessage(message) {
     const lower = message.toLowerCase().trim();
-    
-    // If there's a pending action requiring input
+
     if (this.pendingAction) {
       this.handlePendingAction(message);
       return;
     }
-    
-    // Match commands
+
     if (this.matchCommand(lower, ['help', 'commands', 'what can you do'])) {
       this.showHelp();
     }
-    // Projects
+
     else if (this.matchCommand(lower, ['list projects', 'show projects', 'all projects', 'list all projects'])) {
       this.listProjects();
     }
@@ -92,7 +75,7 @@ const AIActions = {
     else if (this.matchCommand(lower, ['hide project', 'unpublish project'])) {
       this.startHideProject(message);
     }
-    // Navigation
+
     else if (this.matchCommand(lower, ['nav links', 'show nav', 'navigation', 'list nav', 'show nav links'])) {
       this.listNavLinks();
     }
@@ -105,7 +88,7 @@ const AIActions = {
     else if (this.matchCommand(lower, ['delete nav', 'remove nav'])) {
       this.startDeleteNavLink(message);
     }
-    // Links
+
     else if (this.matchCommand(lower, ['project links', 'show links', 'list links'])) {
       this.listProjectLinks(message);
     }
@@ -115,35 +98,32 @@ const AIActions = {
     else if (this.matchCommand(lower, ['edit link'])) {
       this.startEditProjectLink(message);
     }
-    // Search
+
     else if (this.matchCommand(lower, ['search', 'find'])) {
       this.searchProjects(message);
     }
-    // Stats
+
     else if (this.matchCommand(lower, ['stats', 'statistics', 'overview', 'summary'])) {
       this.showStats();
     }
-    // Sync
+
     else if (this.matchCommand(lower, ['sync', 'sync projects', 'sync all'])) {
       this.syncAll();
     }
-    // AI suggestions
+
     else if (this.matchCommand(lower, ['suggest', 'improve', 'optimize'])) {
       this.startAISuggestion(message);
     }
     else {
-      // Try to understand with AI or show not understood
+
       this.handleUnknownCommand(message);
     }
   },
-  
+
   matchCommand(input, commands) {
     return commands.some(cmd => input.includes(cmd));
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // HELP & STATS
-  // ═══════════════════════════════════════════════════════════
+
   showHelp() {
     const helpText = `
       <p><strong>Here's what I can do:</strong></p>
@@ -188,19 +168,19 @@ const AIActions = {
     `;
     this.addMessage('bot', helpText);
   },
-  
+
   showStats() {
     const projects = ProApp.projects || [];
     const navLinks = ProApp.navLinks || [];
-    
+
     const published = projects.filter(p => p.status === 'published').length;
     const draft = projects.filter(p => p.status === 'draft').length;
     const hidden = projects.filter(p => p.status === 'hidden').length;
     const featured = projects.filter(p => p.featured).length;
-    
+
     const techSet = new Set();
     projects.forEach(p => (p.tech || []).forEach(t => techSet.add(t)));
-    
+
     const statsHtml = `
       <div class="ai-stats-grid">
         <div class="ai-stat-card">
@@ -231,13 +211,10 @@ const AIActions = {
     `;
     this.addMessage('bot', statsHtml);
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // PROJECTS - LIST
-  // ═══════════════════════════════════════════════════════════
+
   listProjects() {
     const projects = ProApp.projects || [];
-    
+
     if (projects.length === 0) {
       this.addMessage('bot', `
         <p>No projects found. Would you like to add one?</p>
@@ -245,7 +222,7 @@ const AIActions = {
       `);
       return;
     }
-    
+
     const projectsHtml = projects.map(p => `
       <div class="ai-project-item">
         <div class="ai-project-info">
@@ -260,21 +237,21 @@ const AIActions = {
         </div>
       </div>
     `).join('');
-    
+
     this.addMessage('bot', `
       <p><strong>${projects.length} Projects:</strong></p>
       <div class="ai-projects-list">${projectsHtml}</div>
     `);
   },
-  
+
   listFeaturedProjects() {
     const projects = (ProApp.projects || []).filter(p => p.featured);
-    
+
     if (projects.length === 0) {
       this.addMessage('bot', 'No featured projects. Use "edit project [name]" to feature a project.');
       return;
     }
-    
+
     const projectsHtml = projects.map(p => `
       <div class="ai-project-item">
         <div class="ai-project-info">
@@ -283,32 +260,32 @@ const AIActions = {
         </div>
       </div>
     `).join('');
-    
+
     this.addMessage('bot', `
       <p><strong>${projects.length} Featured Projects:</strong></p>
       <div class="ai-projects-list">${projectsHtml}</div>
     `);
   },
-  
+
   searchProjects(message) {
     const query = message.replace(/search|find/gi, '').trim().toLowerCase();
-    
+
     if (!query) {
       this.addMessage('bot', 'What would you like to search for? Example: "search python"');
       return;
     }
-    
-    const projects = (ProApp.projects || []).filter(p => 
+
+    const projects = (ProApp.projects || []).filter(p =>
       p.title?.toLowerCase().includes(query) ||
       p.description?.toLowerCase().includes(query) ||
       (p.tech || []).some(t => t.toLowerCase().includes(query))
     );
-    
+
     if (projects.length === 0) {
       this.addMessage('bot', `No projects found matching "${query}".`);
       return;
     }
-    
+
     const projectsHtml = projects.map(p => `
       <div class="ai-project-item">
         <div class="ai-project-info">
@@ -320,37 +297,34 @@ const AIActions = {
         </div>
       </div>
     `).join('');
-    
+
     this.addMessage('bot', `
       <p><strong>Found ${projects.length} project(s) matching "${query}":</strong></p>
       <div class="ai-projects-list">${projectsHtml}</div>
     `);
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // PROJECTS - ADD
-  // ═══════════════════════════════════════════════════════════
+
   startAddProject() {
     this.pendingAction = 'add_project_title';
     this.pendingData = {};
     this.addMessage('bot', 'Let\'s create a new project. What\'s the <strong>title</strong>?');
   },
-  
+
   handlePendingAction(input) {
     switch(this.pendingAction) {
-      // Add Project Flow
+
       case 'add_project_title':
         this.pendingData.title = input;
         this.pendingAction = 'add_project_description';
         this.addMessage('bot', `Great! "${input}" sounds good. Now enter a <strong>description</strong>:`);
         break;
-        
+
       case 'add_project_description':
         this.pendingData.description = input;
         this.pendingAction = 'add_project_tech';
         this.addMessage('bot', 'What <strong>technologies</strong> are used? (comma-separated, e.g., "React, Node.js, MongoDB")');
         break;
-        
+
       case 'add_project_tech':
         this.pendingData.tech = input.split(',').map(t => t.trim()).filter(Boolean);
         this.pendingAction = 'add_project_status';
@@ -363,41 +337,38 @@ const AIActions = {
           </div>
         `);
         break;
-        
+
       case 'add_project_status':
         this.pendingData.status = input.toLowerCase();
         this.completeAddProject();
         break;
-        
-      // Edit Project Flow
+
       case 'edit_project_select':
         this.selectProjectForEdit(input);
         break;
-        
+
       case 'edit_project_field':
         this.selectFieldToEdit(input);
         break;
-        
+
       case 'edit_project_value':
         this.applyProjectEdit(input);
         break;
-        
-      // Delete Project Flow
+
       case 'delete_project_select':
         this.selectProjectForDelete(input);
         break;
-        
+
       case 'delete_project_confirm':
         this.confirmDelete(input);
         break;
-        
-      // Navigation Flow
+
       case 'add_nav_label':
         this.pendingData.label = input;
         this.pendingAction = 'add_nav_url';
         this.addMessage('bot', 'What\'s the <strong>URL</strong> or path? (e.g., "/projects" or "https://...")');
         break;
-        
+
       case 'add_nav_url':
         this.pendingData.url = input;
         this.pendingAction = 'add_nav_icon';
@@ -412,55 +383,54 @@ const AIActions = {
           </div>
         `);
         break;
-        
+
       case 'add_nav_icon':
         this.pendingData.icon = input !== 'none' ? input : '';
         this.completeAddNavLink();
         break;
-        
+
       case 'edit_nav_select':
         this.selectNavForEdit(input);
         break;
-        
+
       case 'edit_nav_field':
         this.selectNavFieldToEdit(input);
         break;
-        
+
       case 'edit_nav_value':
         this.applyNavEdit(input);
         break;
-        
+
       case 'delete_nav_select':
         this.selectNavForDelete(input);
         break;
-        
+
       case 'delete_nav_confirm':
         this.confirmNavDelete(input);
         break;
-        
-      // Project Links Flow
+
       case 'add_link_project':
         this.selectProjectForLink(input);
         break;
-        
+
       case 'add_link_label':
         this.pendingData.linkLabel = input;
         this.pendingAction = 'add_link_url';
         this.addMessage('bot', 'What\'s the <strong>link URL</strong>?');
         break;
-        
+
       case 'add_link_url':
         this.pendingData.linkUrl = input;
         this.completeAddProjectLink();
         break;
-        
+
       default:
         this.pendingAction = null;
         this.pendingData = {};
         this.handleUnknownCommand(input);
     }
   },
-  
+
   continueWithValue(value) {
     const input = document.getElementById('aiChatInput');
     if (input) {
@@ -468,7 +438,7 @@ const AIActions = {
       this.handleInput();
     }
   },
-  
+
   async completeAddProject() {
     const project = {
       id: `project_${Date.now()}`,
@@ -484,11 +454,11 @@ const AIActions = {
       createdAt: Date.now(),
       updatedAt: Date.now()
     };
-    
+
     try {
       await Database.put('projects', project);
       await ProApp.loadProjects();
-      
+
       this.addMessage('bot', `
         <div class="ai-success-message">
           ✅ Project "<strong>${this.escapeHtml(project.title)}</strong>" created successfully!
@@ -505,17 +475,14 @@ const AIActions = {
     } catch (e) {
       this.addMessage('bot', `❌ Failed to create project: ${e.message}`);
     }
-    
+
     this.pendingAction = null;
     this.pendingData = {};
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // PROJECTS - EDIT
-  // ═══════════════════════════════════════════════════════════
+
   startEditProject(message) {
     const projectName = message.replace(/edit|update|modify|project/gi, '').trim();
-    
+
     if (projectName) {
       this.selectProjectForEdit(projectName);
     } else {
@@ -524,11 +491,11 @@ const AIActions = {
         this.addMessage('bot', 'No projects to edit. Create one first!');
         return;
       }
-      
+
       const projectsHtml = projects.map(p => `
         <button class="ai-choice-btn-full" onclick="AIActions.quickEdit('${p.id}')">${this.escapeHtml(p.title)}</button>
       `).join('');
-      
+
       this.pendingAction = 'edit_project_select';
       this.addMessage('bot', `
         <p>Which project would you like to edit?</p>
@@ -536,23 +503,23 @@ const AIActions = {
       `);
     }
   },
-  
+
   selectProjectForEdit(input) {
     const projects = ProApp.projects || [];
-    const project = projects.find(p => 
+    const project = projects.find(p =>
       p.title?.toLowerCase().includes(input.toLowerCase()) ||
       p.id === input
     );
-    
+
     if (!project) {
       this.addMessage('bot', `Project "${input}" not found. Try "list projects" to see all.`);
       this.pendingAction = null;
       return;
     }
-    
+
     this.pendingData.projectId = project.id;
     this.pendingAction = 'edit_project_field';
-    
+
     this.addMessage('bot', `
       <p>Editing "<strong>${this.escapeHtml(project.title)}</strong>". What would you like to change?</p>
       <div class="ai-choice-buttons">
@@ -565,7 +532,7 @@ const AIActions = {
       </div>
     `);
   },
-  
+
   selectFieldToEdit(field) {
     if (field === 'cancel') {
       this.pendingAction = null;
@@ -573,17 +540,17 @@ const AIActions = {
       this.addMessage('bot', 'Edit cancelled. What else can I help with?');
       return;
     }
-    
+
     const project = ProApp.projects.find(p => p.id === this.pendingData.projectId);
     if (!project) {
       this.addMessage('bot', 'Project not found. Please try again.');
       this.pendingAction = null;
       return;
     }
-    
+
     this.pendingData.field = field;
     this.pendingAction = 'edit_project_value';
-    
+
     switch(field) {
       case 'title':
         this.addMessage('bot', `Current title: "${project.title}"\n\nEnter the new <strong>title</strong>:`);
@@ -615,7 +582,7 @@ const AIActions = {
         break;
     }
   },
-  
+
   async applyProjectEdit(value) {
     const project = ProApp.projects.find(p => p.id === this.pendingData.projectId);
     if (!project) {
@@ -623,9 +590,9 @@ const AIActions = {
       this.pendingAction = null;
       return;
     }
-    
+
     const field = this.pendingData.field;
-    
+
     switch(field) {
       case 'title':
         project.title = value;
@@ -644,22 +611,22 @@ const AIActions = {
         project.featured = value.toLowerCase() === 'yes';
         break;
     }
-    
+
     project.updatedAt = Date.now();
-    
+
     try {
       await Database.put('projects', project);
       await ProApp.loadProjects();
-      
+
       this.addMessage('bot', `✅ Project updated! ${field} is now "${field === 'tech' ? project.tech.join(', ') : project[field]}"`);
     } catch (e) {
       this.addMessage('bot', `❌ Failed to update: ${e.message}`);
     }
-    
+
     this.pendingAction = null;
     this.pendingData = {};
   },
-  
+
   quickEdit(projectId) {
     this.pendingData = { projectId };
     const project = ProApp.projects.find(p => p.id === projectId);
@@ -667,13 +634,10 @@ const AIActions = {
       this.selectProjectForEdit(project.title);
     }
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // PROJECTS - DELETE
-  // ═══════════════════════════════════════════════════════════
+
   startDeleteProject(message) {
     const projectName = message.replace(/delete|remove|project/gi, '').trim();
-    
+
     if (projectName) {
       this.selectProjectForDelete(projectName);
     } else {
@@ -681,28 +645,28 @@ const AIActions = {
       this.addMessage('bot', 'Which project do you want to delete? Type the name or "cancel" to abort.');
     }
   },
-  
+
   selectProjectForDelete(input) {
     if (input.toLowerCase() === 'cancel') {
       this.pendingAction = null;
       this.addMessage('bot', 'Delete cancelled.');
       return;
     }
-    
-    const project = ProApp.projects.find(p => 
+
+    const project = ProApp.projects.find(p =>
       p.title?.toLowerCase().includes(input.toLowerCase())
     );
-    
+
     if (!project) {
       this.addMessage('bot', `Project "${input}" not found.`);
       this.pendingAction = null;
       return;
     }
-    
+
     this.pendingData.projectId = project.id;
     this.pendingData.projectTitle = project.title;
     this.pendingAction = 'delete_project_confirm';
-    
+
     this.addMessage('bot', `
       <p>⚠️ Are you sure you want to delete "<strong>${this.escapeHtml(project.title)}</strong>"?</p>
       <p>This cannot be undone.</p>
@@ -712,7 +676,7 @@ const AIActions = {
       </div>
     `);
   },
-  
+
   async confirmDelete(input) {
     if (input.toLowerCase() !== 'yes') {
       this.addMessage('bot', 'Delete cancelled.');
@@ -720,7 +684,7 @@ const AIActions = {
       this.pendingData = {};
       return;
     }
-    
+
     try {
       await Database.delete('projects', this.pendingData.projectId);
       await ProApp.loadProjects();
@@ -728,18 +692,18 @@ const AIActions = {
     } catch (e) {
       this.addMessage('bot', `❌ Failed to delete: ${e.message}`);
     }
-    
+
     this.pendingAction = null;
     this.pendingData = {};
   },
-  
+
   async quickDelete(projectId) {
     const project = ProApp.projects.find(p => p.id === projectId);
     if (!project) return;
-    
+
     this.pendingData = { projectId, projectTitle: project.title };
     this.pendingAction = 'delete_project_confirm';
-    
+
     this.addMessage('bot', `
       <p>⚠️ Delete "<strong>${this.escapeHtml(project.title)}</strong>"?</p>
       <div class="ai-choice-buttons">
@@ -748,15 +712,15 @@ const AIActions = {
       </div>
     `);
   },
-  
+
   async quickToggleStatus(projectId) {
     const project = ProApp.projects.find(p => p.id === projectId);
     if (!project) return;
-    
+
     const newStatus = project.status === 'published' ? 'hidden' : 'published';
     project.status = newStatus;
     project.updatedAt = Date.now();
-    
+
     try {
       await Database.put('projects', project);
       await ProApp.loadProjects();
@@ -765,24 +729,21 @@ const AIActions = {
       this.addMessage('bot', `❌ Failed: ${e.message}`);
     }
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // PROJECTS - PUBLISH/HIDE
-  // ═══════════════════════════════════════════════════════════
+
   async startPublishProject(message) {
     const projectName = message.replace(/publish|project/gi, '').trim();
-    const project = ProApp.projects.find(p => 
+    const project = ProApp.projects.find(p =>
       p.title?.toLowerCase().includes(projectName.toLowerCase())
     );
-    
+
     if (!project) {
       this.addMessage('bot', `Project "${projectName}" not found.`);
       return;
     }
-    
+
     project.status = 'published';
     project.updatedAt = Date.now();
-    
+
     try {
       await Database.put('projects', project);
       await ProApp.loadProjects();
@@ -791,21 +752,21 @@ const AIActions = {
       this.addMessage('bot', `❌ Failed: ${e.message}`);
     }
   },
-  
+
   async startHideProject(message) {
     const projectName = message.replace(/hide|unpublish|project/gi, '').trim();
-    const project = ProApp.projects.find(p => 
+    const project = ProApp.projects.find(p =>
       p.title?.toLowerCase().includes(projectName.toLowerCase())
     );
-    
+
     if (!project) {
       this.addMessage('bot', `Project "${projectName}" not found.`);
       return;
     }
-    
+
     project.status = 'hidden';
     project.updatedAt = Date.now();
-    
+
     try {
       await Database.put('projects', project);
       await ProApp.loadProjects();
@@ -814,13 +775,10 @@ const AIActions = {
       this.addMessage('bot', `❌ Failed: ${e.message}`);
     }
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // NAVIGATION LINKS
-  // ═══════════════════════════════════════════════════════════
+
   listNavLinks() {
     const navLinks = ProApp.navLinks || [];
-    
+
     if (navLinks.length === 0) {
       this.addMessage('bot', `
         <p>No navigation links configured.</p>
@@ -828,7 +786,7 @@ const AIActions = {
       `);
       return;
     }
-    
+
     const linksHtml = navLinks.map(link => `
       <div class="ai-nav-item">
         <div class="ai-nav-info">
@@ -841,20 +799,20 @@ const AIActions = {
         </div>
       </div>
     `).join('');
-    
+
     this.addMessage('bot', `
       <p><strong>${navLinks.length} Navigation Links:</strong></p>
       <div class="ai-nav-list">${linksHtml}</div>
       <button class="ai-action-btn-inline" onclick="AIActions.startAddNavLink()">+ Add New</button>
     `);
   },
-  
+
   startAddNavLink() {
     this.pendingAction = 'add_nav_label';
     this.pendingData = {};
     this.addMessage('bot', 'Let\'s add a nav link. What\'s the <strong>label</strong> (text that appears)?');
   },
-  
+
   async completeAddNavLink() {
     const navLink = {
       id: `nav_${Date.now()}`,
@@ -864,11 +822,11 @@ const AIActions = {
       order: (ProApp.navLinks?.length || 0),
       createdAt: Date.now()
     };
-    
+
     try {
       await Database.put('navigation', navLink);
       await ProApp.loadNavigation();
-      
+
       this.addMessage('bot', `
         <div class="ai-success-message">
           ✅ Nav link "<strong>${this.escapeHtml(navLink.label)}</strong>" added!
@@ -878,11 +836,11 @@ const AIActions = {
     } catch (e) {
       this.addMessage('bot', `❌ Failed: ${e.message}`);
     }
-    
+
     this.pendingAction = null;
     this.pendingData = {};
   },
-  
+
   startEditNavLink(message) {
     const navName = message.replace(/edit|update|nav|link|navigation/gi, '').trim();
     if (navName) {
@@ -892,34 +850,34 @@ const AIActions = {
       this.addMessage('bot', 'Which nav link do you want to edit? Type the label or "cancel".');
     }
   },
-  
+
   startEditNavLinkById(id) {
     const navLink = (ProApp.navLinks || []).find(n => n.id === id);
     if (navLink) {
       this.selectNavForEdit(navLink.label);
     }
   },
-  
+
   selectNavForEdit(input) {
     if (input.toLowerCase() === 'cancel') {
       this.pendingAction = null;
       this.addMessage('bot', 'Edit cancelled.');
       return;
     }
-    
-    const navLink = (ProApp.navLinks || []).find(n => 
+
+    const navLink = (ProApp.navLinks || []).find(n =>
       n.label?.toLowerCase().includes(input.toLowerCase()) || n.id === input
     );
-    
+
     if (!navLink) {
       this.addMessage('bot', `Nav link "${input}" not found.`);
       this.pendingAction = null;
       return;
     }
-    
+
     this.pendingData.navId = navLink.id;
     this.pendingAction = 'edit_nav_field';
-    
+
     this.addMessage('bot', `
       <p>Editing "<strong>${this.escapeHtml(navLink.label)}</strong>". What to change?</p>
       <div class="ai-choice-buttons">
@@ -929,7 +887,7 @@ const AIActions = {
       </div>
     `);
   },
-  
+
   selectNavFieldToEdit(field) {
     if (field === 'cancel') {
       this.pendingAction = null;
@@ -937,30 +895,30 @@ const AIActions = {
       this.addMessage('bot', 'Edit cancelled.');
       return;
     }
-    
+
     const navLink = (ProApp.navLinks || []).find(n => n.id === this.pendingData.navId);
     this.pendingData.field = field;
     this.pendingAction = 'edit_nav_value';
-    
+
     if (field === 'label') {
       this.addMessage('bot', `Current: "${navLink.label}"\nEnter new <strong>label</strong>:`);
     } else {
       this.addMessage('bot', `Current: "${navLink.url}"\nEnter new <strong>URL</strong>:`);
     }
   },
-  
+
   async applyNavEdit(value) {
     const navLinks = ProApp.navLinks || [];
     const navLink = navLinks.find(n => n.id === this.pendingData.navId);
-    
+
     if (!navLink) {
       this.addMessage('bot', 'Nav link not found.');
       this.pendingAction = null;
       return;
     }
-    
+
     navLink[this.pendingData.field] = value;
-    
+
     try {
       await Database.put('navigation', navLink);
       await ProApp.loadNavigation();
@@ -968,11 +926,11 @@ const AIActions = {
     } catch (e) {
       this.addMessage('bot', `❌ Failed: ${e.message}`);
     }
-    
+
     this.pendingAction = null;
     this.pendingData = {};
   },
-  
+
   startDeleteNavLink(message) {
     const navName = message.replace(/delete|remove|nav|link|navigation/gi, '').trim();
     if (navName) {
@@ -982,35 +940,35 @@ const AIActions = {
       this.addMessage('bot', 'Which nav link to delete? Type the label or "cancel".');
     }
   },
-  
+
   startDeleteNavLinkById(id) {
     const navLink = (ProApp.navLinks || []).find(n => n.id === id);
     if (navLink) {
       this.selectNavForDelete(navLink.label);
     }
   },
-  
+
   selectNavForDelete(input) {
     if (input.toLowerCase() === 'cancel') {
       this.pendingAction = null;
       this.addMessage('bot', 'Delete cancelled.');
       return;
     }
-    
-    const navLink = (ProApp.navLinks || []).find(n => 
+
+    const navLink = (ProApp.navLinks || []).find(n =>
       n.label?.toLowerCase().includes(input.toLowerCase())
     );
-    
+
     if (!navLink) {
       this.addMessage('bot', `Nav link "${input}" not found.`);
       this.pendingAction = null;
       return;
     }
-    
+
     this.pendingData.navId = navLink.id;
     this.pendingData.navLabel = navLink.label;
     this.pendingAction = 'delete_nav_confirm';
-    
+
     this.addMessage('bot', `
       <p>⚠️ Delete nav link "<strong>${this.escapeHtml(navLink.label)}</strong>"?</p>
       <div class="ai-choice-buttons">
@@ -1019,7 +977,7 @@ const AIActions = {
       </div>
     `);
   },
-  
+
   async confirmNavDelete(input) {
     if (input.toLowerCase() !== 'yes') {
       this.addMessage('bot', 'Delete cancelled.');
@@ -1027,7 +985,7 @@ const AIActions = {
       this.pendingData = {};
       return;
     }
-    
+
     try {
       await Database.delete('navigation', this.pendingData.navId);
       await ProApp.loadNavigation();
@@ -1035,33 +993,30 @@ const AIActions = {
     } catch (e) {
       this.addMessage('bot', `❌ Failed: ${e.message}`);
     }
-    
+
     this.pendingAction = null;
     this.pendingData = {};
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // PROJECT LINKS
-  // ═══════════════════════════════════════════════════════════
+
   listProjectLinks(message) {
     const projectName = message.replace(/project|links|show|list/gi, '').trim();
-    
+
     if (!projectName) {
       this.addMessage('bot', 'Which project\'s links? Example: "show links AI Desktop"');
       return;
     }
-    
-    const project = ProApp.projects.find(p => 
+
+    const project = ProApp.projects.find(p =>
       p.title?.toLowerCase().includes(projectName.toLowerCase())
     );
-    
+
     if (!project) {
       this.addMessage('bot', `Project "${projectName}" not found.`);
       return;
     }
-    
+
     const links = project.links || [];
-    
+
     if (links.length === 0) {
       this.addMessage('bot', `
         <p>"${project.title}" has no links.</p>
@@ -1069,24 +1024,24 @@ const AIActions = {
       `);
       return;
     }
-    
+
     const linksHtml = links.map((link, i) => `
       <div class="ai-link-item">
         <span class="ai-link-label">${this.escapeHtml(link.label)}</span>
         <a href="${link.url}" target="_blank" class="ai-link-url">${this.escapeHtml(link.url)}</a>
       </div>
     `).join('');
-    
+
     this.addMessage('bot', `
       <p><strong>Links for "${project.title}":</strong></p>
       <div class="ai-links-list">${linksHtml}</div>
       <button class="ai-action-btn-inline" onclick="AIActions.addLinkToProject('${project.id}')">+ Add Link</button>
     `);
   },
-  
+
   startAddProjectLink(message) {
     const projectName = message.replace(/add|link|to/gi, '').trim();
-    
+
     if (projectName) {
       this.selectProjectForLink(projectName);
     } else {
@@ -1094,32 +1049,32 @@ const AIActions = {
       this.addMessage('bot', 'Which project should I add the link to?');
     }
   },
-  
+
   addLinkToProject(projectId) {
     const project = ProApp.projects.find(p => p.id === projectId);
     if (!project) return;
-    
+
     this.pendingData.projectId = projectId;
     this.pendingAction = 'add_link_label';
     this.addMessage('bot', `Adding link to "${project.title}". What's the <strong>link label</strong>? (e.g., "GitHub", "Live Demo")`);
   },
-  
+
   selectProjectForLink(input) {
-    const project = ProApp.projects.find(p => 
+    const project = ProApp.projects.find(p =>
       p.title?.toLowerCase().includes(input.toLowerCase()) || p.id === input
     );
-    
+
     if (!project) {
       this.addMessage('bot', `Project "${input}" not found.`);
       this.pendingAction = null;
       return;
     }
-    
+
     this.pendingData.projectId = project.id;
     this.pendingAction = 'add_link_label';
     this.addMessage('bot', `Adding link to "${project.title}". What's the <strong>link label</strong>?`);
   },
-  
+
   async completeAddProjectLink() {
     const project = ProApp.projects.find(p => p.id === this.pendingData.projectId);
     if (!project) {
@@ -1127,14 +1082,14 @@ const AIActions = {
       this.pendingAction = null;
       return;
     }
-    
+
     if (!project.links) project.links = [];
     project.links.push({
       label: this.pendingData.linkLabel,
       url: this.pendingData.linkUrl
     });
     project.updatedAt = Date.now();
-    
+
     try {
       await Database.put('projects', project);
       await ProApp.loadProjects();
@@ -1142,47 +1097,43 @@ const AIActions = {
     } catch (e) {
       this.addMessage('bot', `❌ Failed: ${e.message}`);
     }
-    
+
     this.pendingAction = null;
     this.pendingData = {};
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // SYNC & AI SUGGESTIONS
-  // ═══════════════════════════════════════════════════════════
+
   async syncAll() {
     this.addMessage('bot', '🔄 Syncing...');
-    
+
     try {
       if (ProApp.syncProjects) await ProApp.syncProjects();
       if (ProApp.syncNavigation) await ProApp.syncNavigation();
       await ProApp.loadProjects();
       await ProApp.loadNavigation();
-      
+
       this.addMessage('bot', '✅ Sync complete! Data is up to date.');
     } catch (e) {
       this.addMessage('bot', `❌ Sync failed: ${e.message}`);
     }
   },
-  
+
   async startAISuggestion(message) {
     const projectName = message.replace(/suggest|improve|optimize/gi, '').trim();
-    
+
     if (!projectName) {
       this.addMessage('bot', 'Which project should I analyze? Example: "suggest AI Desktop"');
       return;
     }
-    
-    const project = ProApp.projects.find(p => 
+
+    const project = ProApp.projects.find(p =>
       p.title?.toLowerCase().includes(projectName.toLowerCase())
     );
-    
+
     if (!project) {
       this.addMessage('bot', `Project "${projectName}" not found.`);
       return;
     }
-    
-    // Open the AI panel with project tools
+
     if (AIAssistant && AIAssistant.openProjectAI) {
       AIAssistant.openProjectAI(project.id);
       this.addMessage('bot', `Opening AI tools for "${project.title}"...`);
@@ -1198,14 +1149,11 @@ const AIActions = {
       `);
     }
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // UNKNOWN COMMAND HANDLER
-  // ═══════════════════════════════════════════════════════════
+
   handleUnknownCommand(message) {
-    // Try to match partial commands
+
     const lower = message.toLowerCase();
-    
+
     if (lower.includes('project')) {
       this.addMessage('bot', `
         <p>I didn't quite get that. Here are project commands:</p>
@@ -1235,17 +1183,14 @@ const AIActions = {
       `);
     }
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // UI HELPERS
-  // ═══════════════════════════════════════════════════════════
+
   addMessage(type, content) {
     const container = document.getElementById('aiChatMessages');
     if (!container) return;
-    
+
     const messageDiv = document.createElement('div');
     messageDiv.className = `ai-chat-message ai-chat-${type}`;
-    
+
     if (type === 'user') {
       messageDiv.innerHTML = `
         <div class="ai-chat-content">
@@ -1270,20 +1215,20 @@ const AIActions = {
         <div class="ai-chat-content">${content}</div>
       `;
     }
-    
+
     container.appendChild(messageDiv);
     container.scrollTop = container.scrollHeight;
-    
+
     this.chatHistory.push({ type, content });
   },
-  
+
   escapeHtml(str) {
     if (!str) return '';
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
   },
-  
+
   generateSlug(title) {
     return (title || 'project')
       .toLowerCase()
@@ -1292,10 +1237,8 @@ const AIActions = {
   }
 };
 
-// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => AIActions.init(), 600);
 });
 
-// Export
 window.AIActions = AIActions;

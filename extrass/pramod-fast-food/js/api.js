@@ -1,16 +1,5 @@
-/**
- * api.js — Centralised API utility for Pramod Fast Food.
- *
- * Single source of truth for all backend communication.
- * Auto-detects local dev vs production endpoint.
- * Every fetch goes through Api.request() which handles errors,
- * timeouts, and token management uniformly.
- *
- * Loaded BEFORE menu-data.js so other modules can call Api.*
- */
 'use strict';
 
-/* ========== GLOBAL DEBUG MODE ========== */
 window.__DEBUG__ = true;
 
 function debug(label, data = null) {
@@ -19,8 +8,6 @@ function debug(label, data = null) {
 }
 
 const Api = (() => {
-
-    /* ---------- Configuration ---------- */
 
     const _BASE = (() => {
         const host = location.hostname;
@@ -40,18 +27,11 @@ const Api = (() => {
     const TIMEOUT_MS = 8000;
     const COLD_START_RETRY_DELAY = 2000;
 
-    /** JWT token (set after login, if any) */
     let _token = localStorage.getItem('pf_token') || null;
 
-    /** Track server readiness for cold-start UX */
     let _serverAwake = false;
     const isServerAwake = () => _serverAwake;
 
-    /* ---------- Internals ---------- */
-
-    /**
-     * Single attempt fetch.
-     */
     const _doFetch = async (url, opts, headers, timeout) => {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), timeout);
@@ -85,7 +65,7 @@ const Api = (() => {
                 };
             }
             _serverAwake = true;
-            /* Unwrap backend { success, data } envelope so consumers get the real payload */
+
             const payload = (data && data.success === true && 'data' in data) ? data.data : data;
             return { ok: true, status: res.status, data: payload };
 
@@ -99,16 +79,6 @@ const Api = (() => {
         }
     };
 
-    /**
-     * Core fetch wrapper with automatic cold-start retry.
-     * On first network error / timeout, waits 3s and retries once
-     * (Render free-tier spins down after inactivity).
-     *
-     * @param {string}  path     - API path (e.g. '/api/restaurant/menu')
-     * @param {object}  [opts]   - fetch options override
-     * @param {number}  [timeout] - ms before abort
-     * @returns {Promise<{ok:boolean, status:number, data:any, error?:string}>}
-     */
     const request = async (path, opts = {}, timeout = TIMEOUT_MS) => {
         const url = `${_BASE}${path}`;
 
@@ -120,7 +90,6 @@ const Api = (() => {
 
         const result = await _doFetch(url, opts, headers, timeout);
 
-        /* Retry once on cold-start (network error or timeout, not HTTP errors) */
         if (!result.ok && result.status === 0 && !_serverAwake) {
             console.log('[Api] Server may be waking up — retrying in 3s…');
             document.dispatchEvent(new CustomEvent('api:cold-start'));
@@ -131,51 +100,26 @@ const Api = (() => {
         return result;
     };
 
-    /* ---------- Public API ---------- */
-
-    /**
-     * Fetch live menu from backend.
-     * @returns {Promise<{ok:boolean, data?:object, error?:string}>}
-     *   data = { categories: { key: { title, icon, items[] } } } or array format
-     */
     const fetchMenu = () => request(ENDPOINTS.menu);
 
-    /**
-     * Submit order to backend. Backend calculates totals.
-     * @param {{customerName:string, phone:string, orderType:string, persons?:number,
-     *          tableNumber?:string, note?:string, items:{itemId:number, size:string, quantity:number}[]}} payload
-     * @returns {Promise<{ok:boolean, data?:{orderId:string, total:number, ...}, error?:string}>}
-     */
     const placeOrder = (payload) => request(ENDPOINTS.orders, {
         method: 'POST',
         body: JSON.stringify(payload),
     });
 
-    /**
-     * Fetch orders by phone number.
-     * @param {string} phone — Customer phone number
-     * @returns {Promise<{ok:boolean, data?:Array, error?:string}>}
-     */
     const fetchOrdersByPhone = (phone) =>
         request(`${ENDPOINTS.orders}?phone=${encodeURIComponent(phone)}`);
 
-    /**
-     * Fetch authenticated user profile (loyalty data).
-     * @returns {Promise<{ok:boolean, data?:{name:string, points:number, orders:number, ...}, error?:string}>}
-     */
     const fetchProfile = () => request(ENDPOINTS.profile);
 
-    /** Store JWT token (e.g. after login) */
     const setToken = (token) => {
         _token = token;
         if (token) localStorage.setItem('pf_token', token);
         else localStorage.removeItem('pf_token');
     };
 
-    /** Read current token */
     const getToken = () => _token;
 
-    /** Check if user is authenticated */
     const isAuthenticated = () => !!_token;
 
     return Object.freeze({

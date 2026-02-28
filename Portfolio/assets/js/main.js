@@ -1,14 +1,6 @@
-/**
- * ANAND DEV OS  Main JavaScript
- * Scroll detection, navbar, particles, reveals, interactions
- */
-
 (function() {
   'use strict';
 
-  // 
-  // NAVIGATION
-  // 
   const nav = document.querySelector('.nav');
   const navToggle = document.querySelector('.nav__toggle');
   const navLinks = document.querySelector('.nav__links');
@@ -17,19 +9,19 @@
 
   function updateNav() {
     const currentScrollY = window.scrollY;
-    
+
     if (currentScrollY > 100) {
       nav?.classList.add('nav--scrolled');
     } else {
       nav?.classList.remove('nav--scrolled');
     }
-    
+
     if (currentScrollY > lastScrollY && currentScrollY > 200) {
       nav?.classList.add('nav--hidden');
     } else {
       nav?.classList.remove('nav--hidden');
     }
-    
+
     lastScrollY = currentScrollY;
     ticking = false;
   }
@@ -41,11 +33,10 @@
     }
   }, { passive: true });
 
-  // Only enable hamburger menu toggle on non-mobile (mobile.js handles mobile nav via bottom sheet)
   const isMobileDevice = () => window.innerWidth <= 768;
-  
+
   navToggle?.addEventListener('click', function() {
-    if (isMobileDevice()) return; // mobile.js handles mobile navigation
+    if (isMobileDevice()) return;
     this.classList.toggle('nav__toggle--active');
     navLinks?.classList.toggle('nav__links--open');
   });
@@ -58,11 +49,8 @@
     });
   });
 
-  // 
-  // SCROLL REVEAL
-  // 
   const revealElements = document.querySelectorAll('.reveal');
-  
+
   const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -77,9 +65,6 @@
 
   revealElements.forEach(el => revealObserver.observe(el));
 
-  // 
-  // PARTICLE SYSTEM
-  // 
   class ParticleSystem {
     constructor(canvas) {
       this.canvas = canvas;
@@ -88,7 +73,7 @@
       this.mouse = { x: null, y: null, radius: 150 };
       this.animationId = null;
       this.resizeTimeout = null;
-      
+
       this.init();
       this.bindEvents();
       this.animate();
@@ -109,7 +94,7 @@
       this.particles = [];
       const area = this.canvas.width * this.canvas.height;
       const count = Math.min(Math.floor(area / 15000), 100);
-      
+
       for (let i = 0; i < count; i++) {
         this.particles.push({
           x: Math.random() * this.canvas.width,
@@ -156,7 +141,7 @@
           const dx = p.x - this.mouse.x;
           const dy = p.y - this.mouse.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          
+
           if (dist < this.mouse.radius) {
             const force = (this.mouse.radius - dist) / this.mouse.radius;
             p.x += dx * force * 0.02;
@@ -184,7 +169,7 @@
           const dx = p1.x - p2.x;
           const dy = p1.y - p2.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          
+
           if (dist < 120) {
             const opacity = (1 - dist / 120) * 0.15;
             this.ctx.beginPath();
@@ -214,27 +199,21 @@
     new ParticleSystem(particlesCanvas);
   }
 
-  // 
-  // DEV OS TABS
-  // 
   const tabs = document.querySelectorAll('.dev-os__tab');
   const tabContents = document.querySelectorAll('.dev-os__content');
 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       const target = tab.dataset.tab;
-      
+
       tabs.forEach(t => t.classList.remove('dev-os__tab--active'));
       tabContents.forEach(c => c.classList.remove('dev-os__content--active'));
-      
+
       tab.classList.add('dev-os__tab--active');
       document.getElementById(target)?.classList.add('dev-os__content--active');
     });
   });
 
-  // 
-  // TOGGLE SWITCHES
-  // 
   document.querySelectorAll('.toggle').forEach(toggle => {
     toggle.addEventListener('click', function() {
       this.classList.toggle('toggle--active');
@@ -245,9 +224,6 @@
     });
   });
 
-  // 
-  // RANGE INPUT VALUE DISPLAY
-  // 
   document.querySelectorAll('.range-input').forEach(input => {
     const valueDisplay = input.parentElement?.querySelector('.lab-demo__value');
     if (valueDisplay) {
@@ -257,9 +233,6 @@
     }
   });
 
-  // 
-  // PASSWORD GATE (Hidden Page)
-  // 
   const passwordForm = document.getElementById('password-form');
   const passwordInput = document.getElementById('password-input');
   const passwordError = document.getElementById('password-error');
@@ -270,8 +243,7 @@
     passwordForm.addEventListener('submit', function(e) {
       e.preventDefault();
       const password = passwordInput?.value;
-      
-      // Simple hash check (in production, use server-side auth)
+
       if (password === 'Abhilasha') {
         passwordGate?.classList.add('password-gate--hidden');
         hiddenContent?.classList.add('hidden-content--visible');
@@ -286,16 +258,12 @@
       }
     });
 
-    // Check session storage
     if (sessionStorage.getItem('hidden-auth') === 'true') {
       passwordGate?.classList.add('password-gate--hidden');
       hiddenContent?.classList.add('hidden-content--visible');
     }
   }
 
-  // 
-  // LAB EXPERIMENTS
-  // 
   class LabParticleSystem {
     constructor(canvas, options = {}) {
       this.canvas = canvas;
@@ -312,7 +280,7 @@
       this.particles = [];
       this.mouse = { x: null, y: null };
       this.animationId = null;
-      
+
       this.init();
     }
 
@@ -367,7 +335,7 @@
           const dx = p.x - this.mouse.x;
           const dy = p.y - this.mouse.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          
+
           if (dist < this.options.mouseRadius) {
             const force = (this.options.mouseRadius - dist) / this.options.mouseRadius;
             p.x += dx * force * 0.03;
@@ -394,7 +362,7 @@
             const dx = p1.x - p2.x;
             const dy = p1.y - p2.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            
+
             if (dist < this.options.connectionDistance) {
               const opacity = (1 - dist / this.options.connectionDistance) * 0.3;
               this.ctx.beginPath();
@@ -427,14 +395,12 @@
     }
   }
 
-  // Initialize lab canvas if exists
   const labCanvas = document.getElementById('lab-canvas');
   let labSystem = null;
-  
+
   if (labCanvas) {
     labSystem = new LabParticleSystem(labCanvas);
 
-    // Bind controls
     const particleCountSlider = document.getElementById('particle-count');
     const connectionDistSlider = document.getElementById('connection-dist');
     const particleSpeedSlider = document.getElementById('particle-speed');
@@ -461,9 +427,6 @@
     });
   }
 
-  // 
-  // WAVE SIMULATION
-  // 
   class WaveSimulation {
     constructor(canvas) {
       this.canvas = canvas;
@@ -477,7 +440,7 @@
         speed: 0.02
       };
       this.time = 0;
-      
+
       this.init();
     }
 
@@ -499,28 +462,28 @@
 
     draw() {
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      
+
       const centerY = this.canvas.height / 2;
       const colors = ['rgba(59, 130, 246, 0.3)', 'rgba(96, 165, 250, 0.2)', 'rgba(147, 197, 253, 0.15)'];
-      
+
       for (let w = 0; w < this.options.waveCount; w++) {
         this.ctx.beginPath();
         this.ctx.moveTo(0, centerY);
-        
+
         for (let x = 0; x <= this.canvas.width; x += 2) {
-          const y = centerY + 
+          const y = centerY +
             Math.sin(x * this.options.frequency + this.time + w * 0.5) * this.options.amplitude * (1 - w * 0.2) +
             Math.sin(x * this.options.frequency * 0.5 + this.time * 0.7 + w) * this.options.amplitude * 0.5;
           this.ctx.lineTo(x, y);
         }
-        
+
         this.ctx.lineTo(this.canvas.width, this.canvas.height);
         this.ctx.lineTo(0, this.canvas.height);
         this.ctx.closePath();
         this.ctx.fillStyle = colors[w];
         this.ctx.fill();
       }
-      
+
       this.time += this.options.speed;
     }
 
@@ -540,7 +503,7 @@
 
   const waveCanvas = document.getElementById('wave-canvas');
   let waveSystem = null;
-  
+
   if (waveCanvas) {
     waveSystem = new WaveSimulation(waveCanvas);
 
@@ -564,12 +527,9 @@
     });
   }
 
-  // 
-  // PROJECT PREVIEW CANVASES
-  // 
   function initProjectPreview(canvas, type) {
     if (!canvas) return;
-    
+
     const ctx = canvas.getContext('2d');
     const rect = canvas.getBoundingClientRect();
     canvas.width = rect.width;
@@ -580,7 +540,7 @@
 
     function drawPattern() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
+
       if (type === 'particles') {
         for (let i = 0; i < 20; i++) {
           const x = (Math.sin(time * 0.5 + i * 0.5) + 1) * canvas.width * 0.4 + canvas.width * 0.1;
@@ -623,7 +583,7 @@
         ctx.fillStyle = 'rgba(59, 130, 246, 0.6)';
         ctx.fill();
       }
-      
+
       time += 0.02;
       animationId = requestAnimationFrame(drawPattern);
     }
@@ -635,14 +595,11 @@
     initProjectPreview(canvas, canvas.dataset.preview);
   });
 
-  // 
-  // SMOOTH ANCHOR SCROLL
-  // 
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function(e) {
       const href = this.getAttribute('href');
       if (href === '#') return;
-      
+
       const target = document.querySelector(href);
       if (target) {
         e.preventDefault();
@@ -651,14 +608,10 @@
     });
   });
 
-  // 
-  // ACTIVE NAV LINK
-  // 
   const path = window.location.pathname;
   const pathSegments = path.split('/').filter(Boolean);
   let currentPage = 'home';
-  
-  // Detect current page from folder-based URL
+
   if (path.includes('/pages/')) {
     const pagesIndex = pathSegments.indexOf('pages');
     if (pagesIndex >= 0 && pathSegments[pagesIndex + 1]) {
@@ -667,22 +620,16 @@
   } else if (pathSegments.length > 0 && pathSegments[pathSegments.length - 1].includes('.html')) {
     currentPage = pathSegments[pathSegments.length - 1].replace('.html', '');
   }
-  
+
   document.querySelectorAll('.nav__link').forEach(link => {
     const href = link.getAttribute('href');
-    // Match folder-based URLs (e.g., href="../projects/" matches currentPage="projects")
+
     const hrefPage = href.replace(/^\.\.\/|^\.\//g, '').replace(/\/$/, '').split('/').pop();
-    if (hrefPage === currentPage || 
+    if (hrefPage === currentPage ||
         (currentPage === 'home' && (href === './' || href === '../../' || href.endsWith('index.html')))) {
       link.classList.add('nav__link--active');
     }
   });
-
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  // CARD FOCUS SYSTEM
-  // Shared interaction module for Projects & Lab pages
-  // Handles: hover, click, URL hash, keyboard nav, mobile gestures
-  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   class CardFocusSystem {
     constructor(options = {}) {
@@ -712,7 +659,7 @@
 
     init() {
       this.cards = Array.from(document.querySelectorAll(this.options.cardSelector));
-      
+
       if (this.cards.length === 0) return;
 
       this.createOverlay();
@@ -723,18 +670,17 @@
     }
 
     createOverlay() {
-      // Create backdrop
+
       if (!document.getElementById(this.options.backdropId)) {
         const backdrop = document.createElement('div');
         backdrop.id = this.options.backdropId;
         backdrop.className = 'focus-overlay-backdrop';
         backdrop.setAttribute('aria-hidden', 'true');
         document.body.appendChild(backdrop);
-        
+
         backdrop.addEventListener('click', () => this.close());
       }
 
-      // Create overlay container
       if (!document.getElementById(this.options.overlayId)) {
         const overlay = document.createElement('div');
         overlay.id = this.options.overlayId;
@@ -742,7 +688,7 @@
         overlay.setAttribute('role', 'dialog');
         overlay.setAttribute('aria-modal', 'true');
         overlay.setAttribute('aria-hidden', 'true');
-        
+
         overlay.innerHTML = `
           <div class="focus-overlay__panel" role="document">
             <button class="focus-overlay__close" aria-label="Close overlay" type="button">
@@ -751,13 +697,11 @@
             <div class="focus-overlay__content"></div>
           </div>
         `;
-        
+
         document.body.appendChild(overlay);
 
-        // Bind close button
         overlay.querySelector('.focus-overlay__close').addEventListener('click', () => this.close());
-        
-        // Bind mobile gestures
+
         this.bindMobileGestures(overlay.querySelector('.focus-overlay__panel'));
       }
 
@@ -769,25 +713,23 @@
 
     bindCardEvents() {
       this.cards.forEach((card, index) => {
-        // Set accessibility attributes
+
         card.setAttribute('role', 'button');
         card.setAttribute('tabindex', '0');
         card.setAttribute('aria-expanded', 'false');
-        
-        // Click handler
+
         card.addEventListener('click', (e) => {
-          // Don't open card if clicking action buttons
+
           if (e.target.closest('.action-btn')) {
-            return; // Let the link/button handle itself
+            return;
           }
           e.preventDefault();
           this.open(index);
         });
 
-        // Keyboard activation
         card.addEventListener('keydown', (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
-            // Don't open card if focusing action buttons
+
             if (e.target.closest('.action-btn')) {
               return;
             }
@@ -831,7 +773,7 @@
           if (this.isOpen) this.close(false);
           return;
         }
-        
+
         const cardIndex = this.findCardIndexByHash(hash);
         if (cardIndex !== -1 && cardIndex !== this.currentCardIndex) {
           this.open(cardIndex, false);
@@ -844,7 +786,7 @@
       if (hash) {
         const cardIndex = this.findCardIndexByHash(hash);
         if (cardIndex !== -1) {
-          // Small delay to ensure DOM is ready
+
           requestAnimationFrame(() => {
             this.open(cardIndex, false);
           });
@@ -880,18 +822,17 @@
       panel.addEventListener('touchmove', (e) => {
         this.touchCurrentY = e.touches[0].clientY;
         this.touchCurrentX = e.touches[0].clientX;
-        
+
         const deltaY = this.touchCurrentY - this.touchStartY;
         const deltaX = this.touchCurrentX - this.touchStartX;
-        
-        // Only start dragging if moving predominantly down/right
+
         if (!this.isDragging && (deltaY > 10 || deltaX > 10)) {
-          // Check if at top of scroll
+
           if (panel.scrollTop <= 0 && (deltaY > Math.abs(deltaX))) {
             this.isDragging = true;
           }
         }
-        
+
         if (this.isDragging) {
           const translateY = Math.max(0, deltaY * 0.5);
           panel.style.transform = `translateY(${translateY}px)`;
@@ -901,25 +842,23 @@
 
       panel.addEventListener('touchend', () => {
         if (!this.isDragging) return;
-        
+
         const deltaY = this.touchCurrentY - this.touchStartY;
         const deltaX = this.touchCurrentX - this.touchStartX;
         const deltaTime = Date.now() - startTime;
         const velocityY = deltaY / deltaTime;
         const velocityX = deltaX / deltaTime;
-        
-        // Reset transform
+
         panel.style.transform = '';
         panel.style.transition = '';
-        
-        // Check for swipe down or swipe right
+
         const isSwipeDown = deltaY > SWIPE_THRESHOLD || velocityY > VELOCITY_THRESHOLD;
         const isSwipeRight = deltaX > SWIPE_THRESHOLD || velocityX > VELOCITY_THRESHOLD;
-        
+
         if (isSwipeDown || isSwipeRight) {
           this.close();
         }
-        
+
         this.isDragging = false;
       }, { passive: true });
     }
@@ -942,51 +881,43 @@
 
     open(index, updateHash = true) {
       if (index < 0 || index >= this.cards.length) return;
-      
+
       const card = this.cards[index];
       const contentTemplate = card.querySelector('.focus-card__content-template');
-      
+
       if (!contentTemplate) {
         console.warn('Card missing content template:', card);
         return;
       }
 
-      // Store scroll position and lock body
       this.scrollPosition = window.scrollY;
       document.body.classList.add('focus-overlay-open');
       document.body.style.top = `-${this.scrollPosition}px`;
 
-      // Update current index
       this.currentCardIndex = index;
       this.isOpen = true;
 
-      // Update card accessibility
       this.cards.forEach((c, i) => {
         c.setAttribute('aria-expanded', i === index ? 'true' : 'false');
       });
 
-      // Populate overlay content
       this.content.innerHTML = contentTemplate.innerHTML;
 
-      // Show overlay
       this.backdrop.classList.add('focus-overlay-backdrop--active');
       this.overlay.classList.add('focus-overlay--active');
       this.overlay.setAttribute('aria-hidden', 'false');
       this.backdrop.setAttribute('aria-hidden', 'false');
 
-      // Update URL hash
       if (updateHash) {
         const hash = this.getCardHash(card);
         history.pushState(null, '', `#${hash}`);
       }
 
-      // Focus management
       setTimeout(() => {
         const closeBtn = this.overlay.querySelector('.focus-overlay__close');
         closeBtn?.focus();
       }, 100);
 
-      // Callback
       if (this.options.onOpen) {
         this.options.onOpen(card, index);
       }
@@ -995,38 +926,31 @@
     close(updateHash = true) {
       if (!this.isOpen) return;
 
-      // Hide overlay
       this.backdrop.classList.remove('focus-overlay-backdrop--active');
       this.overlay.classList.remove('focus-overlay--active');
       this.overlay.setAttribute('aria-hidden', 'true');
       this.backdrop.setAttribute('aria-hidden', 'true');
 
-      // Update card accessibility
       this.cards.forEach(c => {
         c.setAttribute('aria-expanded', 'false');
       });
 
-      // Restore scroll position
       document.body.classList.remove('focus-overlay-open');
       document.body.style.top = '';
       window.scrollTo(0, this.scrollPosition);
 
-      // Clear hash
       if (updateHash && window.location.hash) {
         history.pushState(null, '', window.location.pathname + window.location.search);
       }
 
-      // Return focus to card
       if (this.currentCardIndex >= 0 && this.cards[this.currentCardIndex]) {
         this.cards[this.currentCardIndex].focus();
       }
 
-      // Callback
       if (this.options.onClose) {
         this.options.onClose(this.cards[this.currentCardIndex], this.currentCardIndex);
       }
 
-      // Clear content after animation
       setTimeout(() => {
         this.content.innerHTML = '';
       }, 400);
@@ -1058,13 +982,12 @@
     }
   }
 
-  // Initialize Card Focus System if cards exist
   const focusCards = document.querySelectorAll('.focus-card');
   if (focusCards.length > 0) {
-    // Determine hash prefix based on page
+
     const isLabPage = window.location.pathname.includes('lab');
     const hashPrefix = isLabPage ? 'lab' : 'project';
-    
+
     window.cardFocusSystem = new CardFocusSystem({
       hashPrefix: hashPrefix
     });

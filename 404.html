@@ -11,11 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
-    /* ══════════════════════════════════════════════════════════════════════════
-       NOTHING-STYLE 404 PAGE
-       Minimal, intentional, dot-matrix aesthetic
-       ══════════════════════════════════════════════════════════════════════════ */
-    
+
     *, *::before, *::after {
       margin: 0;
       padding: 0;
@@ -52,10 +48,6 @@
       -moz-osx-font-smoothing: grayscale;
     }
 
-    /* ══════════════════════════════════════════════════════════════════════════
-       404 NUMBER
-       ══════════════════════════════════════════════════════════════════════════ */
-    
     .nothing-404 {
       font-size: clamp(8rem, 30vw, 20rem);
       font-weight: 300;
@@ -73,10 +65,6 @@
       background: transparent;
     }
 
-    /* ══════════════════════════════════════════════════════════════════════════
-       MESSAGE
-       ══════════════════════════════════════════════════════════════════════════ */
-    
     .nothing-message {
       font-size: clamp(0.875rem, 2vw, 1.125rem);
       font-weight: 400;
@@ -95,10 +83,6 @@
       display: inline;
     }
 
-    /* ══════════════════════════════════════════════════════════════════════════
-       BLINKING CURSOR
-       ══════════════════════════════════════════════════════════════════════════ */
-    
     .nothing-cursor {
       display: inline-block;
       width: 0.6em;
@@ -114,7 +98,6 @@
       50% { opacity: 0; }
     }
 
-    /* Respect reduced motion */
     @media (prefers-reduced-motion: reduce) {
       .nothing-cursor {
         animation: none;
@@ -122,10 +105,6 @@
       }
     }
 
-    /* ══════════════════════════════════════════════════════════════════════════
-       NAVIGATION
-       ══════════════════════════════════════════════════════════════════════════ */
-    
     .nothing-nav {
       display: flex;
       gap: 2rem;
@@ -175,10 +154,6 @@
       left: 0;
     }
 
-    /* ══════════════════════════════════════════════════════════════════════════
-       EASTER EGG
-       ══════════════════════════════════════════════════════════════════════════ */
-    
     .nothing-easter-egg {
       position: fixed;
       bottom: 2rem;
@@ -199,10 +174,6 @@
       visibility: visible;
     }
 
-    /* ══════════════════════════════════════════════════════════════════════════
-       MOBILE OPTIMIZATION
-       ══════════════════════════════════════════════════════════════════════════ */
-    
     @media (max-width: 480px) {
       body {
         padding: 1.5rem;
@@ -228,10 +199,6 @@
       }
     }
 
-    /* ══════════════════════════════════════════════════════════════════════════
-       SUBTLE GRAIN TEXTURE (OPTIONAL)
-       ══════════════════════════════════════════════════════════════════════════ */
-    
     body::before {
       content: '';
       position: fixed;
@@ -242,10 +209,6 @@
       z-index: 1;
     }
 
-    /* ══════════════════════════════════════════════════════════════════════════
-       PARTICLE CANVAS & AMBIENT GLOW
-       ══════════════════════════════════════════════════════════════════════════ */
-    
     #particles-canvas {
       position: fixed;
       top: 0;
@@ -286,43 +249,31 @@
   </style>
 </head>
 <body>
-  <!-- Particle Canvas -->
+
   <canvas id="particles-canvas" aria-hidden="true"></canvas>
-  
-  <!-- Ambient Glow (follows mouse) -->
+
   <div class="ambient-glow ambient-glow--mouse" id="ambient-glow" aria-hidden="true"></div>
 
-  <!-- 404 Number (Clickable for easter egg) -->
   <div class="nothing-404" id="nothing-404" role="img" aria-label="404 Error">404</div>
-  
-  <!-- Message with blinking cursor -->
+
   <div class="nothing-message">
     <span class="nothing-message__text" id="nothing-message">This route returns nothing.</span>
     <span class="nothing-cursor" aria-hidden="true"></span>
   </div>
-  
-  <!-- Navigation -->
+
   <nav class="nothing-nav" aria-label="Main navigation">
     <a href="./" class="nothing-nav__link">Home</a>
     <a href="pages/projects/" class="nothing-nav__link">Projects</a>
   </nav>
 
-  <!-- Hidden Easter Egg -->
   <div class="nothing-easter-egg" id="nothing-easter-egg" aria-hidden="true">
     You found the nothing.
   </div>
 
   <script>
-    /**
-     * NOTHING 404 PAGE
-     * Random messages, easter egg, minimal interaction
-     */
+
     (function() {
       'use strict';
-
-      // ════════════════════════════════════════════════════════════════════════
-      // RANDOM MESSAGES
-      // ════════════════════════════════════════════════════════════════════════
 
       const messages = [
         "This route returns nothing.",
@@ -351,18 +302,10 @@
         "// TODO: Add something here"
       ];
 
-      // ════════════════════════════════════════════════════════════════════════
-      // STATE
-      // ════════════════════════════════════════════════════════════════════════
-
       let clickCount = 0;
       let keySequence = [];
       const secretCode = ['n', 'o', 't', 'h', 'i', 'n', 'g'];
       let easterEggTriggered = false;
-
-      // ════════════════════════════════════════════════════════════════════════
-      // RANDOM MESSAGE
-      // ════════════════════════════════════════════════════════════════════════
 
       function setRandomMessage() {
         const messageEl = document.getElementById('nothing-message');
@@ -372,25 +315,20 @@
         }
       }
 
-      // ════════════════════════════════════════════════════════════════════════
-      // EASTER EGG
-      // ════════════════════════════════════════════════════════════════════════
-
       function triggerEasterEgg() {
         if (easterEggTriggered) return;
         easterEggTriggered = true;
 
         const easterEggEl = document.getElementById('nothing-easter-egg');
         if (easterEggEl) {
-          // Random easter egg message
+
           const randomIndex = Math.floor(Math.random() * easterEggMessages.length);
           easterEggEl.textContent = easterEggMessages[randomIndex];
           easterEggEl.classList.add('nothing-easter-egg--visible');
 
-          // Hide after 5 seconds
           setTimeout(() => {
             easterEggEl.classList.remove('nothing-easter-egg--visible');
-            // Allow re-triggering after hidden
+
             setTimeout(() => {
               easterEggTriggered = false;
               clickCount = 0;
@@ -400,18 +338,13 @@
         }
       }
 
-      // ════════════════════════════════════════════════════════════════════════
-      // CLICK HANDLER (5 clicks on 404)
-      // ════════════════════════════════════════════════════════════════════════
-
       function handleClick() {
         clickCount++;
-        
+
         if (clickCount >= 5) {
           triggerEasterEgg();
         }
 
-        // Reset after 2 seconds of no clicks
         clearTimeout(window.clickResetTimeout);
         window.clickResetTimeout = setTimeout(() => {
           if (!easterEggTriggered) {
@@ -420,14 +353,9 @@
         }, 2000);
       }
 
-      // ════════════════════════════════════════════════════════════════════════
-      // KEY SEQUENCE HANDLER (type "nothing")
-      // ════════════════════════════════════════════════════════════════════════
-
       function handleKeyDown(e) {
         const key = e.key.toLowerCase();
-        
-        // Only track letter keys
+
         if (key.length !== 1 || !/[a-z]/.test(key)) {
           keySequence = [];
           return;
@@ -435,12 +363,10 @@
 
         keySequence.push(key);
 
-        // Keep only last N characters
         if (keySequence.length > secretCode.length) {
           keySequence.shift();
         }
 
-        // Check if sequence matches
         if (keySequence.length === secretCode.length) {
           const matches = keySequence.every((k, i) => k === secretCode[i]);
           if (matches) {
@@ -449,15 +375,10 @@
         }
       }
 
-      // ════════════════════════════════════════════════════════════════════════
-      // INITIALIZE
-      // ════════════════════════════════════════════════════════════════════════
-
       function init() {
-        // Set random message
+
         setRandomMessage();
 
-        // Bind 404 click handler
         const el404 = document.getElementById('nothing-404');
         if (el404) {
           el404.addEventListener('click', handleClick);
@@ -467,10 +388,8 @@
           });
         }
 
-        // Bind key handler
         document.addEventListener('keydown', handleKeyDown);
 
-        // Check for reduced motion
         const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (prefersReducedMotion) {
           const cursor = document.querySelector('.nothing-cursor');
@@ -481,7 +400,6 @@
         }
       }
 
-      // Run on DOM ready
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
       } else {
@@ -489,14 +407,9 @@
       }
     })();
 
-    /**
-     * PARTICLE SYSTEM
-     * Mouse-interactive ambient particles
-     */
     (function() {
       'use strict';
 
-      // Check for reduced motion
       const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (prefersReducedMotion) return;
 
@@ -504,11 +417,7 @@
       if (!canvas) return;
 
       const ctx = canvas.getContext('2d');
-      
-      // ════════════════════════════════════════════════════════════════════════
-      // CONFIG
-      // ════════════════════════════════════════════════════════════════════════
-      
+
       const config = {
         particleCount: 80,
         particleSize: { min: 1, max: 2.5 },
@@ -521,18 +430,10 @@
         connectionOpacity: 0.08
       };
 
-      // ════════════════════════════════════════════════════════════════════════
-      // STATE
-      // ════════════════════════════════════════════════════════════════════════
-      
       let particles = [];
       let mouse = { x: null, y: null };
       let animationId = null;
 
-      // ════════════════════════════════════════════════════════════════════════
-      // PARTICLE CLASS
-      // ════════════════════════════════════════════════════════════════════════
-      
       class Particle {
         constructor() {
           this.reset();
@@ -551,7 +452,7 @@
         }
 
         update() {
-          // Mouse interaction
+
           if (mouse.x !== null && mouse.y !== null) {
             const dx = mouse.x - this.x;
             const dy = mouse.y - this.y;
@@ -560,27 +461,22 @@
             if (distance < config.mouseRadius) {
               const force = (config.mouseRadius - distance) / config.mouseRadius;
               const angle = Math.atan2(dy, dx);
-              
-              // Push particles away from mouse
+
               this.velocityX -= Math.cos(angle) * force * config.mouseForce;
               this.velocityY -= Math.sin(angle) * force * config.mouseForce;
-              
-              // Increase opacity when near mouse
+
               this.opacity = Math.min(this.baseOpacity + force * 0.3, 0.6);
             } else {
               this.opacity += (this.baseOpacity - this.opacity) * 0.05;
             }
           }
 
-          // Apply friction
           this.velocityX *= config.friction;
           this.velocityY *= config.friction;
 
-          // Update position
           this.x += this.speedX + this.velocityX;
           this.y += this.speedY + this.velocityY;
 
-          // Wrap around edges
           if (this.x < -this.size) this.x = canvas.width + this.size;
           if (this.x > canvas.width + this.size) this.x = -this.size;
           if (this.y < -this.size) this.y = canvas.height + this.size;
@@ -595,10 +491,6 @@
         }
       }
 
-      // ════════════════════════════════════════════════════════════════════════
-      // CONNECTIONS
-      // ════════════════════════════════════════════════════════════════════════
-      
       function drawConnections() {
         for (let i = 0; i < particles.length; i++) {
           for (let j = i + 1; j < particles.length; j++) {
@@ -619,43 +511,28 @@
         }
       }
 
-      // ════════════════════════════════════════════════════════════════════════
-      // ANIMATION LOOP
-      // ════════════════════════════════════════════════════════════════════════
-      
       function animate() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Update and draw particles
         particles.forEach(particle => {
           particle.update();
           particle.draw();
         });
 
-        // Draw connections
         drawConnections();
 
         animationId = requestAnimationFrame(animate);
       }
 
-      // ════════════════════════════════════════════════════════════════════════
-      // RESIZE HANDLER
-      // ════════════════════════════════════════════════════════════════════════
-      
       function resize() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
       }
 
-      // ════════════════════════════════════════════════════════════════════════
-      // MOUSE HANDLERS
-      // ════════════════════════════════════════════════════════════════════════
-      
       function handleMouseMove(e) {
         mouse.x = e.clientX;
         mouse.y = e.clientY;
 
-        // Update ambient glow position
         const glow = document.getElementById('ambient-glow');
         if (glow) {
           glow.style.left = mouse.x + 'px';
@@ -686,30 +563,22 @@
         mouse.y = null;
       }
 
-      // ════════════════════════════════════════════════════════════════════════
-      // INITIALIZE
-      // ════════════════════════════════════════════════════════════════════════
-      
       function initParticles() {
         resize();
 
-        // Create particles
         particles = [];
         for (let i = 0; i < config.particleCount; i++) {
           particles.push(new Particle());
         }
 
-        // Start animation
         animate();
 
-        // Event listeners
         window.addEventListener('resize', resize);
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseleave', handleMouseLeave);
         document.addEventListener('touchmove', handleTouchMove, { passive: true });
         document.addEventListener('touchend', handleTouchEnd);
 
-        // Position ambient glow initially at center
         const glow = document.getElementById('ambient-glow');
         if (glow) {
           glow.style.left = window.innerWidth / 2 + 'px';
@@ -717,7 +586,6 @@
         }
       }
 
-      // Run on DOM ready
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initParticles);
       } else {

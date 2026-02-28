@@ -1,11 +1,3 @@
-/* ═══════════════════════════════════════════════════════════
-   PRIVATE SPACE - COMPONENTS
-   Nothing OS Inspired × Calm × Minimal
-   ═══════════════════════════════════════════════════════════ */
-
-/* ═══════════════════════════════════
-   BUTTONS - Soft, Matte, Intentional
-   ═══════════════════════════════════ */
 .ps-btn {
   display: inline-flex;
   align-items: center;
@@ -21,7 +13,7 @@
   position: relative;
   overflow: hidden;
   white-space: nowrap;
-  transition: 
+  transition:
     background var(--ps-duration-normal) var(--ps-ease-smooth),
     opacity var(--ps-duration-normal) var(--ps-ease-smooth),
     color var(--ps-duration-normal) var(--ps-ease-smooth);
@@ -40,7 +32,6 @@
   background: rgba(255, 255, 255, 0.14);
 }
 
-/* Her Mode primary button */
 [data-ai-mode="her"] .ps-btn-primary {
   background: var(--ps-her-accent-muted);
   color: var(--ps-her-accent-text);
@@ -107,15 +98,12 @@
   opacity: 0.8;
 }
 
-/* ═══════════════════════════════════
-   CARDS - Soft Surfaces, Subtle Depth
-   ═══════════════════════════════════ */
 .ps-card {
   background: var(--ps-bg-secondary);
   border: 1px solid var(--ps-border-subtle);
   border-radius: var(--ps-radius-lg);
   overflow: hidden;
-  transition: 
+  transition:
     background var(--ps-duration-normal) var(--ps-ease-smooth),
     border-color var(--ps-duration-normal) var(--ps-ease-smooth);
 }
@@ -154,9 +142,6 @@
   background: rgba(255, 255, 255, 0.01);
 }
 
-/* ═══════════════════════════════════
-   INPUTS - Soft, Minimal
-   ═══════════════════════════════════ */
 .ps-input-group {
   display: flex;
   flex-direction: column;
@@ -179,7 +164,7 @@
   border-radius: var(--ps-radius-md);
   color: var(--ps-text-primary);
   font-size: var(--ps-text-sm);
-  transition: 
+  transition:
     border-color var(--ps-duration-normal) var(--ps-ease-smooth),
     background var(--ps-duration-normal) var(--ps-ease-smooth);
 }
@@ -194,7 +179,6 @@
   outline: none;
 }
 
-/* Her Mode input focus */
 [data-ai-mode="her"] .ps-input:focus {
   border-color: rgba(232, 164, 184, 0.25);
 }
@@ -221,7 +205,7 @@
   font-size: var(--ps-text-sm);
   line-height: var(--ps-leading-relaxed);
   resize: vertical;
-  transition: 
+  transition:
     border-color var(--ps-duration-normal) var(--ps-ease-smooth),
     box-shadow var(--ps-duration-normal) var(--ps-ease-smooth);
 }
@@ -231,12 +215,10 @@
   outline: none;
 }
 
-/* Her Mode textarea focus */
 [data-ai-mode="her"] .ps-textarea:focus {
   border-color: rgba(232, 164, 184, 0.25);
 }
 
-/* Toggle - Minimal */
 .ps-toggle {
   position: relative;
   display: inline-flex;
@@ -257,7 +239,7 @@
   background: var(--ps-bg-tertiary);
   border: 1px solid var(--ps-border-subtle);
   border-radius: var(--ps-radius-full);
-  transition: 
+  transition:
     background var(--ps-duration-normal) var(--ps-ease-smooth),
     border-color var(--ps-duration-normal) var(--ps-ease-smooth);
   position: relative;
@@ -268,7 +250,6 @@
   border-color: var(--ps-border-default);
 }
 
-/* Her Mode toggle checked */
 [data-ai-mode="her"] .ps-toggle-input:checked + .ps-toggle-track {
   background: var(--ps-her-accent-muted);
   border-color: rgba(232, 164, 184, 0.2);
@@ -283,7 +264,7 @@
   height: 16px;
   background: var(--ps-text-muted);
   border-radius: 50%;
-  transition: 
+  transition:
     transform var(--ps-duration-normal) var(--ps-ease-smooth),
     background var(--ps-duration-normal) var(--ps-ease-smooth);
 }
@@ -293,14 +274,10 @@
   background: var(--ps-text-primary);
 }
 
-/* Her Mode toggle knob */
 [data-ai-mode="her"] .ps-toggle-input:checked + .ps-toggle-track::after {
   background: var(--ps-her-accent-text);
 }
 
-/* ═══════════════════════════════════
-   TAGS - Pill Style
-   ═══════════════════════════════════ */
 .ps-tag {
   display: inline-flex;
   align-items: center;
@@ -313,7 +290,7 @@
   border-radius: var(--ps-radius-full);
   color: var(--ps-text-muted);
   letter-spacing: 0.02em;
-  transition: 
+  transition:
     background var(--ps-duration-normal) var(--ps-ease-smooth),
     border-color var(--ps-duration-normal) var(--ps-ease-smooth),
     color var(--ps-duration-normal) var(--ps-ease-smooth);
@@ -331,7 +308,6 @@
   border-color: transparent;
 }
 
-/* Her Mode accent tag */
 [data-ai-mode="her"] .ps-tag-accent {
   background: var(--ps-her-accent-muted);
   color: var(--ps-her-accent-text);
@@ -354,7 +330,7 @@
   border-radius: 50%;
   margin-left: var(--ps-space-1);
   opacity: 0.5;
-  transition: 
+  transition:
     opacity var(--ps-duration-normal) var(--ps-ease-smooth),
     background var(--ps-duration-normal) var(--ps-ease-smooth);
 }
@@ -364,9 +340,6 @@
   background: rgba(255, 255, 255, 0.1);
 }
 
-/* ═══════════════════════════════════
-   DROPDOWN
-   ═══════════════════════════════════ */
 .ps-dropdown {
   position: relative;
 }
@@ -387,7 +360,7 @@
   visibility: hidden;
   transform: translateY(-8px) scale(0.96);
   transform-origin: top right;
-  transition: 
+  transition:
     opacity var(--ps-duration-normal) var(--ps-ease-out),
     visibility var(--ps-duration-normal) var(--ps-ease-out),
     transform var(--ps-duration-normal) var(--ps-ease-out);
@@ -409,7 +382,7 @@
   color: var(--ps-text-secondary);
   border-radius: var(--ps-radius-lg);
   cursor: pointer;
-  transition: 
+  transition:
     background var(--ps-duration-fast) var(--ps-ease-default),
     color var(--ps-duration-fast) var(--ps-ease-default);
 }
@@ -431,9 +404,6 @@
   margin: var(--ps-space-2) var(--ps-space-3);
 }
 
-/* ═══════════════════════════════════
-   MODAL
-   ═══════════════════════════════════ */
 .ps-modal-overlay {
   position: fixed;
   inset: 0;
@@ -445,7 +415,7 @@
   padding: var(--ps-space-6);
   opacity: 0;
   visibility: hidden;
-  transition: 
+  transition:
     opacity var(--ps-duration-normal) var(--ps-ease-smooth),
     visibility var(--ps-duration-normal) var(--ps-ease-smooth);
   z-index: var(--ps-z-modal);
@@ -493,7 +463,7 @@
   justify-content: center;
   border-radius: var(--ps-radius-md);
   color: var(--ps-text-muted);
-  transition: 
+  transition:
     background var(--ps-duration-fast) var(--ps-ease-default),
     color var(--ps-duration-fast) var(--ps-ease-default);
 }
@@ -517,9 +487,6 @@
   gap: var(--ps-space-3);
 }
 
-/* ═══════════════════════════════════
-   TOAST
-   ═══════════════════════════════════ */
 .ps-toast-container {
   position: fixed;
   bottom: var(--ps-space-8);
@@ -618,7 +585,7 @@
   border-radius: var(--ps-radius-md);
   color: var(--ps-text-muted);
   flex-shrink: 0;
-  transition: 
+  transition:
     color var(--ps-duration-fast) var(--ps-ease-default),
     background var(--ps-duration-fast) var(--ps-ease-default);
 }
@@ -628,9 +595,6 @@
   background: var(--ps-bg-hover);
 }
 
-/* ═══════════════════════════════════
-   EMPTY STATE
-   ═══════════════════════════════════ */
 .ps-empty {
   padding: var(--ps-space-16) var(--ps-space-8);
   text-align: center;
@@ -660,9 +624,6 @@
   line-height: var(--ps-leading-relaxed);
 }
 
-/* ═══════════════════════════════════
-   SKELETON LOADING
-   ═══════════════════════════════════ */
 .ps-skeleton {
   background: linear-gradient(
     90deg,
@@ -698,9 +659,6 @@
   border-radius: 50%;
 }
 
-/* ═══════════════════════════════════
-   TABS
-   ═══════════════════════════════════ */
 .ps-tabs {
   display: flex;
   gap: var(--ps-space-1);
@@ -716,7 +674,7 @@
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
   cursor: pointer;
-  transition: 
+  transition:
     color var(--ps-duration-normal) var(--ps-ease-smooth),
     border-color var(--ps-duration-normal) var(--ps-ease-smooth);
 }
@@ -744,9 +702,6 @@
   to { opacity: 1; }
 }
 
-/* ═══════════════════════════════════
-   BADGE
-   ═══════════════════════════════════ */
 .ps-badge {
   display: inline-flex;
   align-items: center;
@@ -780,9 +735,6 @@
 .ps-badge-warning { background: var(--ps-warning); }
 .ps-badge-error { background: var(--ps-error); }
 
-/* ═══════════════════════════════════
-   AVATAR
-   ═══════════════════════════════════ */
 .ps-avatar {
   width: 36px;
   height: 36px;
@@ -813,9 +765,6 @@
   border-radius: inherit;
 }
 
-/* ═══════════════════════════════════
-   DIVIDER
-   ═══════════════════════════════════ */
 .ps-divider {
   height: 1px;
   background: var(--ps-border-subtle);
@@ -829,9 +778,6 @@
   margin: 0 var(--ps-space-4);
 }
 
-/* ═══════════════════════════════════
-   PROGRESS
-   ═══════════════════════════════════ */
 .ps-progress {
   width: 100%;
   height: 6px;
@@ -857,9 +803,6 @@
   100% { transform: translateX(350%); }
 }
 
-/* ═══════════════════════════════════
-   TOOLTIP
-   ═══════════════════════════════════ */
 .ps-tooltip {
   position: relative;
 }
@@ -880,7 +823,7 @@
   box-shadow: var(--ps-shadow-md);
   opacity: 0;
   visibility: hidden;
-  transition: 
+  transition:
     opacity var(--ps-duration-fast) var(--ps-ease-default),
     visibility var(--ps-duration-fast) var(--ps-ease-default),
     transform var(--ps-duration-fast) var(--ps-ease-default);
@@ -894,9 +837,6 @@
   transform: translateX(-50%) translateY(-8px);
 }
 
-/* ═══════════════════════════════════
-   SELECT
-   ═══════════════════════════════════ */
 .ps-select {
   appearance: none;
   padding: var(--ps-space-3) var(--ps-space-10) var(--ps-space-3) var(--ps-space-4);
@@ -930,9 +870,6 @@
   font-size: var(--ps-text-xs);
 }
 
-/* ═══════════════════════════════════
-   TEXTAREA
-   ═══════════════════════════════════ */
 .ps-textarea {
   width: 100%;
   padding: var(--ps-space-3) var(--ps-space-4);
@@ -960,9 +897,6 @@
   color: var(--ps-text-muted);
 }
 
-/* ═══════════════════════════════════
-   LABEL
-   ═══════════════════════════════════ */
 .ps-label {
   display: block;
   font-size: var(--ps-text-sm);

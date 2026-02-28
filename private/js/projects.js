@@ -1,10 +1,3 @@
-/**
- * ═══════════════════════════════════════════════════════════
- * PRIVATE SPACE - PROJECTS MODULE
- * Idea dumps, research notes, TODO lists
- * ═══════════════════════════════════════════════════════════
- */
-
 const PSProjects = (function() {
   'use strict';
 
@@ -13,17 +6,11 @@ const PSProjects = (function() {
   let _activeTab = 'ideas';
   let _saveTimeout = null;
 
-  /**
-   * Load projects view
-   */
   async function load() {
     await loadProjects();
     render();
   }
 
-  /**
-   * Load projects from storage
-   */
   async function loadProjects() {
     try {
       _projects = await PSStorage.getAll(PSStorage.STORES.PROJECTS);
@@ -33,9 +20,6 @@ const PSProjects = (function() {
     }
   }
 
-  /**
-   * Render projects interface
-   */
   function render() {
     const container = document.querySelector('#section-projects .ps-workspace');
     if (!container) return;
@@ -50,12 +34,12 @@ const PSProjects = (function() {
               New
             </button>
           </div>
-          
+
           <div class="ps-projects-list">
             ${renderProjectList()}
           </div>
         </div>
-        
+
         <div class="ps-projects-content">
           ${_selectedProject ? renderProjectContent() : renderEmptyState()}
         </div>
@@ -63,9 +47,6 @@ const PSProjects = (function() {
     `;
   }
 
-  /**
-   * Render project list
-   */
   function renderProjectList() {
     if (_projects.length === 0) {
       return `
@@ -79,9 +60,9 @@ const PSProjects = (function() {
       const isSelected = _selectedProject?.id === project.id;
       const todoCount = (project.todos || []).filter(t => !t.completed).length;
       const ideaCount = (project.ideas || []).length;
-      
+
       return `
-        <div class="ps-project-item ${isSelected ? 'active' : ''}" 
+        <div class="ps-project-item ${isSelected ? 'active' : ''}"
              onclick="PSProjects.select('${project.id}')">
           <div class="ps-project-item-color" style="background: ${project.color || '#6366f1'}"></div>
           <div class="ps-project-item-content">
@@ -99,9 +80,6 @@ const PSProjects = (function() {
     }).join('');
   }
 
-  /**
-   * Render empty state
-   */
   function renderEmptyState() {
     return `
       <div class="ps-empty">
@@ -114,9 +92,6 @@ const PSProjects = (function() {
     `;
   }
 
-  /**
-   * Render project content
-   */
   function renderProjectContent() {
     return `
       <div class="ps-project-header">
@@ -124,8 +99,8 @@ const PSProjects = (function() {
           <div class="ps-project-color-picker">
             <button class="ps-project-color-btn" style="background: ${_selectedProject.color || '#6366f1'}" onclick="PSProjects.showColorPicker()"></button>
           </div>
-          <input class="ps-project-title-input" 
-                 type="text" 
+          <input class="ps-project-title-input"
+                 type="text"
                  value="${escapeHtml(_selectedProject.name)}"
                  placeholder="Project name"
                  oninput="PSProjects.updateName(this.value)">
@@ -134,7 +109,7 @@ const PSProjects = (function() {
                   placeholder="Add a description..."
                   oninput="PSProjects.updateDescription(this.value)">${escapeHtml(_selectedProject.description || '')}</textarea>
       </div>
-      
+
       <div class="ps-project-tabs">
         <button class="ps-project-tab ${_activeTab === 'ideas' ? 'active' : ''}" onclick="PSProjects.setTab('ideas')">
           <svg viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
@@ -149,7 +124,7 @@ const PSProjects = (function() {
           Research
         </button>
       </div>
-      
+
       <div class="ps-project-tab-content">
         ${_activeTab === 'ideas' ? renderIdeas() : ''}
         ${_activeTab === 'todos' ? renderTodos() : ''}
@@ -158,23 +133,20 @@ const PSProjects = (function() {
     `;
   }
 
-  /**
-   * Render ideas tab
-   */
   function renderIdeas() {
     const ideas = _selectedProject.ideas || [];
 
     return `
       <div class="ps-ideas">
         <div class="ps-ideas-input">
-          <input type="text" 
+          <input type="text"
                  id="newIdeaInput"
                  class="ps-input"
                  placeholder="Quick idea dump..."
                  onkeydown="if(event.key==='Enter') PSProjects.addIdea()">
           <button class="ps-btn ps-btn-primary" onclick="PSProjects.addIdea()">Add</button>
         </div>
-        
+
         <div class="ps-ideas-list">
           ${ideas.length === 0 ? `
             <div class="ps-empty" style="padding: 32px;">
@@ -201,9 +173,6 @@ const PSProjects = (function() {
     `;
   }
 
-  /**
-   * Render TODOs tab
-   */
   function renderTodos() {
     const todos = _selectedProject.todos || [];
     const pending = todos.filter(t => !t.completed);
@@ -224,16 +193,16 @@ const PSProjects = (function() {
           </select>
           <button class="ps-btn ps-btn-primary" onclick="PSProjects.addTodo()">Add</button>
         </div>
-        
+
         <div class="ps-todos-list">
           ${pending.length === 0 && completed.length === 0 ? `
             <div class="ps-empty" style="padding: 32px;">
               <p class="ps-empty-description">No tasks yet. Add your first todo above.</p>
             </div>
           ` : ''}
-          
+
           ${pending.map(todo => renderTodoItem(todo)).join('')}
-          
+
           ${completed.length > 0 ? `
             <div class="ps-todos-completed-header">
               <span>Completed (${completed.length})</span>
@@ -245,9 +214,6 @@ const PSProjects = (function() {
     `;
   }
 
-  /**
-   * Render single TODO item
-   */
   function renderTodoItem(todo) {
     return `
       <div class="ps-todo-item ${todo.completed ? 'completed' : ''} priority-${todo.priority || 'medium'}">
@@ -263,9 +229,6 @@ const PSProjects = (function() {
     `;
   }
 
-  /**
-   * Render research tab
-   */
   function renderResearch() {
     const research = _selectedProject.research || '';
 
@@ -287,9 +250,6 @@ const PSProjects = (function() {
     `;
   }
 
-  /**
-   * Create new project
-   */
   async function create() {
     const project = {
       id: PSCrypto.generateId(),
@@ -309,7 +269,6 @@ const PSProjects = (function() {
     _activeTab = 'ideas';
     render();
 
-    // Focus name input
     setTimeout(() => {
       const input = document.querySelector('.ps-project-title-input');
       if (input) {
@@ -319,53 +278,38 @@ const PSProjects = (function() {
     }, 100);
   }
 
-  /**
-   * Select project
-   */
   function select(id) {
     _selectedProject = _projects.find(p => p.id === id);
     _activeTab = 'ideas';
     render();
   }
 
-  /**
-   * Set active tab
-   */
   function setTab(tab) {
     _activeTab = tab;
     render();
   }
 
-  /**
-   * Update project name
-   */
   function updateName(name) {
     if (!_selectedProject) return;
     _selectedProject.name = name;
     scheduleSave();
   }
 
-  /**
-   * Update project description
-   */
   function updateDescription(desc) {
     if (!_selectedProject) return;
     _selectedProject.description = desc;
     scheduleSave();
   }
 
-  /**
-   * Add idea
-   */
   async function addIdea() {
     if (!_selectedProject) return;
-    
+
     const input = document.getElementById('newIdeaInput');
     const content = input?.value.trim();
     if (!content) return;
 
     if (!_selectedProject.ideas) _selectedProject.ideas = [];
-    
+
     _selectedProject.ideas.unshift({
       id: PSCrypto.generateId(),
       content,
@@ -377,12 +321,9 @@ const PSProjects = (function() {
     render();
   }
 
-  /**
-   * Edit idea
-   */
   async function editIdea(id) {
     if (!_selectedProject) return;
-    
+
     const idea = _selectedProject.ideas?.find(i => i.id === id);
     if (!idea) return;
 
@@ -394,28 +335,22 @@ const PSProjects = (function() {
     }
   }
 
-  /**
-   * Delete idea
-   */
   async function deleteIdea(id) {
     if (!_selectedProject) return;
-    
+
     _selectedProject.ideas = (_selectedProject.ideas || []).filter(i => i.id !== id);
     await saveProject();
     render();
   }
 
-  /**
-   * Convert idea to TODO
-   */
   async function convertToTodo(ideaId) {
     if (!_selectedProject) return;
-    
+
     const idea = _selectedProject.ideas?.find(i => i.id === ideaId);
     if (!idea) return;
 
     if (!_selectedProject.todos) _selectedProject.todos = [];
-    
+
     _selectedProject.todos.unshift({
       id: PSCrypto.generateId(),
       text: idea.content,
@@ -426,27 +361,24 @@ const PSProjects = (function() {
 
     _selectedProject.ideas = _selectedProject.ideas.filter(i => i.id !== ideaId);
     await saveProject();
-    
+
     _activeTab = 'todos';
     render();
-    
+
     PSUI.showToast('Idea converted to TODO');
   }
 
-  /**
-   * Add TODO
-   */
   async function addTodo() {
     if (!_selectedProject) return;
-    
+
     const input = document.getElementById('newTodoInput');
     const priority = document.getElementById('todoPriority');
-    
+
     const text = input?.value.trim();
     if (!text) return;
 
     if (!_selectedProject.todos) _selectedProject.todos = [];
-    
+
     _selectedProject.todos.unshift({
       id: PSCrypto.generateId(),
       text,
@@ -460,41 +392,32 @@ const PSProjects = (function() {
     render();
   }
 
-  /**
-   * Toggle TODO completion
-   */
   async function toggleTodo(id) {
     if (!_selectedProject) return;
-    
+
     const todo = _selectedProject.todos?.find(t => t.id === id);
     if (!todo) return;
 
     todo.completed = !todo.completed;
     todo.completedAt = todo.completed ? Date.now() : null;
-    
+
     await saveProject();
     render();
   }
 
-  /**
-   * Delete TODO
-   */
   async function deleteTodo(id) {
     if (!_selectedProject) return;
-    
+
     _selectedProject.todos = (_selectedProject.todos || []).filter(t => t.id !== id);
     await saveProject();
     render();
   }
 
-  /**
-   * Update research notes
-   */
   function updateResearch(content) {
     if (!_selectedProject) return;
     _selectedProject.research = content;
     scheduleSave();
-    
+
     const status = document.getElementById('researchSaveStatus');
     if (status) {
       status.className = 'ps-save-status saving';
@@ -505,15 +428,12 @@ const PSProjects = (function() {
     }
   }
 
-  /**
-   * Schedule auto-save
-   */
   function scheduleSave() {
     if (_saveTimeout) clearTimeout(_saveTimeout);
-    
+
     _saveTimeout = setTimeout(async () => {
       await saveProject();
-      
+
       const status = document.getElementById('researchSaveStatus');
       if (status) {
         status.className = 'ps-save-status saved';
@@ -525,19 +445,13 @@ const PSProjects = (function() {
     }, 500);
   }
 
-  /**
-   * Save project
-   */
   async function saveProject() {
     if (!_selectedProject) return;
-    
+
     _selectedProject.updatedAt = Date.now();
     await PSStorage.save(PSStorage.STORES.PROJECTS, _selectedProject);
   }
 
-  /**
-   * Delete project
-   */
   async function deleteProject(id) {
     const project = _projects.find(p => p.id === id);
     if (!project) return;
@@ -547,18 +461,15 @@ const PSProjects = (function() {
 
     await PSStorage.delete(PSStorage.STORES.PROJECTS, id);
     _projects = _projects.filter(p => p.id !== id);
-    
+
     if (_selectedProject?.id === id) {
       _selectedProject = null;
     }
-    
+
     render();
     PSUI.showToast('Project deleted');
   }
 
-  /**
-   * Show project menu
-   */
   function showMenu(id) {
     const project = _projects.find(p => p.id === id);
     if (!project) return;
@@ -576,12 +487,9 @@ const PSProjects = (function() {
     );
   }
 
-  /**
-   * Show color picker
-   */
   function showColorPicker() {
     const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#ec4899'];
-    
+
     PSUI.showModal(
       '<h3>Choose Color</h3>',
       `
@@ -596,37 +504,25 @@ const PSProjects = (function() {
     );
   }
 
-  /**
-   * Set project color
-   */
   async function setColor(color) {
     if (!_selectedProject) return;
-    
+
     _selectedProject.color = color;
     await saveProject();
     PSUI.hideModal();
     render();
   }
 
-  /**
-   * Get random color
-   */
   function getRandomColor() {
     const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#14b8a6', '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#ec4899'];
     return colors[Math.floor(Math.random() * colors.length)];
   }
 
-  /**
-   * Format date
-   */
   function formatDate(ts) {
     const date = new Date(ts);
     return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
   }
 
-  /**
-   * Escape HTML
-   */
   function escapeHtml(str) {
     if (!str) return '';
     const div = document.createElement('div');

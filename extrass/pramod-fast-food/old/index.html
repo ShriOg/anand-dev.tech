@@ -7,17 +7,14 @@
     <meta name="description" content="Pramod Fast Food — Momos, Noodles, Rolls & more. 100% Pure Veg. Order via WhatsApp!">
     <meta name="theme-color" content="#e85d04">
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Styles -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-    <!-- ========================= HERO ========================= -->
     <header class="hero" role="banner">
         <div class="hero__inner">
             <span class="hero__emoji" aria-hidden="true">🥟</span>
@@ -27,10 +24,8 @@
         </div>
     </header>
 
-    <!-- ==================== LOYALTY BAR ==================== -->
     <div class="loyalty-bar" id="loyaltyBar" role="complementary" aria-label="Rewards"></div>
 
-    <!-- ==================== SEARCH + FILTERS ==================== -->
     <div class="search-bar" role="search" aria-label="Search menu">
         <div class="search-box">
             <span class="search-box__icon" aria-hidden="true">🔍</span>
@@ -52,7 +47,6 @@
         </div>
     </div>
 
-    <!-- ==================== CATEGORY TABS ==================== -->
     <nav class="tabs-wrap" aria-label="Menu categories">
         <div class="tabs" id="menuTabs" role="tablist">
             <button class="tab active" data-category="all"     role="tab" aria-selected="true">All</button>
@@ -69,9 +63,8 @@
         </div>
     </nav>
 
-    <!-- ==================== MAIN CONTENT ==================== -->
     <main class="main">
-        <!-- Stats -->
+
         <div class="stats" aria-label="Menu statistics">
             <div class="stat">
                 <div class="stat__val" id="stat-total">0</div>
@@ -87,11 +80,9 @@
             </div>
         </div>
 
-        <!-- Menu items render here -->
         <div id="menuContainer" role="feed" aria-label="Menu items"></div>
     </main>
 
-    <!-- ======================== FOOTER ======================== -->
     <footer class="footer">
         <div class="footer__btns">
             <a href="tel:8595928413" class="footer__btn footer__btn--call" aria-label="Call us">📞 Call Now</a>
@@ -103,7 +94,6 @@
         </p>
     </footer>
 
-    <!-- ==================== FLOATING UI ==================== -->
     <button class="btt" id="backToTop" aria-label="Back to top">↑</button>
 
     <button class="cart-fab" id="cartBtn" aria-label="Open cart">
@@ -111,10 +101,8 @@
         <span class="cart-fab__badge" id="cartBadge" style="display:none">0</span>
     </button>
 
-    <!-- Cart overlay -->
     <div class="overlay" id="modalOverlay" aria-hidden="true"></div>
 
-    <!-- Cart modal -->
     <div class="cart-modal" id="cartModal" role="dialog" aria-label="Shopping cart" aria-modal="true">
         <div class="cart-modal__handle" aria-hidden="true"></div>
         <div class="cart-modal__head">
@@ -140,8 +128,6 @@
         </div>
     </div>
 
-    <!-- ==================== SCRIPTS (order matters) ==================== -->
-    <!-- Socket.IO + api.js disabled — frontend-only mode -->
     <script src="js/api.js"></script>
     <script src="js/menu-data.js"></script>
     <script src="js/state.js"></script>

@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <!-- Modular CSS -->
+
   <link rel="stylesheet" href="../../assets/css/variables.css">
   <link rel="stylesheet" href="../../assets/css/base.css">
   <link rel="stylesheet" href="../../assets/css/layout.css">
@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="../../assets/css/zoom-transitions.css">
 </head>
 <body class="page">
-  <!-- Navigation - Content injected from content.json -->
+
   <nav class="nav">
     <div class="nav__inner">
       <a href="../../" class="nav__logo" data-content="logo"></a>
@@ -31,45 +31,42 @@
         <span></span>
       </button>
       <div class="nav__links" data-content="nav-links">
-        <!-- Navigation links injected dynamically -->
+
       </div>
     </div>
   </nav>
 
   <main style="padding-top: var(--space-24);">
     <div class="container">
-      <!-- Projects Header - Content injected from content.json -->
+
       <header class="section-header reveal">
         <span class="section-header__eyebrow" data-content="projects-eyebrow"></span>
         <h1 class="section-header__title" data-content="projects-title"></h1>
         <p class="section-header__description" data-content="projects-description"></p>
       </header>
 
-      <!-- All Projects Grid - Rendered dynamically from content.json -->
       <div class="focus-cards-grid" data-content="all-projects">
-        <!-- Project cards injected dynamically -->
+
       </div>
     </div>
   </main>
 
-  <!-- Footer - Content injected from content.json -->
   <footer class="footer">
     <div class="container">
       <div class="footer__inner">
         <div class="footer__links" data-content="footer-links">
-          <!-- Footer links injected dynamically -->
+
         </div>
         <p class="footer__copyright" data-content="footer-copyright"></p>
       </div>
     </div>
   </footer>
 
-  <!-- Core Scripts -->
   <script src="../../assets/js/main.js"></script>
   <script src="../../assets/js/mobile.js"></script>
-  <!-- Content Loader - Single Source of Truth -->
+
   <script src="../../assets/js/content-loader.js"></script>
-  <!-- Interactions & Transitions -->
+
   <script src="../../assets/js/transitions.js"></script>
   <script src="../../assets/js/gestures.js"></script>
   <script src="../../assets/js/app.js"></script>

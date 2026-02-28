@@ -14,63 +14,63 @@ async function initAIModule(container) {
       <button class="btn-primary" onclick="sendMessage()">Send</button>
     </div>
   `;
-  
+
   renderChatHistory();
 }
 
 function renderChatHistory() {
   const messagesContainer = document.getElementById('chatMessages');
-  
+
   if (chatHistory.length === 0) {
     messagesContainer.innerHTML = '<p class="empty-state">Start a conversation with the AI assistant!</p>';
     return;
   }
-  
+
   messagesContainer.innerHTML = chatHistory.map(msg => `
     <div class="chat-message ${msg.role}">
       <div class="message-content">${escapeHtml(msg.content)}</div>
       <span class="message-time">${formatTime(msg.timestamp)}</span>
     </div>
   `).join('');
-  
+
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
 async function sendMessage() {
   const input = document.getElementById('chatInput');
   const message = input.value.trim();
-  
+
   if (!message) return;
-  
+
   chatHistory.push({
     role: 'user',
     content: message,
     timestamp: new Date(),
   });
-  
+
   input.value = '';
   renderChatHistory();
-  
+
   const messagesContainer = document.getElementById('chatMessages');
   const loadingDiv = document.createElement('div');
   loadingDiv.className = 'chat-message assistant loading';
   loadingDiv.innerHTML = '<div class="message-content">Thinking...</div>';
   messagesContainer.appendChild(loadingDiv);
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
-  
+
   try {
     const response = await api.post('/api/ai', { message });
-    
+
     chatHistory.push({
       role: 'assistant',
       content: response.reply,
       timestamp: new Date(),
     });
-    
+
     renderChatHistory();
   } catch (error) {
     loadingDiv.remove();
-    
+
     if (error.message.includes('rate limit')) {
       chatHistory.push({
         role: 'assistant',
@@ -84,7 +84,7 @@ async function sendMessage() {
         timestamp: new Date(),
       });
     }
-    
+
     renderChatHistory();
   }
 }

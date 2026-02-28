@@ -1,10 +1,3 @@
-/**
- * ═══════════════════════════════════════════════════════════
- * PRIVATE SPACE - AI CHAT MODULE
- * Persistent chat interface with memory integration
- * ═══════════════════════════════════════════════════════════
- */
-
 const PSChat = (function() {
   'use strict';
 
@@ -13,12 +6,9 @@ const PSChat = (function() {
   let _sessions = [];
   let _isTyping = false;
 
-  /**
-   * Load chat view
-   */
   async function load() {
     await loadSessions();
-    
+
     if (!_currentSessionId && _sessions.length > 0) {
       _currentSessionId = _sessions[0].id;
     }
@@ -30,9 +20,6 @@ const PSChat = (function() {
     render();
   }
 
-  /**
-   * Load all sessions
-   */
   async function loadSessions() {
     try {
       const allMessages = await PSStorage.getAll(PSStorage.STORES.CHAT);
@@ -62,9 +49,6 @@ const PSChat = (function() {
     }
   }
 
-  /**
-   * Load messages for a session
-   */
   async function loadMessages(sessionId) {
     try {
       _messages = await PSStorage.getByIndex(PSStorage.STORES.CHAT, 'sessionId', sessionId);
@@ -74,9 +58,6 @@ const PSChat = (function() {
     }
   }
 
-  /**
-   * Render chat interface
-   */
   function render() {
     const container = document.querySelector('#section-chat .ps-workspace');
     if (!container) return;
@@ -90,7 +71,7 @@ const PSChat = (function() {
               New
             </button>
             ${_sessions.map(session => `
-              <button class="ps-session-tag ${session.id === _currentSessionId ? 'active' : ''}" 
+              <button class="ps-session-tag ${session.id === _currentSessionId ? 'active' : ''}"
                       onclick="PSChat.switchSession('${session.id}')"
                       title="${session.messageCount} messages">
                 ${escapeHtml(session.name)}
@@ -98,18 +79,18 @@ const PSChat = (function() {
             `).join('')}
           </div>
         </div>
-        
+
         <div class="ps-chat-messages" id="chatMessages">
           ${renderMessages()}
         </div>
-        
+
         <div class="ps-chat-input-container">
           <div class="ps-chat-context" id="chatContext" style="display: none;">
             <div class="ps-chat-context-title">Context</div>
             <div class="ps-chat-context-items" id="chatContextItems"></div>
           </div>
           <div class="ps-chat-input-wrapper">
-            <textarea class="ps-chat-textarea" id="chatInput" placeholder="Message..." rows="1" 
+            <textarea class="ps-chat-textarea" id="chatInput" placeholder="Message..." rows="1"
                       onkeydown="PSChat.handleKeydown(event)"
                       oninput="PSChat.autoResize(this)"></textarea>
             <button class="ps-chat-send" id="chatSend" onclick="PSChat.send()">
@@ -133,9 +114,6 @@ const PSChat = (function() {
     scrollToBottom();
   }
 
-  /**
-   * Render messages
-   */
   function renderMessages() {
     if (_messages.length === 0) {
       return `
@@ -150,7 +128,7 @@ const PSChat = (function() {
     let html = _messages.map(msg => `
       <div class="ps-message ps-message-${msg.role} ${msg.pinned ? 'pinned' : ''}" data-id="${msg.id}">
         <div class="ps-message-avatar">
-          ${msg.role === 'user' 
+          ${msg.role === 'user'
             ? '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'
             : '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>'}
         </div>
@@ -193,21 +171,16 @@ const PSChat = (function() {
     return html;
   }
 
-  /**
-   * Send message
-   */
   async function send() {
     const input = document.getElementById('chatInput');
     const content = input?.value.trim();
 
     if (!content) return;
 
-    // Create session if needed
     if (!_currentSessionId) {
       _currentSessionId = PSCrypto.generateId();
     }
 
-    // Save user message
     const userMessage = {
       id: PSCrypto.generateId(),
       sessionId: _currentSessionId,
@@ -220,23 +193,19 @@ const PSChat = (function() {
     await PSStorage.save(PSStorage.STORES.CHAT, userMessage);
     _messages.push(userMessage);
 
-    // Add to short-term memory
     PSMemory.addShortTerm('user_message', content, 'chat');
 
-    // Clear input
     input.value = '';
     input.style.height = 'auto';
 
-    // Re-render
     render();
 
-    // Generate AI response
     _isTyping = true;
     updateMessages();
 
     try {
       const response = await generateResponse(content);
-      
+
       const assistantMessage = {
         id: PSCrypto.generateId(),
         sessionId: _currentSessionId,
@@ -249,7 +218,6 @@ const PSChat = (function() {
       await PSStorage.save(PSStorage.STORES.CHAT, assistantMessage);
       _messages.push(assistantMessage);
 
-      // Handle memory requests from AI
       if (response.memoryRequest) {
         PSMemory.requestLongTerm(
           response.memoryRequest.key,
@@ -258,7 +226,6 @@ const PSChat = (function() {
         );
       }
 
-      // Update session name if first message
       if (_messages.filter(m => m.role === 'user').length === 1) {
         updateSessionName(_currentSessionId, content.substring(0, 30) + (content.length > 30 ? '...' : ''));
       }
@@ -271,20 +238,14 @@ const PSChat = (function() {
     render();
   }
 
-  /**
-   * Generate AI response (placeholder for actual AI integration)
-   */
   async function generateResponse(userMessage) {
-    // Get context from memory
+
     const memories = await PSMemory.getAllForContext();
-    
-    // Simulate thinking delay
+
     await new Promise(resolve => setTimeout(resolve, 800 + Math.random() * 1000));
 
-    // Context-aware responses
     const lowerMessage = userMessage.toLowerCase();
 
-    // Check for memory-related queries
     if (lowerMessage.includes('remember') || lowerMessage.includes('save')) {
       const match = userMessage.match(/remember (?:that )?(.+)/i);
       if (match) {
@@ -299,24 +260,21 @@ const PSChat = (function() {
       }
     }
 
-    // Check for note queries
     if (lowerMessage.includes('note') || lowerMessage.includes('notes')) {
       return {
         text: "I can help you with your notes. You can ask me to:\n• Search for specific notes\n• Summarize a note\n• Find related notes\n• Expand on an idea\n\nWhat would you like to do?"
       };
     }
 
-    // Check for project queries
     if (lowerMessage.includes('project') || lowerMessage.includes('idea')) {
       return {
         text: "I can help with your projects and ideas. I can:\n• Help brainstorm new ideas\n• Organize your thoughts\n• Create TODO lists\n• Find connections between projects\n\nWhat are you working on?"
       };
     }
 
-    // Reference existing memories
     if (memories.longTerm.length > 0 || memories.working.length > 0) {
       const relevantMemories = [...memories.longTerm, ...memories.working]
-        .filter(m => 
+        .filter(m =>
           m.key.toLowerCase().includes(lowerMessage.split(' ')[0]) ||
           m.value.toLowerCase().includes(lowerMessage.split(' ')[0])
         );
@@ -329,7 +287,6 @@ const PSChat = (function() {
       }
     }
 
-    // Default responses
     const responses = [
       "I understand. How can I help you explore this further?",
       "That's interesting. Would you like me to save this as a note or add it to a project?",
@@ -343,9 +300,6 @@ const PSChat = (function() {
     };
   }
 
-  /**
-   * Update messages display
-   */
   function updateMessages() {
     const container = document.getElementById('chatMessages');
     if (container) {
@@ -354,9 +308,6 @@ const PSChat = (function() {
     }
   }
 
-  /**
-   * Scroll to bottom of chat
-   */
   function scrollToBottom() {
     const container = document.getElementById('chatMessages');
     if (container) {
@@ -364,9 +315,6 @@ const PSChat = (function() {
     }
   }
 
-  /**
-   * Handle keydown in input
-   */
   function handleKeydown(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -374,17 +322,11 @@ const PSChat = (function() {
     }
   }
 
-  /**
-   * Auto resize textarea
-   */
   function autoResize(element) {
     element.style.height = 'auto';
     element.style.height = Math.min(element.scrollHeight, 120) + 'px';
   }
 
-  /**
-   * New session
-   */
   function newSession() {
     _currentSessionId = PSCrypto.generateId();
     _messages = [];
@@ -398,25 +340,18 @@ const PSChat = (function() {
     render();
   }
 
-  /**
-   * Switch session
-   */
   async function switchSession(sessionId) {
     _currentSessionId = sessionId;
     await loadMessages(sessionId);
     render();
   }
 
-  /**
-   * Update session name
-   */
   async function updateSessionName(sessionId, name) {
     const session = _sessions.find(s => s.id === sessionId);
     if (session) {
       session.name = name;
     }
 
-    // Update all messages in session
     const messages = await PSStorage.getByIndex(PSStorage.STORES.CHAT, 'sessionId', sessionId);
     for (const msg of messages) {
       msg.sessionName = name;
@@ -424,9 +359,6 @@ const PSChat = (function() {
     }
   }
 
-  /**
-   * Toggle message pin
-   */
   async function togglePin(messageId) {
     const message = _messages.find(m => m.id === messageId);
     if (message) {
@@ -436,9 +368,6 @@ const PSChat = (function() {
     }
   }
 
-  /**
-   * Copy message
-   */
   function copyMessage(messageId) {
     const message = _messages.find(m => m.id === messageId);
     if (message) {
@@ -447,12 +376,9 @@ const PSChat = (function() {
     }
   }
 
-  /**
-   * Attach note to context
-   */
   async function attachNote() {
     const notes = await PSStorage.getAll(PSStorage.STORES.NOTES);
-    
+
     if (notes.length === 0) {
       PSUI.toast('No notes available', 'info');
       return;
@@ -471,15 +397,12 @@ const PSChat = (function() {
     });
   }
 
-  /**
-   * Add note to chat context
-   */
   async function addNoteContext(noteId) {
     const note = await PSStorage.get(PSStorage.STORES.NOTES, noteId);
     if (note) {
       const contextContainer = document.getElementById('chatContext');
       const contextItems = document.getElementById('chatContextItems');
-      
+
       contextContainer.style.display = 'block';
       contextItems.innerHTML += `
         <div class="ps-chat-context-item" data-note-id="${noteId}">
@@ -492,17 +415,14 @@ const PSChat = (function() {
     }
   }
 
-  /**
-   * Show memory context
-   */
   async function showMemory() {
     const memories = await PSMemory.getAllForContext();
-    
+
     const content = `
       <div style="max-height: 300px; overflow-y: auto;">
         <h4 style="margin-bottom: 8px; color: var(--ps-text-secondary);">Working Memory (${memories.working.length})</h4>
         ${memories.working.map(m => `<div style="padding: 4px 0; font-size: 13px;"><strong>${m.key}:</strong> ${m.value}</div>`).join('') || '<p style="color: var(--ps-text-muted);">Empty</p>'}
-        
+
         <h4 style="margin: 16px 0 8px; color: var(--ps-text-secondary);">Long-term Memory (${memories.longTerm.length})</h4>
         ${memories.longTerm.map(m => `<div style="padding: 4px 0; font-size: 13px;"><strong>${m.key}:</strong> ${m.value}</div>`).join('') || '<p style="color: var(--ps-text-muted);">Empty</p>'}
       </div>
@@ -514,11 +434,8 @@ const PSChat = (function() {
     });
   }
 
-  /**
-   * Format message content
-   */
   function formatMessage(content) {
-    // Basic markdown-like formatting
+
     return escapeHtml(content)
       .replace(/\n/g, '<br>')
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
@@ -527,17 +444,11 @@ const PSChat = (function() {
       .replace(/• /g, '• ');
   }
 
-  /**
-   * Format time
-   */
   function formatTime(timestamp) {
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
-  /**
-   * Escape HTML
-   */
   function escapeHtml(str) {
     if (!str) return '';
     const div = document.createElement('div');

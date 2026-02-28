@@ -15,7 +15,6 @@
 </head>
 <body>
 
-    <!-- ==================== PASSWORD GATE ==================== -->
     <div class="gate" id="gate">
         <div class="gate__card">
             <span class="gate__icon">🔐</span>
@@ -32,7 +31,6 @@
         </div>
     </div>
 
-    <!-- ==================== SIDEBAR ==================== -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar__brand">
             <span class="sidebar__logo">🥟</span>
@@ -67,10 +65,8 @@
         </div>
     </aside>
 
-    <!-- ==================== MAIN LAYOUT ==================== -->
     <div class="layout" id="layout">
 
-        <!-- Header -->
         <header class="topbar">
             <button class="topbar__hamburger" id="sidebarToggle" aria-label="Toggle sidebar">☰</button>
             <h1 class="topbar__title" id="pageTitle">Dashboard</h1>
@@ -80,10 +76,8 @@
             </div>
         </header>
 
-        <!-- Page container -->
         <main class="page-container" id="pageContainer">
 
-            <!-- ====== DASHBOARD PAGE ====== -->
             <section class="page" id="pageDashboard" data-page="dashboard">
                 <div class="stats-grid" id="statsGrid">
                     <div class="stat-card">
@@ -123,7 +117,6 @@
                     </div>
                 </div>
 
-                <!-- Quick recent orders -->
                 <div class="panel">
                     <div class="panel__head">
                         <h2 class="panel__title">Recent Orders</h2>
@@ -139,7 +132,6 @@
                 </div>
             </section>
 
-            <!-- ====== LIVE ORDERS PAGE ====== -->
             <section class="page" id="pageOrders" data-page="orders" hidden>
                 <div class="page__toolbar">
                     <h2 class="page__subtitle">Live Orders</h2>
@@ -161,7 +153,6 @@
                 </div>
             </section>
 
-            <!-- ====== ORDER HISTORY PAGE ====== -->
             <section class="page" id="pageHistory" data-page="history" hidden>
                 <div class="page__toolbar">
                     <h2 class="page__subtitle">Order History</h2>
@@ -202,7 +193,6 @@
                 <div class="pagination" id="historyPagination"></div>
             </section>
 
-            <!-- ====== MENU MANAGEMENT PAGE ====== -->
             <section class="page" id="PageMenu" data-page="menu" hidden>
                 <div class="page__toolbar">
                     <h2 class="page__subtitle">Menu Management</h2>
@@ -221,7 +211,6 @@
                 </div>
             </section>
 
-            <!-- ====== ANALYTICS PAGE ====== -->
             <section class="page" id="pageAnalytics" data-page="analytics" hidden>
                 <div class="analytics-grid">
                     <div class="panel">
@@ -251,10 +240,6 @@
         </main>
     </div>
 
-    <!-- ==================== TOAST ==================== -->
-    <!-- Created dynamically by admin-ui.js -->
-
-    <!-- ==================== CONFIRM DIALOG ==================== -->
     <div class="confirm-overlay" id="confirmOverlay" hidden>
         <div class="confirm-dialog" role="alertdialog" aria-modal="true">
             <p class="confirm-dialog__msg" id="confirmMsg"></p>
@@ -265,13 +250,10 @@
         </div>
     </div>
 
-    <!-- ==================== NOTIFICATION SOUND ==================== -->
-    <!-- Tiny inline base64 beep so we don't need an external file -->
     <audio id="notifSound" preload="auto">
         <source src="data:audio/wav;base64,UklGRl4GAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YToGAAD+/wIA/P8EAPv/BgD5/wgA9/8KAPb/CwD1/wwA9f8MAPT/DQD0/w0A9P8NAPX/DAD1/wwA9v8LAPX/DADz/w4A8P8RAPD/EQDx/xAA8v8PAPL/DwDy/w8A8P8RAPP/DgD4/wkA+/8GAP3/BAD+/wMA//8CAP//AgD//wIA//8CAP//AgD+/wMA/f8EAPz/BQD7/wYA+v8HAPn/CAD4/wkA+P8JAPj/CQD5/wgA+v8HAPv/BgD8/wUA/f8EAP7/AwD//wIA//8BAP//AQD//wEA//8BAP//AQD//wEAAAAAAAAAAAAA" type="audio/wav">
     </audio>
 
-    <!-- ==================== SCRIPTS ==================== -->
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
     <script src="js/admin-api.js"></script>
     <script src="js/admin-socket.js"></script>

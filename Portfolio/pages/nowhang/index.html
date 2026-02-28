@@ -46,7 +46,6 @@
             overflow: hidden;
         }
 
-        /* Particle Canvas */
         #particle-canvas {
             position: fixed;
             top: 0;
@@ -64,7 +63,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: 
+            background:
                 radial-gradient(ellipse 80% 60% at 50% 0%, rgba(15, 15, 23, 0.8) 0%, transparent 60%),
                 radial-gradient(ellipse 80% 60% at 50% 100%, rgba(15, 15, 23, 0.6) 0%, transparent 50%);
             pointer-events: none;
@@ -376,7 +375,7 @@
             opacity: 0;
             transform: translateY(16px);
             cursor: pointer;
-            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), 
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
                         box-shadow 0.35s ease,
                         border-color 0.35s ease;
         }
@@ -585,7 +584,7 @@
     </style>
 </head>
 <body class="locked">
-    <!-- Particle Canvas -->
+
     <canvas id="particle-canvas"></canvas>
 
     <div class="lock-screen" id="lockScreen">
@@ -648,7 +647,7 @@
 
             function attemptUnlock() {
                 const code = accessInput.value;
-                
+
                 if (code === ACCESS_CODE) {
                     isUnlocked = true;
                     wrongAttempt = false;
@@ -675,7 +674,6 @@
                 }
             });
 
-            // Auto-unlock if coming from hidden.html
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('from') === 'hidden') {
                 isUnlocked = true;
@@ -729,7 +727,7 @@
 
             function handleScroll() {
                 const currentScrollY = window.scrollY;
-                
+
                 if (!isUnlocked) return;
 
                 if (currentScrollY > lastScrollY && currentScrollY > 60) {
@@ -922,25 +920,24 @@
         })();
     </script>
 
-    <!-- Particle System -->
     <script>
     (function() {
         const canvas = document.getElementById('particle-canvas');
         if (!canvas) return;
-        
+
         const ctx = canvas.getContext('2d');
         let particles = [];
         let mouse = { x: null, y: null, radius: 120 };
         let animationId;
-        
+
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         const PARTICLE_COUNT = isMobile ? 40 : 80;
-        
+
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         }
-        
+
         function createParticles() {
             particles = [];
             for (let i = 0; i < PARTICLE_COUNT; i++) {
@@ -957,27 +954,27 @@
                 });
             }
         }
-        
+
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
+
             particles.forEach(p => {
                 p.x += p.speedX;
                 p.y += p.speedY;
-                
+
                 if (p.x < 0) p.x = canvas.width;
                 if (p.x > canvas.width) p.x = 0;
                 if (p.y < 0) p.y = canvas.height;
                 if (p.y > canvas.height) p.y = 0;
-                
+
                 let currentSize = p.baseSize;
                 let currentOpacity = p.opacity;
-                
+
                 if (mouse.x !== null && !isMobile) {
                     const dx = mouse.x - p.x;
                     const dy = mouse.y - p.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
-                    
+
                     if (dist < mouse.radius) {
                         const force = (mouse.radius - dist) / mouse.radius;
                         p.x -= dx * force * 0.02;
@@ -986,7 +983,7 @@
                         currentOpacity = p.opacity * (1 + force * 0.3);
                     }
                 }
-                
+
                 ctx.beginPath();
                 ctx.arc(p.x, p.y, currentSize, 0, Math.PI * 2);
                 if (p.hue > 0) {
@@ -996,33 +993,33 @@
                 }
                 ctx.fill();
             });
-            
+
             animationId = requestAnimationFrame(animate);
         }
-        
+
         window.addEventListener('resize', function() {
             resize();
             createParticles();
         });
-        
+
         if (!isMobile) {
             window.addEventListener('mousemove', function(e) {
                 mouse.x = e.clientX;
                 mouse.y = e.clientY;
             });
-            
+
             window.addEventListener('mouseout', function() {
                 mouse.x = null;
                 mouse.y = null;
             });
         }
-        
+
         resize();
         createParticles();
         animate();
     })();
     </script>
-    <!-- Project Page Enhancements -->
+
     <script src="../../assets/js/project-page.js"></script>
 </body>
 </html>

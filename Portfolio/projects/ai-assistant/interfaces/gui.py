@@ -7,12 +7,11 @@ from brain.router import CommandRouter
 from actions.schema import ActionStatus
 from interfaces.voice import VoiceInterface, VoiceState
 
-
 class GUIInterface:
     WINDOW_TITLE = "AI Assistant"
     WINDOW_WIDTH = 600
     WINDOW_HEIGHT = 500
-    
+
     COLORS = {
         "bg": "#0f0f12",
         "surface": "#1a1a1e",
@@ -26,7 +25,7 @@ class GUIInterface:
         "error": "#ff5f56",
         "warning": "#ffbd2e",
     }
-    
+
     STATUS_COLORS = {
         VoiceState.IDLE: "#9a9aa0",
         VoiceState.LISTENING: "#50c8ff",
@@ -34,7 +33,7 @@ class GUIInterface:
         VoiceState.SPEAKING: "#27ca40",
         VoiceState.DISABLED: "#5a5a62",
     }
-    
+
     STATUS_TEXT = {
         VoiceState.IDLE: "● Idle",
         VoiceState.LISTENING: "● Listening...",
@@ -48,13 +47,13 @@ class GUIInterface:
         self._voice: Optional[VoiceInterface] = None
         self._voice_enabled = enable_voice
         self._running = False
-        
+
         self._root: Optional[tk.Tk] = None
         self._output_area: Optional[scrolledtext.ScrolledText] = None
         self._input_field: Optional[ttk.Entry] = None
         self._voice_button: Optional[ttk.Button] = None
         self._status_label: Optional[ttk.Label] = None
-        
+
         if enable_voice:
             self._voice = VoiceInterface(router)
 
@@ -79,9 +78,9 @@ class GUIInterface:
         self._root.geometry(f"{self.WINDOW_WIDTH}x{self.WINDOW_HEIGHT}")
         self._root.configure(bg=self.COLORS["bg"])
         self._root.minsize(400, 350)
-        
+
         self._root.protocol("WM_DELETE_WINDOW", self._on_close)
-        
+
         self._setup_styles()
         self._create_widgets()
         self._bind_events()
@@ -89,31 +88,31 @@ class GUIInterface:
     def _setup_styles(self):
         style = ttk.Style()
         style.theme_use('clam')
-        
+
         style.configure("TFrame", background=self.COLORS["bg"])
         style.configure("Surface.TFrame", background=self.COLORS["surface"])
-        
+
         style.configure(
             "TLabel",
             background=self.COLORS["bg"],
             foreground=self.COLORS["text"],
             font=("Segoe UI", 10)
         )
-        
+
         style.configure(
             "Title.TLabel",
             background=self.COLORS["bg"],
             foreground=self.COLORS["text"],
             font=("Segoe UI", 14, "bold")
         )
-        
+
         style.configure(
             "Status.TLabel",
             background=self.COLORS["bg"],
             foreground=self.COLORS["text_secondary"],
             font=("Segoe UI", 9)
         )
-        
+
         style.configure(
             "TEntry",
             fieldbackground=self.COLORS["surface"],
@@ -122,7 +121,7 @@ class GUIInterface:
             borderwidth=1,
             relief="solid"
         )
-        
+
         style.configure(
             "TButton",
             background=self.COLORS["accent"],
@@ -136,7 +135,7 @@ class GUIInterface:
             "TButton",
             background=[("active", self.COLORS["accent_hover"]), ("pressed", self.COLORS["accent_hover"])]
         )
-        
+
         style.configure(
             "Voice.TButton",
             background=self.COLORS["surface"],
@@ -153,19 +152,19 @@ class GUIInterface:
     def _create_widgets(self):
         main_frame = ttk.Frame(self._root, padding=20)
         main_frame.pack(fill=tk.BOTH, expand=True)
-        
+
         header_frame = ttk.Frame(main_frame)
         header_frame.pack(fill=tk.X, pady=(0, 15))
-        
+
         title_label = ttk.Label(header_frame, text="🤖 AI Assistant", style="Title.TLabel")
         title_label.pack(side=tk.LEFT)
-        
+
         self._status_label = ttk.Label(header_frame, text="● Idle", style="Status.TLabel")
         self._status_label.pack(side=tk.RIGHT)
-        
+
         output_frame = ttk.Frame(main_frame)
         output_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
-        
+
         self._output_area = scrolledtext.ScrolledText(
             output_frame,
             wrap=tk.WORD,
@@ -182,16 +181,16 @@ class GUIInterface:
             state=tk.DISABLED
         )
         self._output_area.pack(fill=tk.BOTH, expand=True)
-        
+
         self._output_area.tag_configure("success", foreground=self.COLORS["success"])
         self._output_area.tag_configure("error", foreground=self.COLORS["error"])
         self._output_area.tag_configure("warning", foreground=self.COLORS["warning"])
         self._output_area.tag_configure("info", foreground=self.COLORS["text_secondary"])
         self._output_area.tag_configure("user", foreground=self.COLORS["accent"])
-        
+
         input_frame = ttk.Frame(main_frame)
         input_frame.pack(fill=tk.X)
-        
+
         self._input_field = tk.Entry(
             input_frame,
             font=("Segoe UI", 11),
@@ -202,10 +201,10 @@ class GUIInterface:
             borderwidth=0
         )
         self._input_field.pack(side=tk.LEFT, fill=tk.X, expand=True, ipady=10, ipadx=10)
-        
+
         button_frame = ttk.Frame(input_frame)
         button_frame.pack(side=tk.RIGHT, padx=(10, 0))
-        
+
         if self._voice_enabled:
             self._voice_button = ttk.Button(
                 button_frame,
@@ -215,7 +214,7 @@ class GUIInterface:
                 width=4
             )
             self._voice_button.pack(side=tk.LEFT, padx=(0, 5))
-        
+
         submit_button = ttk.Button(
             button_frame,
             text="Send",
@@ -228,7 +227,7 @@ class GUIInterface:
         self._input_field.bind("<Up>", self._on_history_up)
         self._root.bind("<Escape>", lambda e: self._on_close())
         self._input_field.focus_set()
-        
+
         self._command_history = []
         self._history_index = -1
 
@@ -237,7 +236,7 @@ class GUIInterface:
             self._voice.set_state_callback(self._on_voice_state_change)
             self._voice.set_result_callback(self._on_voice_result)
             self._voice.start()
-            
+
             if self._voice.is_available():
                 self._update_status(VoiceState.IDLE)
             else:
@@ -259,24 +258,24 @@ class GUIInterface:
         user_input = self._input_field.get().strip()
         if not user_input:
             return
-        
+
         self._input_field.delete(0, tk.END)
-        
+
         self._command_history.append(user_input)
         self._history_index = len(self._command_history)
-        
+
         self._append_output(f"🤖 > {user_input}\n", "user")
-        
+
         self._process_command(user_input)
 
     def _process_command(self, command: str):
         def _run():
             result = self.router.process(command)
             self._root.after(0, lambda: self._display_result(result))
-            
+
             if result.data and result.data.get("exit"):
                 self._root.after(100, self._on_close)
-        
+
         thread = threading.Thread(target=_run, daemon=True)
         thread.start()
 
@@ -291,7 +290,7 @@ class GUIInterface:
             ActionStatus.BLOCKED_RATE_LIMIT: "warning",
             ActionStatus.BLOCKED_KILL_SWITCH: "error",
         }
-        
+
         tag = status_tags.get(result.status, "info")
         self._append_output(f"{result.message}\n\n", tag)
 
@@ -308,7 +307,7 @@ class GUIInterface:
         if not self._voice or not self._voice.is_available():
             self._append_output("❌ Voice input not available.\n", "error")
             return
-        
+
         if self._voice.get_state() == VoiceState.LISTENING:
             self._voice._stt.stop_listening()
             self._update_status(VoiceState.IDLE)
@@ -330,10 +329,10 @@ class GUIInterface:
     def _update_status(self, state: VoiceState):
         text = self.STATUS_TEXT.get(state, "● Unknown")
         color = self.STATUS_COLORS.get(state, self.COLORS["text_secondary"])
-        
+
         if self._status_label:
             self._status_label.configure(text=text, foreground=color)
-        
+
         if self._voice_button:
             if state == VoiceState.LISTENING:
                 self._voice_button.configure(text="⏹")
@@ -349,12 +348,10 @@ class GUIInterface:
     def _on_close(self):
         self.stop()
 
-
 def run_gui(enable_voice: bool = False):
     router = CommandRouter()
     gui = GUIInterface(router, enable_voice=enable_voice)
     gui.start()
-
 
 if __name__ == "__main__":
     run_gui(enable_voice=True)

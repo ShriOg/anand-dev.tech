@@ -13,7 +13,7 @@
       gap: 1.5rem;
       padding: 1.5rem;
     }
-    
+
     .video-card {
       position: relative;
       background: var(--bg-secondary);
@@ -23,12 +23,12 @@
       transition: transform 0.2s ease;
       border: 1px solid var(--border-default);
     }
-    
+
     .video-card:hover {
       transform: scale(1.02);
       border-color: var(--her-accent-muted);
     }
-    
+
     .video-card-thumbnail {
       position: relative;
       aspect-ratio: 16/9;
@@ -37,13 +37,13 @@
       align-items: center;
       justify-content: center;
     }
-    
+
     .video-card-thumbnail video {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
-    
+
     .video-card-play {
       position: absolute;
       width: 4rem;
@@ -57,28 +57,28 @@
       color: white;
       transition: transform 0.2s ease;
     }
-    
+
     .video-card:hover .video-card-play {
       transform: scale(1.1);
       background: var(--her-accent);
     }
-    
+
     .video-card-info {
       padding: 1rem;
     }
-    
+
     .video-card-title {
       font-size: 0.9375rem;
       font-weight: 500;
       color: var(--text-primary);
       margin-bottom: 0.25rem;
     }
-    
+
     .video-card-meta {
       font-size: 0.75rem;
       color: var(--text-tertiary);
     }
-    
+
     .video-card-delete {
       position: absolute;
       top: 0.75rem;
@@ -97,31 +97,30 @@
       justify-content: center;
       z-index: 10;
     }
-    
+
     .video-card:hover .video-card-delete {
       opacity: 1;
     }
-    
+
     .video-card-delete:hover {
       background: var(--error);
     }
-    
+
     .no-videos {
       text-align: center;
       padding: 4rem 2rem;
       color: var(--text-muted);
     }
-    
+
     .no-videos-icon {
       font-size: 3rem;
       margin-bottom: 1rem;
     }
-    
+
     .upload-input {
       display: none;
     }
-    
-    /* Video Player Modal */
+
     .video-player-modal {
       position: fixed;
       inset: 0;
@@ -133,11 +132,11 @@
       flex-direction: column;
       padding: 2rem;
     }
-    
+
     .video-player-modal.visible {
       display: flex;
     }
-    
+
     .video-player-close {
       position: absolute;
       top: 1.5rem;
@@ -152,32 +151,31 @@
       cursor: pointer;
       transition: background 0.2s ease;
     }
-    
+
     .video-player-close:hover {
       background: rgba(255,255,255,0.2);
     }
-    
+
     .video-player-container {
       max-width: 90%;
       max-height: 80vh;
       border-radius: 0.5rem;
       overflow: hidden;
     }
-    
+
     .video-player-container video {
       max-width: 100%;
       max-height: 80vh;
       border-radius: 0.5rem;
     }
-    
+
     .video-player-title {
       color: white;
       margin-top: 1.5rem;
       text-align: center;
       font-size: 1rem;
     }
-    
-    /* Upload Progress */
+
     .upload-progress {
       position: fixed;
       bottom: 2rem;
@@ -191,11 +189,11 @@
       gap: 1rem;
       z-index: 100;
     }
-    
+
     .upload-progress.visible {
       display: flex;
     }
-    
+
     .upload-spinner {
       width: 1.5rem;
       height: 1.5rem;
@@ -204,11 +202,11 @@
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
-    
+
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-    
+
     @media (max-width: 768px) {
       .videos-grid {
         grid-template-columns: 1fr;
@@ -219,21 +217,19 @@
   </style>
 </head>
 <body>
-  <!-- Auth Check -->
+
   <div id="authCheck" class="auth-checking">
     <div class="auth-checking-spinner"></div>
   </div>
-  
-  <!-- Ambient Background -->
+
   <div class="her-ambient-bg">
     <div class="her-ambient-orb her-ambient-orb-1"></div>
     <div class="her-ambient-orb her-ambient-orb-2"></div>
     <div class="her-ambient-orb her-ambient-orb-3"></div>
   </div>
-  
-  <!-- Main App -->
+
   <div id="videosApp" class="her-app">
-    <!-- Header -->
+
     <header class="her-header">
       <div class="her-header-left">
         <a href="../personal.html" class="her-back-btn">← Back</a>
@@ -246,8 +242,7 @@
         </button>
       </div>
     </header>
-    
-    <!-- Content -->
+
     <main class="her-main" style="padding: 0;">
       <div id="videosGrid" class="videos-grid"></div>
       <div id="noVideos" class="no-videos" style="display: none;">
@@ -261,8 +256,7 @@
         </button>
       </div>
     </main>
-    
-    <!-- Video Player Modal -->
+
     <div id="videoPlayer" class="video-player-modal">
       <button class="video-player-close" onclick="VideosApp.closePlayer()">×</button>
       <div class="video-player-container">
@@ -270,53 +264,51 @@
       </div>
       <div id="playerTitle" class="video-player-title"></div>
     </div>
-    
-    <!-- Upload Progress -->
+
     <div id="uploadProgress" class="upload-progress">
       <div class="upload-spinner"></div>
       <span id="uploadStatus">Uploading...</span>
     </div>
-    
-    <!-- Toast Container -->
+
     <div id="toastContainer" class="her-toast-container"></div>
   </div>
-  
+
   <script src="../js/database.js"></script>
   <script>
     const VideosApp = {
       SESSION_KEY: 'ps_session_active',
       videos: [],
       currentVideo: null,
-      
+
       async init() {
         if (sessionStorage.getItem(this.SESSION_KEY) !== 'true') {
           window.location.href = '../index.html';
           return;
         }
-        
+
         document.getElementById('authCheck').classList.add('hidden');
         document.getElementById('videosApp').classList.add('visible');
-        
+
         await Database.init();
         await this.loadVideos();
         this.bindEvents();
       },
-      
+
       bindEvents() {
         document.getElementById('uploadBtn')?.addEventListener('click', () => this.triggerUpload());
         document.getElementById('uploadInput')?.addEventListener('change', (e) => this.handleUpload(e));
-        
+
         document.getElementById('videoPlayer')?.addEventListener('click', (e) => {
           if (e.target === document.getElementById('videoPlayer')) this.closePlayer();
         });
-        
+
         document.addEventListener('keydown', (e) => {
           if (e.key === 'Escape' && document.getElementById('videoPlayer')?.classList.contains('visible')) {
             this.closePlayer();
           }
         });
       },
-      
+
       async loadVideos() {
         try {
           this.videos = await Database.getAll('videos') || [];
@@ -327,17 +319,17 @@
           this.renderVideos();
         }
       },
-      
+
       renderVideos() {
         const grid = document.getElementById('videosGrid');
         const empty = document.getElementById('noVideos');
-        
+
         if (this.videos.length === 0) {
           grid.innerHTML = '';
           empty.style.display = 'block';
           return;
         }
-        
+
         empty.style.display = 'none';
         grid.innerHTML = this.videos.map((video, index) => `
           <div class="video-card" onclick="VideosApp.playVideo(${index})">
@@ -353,26 +345,26 @@
           </div>
         `).join('');
       },
-      
+
       triggerUpload() {
         document.getElementById('uploadInput')?.click();
       },
-      
+
       async handleUpload(e) {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
-        
+
         this.showProgress();
         let uploaded = 0;
-        
+
         for (const file of files) {
           if (!file.type.startsWith('video/')) continue;
-          
+
           try {
             document.getElementById('uploadStatus').textContent = `Uploading ${file.name}...`;
-            
+
             const data = await this.readFileAsDataURL(file);
-            
+
             await Database.add('videos', {
               id: crypto.randomUUID(),
               name: file.name,
@@ -386,16 +378,16 @@
             console.warn('Upload error:', err);
           }
         }
-        
+
         e.target.value = '';
         this.hideProgress();
         await this.loadVideos();
-        
+
         if (uploaded > 0) {
           this.toast(`Uploaded ${uploaded} video${uploaded > 1 ? 's' : ''}`, 'success');
         }
       },
-      
+
       readFileAsDataURL(file) {
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
@@ -404,29 +396,29 @@
           reader.readAsDataURL(file);
         });
       },
-      
+
       showProgress() {
         document.getElementById('uploadProgress').classList.add('visible');
       },
-      
+
       hideProgress() {
         document.getElementById('uploadProgress').classList.remove('visible');
       },
-      
+
       playVideo(index) {
         const video = this.videos[index];
         if (!video) return;
-        
+
         this.currentVideo = video;
-        
+
         const playerVideo = document.getElementById('playerVideo');
         playerVideo.src = video.data;
         document.getElementById('playerTitle').textContent = video.title || video.name || 'Untitled';
-        
+
         document.getElementById('videoPlayer').classList.add('visible');
         playerVideo.play();
       },
-      
+
       closePlayer() {
         const playerVideo = document.getElementById('playerVideo');
         playerVideo.pause();
@@ -434,10 +426,10 @@
         document.getElementById('videoPlayer').classList.remove('visible');
         this.currentVideo = null;
       },
-      
+
       async deleteVideo(id) {
         if (!confirm('Delete this video?')) return;
-        
+
         try {
           await Database.delete('videos', id);
           await this.loadVideos();
@@ -446,7 +438,7 @@
           this.toast('Failed to delete', 'error');
         }
       },
-      
+
       toast(message, type = 'info') {
         const container = document.getElementById('toastContainer');
         const toast = document.createElement('div');
@@ -458,19 +450,19 @@
           setTimeout(() => toast.remove(), 300);
         }, 3000);
       },
-      
+
       escapeHtml(str) {
         if (!str) return '';
         const div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;
       },
-      
+
       formatDate(ts) {
         return ts ? new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
       }
     };
-    
+
     document.addEventListener('DOMContentLoaded', () => VideosApp.init());
   </script>
   <script src="../js/mobile-nav.js"></script>

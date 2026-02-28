@@ -5,9 +5,8 @@ from datetime import datetime
 from actions.schema import Action, ActionResult
 from adapters import BaseAdapter
 
-
 class LinuxAdapter(BaseAdapter):
-    
+
     APP_ALIASES = {
         "browser": "xdg-open https://",
         "firefox": "firefox",
@@ -152,7 +151,7 @@ class LinuxAdapter(BaseAdapter):
                 screenshots_dir.mkdir(parents=True, exist_ok=True)
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 path = str(screenshots_dir / f"screenshot_{timestamp}.png")
-            
+
             try:
                 subprocess.run(
                     ["gnome-screenshot", "-f", path],
@@ -165,7 +164,7 @@ class LinuxAdapter(BaseAdapter):
                     check=True,
                     capture_output=True
                 )
-            
+
             return ActionResult.success(f"Screenshot saved to {path}", data={"path": path})
         except Exception as e:
             return ActionResult.failure(f"Failed to take screenshot: {str(e)}")

@@ -7,42 +7,40 @@
   <meta name="theme-color" content="#0a0a0a">
   <meta name="robots" content="noindex, nofollow">
   <title>Imported Chats - Her Space</title>
-  
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/mobile-nav.css">
-  
+
   <style>
-    /* ═══════════════════════════════════════════════════════════
-       VARIABLES & BASE
-       ═══════════════════════════════════════════════════════════ */
+
     :root {
       --bg-primary: #0a0a0a;
       --bg-secondary: #111111;
       --bg-tertiary: #1a1a1a;
       --bg-card: #141414;
       --bg-hover: #1f1f1f;
-      
+
       --text-primary: #ffffff;
       --text-secondary: #a0a0a0;
       --text-muted: #666666;
-      
+
       --accent-pink: #ff6b9d;
       --accent-pink-dim: rgba(255, 107, 157, 0.15);
       --accent-purple: #9d4edd;
       --accent-blue: #4ea8de;
-      
+
       --border-subtle: rgba(255, 255, 255, 0.06);
       --border-light: rgba(255, 255, 255, 0.1);
-      
+
       --radius-sm: 8px;
       --radius-md: 12px;
       --radius-lg: 16px;
-      
+
       --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
       --shadow-glow: 0 0 30px rgba(255, 107, 157, 0.1);
-      
+
       --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
@@ -60,9 +58,6 @@
       overflow-x: hidden;
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       LAYOUT
-       ═══════════════════════════════════════════════════════════ */
     .app-container {
       display: flex;
       flex-direction: column;
@@ -134,22 +129,15 @@
       color: var(--text-muted);
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       MAIN CONTENT - SPLIT VIEW
-       TWO COMPLETELY INDEPENDENT SCROLL AREAS
-       ═══════════════════════════════════════════════════════════ */
     .main-content {
       display: flex;
       flex: 1;
       overflow: hidden;
       height: calc(100vh - 65px);
-      /* CRITICAL: No shared scroll container */
+
       position: relative;
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       LEFT SIDEBAR (Chat List) - FIXED, INDEPENDENT SCROLL
-       ═══════════════════════════════════════════════════════════ */
     .chat-list-panel {
       width: 380px;
       min-width: 320px;
@@ -158,7 +146,7 @@
       border-right: 1px solid var(--border-subtle);
       display: flex;
       flex-direction: column;
-      /* CRITICAL: Fixed position, independent from chat viewer */
+
       position: relative;
       flex-shrink: 0;
       height: 100%;
@@ -179,24 +167,21 @@
       letter-spacing: 0.5px;
     }
 
-    /* CRITICAL: Sidebar scroll affects ONLY the chat list */
     .chat-list-scroll {
       flex: 1;
       overflow-y: auto;
       overflow-x: hidden;
       padding: 12px;
-      /* Independent scroll container */
+
       overscroll-behavior: contain;
     }
 
-    /* Chat Grid */
     .her-imported-chats-grid {
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
 
-    /* Chat Card */
     .her-imported-chat-card {
       background: var(--bg-card);
       border: 1px solid var(--border-subtle);
@@ -295,7 +280,6 @@
       color: var(--accent-pink);
     }
 
-    /* Empty State */
     .her-empty-state {
       display: flex;
       flex-direction: column;
@@ -326,19 +310,16 @@
       max-width: 280px;
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       RIGHT CHAT VIEWER PANEL - INDEPENDENT SCROLL
-       ═══════════════════════════════════════════════════════════ */
     .chat-viewer-panel {
       flex: 1;
       display: flex;
       flex-direction: column;
       background: var(--bg-primary);
-      /* CRITICAL: Completely independent scroll area */
+
       overflow: hidden;
       position: relative;
       min-width: 0;
-      /* Prevent layout shift when messages load */
+
       contain: layout style;
     }
 
@@ -350,7 +331,6 @@
       overflow: hidden;
     }
 
-    /* Viewer Header */
     .her-chat-viewer-header {
       display: flex;
       align-items: center;
@@ -447,7 +427,6 @@
       height: 18px;
     }
 
-    /* Search Bar */
     .her-chat-search {
       display: none;
       align-items: center;
@@ -534,11 +513,6 @@
       height: 14px;
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       MESSAGES CONTAINER - INDEPENDENT SCROLL AREA
-       CRITICAL: Chat viewer scroll affects ONLY messages
-       WhatsApp/Instagram DM style - start at bottom
-       ═══════════════════════════════════════════════════════════ */
     .her-chat-messages {
       flex: 1;
       overflow-y: auto;
@@ -548,24 +522,21 @@
       flex-direction: column;
       gap: 4px;
       min-height: 0;
-      /* CRITICAL: Independent scroll container */
+
       overscroll-behavior: contain;
-      /* Prevent layout shifts */
+
       contain: strict;
     }
-    
-    /* Spacer that pushes messages to the bottom when there aren't many */
+
     .her-chat-messages-spacer {
       flex: 1 1 auto;
       min-height: 0;
     }
-    
-    /* Ensure messages don't cause layout shift */
+
     .her-chat-messages > *:not(.her-chat-messages-spacer) {
       flex-shrink: 0;
     }
 
-    /* Date Separator */
     .her-chat-date-separator {
       display: flex;
       align-items: center;
@@ -585,7 +556,6 @@
       border-radius: 20px;
     }
 
-    /* Message Bubble */
     .her-chat-message {
       max-width: 70%;
       padding: 12px 16px;
@@ -639,37 +609,33 @@
     .her-chat-message.highlight {
       box-shadow: 0 0 0 2px var(--accent-pink), 0 0 20px rgba(255, 107, 157, 0.3);
     }
-    
-    /* ═══════════════════════════════════════════════════════════
-       SEARCH HIGHLIGHTS
-       ═══════════════════════════════════════════════════════════ */
+
     .her-chat-message.has-match {
       background: rgba(255, 107, 157, 0.1);
     }
-    
+
     .her-chat-message.current-match {
       box-shadow: 0 0 0 2px var(--accent-pink), 0 0 20px rgba(255, 107, 157, 0.4);
       animation: pulse-highlight 1.5s ease-in-out;
     }
-    
+
     @keyframes pulse-highlight {
       0%, 100% { box-shadow: 0 0 0 2px var(--accent-pink), 0 0 20px rgba(255, 107, 157, 0.4); }
       50% { box-shadow: 0 0 0 3px var(--accent-pink), 0 0 30px rgba(255, 107, 157, 0.6); }
     }
-    
+
     mark.search-highlight {
       background: var(--accent-pink);
       color: white;
       padding: 1px 4px;
       border-radius: 3px;
     }
-    
+
     .her-chat-message.sent mark.search-highlight {
       background: rgba(255, 255, 255, 0.3);
       color: white;
     }
 
-    /* Timeline Scrubber */
     .her-chat-timeline {
       padding: 12px 24px;
       background: var(--bg-secondary);
@@ -711,7 +677,7 @@
     .her-chat-timeline-thumb:hover {
       transform: translate(-50%, -50%) scale(1.2);
     }
-    
+
     .her-chat-timeline-thumb:active {
       cursor: grabbing;
       transform: translate(-50%, -50%) scale(1.3);
@@ -724,8 +690,7 @@
       font-size: 10px;
       color: var(--text-muted);
     }
-    
-    /* Floating Date Tooltip */
+
     .timeline-floating-tooltip {
       position: fixed;
       background: var(--bg-tertiary);
@@ -742,11 +707,11 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
       border: 1px solid var(--border-light);
     }
-    
+
     .timeline-floating-tooltip.visible {
       opacity: 1;
     }
-    
+
     .timeline-floating-tooltip::after {
       content: '';
       position: absolute;
@@ -758,9 +723,6 @@
       border-top: 6px solid var(--bg-tertiary);
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       INSIGHTS PANEL
-       ═══════════════════════════════════════════════════════════ */
     .her-chat-insights-panel {
       position: absolute;
       top: 60px;
@@ -966,7 +928,6 @@
       color: var(--text-primary);
     }
 
-    /* Mobile Insights */
     @media (max-width: 768px) {
       .her-chat-insights-panel {
         width: 100%;
@@ -985,36 +946,27 @@
       }
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       PLATFORM-SPECIFIC MESSAGE STYLING
-       ═══════════════════════════════════════════════════════════ */
-    /* WhatsApp Style */
     .her-chat-viewer.platform-whatsapp .her-chat-message.sent {
       background: #075e54;
       background: linear-gradient(135deg, #128c7e, #075e54);
     }
-    
+
     .her-chat-viewer.platform-whatsapp .her-chat-message.received {
       background: #1f2c34;
     }
-    
-    /* Instagram Style */
+
     .her-chat-viewer.platform-instagram .her-chat-message.sent {
       background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
       border-radius: 20px;
       border-bottom-right-radius: 4px;
     }
-    
+
     .her-chat-viewer.platform-instagram .her-chat-message.received {
       background: var(--bg-tertiary);
       border-radius: 20px;
       border-bottom-left-radius: 4px;
     }
-    
-    /* ═══════════════════════════════════════════════════════════
-       LOAD MORE INDICATOR - UPWARD LAZY LOADING
-       MUST disappear once loading begins
-       ═══════════════════════════════════════════════════════════ */
+
     .her-chat-load-more {
       display: flex;
       justify-content: center;
@@ -1023,7 +975,7 @@
       min-height: 50px;
       flex-shrink: 0;
     }
-    
+
     .her-chat-load-more-text {
       display: flex;
       align-items: center;
@@ -1035,33 +987,33 @@
       border-radius: 20px;
       transition: opacity 0.2s ease, transform 0.2s ease;
     }
-    
+
     .her-chat-load-more.loading .her-chat-load-more-text {
       opacity: 0.6;
     }
-    
+
     .her-chat-load-more-icon {
       animation: bounce 1.5s ease-in-out infinite;
     }
-    
+
     .her-chat-load-more.loading .her-chat-load-more-icon {
       animation: spin 0.8s linear infinite;
     }
-    
+
     .her-chat-load-more-label {
       white-space: nowrap;
     }
-    
+
     @keyframes bounce {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-4px); }
     }
-    
+
     @keyframes loadingPulse {
       0%, 100% { opacity: 0.6; }
       50% { opacity: 1; }
     }
-    
+
     .her-chat-empty-messages {
       display: flex;
       align-items: center;
@@ -1071,7 +1023,6 @@
       font-size: 14px;
     }
 
-    /* Viewer Empty State */
     .chat-viewer-empty {
       flex: 1;
       display: flex;
@@ -1102,9 +1053,6 @@
       color: var(--text-muted);
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       LOCK SCREEN OVERLAY
-       ═══════════════════════════════════════════════════════════ */
     .her-lock-overlay {
       position: absolute;
       inset: 0;
@@ -1162,9 +1110,6 @@
       color: var(--text-muted);
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       MOBILE RESPONSIVE - MAINTAIN INDEPENDENT SCROLL AREAS
-       ═══════════════════════════════════════════════════════════ */
     @media (max-width: 768px) {
       .app-header {
         padding: 12px 16px;
@@ -1183,7 +1128,6 @@
         height: calc(100vh - 57px);
       }
 
-      /* MOBILE: Sidebar becomes full-width but STILL has independent scroll */
       .chat-list-panel {
         width: 100%;
         min-width: unset;
@@ -1191,27 +1135,25 @@
         border-right: none;
         border-bottom: 1px solid var(--border-subtle);
         flex: 1;
-        /* Maintain independent scroll */
+
         overflow: hidden;
       }
 
       .chat-list-panel.hidden {
         display: none;
       }
-      
-      /* CRITICAL: Sidebar scroll still independent on mobile */
+
       .chat-list-scroll {
         overflow-y: auto;
         overscroll-behavior: contain;
       }
 
-      /* MOBILE: Chat viewer takes full screen with fixed position */
       .chat-viewer-panel {
         position: fixed;
         inset: 0;
         z-index: 200;
         display: none;
-        /* Maintain independent scroll */
+
         overflow: hidden;
       }
 
@@ -1229,20 +1171,18 @@
 
       .her-chat-messages {
         padding: 16px;
-        /* CRITICAL: Independent scroll on mobile too */
+
         overflow-y: auto;
         overscroll-behavior: contain;
-        /* Account for mobile nav bar */
+
         padding-bottom: calc(16px + var(--mobile-nav-height, 64px));
       }
 
-      /* Account for mobile nav bar on sidebar scroll */
       .chat-list-scroll {
         padding-bottom: calc(12px + var(--mobile-nav-height, 64px));
       }
     }
 
-    /* Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
     }
@@ -1260,7 +1200,6 @@
       background: var(--text-muted);
     }
 
-    /* Loading State */
     .loading-spinner {
       display: flex;
       align-items: center;
@@ -1285,7 +1224,7 @@
 </head>
 <body>
   <div class="app-container">
-    <!-- Header -->
+
     <header class="app-header">
       <div class="app-header-left">
         <a href="../personal.html" class="back-btn">
@@ -1304,9 +1243,8 @@
       </div>
     </header>
 
-    <!-- Main Content -->
     <main class="main-content">
-      <!-- Chat List Panel -->
+
       <aside class="chat-list-panel" id="chatListPanel">
         <div class="chat-list-header">
           <h2>Conversations</h2>
@@ -1315,7 +1253,7 @@
           <div class="her-imported-chats-grid" id="importedChatsGrid">
             <div class="loading-spinner"></div>
           </div>
-          
+
           <div class="her-empty-state" id="importedChatsEmpty" style="display: none;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
@@ -1326,17 +1264,16 @@
         </div>
       </aside>
 
-      <!-- Chat Viewer Panel -->
       <section class="chat-viewer-panel" id="chatViewerPanel">
         <div class="her-chat-viewer" id="importedChatViewer" style="display: none;">
-          <!-- Chat Header -->
+
           <div class="her-chat-viewer-header">
             <button class="her-chat-viewer-back" id="chatViewerBack">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="15 18 9 12 15 6"/>
               </svg>
             </button>
-            
+
             <div class="her-chat-viewer-title-group">
               <div class="her-chat-viewer-title">
                 <span class="her-chat-viewer-platform-icon" id="viewerPlatformIcon">💬</span>
@@ -1346,7 +1283,7 @@
                 </div>
               </div>
             </div>
-            
+
             <div class="her-chat-viewer-controls">
               <button class="her-chat-viewer-btn" id="toggleSearchBtn" title="Search messages">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1378,7 +1315,6 @@
             </div>
           </div>
 
-          <!-- Search Bar -->
           <div class="her-chat-search" id="chatSearchBar">
             <div class="her-chat-search-input-wrap">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1402,12 +1338,10 @@
             </div>
           </div>
 
-          <!-- Messages -->
           <div class="her-chat-messages" id="chatMessagesContainer">
-            <!-- Messages render here -->
+
           </div>
 
-          <!-- Timeline Scrubber -->
           <div class="her-chat-timeline" id="chatTimeline">
             <div class="her-chat-timeline-track" id="timelineTrack">
               <div class="her-chat-timeline-progress" id="timelineProgress"></div>
@@ -1419,12 +1353,10 @@
             </div>
           </div>
 
-          <!-- Insights Panel -->
           <div class="her-chat-insights-panel" id="chatInsightsPanel">
-            <!-- Content rendered by JS -->
+
           </div>
 
-          <!-- Lock Overlay -->
           <div class="her-lock-overlay" id="chatLockOverlay">
             <div class="her-lock-icon">🔐</div>
             <div class="her-lock-title">This chat is locked</div>
@@ -1433,7 +1365,6 @@
           </div>
         </div>
 
-        <!-- Empty State for Viewer -->
         <div class="chat-viewer-empty" id="chatViewerEmpty">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -1448,7 +1379,7 @@
   <script src="../js/imported-chats.js"></script>
   <script src="../js/mobile-nav.js"></script>
   <script>
-    // Initialize mobile side nav for imported chats
+
     document.addEventListener('DOMContentLoaded', function() {
       MobileSideNav.init('imported');
     });

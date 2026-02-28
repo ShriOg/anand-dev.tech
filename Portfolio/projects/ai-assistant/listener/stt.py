@@ -5,12 +5,10 @@ from typing import Optional, Callable
 from enum import Enum, auto
 from dataclasses import dataclass
 
-
 class STTEngine(Enum):
     VOSK = auto()
     SPEECH_RECOGNITION = auto()
     DISABLED = auto()
-
 
 @dataclass
 class ListenResult:
@@ -18,7 +16,6 @@ class ListenResult:
     text: str
     confidence: float = 0.0
     error: str = ""
-
 
 class BaseSTT(ABC):
     @abstractmethod
@@ -33,7 +30,6 @@ class BaseSTT(ABC):
     def calibrate(self, duration: float = 1.0) -> None:
         pass
 
-
 class VoskSTT(BaseSTT):
     def __init__(self):
         self._model = None
@@ -46,20 +42,20 @@ class VoskSTT(BaseSTT):
         try:
             from vosk import Model, KaldiRecognizer
             import os
-            
+
             model_paths = [
                 os.path.expanduser("~/.vosk/model"),
                 os.path.expanduser("~/vosk-model-small-en-us-0.15"),
                 "model",
                 "vosk-model",
             ]
-            
+
             model_path = None
             for path in model_paths:
                 if os.path.exists(path):
                     model_path = path
                     break
-            
+
             if model_path:
                 self._model = Model(model_path)
                 self._recognizer = KaldiRecognizer(self._model, self._sample_rate)
@@ -70,11 +66,11 @@ class VoskSTT(BaseSTT):
     def listen(self, timeout: float = 5.0) -> ListenResult:
         if not self._available:
             return ListenResult(False, "", error="Vosk not available")
-        
+
         try:
             import pyaudio
             import json
-            
+
             p = pyaudio.PyAudio()
             stream = p.open(
                 format=pyaudio.paInt16,
@@ -83,11 +79,11 @@ class VoskSTT(BaseSTT):
                 input=True,
                 frames_per_buffer=4000
             )
-            
+
             self._recognizer.Reset()
             start_time = time.time()
             result_text = ""
-            
+
             while time.time() - start_time < timeout:
                 data = stream.read(4000, exception_on_overflow=False)
                 if self._recognizer.AcceptWaveform(data):
@@ -95,19 +91,19 @@ class VoskSTT(BaseSTT):
                     if result.get("text"):
                         result_text = result["text"]
                         break
-            
+
             if not result_text:
                 final = json.loads(self._recognizer.FinalResult())
                 result_text = final.get("text", "")
-            
+
             stream.stop_stream()
             stream.close()
             p.terminate()
-            
+
             if result_text:
                 return ListenResult(True, result_text, confidence=0.8)
             return ListenResult(False, "", error="No speech detected")
-            
+
         except Exception as e:
             return ListenResult(False, "", error=str(e))
 
@@ -116,7 +112,6 @@ class VoskSTT(BaseSTT):
 
     def calibrate(self, duration: float = 1.0) -> None:
         pass
-
 
 class SpeechRecognitionSTT(BaseSTT):
     def __init__(self):
@@ -139,13 +134,13 @@ class SpeechRecognitionSTT(BaseSTT):
     def listen(self, timeout: float = 5.0) -> ListenResult:
         if not self._available:
             return ListenResult(False, "", error="Speech recognition not available")
-        
+
         try:
             import speech_recognition as sr
-            
+
             with self._microphone as source:
                 audio = self._recognizer.listen(source, timeout=timeout, phrase_time_limit=10)
-            
+
             try:
                 text = self._recognizer.recognize_google(audio)
                 return ListenResult(True, text, confidence=0.85)
@@ -157,7 +152,7 @@ class SpeechRecognitionSTT(BaseSTT):
                     return ListenResult(True, text, confidence=0.6)
                 except Exception:
                     return ListenResult(False, "", error="Offline recognition failed")
-                    
+
         except Exception as e:
             return ListenResult(False, "", error=str(e))
 
@@ -171,7 +166,6 @@ class SpeechRecognitionSTT(BaseSTT):
                     self._recognizer.adjust_for_ambient_noise(source, duration=duration)
             except Exception:
                 pass
-
 
 class SpeechToText:
     def __init__(self, engine: STTEngine = STTEngine.SPEECH_RECOGNITION):
@@ -205,29 +199,29 @@ class SpeechToText:
     def listen_once(self, timeout: float = 5.0) -> ListenResult:
         if not self._enabled or not self._engine:
             return ListenResult(False, "", error="Speech recognition disabled or unavailable")
-        
+
         current_time = time.time()
         if current_time - self._last_listen_time < self._cooldown:
             return ListenResult(False, "", error="Cooldown active")
-        
+
         self._listening = True
         result = self._engine.listen(timeout)
         self._listening = False
         self._last_listen_time = time.time()
-        
+
         return result
 
     def listen_async(self, timeout: float = 5.0, callback: Optional[Callable[[ListenResult], None]] = None):
         if self._listening:
             return
-        
+
         def _listen_worker():
             result = self.listen_once(timeout)
             if callback:
                 callback(result)
             elif self._on_result_callback:
                 self._on_result_callback(result)
-        
+
         self._listen_thread = threading.Thread(target=_listen_worker, daemon=True)
         self._listen_thread.start()
 

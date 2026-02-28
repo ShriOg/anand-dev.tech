@@ -1,16 +1,7 @@
-/**
- * cart.js — Cart logic: add / update / remove / totals / checkout.
- *
- * Cart entries are keyed by "itemId-sizeLabel" so the same item in
- * different sizes occupies different slots.
- *
- * Emits a custom 'cart:changed' event on document after every mutation
- * so UI can react without tight coupling.
- */
 'use strict';
 
 const Cart = (() => {
-    /** @type {Object.<string, {id:number, name:string, size:string, price:number, quantity:number}>} */
+
     const _items = {};
 
     const _key = (id, size) => `${id}-${size}`;
@@ -18,8 +9,6 @@ const Cart = (() => {
     const _emit = () => {
         document.dispatchEvent(new CustomEvent('cart:changed', { detail: snapshot() }));
     };
-
-    /* ---------- Public API ---------- */
 
     const add = (itemId, size, price) => {
         const item = MenuData.findById(itemId);
@@ -55,19 +44,14 @@ const Cart = (() => {
         _emit();
     };
 
-    /** Quantity of a specific item+size (0 if not in cart) */
     const qty = (itemId, size) => _items[_key(itemId, size)]?.quantity || 0;
 
-    /** Total number of items (sum of quantities) */
     const count = () => Object.values(_items).reduce((s, i) => s + i.quantity, 0);
 
-    /** Total price */
     const total = () => Object.values(_items).reduce((s, i) => s + i.price * i.quantity, 0);
 
-    /** Immutable snapshot of cart entries */
     const snapshot = () => Object.values(_items).map(i => ({ ...i }));
 
-    /** Build WhatsApp checkout URL (legacy) */
     const checkoutURL = () => {
         const items = snapshot();
         if (!items.length) return null;
@@ -80,10 +64,8 @@ const Cart = (() => {
         return `https://wa.me/918595928413?text=${encodeURIComponent(msg)}`;
     };
 
-    /** Generate short order ID: PF + base36 timestamp */
     const generateOrderId = () => 'PF' + Date.now().toString(36).toUpperCase().slice(-6);
 
-    /** Human-readable timestamp */
     const formatTimestamp = () => {
         const d = new Date();
         const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -91,7 +73,6 @@ const Cart = (() => {
         return `${d.getDate()} ${M[d.getMonth()]} ${d.getFullYear()}, ${hr}:${String(d.getMinutes()).padStart(2,'0')} ${ap}`;
     };
 
-    /** Build professional WhatsApp checkout URL with customer info */
     const buildCheckoutMessage = (info, overrides = {}) => {
         const items = snapshot();
         if (!items.length) return null;
@@ -122,14 +103,6 @@ const Cart = (() => {
         return `https://wa.me/918595928413?text=${encodeURIComponent(msg)}`;
     };
 
-    /**
-     * Submit order — pure frontend WhatsApp checkout.
-     * Generates a local order ID and builds the WhatsApp URL.
-     * Does NOT clear the cart — caller clears only on success.
-     *
-     * @param {object} info — { name, phone, orderType, persons?, table?, note? }
-     * @returns {{ok:boolean, url?:string, orderId?:string, total?:number, error?:string}}
-     */
     const submitOrder = (info) => {
         const items = snapshot();
         if (!items.length) return { ok: false, error: 'Cart is empty' };

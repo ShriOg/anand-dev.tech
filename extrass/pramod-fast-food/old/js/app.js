@@ -1,9 +1,3 @@
-/**
- * app.js — Orchestrator: wires events → state → UI.
- *
- * Single DOMContentLoaded listener.  All user interactions go through
- * event delegation on stable parent containers — zero inline handlers.
- */
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -17,15 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalOverlay = $('#modalOverlay');
     let lastFocusedEl = null;
 
-    /* ==========  UTILITY  ========== */
     const debounce = (fn, ms) => {
         let t;
         return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
     };
 
-    /* ==========  ORDER RESULT POPUP  ========== */
     const _showOrderResult = (success, data = {}) => {
-        /* Remove any existing popup */
+
         const existing = document.getElementById('orderResultPopup');
         if (existing) existing.remove();
 
@@ -67,7 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(popup);
         requestAnimationFrame(() => popup.classList.add('order-popup--visible'));
 
-        /* Event delegation inside popup */
         popup.addEventListener('click', (e) => {
             const copyBtn = e.target.closest('[data-copy]');
             if (copyBtn) {
@@ -88,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        /* Auto-dismiss after 15s */
         setTimeout(() => {
             if (popup.parentNode) {
                 popup.classList.remove('order-popup--visible');
@@ -104,15 +94,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return d.innerHTML;
     };
 
-    /* ==========  INITIAL RENDER  ========== */
     showSkeleton();
 
-    /* Load static menu (no backend) */
     renderStats();
     State.set('loading', false);
     renderMenu();
 
-    /* ==========  STATE → UI SUBSCRIPTIONS  ========== */
     const updateTabIndicator = (activeTab) => {
         if (!tabs || !tabIndicator || !activeTab) return;
         requestAnimationFrame(() => {
@@ -150,7 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCartModal();
     });
 
-    /* ==========  EVENT DELEGATION: menu container  ========== */
     $('#menuContainer').addEventListener('click', (e) => {
         const btn = e.target.closest('[data-action]');
         if (!btn) return;
@@ -176,7 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    /* ==========  TABS  ========== */
     $('#menuTabs').addEventListener('click', (e) => {
         const tab = e.target.closest('.tab');
         if (!tab) return;
@@ -185,14 +170,12 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTabIndicator(tab);
     });
 
-    /* ==========  FILTER CHIPS  ========== */
     $('#filterBar').addEventListener('click', (e) => {
         const chip = e.target.closest('.chip');
         if (!chip) return;
         State.set('filter', chip.dataset.filter);
     });
 
-    /* ==========  SEARCH  ========== */
     const searchInput = $('#searchInput');
     const searchClear = $('#searchClear');
     const debouncedSearch = debounce((q) => State.set('search', q), 180);
@@ -210,12 +193,10 @@ document.addEventListener('DOMContentLoaded', () => {
         searchInput.focus();
     });
 
-    /* ==========  CART MODAL  ========== */
     $('#cartBtn').addEventListener('click',     () => toggleCart());
     $('#modalOverlay').addEventListener('click', () => toggleCart(false));
     $('#closeCart').addEventListener('click',    () => toggleCart(false));
 
-    /* ==========  CART MODAL: delegation for +/−, clear, checkout flow, suggestions  ========== */
     cartModal.addEventListener('click', (e) => {
         const btn = e.target.closest('[data-action]');
         if (!btn) return;
@@ -289,7 +270,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 }
 
-                /* Show success popup */
                 _showOrderResult(true, {
                     orderId: result.orderId,
                     total: result.total,
@@ -300,7 +280,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Opening WhatsApp…');
                 if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
 
-                /* Clear cart & reset after short delay */
                 setTimeout(() => {
                     Cart.clear();
                     UI.setCheckoutStep('cart');
@@ -313,7 +292,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    /* Order-type toggle inside checkout form */
     cartModal.addEventListener('change', (e) => {
         if (e.target.name === 'orderType') {
             const dineIn = $('#dineInFields');
@@ -324,7 +302,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Close cart on Escape + trap focus in modal
     document.addEventListener('keydown', (e) => {
         if (!State.get('cartOpen')) return;
         if (e.key === 'Escape') return toggleCart(false);
@@ -344,7 +321,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Swipe down to close (mobile)
     let touchStartY = 0;
     let touchActive = false;
     cartModal.addEventListener('touchstart', (e) => {
@@ -361,7 +337,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
     cartModal.addEventListener('touchend', () => { touchActive = false; }, { passive: true });
 
-    /* ==========  BACK TO TOP  ========== */
     const btt = $('#backToTop');
     let scrollTick = false;
 
@@ -391,7 +366,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateTabIndicator(document.querySelector('.tab.active'));
 
-    /* ==========  LOYALTY BAR (frontend placeholder)  ========== */
     UI.renderLoyaltyBar(null);
 
     document.addEventListener('click', (e) => {

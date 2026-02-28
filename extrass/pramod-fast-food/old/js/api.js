@@ -1,11 +1,3 @@
-/**
- * api.js — DISABLED (frontend-only mode).
- *
- * Backend integration is temporarily removed.
- * This stub keeps the global `Api` symbol so other modules
- * that guard with `typeof Api !== 'undefined'` won't throw.
- * All methods return failure so callers fall back gracefully.
- */
 'use strict';
 
 const Api = Object.freeze({
@@ -19,4 +11,3 @@ const Api = Object.freeze({
     request:         async () => ({ ok: false, data: null, error: 'Backend disabled' }),
     ENDPOINTS:       Object.freeze({ menu: '', orders: '', profile: '' }),
 });
-

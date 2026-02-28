@@ -12,7 +12,7 @@ async function initFilesModule(container) {
     </div>
     <div id="filesList" class="files-grid"></div>
   `;
-  
+
   await loadFiles();
 }
 
@@ -28,12 +28,12 @@ async function loadFiles() {
 
 function renderFiles() {
   const filesList = document.getElementById('filesList');
-  
+
   if (filesData.length === 0) {
     filesList.innerHTML = '<p class="empty-state">No files yet. Upload your first file!</p>';
     return;
   }
-  
+
   filesList.innerHTML = filesData.map(file => `
     <div class="file-card">
       <div class="file-icon">${getFileIcon(file.mimetype)}</div>
@@ -53,13 +53,13 @@ function renderFiles() {
 async function uploadFile(event) {
   const file = event.target.files[0];
   if (!file) return;
-  
+
   const formData = new FormData();
   formData.append('file', file);
-  
+
   const progress = document.getElementById('uploadProgress');
   progress.style.display = 'block';
-  
+
   try {
     await api.post('/api/files', formData);
     progress.style.display = 'none';
@@ -73,7 +73,7 @@ async function uploadFile(event) {
 
 async function deleteFile(fileId) {
   if (!confirm('Are you sure you want to delete this file?')) return;
-  
+
   try {
     await api.delete(`/api/files/${fileId}`);
     await loadFiles();

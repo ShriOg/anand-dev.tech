@@ -1,25 +1,15 @@
-/**
- * ui.js — All DOM rendering: menu cards, cart modal, stats, skeletons, toasts.
- *
- * Rendering is pure: each function reads MenuData / Cart / State and
- * writes to a known container. No side-effects outside the DOM.
- */
 'use strict';
 
 const UI = (() => {
-    /* ---------- DOM shorthand ---------- */
+
     const $ = (s, ctx = document) => ctx.querySelector(s);
     const $$ = (s, ctx = document) => ctx.querySelectorAll(s);
 
-    /* ---------- Internal state ---------- */
     const _prevQty = new Map();
     let _lastCartCount = 0;
-    let _checkoutStep = 'cart'; // 'cart' | 'form' | 'summary'
+    let _checkoutStep = 'cart';
     let _customerInfo = {};
 
-    /* ====================================================================
-       STATS
-    ==================================================================== */
     const renderStats = () => {
         const items = MenuData.allItems();
         const specials = items.filter(i => i.special).length;
@@ -33,7 +23,6 @@ const UI = (() => {
         if (specialsEl) specialsEl.textContent = specials;
         if (avgEl) avgEl.textContent = `₹${avg}`;
 
-        // Live indicator
         const indicator = $('#liveIndicator');
         if (indicator && typeof MenuData.isLive === 'function') {
             if (MenuData.isLive()) {
@@ -48,9 +37,6 @@ const UI = (() => {
         }
     };
 
-    /* ====================================================================
-       SKELETON LOADER
-    ==================================================================== */
     const showSkeleton = () => {
         const container = $('#menuContainer');
         container.innerHTML = Array.from({ length: 4 }, () => `
@@ -62,9 +48,6 @@ const UI = (() => {
         `).join('');
     };
 
-    /* ====================================================================
-       MENU RENDERING
-    ==================================================================== */
     const _matchSearch = (item, query) => {
         if (!query) return true;
         const q = query.toLowerCase();
@@ -190,9 +173,6 @@ const UI = (() => {
         });
     };
 
-    /* ====================================================================
-       CART BADGE
-    ==================================================================== */
     const renderCartBadge = () => {
         const badge = $('#cartBadge');
         const c = Cart.count();
@@ -207,11 +187,6 @@ const UI = (() => {
         _lastCartCount = c;
     };
 
-    /* ====================================================================
-       CART MODAL
-    ==================================================================== */
-
-    /** Pick 2 random menu items not currently in cart */
     const _renderSuggestions = () => {
         const cartIds = new Set(Cart.snapshot().map(i => i.itemId));
         const available = MenuData.allItems().filter(i => !cartIds.has(i._id));
@@ -242,14 +217,13 @@ const UI = (() => {
         const footerEl = $('#cartFooter');
         const titleEl  = $('.cart-modal__title');
 
-        /* --- Checkout FORM step --- */
         if (_checkoutStep === 'form') {
             debug('Checkout Step', 'form');
             if (titleEl) titleEl.innerHTML = '<span class="cart-modal__title-icon">📋</span> Details';
             _renderCheckoutForm(listEl, footerEl);
             return;
         }
-        /* --- Order SUMMARY step --- */
+
         if (_checkoutStep === 'summary') {
             debug('Checkout Step', 'summary');
             if (titleEl) titleEl.innerHTML = '<span class="cart-modal__title-icon">📦</span> Summary';
@@ -257,7 +231,6 @@ const UI = (() => {
             return;
         }
 
-        /* --- Default CART step --- */
         debug('Rendering Cart Modal', Cart.snapshot());
         if (titleEl) titleEl.innerHTML = '<span class="cart-modal__title-icon">🛒</span> Your Cart';
         const items = Cart.snapshot();
@@ -302,9 +275,8 @@ const UI = (() => {
             <button class="checkout-btn" id="checkoutBtn" data-action="checkout-start">� Place Order</button>`;
     };
 
-    /* ---------- Checkout Form ---------- */
     const _renderCheckoutForm = (listEl, footerEl) => {
-        /* Auto-prefill from saved customer data if form fields are empty */
+
         const saved = (typeof Customer !== 'undefined') ? Customer.getProfile() : null;
         const lsName = localStorage.getItem('pf_customer_name') || '';
         const lsPhone = localStorage.getItem('pf_customer_phone') || '';
@@ -364,7 +336,6 @@ const UI = (() => {
             </div>`;
     };
 
-    /* ---------- Order Summary ---------- */
     const _renderOrderSummary = (listEl, footerEl) => {
         const ci = _customerInfo;
         const items = Cart.snapshot();
@@ -408,7 +379,6 @@ const UI = (() => {
             ${!connected ? '<p class="checkout-server-hint">⚠️ Server may be waking up — WhatsApp is available as backup</p>' : ''}`;
     };
 
-    /* ---------- Checkout Step Manager ---------- */
     const setCheckoutStep = (step) => { _checkoutStep = step; renderCartModal(); };
     const getCheckoutStep = () => _checkoutStep;
     const setCustomerInfo = (info) => { _customerInfo = info; };
@@ -426,9 +396,6 @@ const UI = (() => {
         }
     };
 
-    /* ====================================================================
-       TOAST (mini feedback when item added)
-    ==================================================================== */
     let _toastTimer;
     const showToast = (message) => {
         let el = $('#toast');
@@ -446,9 +413,6 @@ const UI = (() => {
         _toastTimer = setTimeout(() => el.classList.remove('toast--visible'), 2200);
     };
 
-    /* ====================================================================
-       ACTIVE STATES (tabs, chips)
-    ==================================================================== */
     const setActiveTab = (key) => {
         $$('.tab').forEach(t => {
             const active = t.dataset.category === key;
@@ -465,14 +429,10 @@ const UI = (() => {
         });
     };
 
-    /* ====================================================================
-       GREETING BAR
-    ==================================================================== */
     const renderGreeting = () => {
         const bar = $('#greetingBar');
         if (!bar) return;
 
-        /* Read directly from localStorage — single source of truth */
         const name = localStorage.getItem('pf_customer_name') || '';
 
         if (!name) {
@@ -500,22 +460,19 @@ const UI = (() => {
         }
     };
 
-    /* ====================================================================
-       HERO AUTH BUTTON (Sign Up / Profile)
-    ==================================================================== */
     const renderAuthButton = () => {
         const btn = $('#heroAuthBtn');
         if (!btn) return;
         const name = Customer.getName();
         if (name) {
-            /* Signed-up: show profile icon with initial */
+
             const initial = name.charAt(0).toUpperCase();
             btn.className = 'hero__auth hero__auth--profile';
             btn.innerHTML = `<span class="hero__auth-avatar">${initial}</span>`;
             btn.setAttribute('aria-label', name);
             btn.title = name;
         } else {
-            /* Not signed up */
+
             btn.className = 'hero__auth';
             btn.innerHTML = '✏️ Sign Up';
             btn.setAttribute('aria-label', 'Sign Up');
@@ -523,9 +480,6 @@ const UI = (() => {
         }
     };
 
-    /* ====================================================================
-       THEME TOGGLE
-    ==================================================================== */
     const renderThemeToggle = () => {
         const btn = $('#themeToggle');
         if (!btn) return;
@@ -534,9 +488,6 @@ const UI = (() => {
         btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
     };
 
-    /* ====================================================================
-       ORDERS PANEL
-    ==================================================================== */
     const _buildTimeline = (status) => {
         const steps = [
             { key: 'PENDING',   label: 'Placed',   icon: '⏳' },
@@ -546,12 +497,10 @@ const UI = (() => {
         const statusOrder = { PENDING: 0, PREPARING: 1, COMPLETED: 2, CANCELLED: -1 };
         const current = statusOrder[status] ?? -1;
 
-        /* Progress bar percentage */
         const progressPct = status === 'PENDING' ? 33 : status === 'PREPARING' ? 66 : status === 'COMPLETED' ? 100 : 0;
 
         let html = '';
 
-        /* Animated progress bar */
         html += `<div class="order-progress">
             <div class="order-progress__fill${progressPct === 100 ? ' order-progress__fill--done' : ''}" style="width:${progressPct}%" data-progress></div>
         </div>`;
@@ -656,28 +605,22 @@ const UI = (() => {
         if (open) renderOrdersPanel();
     };
 
-    /* ====================================================================
-       REALTIME ORDER CARD UPDATE (socket-driven, no full re-render)
-    ==================================================================== */
     const updateOrderCard = (order) => {
         if (!order) return;
         const id = order._id;
         if (!id) return;
 
-        /* Find card strictly by data-id (Mongo _id) */
         const card = document.querySelector(`[data-id="${id}"]`);
         if (!card) return;
 
         const statusKey = (order.status || '').toUpperCase();
 
-        /* Update status badge */
         const badge = card.querySelector('.order-status');
         if (badge) {
             badge.textContent = statusKey;
             badge.className = `order-card__status order-status order-card__status--${statusKey.toLowerCase()}`;
         }
 
-        /* Update progress bar */
         const progressFill = card.querySelector('[data-progress]');
         if (progressFill) {
             const pct = statusKey === 'PENDING' ? 33 : statusKey === 'PREPARING' ? 66 : statusKey === 'COMPLETED' ? 100 : 0;
@@ -685,7 +628,6 @@ const UI = (() => {
             progressFill.classList.toggle('order-progress__fill--done', pct === 100);
         }
 
-        /* Re-render timeline dots */
         const timeline = card.querySelector('.order-timeline');
         if (timeline) {
             const tempDiv = document.createElement('div');
@@ -694,11 +636,9 @@ const UI = (() => {
             if (newTimeline) timeline.replaceWith(newTimeline);
         }
 
-        /* Pulse animation for visual feedback */
         card.classList.add('pulse');
         setTimeout(() => card.classList.remove('pulse'), 600);
 
-        /* Auto-collapse completed orders after 10s */
         if (statusKey === 'COMPLETED') {
             card.classList.add('order-card--completed');
             setTimeout(() => {
@@ -712,7 +652,6 @@ const UI = (() => {
         }
     };
 
-    /* ---------- Public surface ---------- */
     return Object.freeze({
         $, $$,
         renderStats, showSkeleton, renderMenu,

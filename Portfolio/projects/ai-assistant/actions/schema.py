@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import Any, Dict, Optional
 
-
 class ActionType(Enum):
     OPEN_APP = auto()
     OPEN_FILE = auto()
@@ -25,7 +24,6 @@ class ActionType(Enum):
     STATUS = auto()
     UNKNOWN = auto()
 
-
 class ActionStatus(Enum):
     SUCCESS = "success"
     FAILURE = "failure"
@@ -35,7 +33,6 @@ class ActionStatus(Enum):
     BLOCKED_COOLDOWN = "blocked_cooldown"
     BLOCKED_RATE_LIMIT = "blocked_rate_limit"
     BLOCKED_KILL_SWITCH = "blocked_kill_switch"
-
 
 @dataclass
 class Action:
@@ -49,7 +46,6 @@ class Action:
             params = ", ".join(f"{k}={v}" for k, v in self.parameters.items())
             return f"{self.action_type.name}({params})"
         return self.action_type.name
-
 
 @dataclass
 class ActionResult:
@@ -76,7 +72,6 @@ class ActionResult:
     @classmethod
     def blocked(cls, status: ActionStatus, message: str) -> "ActionResult":
         return cls(status=status, message=message)
-
 
 ACTION_METADATA = {
     ActionType.OPEN_APP: {
@@ -194,7 +189,6 @@ ACTION_METADATA = {
         "parameters": [],
     },
 }
-
 
 def create_action(action_type: ActionType, **parameters) -> Action:
     metadata = ACTION_METADATA.get(action_type, {})

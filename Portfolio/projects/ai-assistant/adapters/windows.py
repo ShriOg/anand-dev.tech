@@ -6,9 +6,8 @@ from datetime import datetime
 from actions.schema import Action, ActionResult
 from adapters import BaseAdapter
 
-
 class WindowsAdapter(BaseAdapter):
-    
+
     APP_ALIASES = {
         "browser": "start msedge",
         "edge": "start msedge",
@@ -37,7 +36,7 @@ class WindowsAdapter(BaseAdapter):
         try:
             app_lower = app_name.lower().strip()
             command = self.APP_ALIASES.get(app_lower)
-            
+
             if command:
                 subprocess.Popen(
                     command,
@@ -99,7 +98,7 @@ class WindowsAdapter(BaseAdapter):
                 from ctypes import cast, POINTER
                 from comtypes import CLSCTX_ALL
                 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
-                
+
                 devices = AudioUtilities.GetSpeakers()
                 interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
                 volume = cast(interface, POINTER(IAudioEndpointVolume))
@@ -121,7 +120,7 @@ class WindowsAdapter(BaseAdapter):
                 from ctypes import cast, POINTER
                 from comtypes import CLSCTX_ALL
                 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
-                
+
                 devices = AudioUtilities.GetSpeakers()
                 interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
                 volume = cast(interface, POINTER(IAudioEndpointVolume))
@@ -142,7 +141,7 @@ class WindowsAdapter(BaseAdapter):
                 from ctypes import cast, POINTER
                 from comtypes import CLSCTX_ALL
                 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
-                
+
                 devices = AudioUtilities.GetSpeakers()
                 interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
                 volume = cast(interface, POINTER(IAudioEndpointVolume))
@@ -164,7 +163,7 @@ class WindowsAdapter(BaseAdapter):
                 screenshots_dir.mkdir(parents=True, exist_ok=True)
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 path = str(screenshots_dir / f"screenshot_{timestamp}.png")
-            
+
             try:
                 from PIL import ImageGrab
                 screenshot = ImageGrab.grab()
@@ -179,7 +178,7 @@ class WindowsAdapter(BaseAdapter):
                 $bitmap.Save("{path}")
                 '''
                 subprocess.run(["powershell", "-Command", ps_script], capture_output=True)
-            
+
             return ActionResult.success(f"Screenshot saved to {path}", data={"path": path})
         except Exception as e:
             return ActionResult.failure(f"Failed to take screenshot: {str(e)}")
@@ -219,11 +218,11 @@ class WindowsAdapter(BaseAdapter):
 
             status = SYSTEM_POWER_STATUS()
             ctypes.windll.kernel32.GetSystemPowerStatus(ctypes.byref(status))
-            
+
             percentage = status.BatteryLifePercent
             if percentage > 100:
                 return ActionResult.failure("No battery detected")
-            
+
             charging = "Charging" if status.ACLineStatus == 1 else "Discharging"
             return ActionResult.success(
                 f"Battery: {percentage}% ({charging})",

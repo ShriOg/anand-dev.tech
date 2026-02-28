@@ -7,14 +7,12 @@ from actions.schema import ActionStatus
 from speaker.tts import TextToSpeech, TTSEngine
 from listener.stt import SpeechToText, STTEngine, ListenResult
 
-
 class VoiceState(Enum):
     IDLE = auto()
     LISTENING = auto()
     PROCESSING = auto()
     SPEAKING = auto()
     DISABLED = auto()
-
 
 class VoiceInterface:
     WAKE_WORDS = ["hey assistant", "assistant", "jarvis", "computer"]
@@ -75,17 +73,17 @@ class VoiceInterface:
 
     def _process_voice_input(self, text: str):
         import time
-        
+
         self._set_state(VoiceState.PROCESSING)
-        
+
         current_time = time.time()
         if current_time - self._last_command_time < self._cooldown:
             self._notify_result("⏳ Please wait before the next command.")
             self._set_state(VoiceState.IDLE)
             return
-        
+
         self._last_command_time = current_time
-        
+
         text_lower = text.lower().strip()
         if self._wake_word_enabled:
             wake_word_found = False
@@ -103,9 +101,9 @@ class VoiceInterface:
             return
 
         result = self.router.process(text)
-        
+
         self._notify_result(result.message)
-        
+
         if result.status == ActionStatus.PENDING_CONFIRMATION:
             self._speak_and_wait_for_confirmation(result.message)
         else:
@@ -118,14 +116,14 @@ class VoiceInterface:
     def _speak_and_wait_for_confirmation(self, message: str):
         self._speak("This action requires confirmation. Say yes to confirm or no to cancel.")
         self._set_state(VoiceState.LISTENING)
-        
+
         def _on_confirmation(result: ListenResult):
             if result.success and result.text:
                 response_lower = result.text.lower().strip()
-                
+
                 confirmed = any(word in response_lower for word in self.CONFIRMATION_WORDS)
                 cancelled = any(word in response_lower for word in self.CANCEL_WORDS)
-                
+
                 if confirmed:
                     final_result = self.router.process("yes")
                 elif cancelled:
@@ -133,15 +131,15 @@ class VoiceInterface:
                 else:
                     final_result = self.router.process("no")
                     self._speak("I didn't understand. Cancelling action.")
-                
+
                 self._notify_result(final_result.message)
                 self._speak(final_result.message)
             else:
                 self.router.process("no")
                 self._speak("No response detected. Cancelling action.")
-            
+
             self._set_state(VoiceState.IDLE)
-        
+
         self._stt.listen_async(timeout=5.0, callback=_on_confirmation)
 
     def _speak(self, text: str):

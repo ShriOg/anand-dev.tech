@@ -19,7 +19,7 @@ async function initNotesModule(container) {
     <div id="notesList" class="notes-list"></div>
     <div id="notesPagination" class="pagination"></div>
   `;
-  
+
   await loadNotes();
 }
 
@@ -36,12 +36,12 @@ async function loadNotes() {
 
 function renderNotes() {
   const notesList = document.getElementById('notesList');
-  
+
   if (notesData.length === 0) {
     notesList.innerHTML = '<p class="empty-state">No notes yet. Create your first note!</p>';
     return;
   }
-  
+
   notesList.innerHTML = notesData.map(note => `
     <div class="note-card">
       <div class="note-header">
@@ -59,12 +59,12 @@ function renderNotes() {
 
 function renderPagination(totalPages) {
   const pagination = document.getElementById('notesPagination');
-  
+
   if (totalPages <= 1) {
     pagination.innerHTML = '';
     return;
   }
-  
+
   let html = '';
   for (let i = 1; i <= totalPages; i++) {
     html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
@@ -87,19 +87,19 @@ async function saveNote() {
   const title = document.getElementById('noteTitle').value.trim();
   const content = document.getElementById('noteContent').value.trim();
   const noteId = document.getElementById('noteTitle').dataset.noteId;
-  
+
   if (!title || !content) {
     alert('Please fill in both title and content');
     return;
   }
-  
+
   try {
     if (noteId) {
       await api.put(`/api/notes/${noteId}`, { title, content });
     } else {
       await api.post('/api/notes', { title, content });
     }
-    
+
     cancelNoteForm();
     await loadNotes();
   } catch (error) {
@@ -110,7 +110,7 @@ async function saveNote() {
 function editNote(noteId) {
   const note = notesData.find(n => n._id === noteId);
   if (!note) return;
-  
+
   document.getElementById('noteTitle').value = note.title;
   document.getElementById('noteContent').value = note.content;
   document.getElementById('noteTitle').dataset.noteId = noteId;
@@ -119,7 +119,7 @@ function editNote(noteId) {
 
 async function deleteNote(noteId) {
   if (!confirm('Are you sure you want to delete this note?')) return;
-  
+
   try {
     await api.delete(`/api/notes/${noteId}`);
     await loadNotes();

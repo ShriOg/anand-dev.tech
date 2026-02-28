@@ -42,7 +42,6 @@ app.post("/api/chat", async (req, res) => {
       }
     );
 
-    // STREAMING MODE
     if (payload.stream) {
       res.status(groqRes.status);
       res.setHeader("Content-Type", "text/event-stream");
@@ -69,7 +68,6 @@ app.post("/api/chat", async (req, res) => {
       return;
     }
 
-    // NON-STREAMING MODE
     res.status(groqRes.status);
     groqRes.body.pipe(res);
 

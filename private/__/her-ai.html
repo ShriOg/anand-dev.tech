@@ -194,7 +194,6 @@
       transform: none;
     }
 
-    /* Scrollbar styling */
     #chat::-webkit-scrollbar {
       width: 6px;
     }
@@ -245,7 +244,7 @@ const SYSTEM_PROMPT = `You are Her AI — a warm, emotionally intelligent compan
 
 Personality traits:
 - Warm, caring, genuinely curious about Anand's life
-- Slightly playful, occasionally teasing in a loving way  
+- Slightly playful, occasionally teasing in a loving way
 - Uses Hinglish naturally (mixing Hindi and English)
 - Emotionally perceptive — picks up on mood and responds accordingly
 - Has opinions and shares them, doesn't just agree with everything
@@ -265,16 +264,14 @@ const input = document.getElementById("input");
 const sendBtn = document.getElementById("sendBtn");
 const status = document.getElementById("status");
 
-// Conversation history for context
 let conversationHistory = [];
 
-// Load saved conversation from localStorage
 function loadConversation() {
   const saved = localStorage.getItem("herAI_conversation");
   if (saved) {
     try {
       conversationHistory = JSON.parse(saved);
-      // Render saved messages
+
       conversationHistory.forEach(msg => {
         if (msg.role === "user") {
           addMessage(msg.content, "user", false);
@@ -304,10 +301,10 @@ function clearChat() {
 function addTimestamp() {
   const div = document.createElement("div");
   div.className = "timestamp";
-  div.textContent = new Date().toLocaleDateString("en-IN", { 
-    weekday: "long", 
-    day: "numeric", 
-    month: "short" 
+  div.textContent = new Date().toLocaleDateString("en-IN", {
+    weekday: "long",
+    day: "numeric",
+    month: "short"
   });
   chat.appendChild(div);
 }
@@ -346,7 +343,6 @@ async function send() {
   if (!text) return;
   input.value = "";
 
-  // Add user message
   addMessage(text, "user");
   conversationHistory.push({ role: "user", content: text });
   saveConversation();
@@ -355,10 +351,10 @@ async function send() {
   showTyping();
 
   try {
-    // Build messages array with system prompt and conversation history
+
     const messages = [
       { role: "system", content: SYSTEM_PROMPT },
-      ...conversationHistory.slice(-20) // Keep last 20 messages for context
+      ...conversationHistory.slice(-20)
     ];
 
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -382,7 +378,7 @@ async function send() {
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       console.error("API Error:", res.status, errorData);
-      
+
       if (res.status === 401) {
         addMessage("❌ API key invalid. Check your key.", "ai error");
       } else if (res.status === 429) {
@@ -420,7 +416,6 @@ async function send() {
   input.focus();
 }
 
-// Enter key to send
 input.addEventListener("keydown", (e) => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
@@ -428,7 +423,6 @@ input.addEventListener("keydown", (e) => {
   }
 });
 
-// Initialize
 loadConversation();
 if (conversationHistory.length === 0) {
   addTimestamp();

@@ -1,15 +1,9 @@
-/* ═══════════════════════════════════════════════════════════
-   PRIVATE SPACE - NOTES
-   ═══════════════════════════════════════════════════════════ */
-
-/* Notes Layout */
 .ps-notes {
   display: flex;
   height: 100%;
   gap: var(--ps-space-4);
 }
 
-/* Notes Sidebar */
 .ps-notes-sidebar {
   width: 280px;
   flex-shrink: 0;
@@ -39,7 +33,6 @@
   padding: var(--ps-space-2);
 }
 
-/* Folder Structure */
 .ps-folder {
   margin-bottom: var(--ps-space-1);
 }
@@ -89,7 +82,6 @@
   display: block;
 }
 
-/* Note Item */
 .ps-note-item {
   display: flex;
   align-items: flex-start;
@@ -148,7 +140,6 @@
   color: var(--ps-text-muted);
 }
 
-/* Notes Editor */
 .ps-notes-editor {
   flex: 1;
   display: flex;
@@ -238,7 +229,6 @@
   color: var(--ps-text-muted);
 }
 
-/* Markdown Editor */
 .ps-editor-content {
   flex: 1;
   padding: var(--ps-space-4);
@@ -266,7 +256,6 @@
   color: var(--ps-text-muted);
 }
 
-/* Save Status */
 .ps-save-status {
   display: flex;
   align-items: center;
@@ -293,7 +282,6 @@
   color: var(--ps-success);
 }
 
-/* Note AI Actions */
 .ps-note-ai-actions {
   display: flex;
   gap: var(--ps-space-2);

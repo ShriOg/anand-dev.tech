@@ -1,18 +1,11 @@
 'use strict';
 
-/* ============================================================
-   Domain Battle — Frontend Client
-   Clean separation: SocketManager (network) ↔ UI (DOM)
-   ============================================================ */
-
-// ── DOM References ──────────────────────────────────
 const DOM = {
-  // Screens
+
   authGate:      document.getElementById('auth-gate'),
   lobby:         document.getElementById('lobby'),
   battle:        document.getElementById('battle'),
 
-  // Lobby
   btnCreate:     document.getElementById('btn-create'),
   btnJoin:       document.getElementById('btn-join'),
   inputRoom:     document.getElementById('input-room'),
@@ -22,7 +15,6 @@ const DOM = {
   btnStart:      document.getElementById('btn-start'),
   lobbyError:    document.getElementById('lobby-error'),
 
-  // Battle
   phaseLabel:    document.getElementById('phase-label'),
   p1Name:        document.getElementById('p1-name'),
   p2Name:        document.getElementById('p2-name'),
@@ -35,14 +27,12 @@ const DOM = {
   domP2:         document.getElementById('dom-p2'),
   actions:       document.getElementById('actions'),
 
-  // Result
   resultOverlay: document.getElementById('result-overlay'),
   resultTitle:   document.getElementById('result-title'),
   resultReason:  document.getElementById('result-reason'),
   btnBackLobby:  document.getElementById('btn-back-lobby'),
 };
 
-// ── UI Controller ───────────────────────────────────
 const UI = {
   show(screen) {
     [DOM.authGate, DOM.lobby, DOM.battle].forEach(s => s.classList.add('hidden'));
@@ -142,8 +132,6 @@ const UI = {
   },
 };
 
-
-// ── Socket Manager ──────────────────────────────────
 const SocketManager = {
   socket: null,
   currentRoom: null,
@@ -174,7 +162,6 @@ const SocketManager = {
       console.warn('[Battle] Disconnected:', reason);
     });
 
-    // ── Room events
     s.on('roomCreated', (data) => {
       this.currentRoom = data.roomId;
       UI.showRoomInfo(data.roomId);
@@ -190,7 +177,6 @@ const SocketManager = {
       UI.enableStart();
     });
 
-    // ── Battle events
     s.on('battleUpdate', (state) => {
       UI.showBattle();
       UI.setPhase(state.phase || 'active');
@@ -252,10 +238,8 @@ const SocketManager = {
   },
 };
 
-
-// ── Event Bindings ──────────────────────────────────
 function bindEvents() {
-  // Lobby buttons
+
   DOM.btnCreate.addEventListener('click', () => {
     DOM.btnCreate.disabled = true;
     SocketManager.createRoom();
@@ -276,28 +260,23 @@ function bindEvents() {
     SocketManager.startBattle();
   });
 
-  // Action buttons
   DOM.actions.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-action]');
     if (!btn || btn.disabled) return;
     SocketManager.sendAction(btn.dataset.action);
   });
 
-  // Back to lobby
   DOM.btnBackLobby.addEventListener('click', () => {
     UI.resetBattle();
     UI.resetLobby();
     UI.showLobby();
   });
 
-  // Join on Enter key
   DOM.inputRoom.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') DOM.btnJoin.click();
   });
 }
 
-
-// ── Init ────────────────────────────────────────────
 (function init() {
   const connected = SocketManager.connect();
   if (connected) {

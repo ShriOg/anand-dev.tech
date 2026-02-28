@@ -1,12 +1,3 @@
-/**
- * admin-socket.js — Socket.IO realtime connection for admin dashboard.
- *
- * Connects to the server, listens for restaurant events,
- * and dispatches CustomEvents so other modules stay decoupled.
- *
- * Expects Socket.IO client library loaded via CDN or bundled.
- * If Socket.IO is not available, falls back to polling gracefully.
- */
 'use strict';
 
 const AdminSocket = (() => {
@@ -19,7 +10,6 @@ const AdminSocket = (() => {
         ORDER_UPDATED: 'restaurant:order-updated',
     };
 
-    /* ---------- Helpers ---------- */
     const _emit = (type, detail) => {
         document.dispatchEvent(new CustomEvent(type, { detail }));
     };
@@ -29,9 +19,8 @@ const AdminSocket = (() => {
         _emit('socket:status', { connected: online });
     };
 
-    /* ---------- Connect ---------- */
     const connect = () => {
-        /* Guard: if socket.io client not loaded, skip gracefully */
+
         if (typeof io === 'undefined') {
             console.warn('[AdminSocket] Socket.IO client not loaded — realtime disabled. Falling back to polling.');
             _updateStatus(false);
@@ -75,7 +64,6 @@ const AdminSocket = (() => {
             _emit('socket:status', { connected: 'connecting' });
         });
 
-        /* --- Restaurant events --- */
         _socket.on(_EVENTS.NEW_ORDER, (order) => {
             console.log('[AdminSocket] New order:', order);
             debug('Socket New Order', order);
@@ -89,7 +77,6 @@ const AdminSocket = (() => {
         });
     };
 
-    /* ---------- Polling fallback (if no Socket.IO) ---------- */
     let _lastPollTimestamp = Date.now();
     let _pollInterval = null;
 
@@ -104,11 +91,10 @@ const AdminSocket = (() => {
                         _emit('admin:new-order', order);
                     });
                 }
-            } catch { /* silently skip */ }
-        }, 15000); // poll every 15s
+            } catch {  }
+        }, 15000);
     };
 
-    /* ---------- Disconnect ---------- */
     const disconnect = () => {
         if (_socket) {
             _socket.disconnect();
@@ -122,7 +108,6 @@ const AdminSocket = (() => {
         _updateStatus(false);
     };
 
-    /* ---------- Status ---------- */
     const isConnected = () => _connected;
 
     return Object.freeze({ connect, disconnect, isConnected });

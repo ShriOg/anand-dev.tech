@@ -1,8 +1,3 @@
-/* ═══════════════════════════════════════════════════════════
-   PROFESSIONAL SPACE - CLEAN, NEUTRAL, FUNCTIONAL
-   Nothing OS × 404.html Inspired Theme
-   ═══════════════════════════════════════════════════════════ */
-
 *, *::before, *::after {
   margin: 0;
   padding: 0;
@@ -10,34 +5,33 @@
 }
 
 :root {
-  /* Colors - Neutral Professional */
+
   --bg-primary: #000000;
   --bg-secondary: #080808;
   --bg-tertiary: #0c0c0c;
   --bg-elevated: #111111;
   --bg-hover: rgba(255, 255, 255, 0.025);
   --bg-active: rgba(255, 255, 255, 0.04);
-  
+
   --text-primary: rgba(255, 255, 255, 0.92);
   --text-secondary: rgba(255, 255, 255, 0.58);
   --text-tertiary: rgba(255, 255, 255, 0.36);
   --text-muted: rgba(255, 255, 255, 0.22);
-  
+
   --accent: #d4d4d4;
   --accent-dim: #a8a8a8;
   --accent-hover: #ffffff;
   --accent-subtle: rgba(255, 255, 255, 0.08);
-  
+
   --success: #4ade80;
   --warning: #facc15;
   --error: #f87171;
   --info: #60a5fa;
-  
+
   --border-subtle: rgba(255, 255, 255, 0.04);
   --border-default: rgba(255, 255, 255, 0.06);
   --border-strong: rgba(255, 255, 255, 0.1);
-  
-  /* Spacing */
+
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -47,8 +41,7 @@
   --space-8: 2rem;
   --space-10: 2.5rem;
   --space-12: 3rem;
-  
-  /* Typography */
+
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --text-xs: 0.6875rem;
   --text-sm: 0.8125rem;
@@ -56,25 +49,21 @@
   --text-lg: 1.0625rem;
   --text-xl: 1.25rem;
   --text-2xl: 1.5rem;
-  
-  /* Layout */
+
   --sidebar-width: 260px;
   --sidebar-collapsed: 64px;
   --header-height: 64px;
   --mobile-nav-height: 64px;
-  
-  /* Radius */
+
   --radius-sm: 0.375rem;
   --radius-md: 0.625rem;
   --radius-lg: 0.875rem;
   --radius-xl: 1.125rem;
-  
-  /* Shadows */
+
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.35);
-  
-  /* Transitions */
+
   --transition-fast: 0.15s ease;
   --transition-normal: 0.25s ease;
   --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -90,9 +79,6 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   AUTH CHECK OVERLAY
-   ═══════════════════════════════════════════════════════════ */
 .auth-check {
   position: fixed;
   inset: 0;
@@ -133,9 +119,6 @@ html, body {
   to { transform: rotate(360deg); }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   APP LAYOUT
-   ═══════════════════════════════════════════════════════════ */
 .pro-app {
   display: flex;
   height: 100vh;
@@ -147,9 +130,6 @@ html, body {
   opacity: 1;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   SIDEBAR - SCROLLABLE
-   ═══════════════════════════════════════════════════════════ */
 .pro-sidebar {
   width: var(--sidebar-width);
   height: 100vh;
@@ -211,7 +191,6 @@ html, body {
   height: 18px;
 }
 
-/* Navigation - SCROLLABLE FIX */
 .pro-nav {
   flex: 1;
   padding: var(--space-4) var(--space-3);
@@ -219,7 +198,6 @@ html, body {
   overflow-x: hidden;
 }
 
-/* Custom scrollbar for nav */
 .pro-nav::-webkit-scrollbar {
   width: 4px;
 }
@@ -290,7 +268,6 @@ html, body {
   opacity: 1;
 }
 
-/* Sidebar Footer */
 .pro-sidebar-footer {
   padding: var(--space-3);
   border-top: 1px solid var(--border-subtle);
@@ -309,9 +286,6 @@ html, body {
   color: var(--error);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   MAIN CONTENT
-   ═══════════════════════════════════════════════════════════ */
 .pro-main {
   flex: 1;
   height: 100vh;
@@ -320,7 +294,6 @@ html, body {
   background: var(--bg-primary);
 }
 
-/* Sections */
 .pro-section {
   display: none;
   padding: var(--space-8);
@@ -368,7 +341,6 @@ html, body {
   flex-wrap: wrap;
 }
 
-/* Workspace */
 .pro-workspace {
   background: var(--bg-secondary);
   border: 1px solid var(--border-subtle);
@@ -376,9 +348,6 @@ html, body {
   padding: var(--space-6);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   BUTTONS
-   ═══════════════════════════════════════════════════════════ */
 .pro-btn {
   display: inline-flex;
   align-items: center;
@@ -444,9 +413,6 @@ html, body {
   border-color: var(--accent);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   FORM ELEMENTS
-   ═══════════════════════════════════════════════════════════ */
 .pro-input, .pro-textarea, .pro-select {
   width: 100%;
   padding: var(--space-3) var(--space-4);
@@ -514,9 +480,6 @@ html, body {
   border-radius: var(--radius-sm);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   SEARCH & FILTERS
-   ═══════════════════════════════════════════════════════════ */
 .pro-filters {
   display: flex;
   gap: var(--space-3);
@@ -562,9 +525,6 @@ html, body {
   min-width: 140px;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   PROJECTS GRID
-   ═══════════════════════════════════════════════════════════ */
 .pro-projects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -653,9 +613,6 @@ html, body {
   padding: var(--space-2);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   NAVIGATION LIST
-   ═══════════════════════════════════════════════════════════ */
 .pro-nav-list {
   display: flex;
   flex-direction: column;
@@ -716,9 +673,6 @@ html, body {
   padding: var(--space-2);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   PAGES LIST
-   ═══════════════════════════════════════════════════════════ */
 .pro-pages-container {
   display: flex;
   flex-direction: column;
@@ -811,9 +765,6 @@ html, body {
   padding: var(--space-2);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   SETTINGS PANEL
-   ═══════════════════════════════════════════════════════════ */
 .pro-settings-panel {
   display: flex;
   flex-direction: column;
@@ -856,9 +807,6 @@ html, body {
   grid-column: 1 / -1;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   EMPTY STATE
-   ═══════════════════════════════════════════════════════════ */
 .pro-empty-state {
   text-align: center;
   padding: var(--space-12) var(--space-6);
@@ -883,9 +831,6 @@ html, body {
   color: var(--text-tertiary);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   TOAST NOTIFICATIONS
-   ═══════════════════════════════════════════════════════════ */
 .pro-toast-container {
   position: fixed;
   bottom: var(--space-6);
@@ -933,9 +878,6 @@ html, body {
   to { opacity: 0; transform: translateX(20px); }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   MODAL
-   ═══════════════════════════════════════════════════════════ */
 .pro-modal-overlay {
   position: fixed;
   inset: 0;
@@ -1024,9 +966,6 @@ html, body {
   border-top: 1px solid var(--border-subtle);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   MOBILE NAVIGATION
-   ═══════════════════════════════════════════════════════════ */
 .pro-mobile-nav {
   display: none;
   position: fixed;
@@ -1039,9 +978,6 @@ html, body {
   z-index: 200;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════════════════════════════════ */
 @media (max-width: 1024px) {
   .pro-sidebar {
     position: fixed;
@@ -1049,15 +985,15 @@ html, body {
     top: 0;
     transform: translateX(-100%);
   }
-  
+
   .pro-sidebar.open {
     transform: translateX(0);
   }
-  
+
   .pro-main {
     padding-bottom: var(--mobile-nav-height);
   }
-  
+
   .pro-mobile-nav {
     display: flex;
   }
@@ -1067,29 +1003,29 @@ html, body {
   .pro-section {
     padding: var(--space-5);
   }
-  
+
   .pro-section-header {
     flex-direction: column;
     align-items: stretch;
     gap: var(--space-4);
   }
-  
+
   .pro-section-actions {
     justify-content: flex-start;
   }
-  
+
   .pro-workspace {
     padding: var(--space-4);
   }
-  
+
   .pro-projects-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .pro-settings-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .pro-toast-container {
     left: var(--space-4);
     right: var(--space-4);
@@ -1121,10 +1057,6 @@ html, body {
   width: 22px;
   height: 22px;
 }
-
-/* ═══════════════════════════════════════════════════════════
-   AI ASSISTANT PANEL
-   ═══════════════════════════════════════════════════════════ */
 
 .ai-panel-toggle {
   position: fixed;
@@ -1159,7 +1091,6 @@ html, body {
   font-weight: 500;
 }
 
-/* AI Panel */
 .ai-panel {
   position: fixed;
   top: 0;
@@ -1228,7 +1159,6 @@ html, body {
   height: 18px;
 }
 
-/* AI Setup View */
 .ai-setup-view {
   flex: 1;
   display: flex;
@@ -1276,7 +1206,6 @@ html, body {
   border-color: var(--accent);
 }
 
-/* AI Tabs */
 .ai-tabs {
   display: flex;
   border-bottom: 1px solid var(--border);
@@ -1306,7 +1235,6 @@ html, body {
   border-bottom-color: var(--accent);
 }
 
-/* AI Tab Content */
 .ai-tab-content {
   display: none;
   flex: 1;
@@ -1334,7 +1262,6 @@ html, body {
   height: calc(100vh - 100px);
 }
 
-/* AI Loading */
 .ai-loading {
   display: flex;
   flex-direction: column;
@@ -1358,7 +1285,6 @@ html, body {
   to { transform: rotate(360deg); }
 }
 
-/* AI Sections */
 .ai-section {
   margin-bottom: var(--space-5);
 }
@@ -1384,7 +1310,6 @@ html, body {
   margin-top: var(--space-2);
 }
 
-/* AI Metrics Grid */
 .ai-metrics-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1415,7 +1340,6 @@ html, body {
   margin-top: var(--space-2);
 }
 
-/* AI Project Scores */
 .ai-project-scores {
   display: flex;
   flex-direction: column;
@@ -1513,7 +1437,6 @@ html, body {
   height: 16px;
 }
 
-/* AI Recommendations */
 .ai-recommendations {
   display: flex;
   flex-direction: column;
@@ -1543,7 +1466,6 @@ html, body {
 .ai-recommendation.info .ai-rec-indicator { background: #3b82f6; }
 .ai-recommendation.action .ai-rec-indicator { background: var(--accent); }
 
-/* AI Buttons */
 .ai-btn {
   display: inline-flex;
   align-items: center;
@@ -1585,7 +1507,6 @@ html, body {
   margin-top: var(--space-4);
 }
 
-/* AI Keywords */
 .ai-keyword-list {
   display: flex;
   flex-direction: column;
@@ -1614,7 +1535,6 @@ html, body {
   border-radius: var(--radius-sm);
 }
 
-/* AI Readability */
 .ai-readability-list {
   display: flex;
   flex-direction: column;
@@ -1642,7 +1562,6 @@ html, body {
 .ai-readability-score.medium { background: rgba(234, 179, 8, 0.15); color: #eab308; }
 .ai-readability-score.low { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
 
-/* AI Tags */
 .ai-suggestions {
   display: flex;
   flex-wrap: wrap;
@@ -1663,7 +1582,6 @@ html, body {
   color: var(--text-muted);
 }
 
-/* AI Recruiter View */
 .ai-recruiter-analysis {
   display: flex;
   flex-direction: column;
@@ -1722,7 +1640,6 @@ html, body {
   margin: 0;
 }
 
-/* AI Order List */
 .ai-order-list {
   display: flex;
   flex-direction: column;
@@ -1763,7 +1680,6 @@ html, body {
   color: var(--text-muted);
 }
 
-/* AI Skills */
 .ai-skills-cloud {
   display: flex;
   flex-wrap: wrap;
@@ -1812,7 +1728,6 @@ html, body {
   border-radius: var(--radius-full);
 }
 
-/* AI Resume Box */
 .ai-resume-box {
   padding: var(--space-3);
   background: var(--bg-secondary);
@@ -1824,7 +1739,6 @@ html, body {
   margin-bottom: var(--space-3);
 }
 
-/* AI Project Modal */
 .ai-project-modal {
   padding: 0;
 }
@@ -1866,7 +1780,6 @@ html, body {
   margin-bottom: var(--space-3);
 }
 
-/* AI Quick Actions */
 .ai-quick-actions {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1900,7 +1813,6 @@ html, body {
   opacity: 0.7;
 }
 
-/* AI Draft Types */
 .ai-draft-types {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1924,7 +1836,6 @@ html, body {
   color: var(--text-primary);
 }
 
-/* AI Output */
 .ai-project-output {
   margin-top: var(--space-5);
   padding-top: var(--space-5);
@@ -2000,7 +1911,6 @@ html, body {
   justify-content: flex-end;
 }
 
-/* AI Empty State */
 .ai-empty {
   text-align: center;
   padding: var(--space-8);
@@ -2017,16 +1927,15 @@ html, body {
   color: var(--text-muted);
 }
 
-/* AI Mobile Responsive */
 @media (max-width: 1024px) {
   .ai-panel {
     width: 100%;
   }
-  
+
   .pro-main.ai-panel-open {
     margin-right: 0;
   }
-  
+
   .ai-panel-toggle {
     bottom: calc(var(--mobile-nav-height) + 20px);
     top: auto;
@@ -2039,19 +1948,15 @@ html, body {
   .ai-output-compare {
     grid-template-columns: 1fr;
   }
-  
+
   .ai-quick-actions {
     grid-template-columns: 1fr;
   }
-  
+
   .ai-draft-types {
     grid-template-columns: 1fr;
   }
 }
-
-/* ═══════════════════════════════════════════════════════════
-   AI ACTIONS CHAT INTERFACE
-   ═══════════════════════════════════════════════════════════ */
 
 .ai-actions-chat {
   display: flex;
@@ -2155,7 +2060,6 @@ html, body {
   margin: var(--space-1) 0;
 }
 
-/* Chat Suggestions */
 .ai-chat-suggestions {
   display: flex;
   flex-wrap: wrap;
@@ -2180,7 +2084,6 @@ html, body {
   color: var(--text-primary);
 }
 
-/* Chat Input Area */
 .ai-chat-input-area {
   display: flex;
   gap: var(--space-2);
@@ -2227,7 +2130,6 @@ html, body {
   height: 18px;
 }
 
-/* Help Sections */
 .ai-help-section {
   margin-top: var(--space-4);
 }
@@ -2250,7 +2152,6 @@ html, body {
   color: var(--text-secondary);
 }
 
-/* Stats Grid */
 .ai-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -2282,7 +2183,6 @@ html, body {
   margin-top: var(--space-1);
 }
 
-/* Projects List */
 .ai-projects-list {
   display: flex;
   flex-direction: column;
@@ -2364,7 +2264,6 @@ html, body {
   background: var(--bg-elevated);
 }
 
-/* Navigation List */
 .ai-nav-list {
   display: flex;
   flex-direction: column;
@@ -2398,7 +2297,6 @@ html, body {
   color: var(--text-muted);
 }
 
-/* Links List */
 .ai-links-list {
   display: flex;
   flex-direction: column;
@@ -2431,7 +2329,6 @@ html, body {
   text-decoration: underline;
 }
 
-/* Action Buttons */
 .ai-action-btn-inline {
   padding: var(--space-2) var(--space-3);
   background: var(--accent);
@@ -2455,7 +2352,6 @@ html, body {
   margin-top: var(--space-3);
 }
 
-/* Choice Buttons */
 .ai-choice-buttons {
   display: flex;
   flex-wrap: wrap;
@@ -2516,7 +2412,6 @@ html, body {
   color: var(--text-primary);
 }
 
-/* Success Message */
 .ai-success-message {
   background: rgba(34, 197, 94, 0.1);
   border: 1px solid rgba(34, 197, 94, 0.3);
@@ -2536,14 +2431,12 @@ html, body {
   margin: 2px 0;
 }
 
-/* Responsive for chat */
 @media (max-width: 768px) {
   .ai-stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .ai-chat-messages {
     max-height: calc(100vh - 280px);
   }
 }
-

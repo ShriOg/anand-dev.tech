@@ -6,12 +6,10 @@ from dataclasses import dataclass, field
 from typing import Dict, Optional
 from enum import Enum
 
-
 class PermissionTier(Enum):
     SAFE = "safe"
     RESTRICTED = "restricted"
     CRITICAL = "critical"
-
 
 @dataclass
 class SafetyConfig:
@@ -26,7 +24,6 @@ class SafetyConfig:
     kill_switch_active: bool = False
     max_commands_per_minute: int = 30
 
-
 @dataclass
 class AppConfig:
     app_name: str = "AI Assistant"
@@ -34,7 +31,6 @@ class AppConfig:
     config_dir: Path = field(default_factory=lambda: Path.home() / ".ai-assistant")
     log_level: str = "INFO"
     safety: SafetyConfig = field(default_factory=SafetyConfig)
-
 
 class ConfigManager:
     def __init__(self, config_path: Optional[Path] = None):
@@ -114,12 +110,11 @@ class ConfigManager:
     def get_permission_tier(self, action: str) -> PermissionTier:
         critical_actions = {"shutdown", "restart", "delete_file", "empty_trash"}
         restricted_actions = {"adjust_volume", "take_screenshot", "open_app"}
-        
+
         if action in critical_actions:
             return PermissionTier.CRITICAL
         elif action in restricted_actions:
             return PermissionTier.RESTRICTED
         return PermissionTier.SAFE
-
 
 config_manager = ConfigManager()

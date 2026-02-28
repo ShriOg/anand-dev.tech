@@ -8,18 +8,18 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="robots" content="noindex, nofollow">
   <title>Private Space</title>
-  
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  
+
   <style>
     *, *::before, *::after {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-    
+
     :root {
       --bg-primary: #000000;
       --bg-secondary: #060606;
@@ -41,7 +41,7 @@
       --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       --transition-slow: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
+
     html, body {
       height: 100%;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
@@ -52,10 +52,7 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
-    
-    /* ═══════════════════════════════════════════════════════════
-       LOCK SCREEN
-       ═══════════════════════════════════════════════════════════ */
+
     .lock-screen {
       position: fixed;
       inset: 0;
@@ -68,56 +65,56 @@
       visibility: visible;
       transition: opacity var(--transition-slow), visibility var(--transition-slow);
     }
-    
+
     .lock-screen.hidden {
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
     }
-    
+
     .lock-content {
       text-align: center;
       width: 100%;
       max-width: 340px;
       padding: 2rem 1.5rem;
     }
-    
+
     .lock-icon {
       width: 56px;
       height: 56px;
       margin: 0 auto 1.75rem;
       opacity: 0.35;
     }
-    
+
     .lock-icon svg {
       width: 100%;
       height: 100%;
       stroke: var(--text-secondary);
     }
-    
+
     .lock-title {
       font-size: 1.375rem;
       font-weight: 500;
       margin-bottom: 0.5rem;
       letter-spacing: -0.02em;
     }
-    
+
     .lock-subtitle {
       font-size: 0.8125rem;
       color: var(--text-muted);
       margin-bottom: 2rem;
     }
-    
+
     .lock-form {
       display: flex;
       gap: 0.625rem;
     }
-    
+
     .lock-input-wrapper {
       flex: 1;
       position: relative;
     }
-    
+
     .lock-input {
       width: 100%;
       padding: 0.875rem 1rem;
@@ -130,26 +127,26 @@
       outline: none;
       transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
     }
-    
+
     .lock-input::placeholder {
       color: var(--text-muted);
     }
-    
+
     .lock-input:focus {
       border-color: rgba(255, 255, 255, 0.12);
       box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.02);
     }
-    
+
     .lock-input.shake {
       animation: shake 0.5s ease;
     }
-    
+
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
       20%, 60% { transform: translateX(-6px); }
       40%, 80% { transform: translateX(6px); }
     }
-    
+
     .lock-btn {
       width: 50px;
       height: 50px;
@@ -164,38 +161,35 @@
       justify-content: center;
       transition: all var(--transition-fast);
     }
-    
+
     .lock-btn:hover {
       background: rgba(255, 255, 255, 0.04);
       border-color: var(--border-hover);
     }
-    
+
     .lock-btn:active {
       transform: scale(0.96);
     }
-    
+
     .lock-btn svg {
       width: 20px;
       height: 20px;
     }
-    
+
     .lock-error {
       margin-top: 1rem;
       font-size: 0.8125rem;
       color: var(--error);
       min-height: 1.25rem;
     }
-    
+
     .lock-hint {
       margin-top: 2.5rem;
       font-size: 0.6875rem;
       color: var(--text-muted);
       letter-spacing: 0.02em;
     }
-    
-    /* ═══════════════════════════════════════════════════════════
-       DASHBOARD
-       ═══════════════════════════════════════════════════════════ */
+
     .dashboard {
       min-height: 100vh;
       display: flex;
@@ -207,23 +201,23 @@
       opacity: 0;
       visibility: hidden;
       transform: translateY(10px);
-      transition: 
-        opacity var(--transition-slow) 0.1s, 
+      transition:
+        opacity var(--transition-slow) 0.1s,
         visibility var(--transition-slow) 0.1s,
         transform var(--transition-slow) 0.1s;
     }
-    
+
     .dashboard.visible {
       opacity: 1;
       visibility: visible;
       transform: translateY(0);
     }
-    
+
     .dashboard-header {
       text-align: center;
       margin-bottom: 2.5rem;
     }
-    
+
     .dashboard-label {
       font-size: 0.6875rem;
       font-weight: 600;
@@ -232,17 +226,14 @@
       color: var(--text-muted);
       margin-bottom: 0.875rem;
     }
-    
+
     .dashboard-title {
       font-size: 1.75rem;
       font-weight: 300;
       letter-spacing: -0.025em;
       color: var(--text-primary);
     }
-    
-    /* ═══════════════════════════════════════════════════════════
-       MODE CARDS
-       ═══════════════════════════════════════════════════════════ */
+
     .mode-cards {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -250,7 +241,7 @@
       width: 100%;
       max-width: 640px;
     }
-    
+
     .mode-card {
       position: relative;
       display: flex;
@@ -263,13 +254,13 @@
       text-decoration: none;
       color: inherit;
       overflow: hidden;
-      transition: 
+      transition:
         transform var(--transition-smooth),
         border-color var(--transition-smooth),
         box-shadow var(--transition-smooth);
       -webkit-tap-highlight-color: transparent;
     }
-    
+
     .mode-card::before {
       content: '';
       position: absolute;
@@ -279,60 +270,57 @@
       transition: opacity var(--transition-smooth);
       pointer-events: none;
     }
-    
+
     .mode-card:hover {
       transform: translateY(-3px);
       border-color: var(--border-hover);
       box-shadow: 0 16px 48px -12px rgba(0, 0, 0, 0.6);
     }
-    
+
     .mode-card:hover::before {
       opacity: 1;
     }
-    
+
     .mode-card:active {
       transform: translateY(-1px) scale(0.99);
     }
-    
+
     .mode-card.professional {
       --card-glow: rgba(200, 200, 200, 0.04);
     }
-    
+
     .mode-card.personal {
       --card-glow: rgba(232, 164, 184, 0.08);
     }
-    
+
     .mode-icon {
       font-size: 2.25rem;
       margin-bottom: 1.25rem;
       display: block;
       line-height: 1;
     }
-    
+
     .mode-title {
       font-size: 1.125rem;
       font-weight: 500;
       margin-bottom: 0.625rem;
       letter-spacing: -0.01em;
     }
-    
+
     .mode-description {
       font-size: 0.8125rem;
       color: var(--text-secondary);
       line-height: 1.55;
     }
-    
+
     .mode-card.professional .mode-title {
       color: var(--accent-pro);
     }
-    
+
     .mode-card.personal .mode-title {
       color: var(--accent-her);
     }
-    
-    /* ═══════════════════════════════════════════════════════════
-       FOOTER ACTIONS
-       ═══════════════════════════════════════════════════════════ */
+
     .dashboard-footer {
       position: fixed;
       bottom: 0;
@@ -345,7 +333,7 @@
       background: linear-gradient(to top, var(--bg-primary) 60%, transparent);
       pointer-events: none;
     }
-    
+
     .footer-btn {
       display: inline-flex;
       align-items: center;
@@ -364,26 +352,23 @@
       pointer-events: auto;
       -webkit-tap-highlight-color: transparent;
     }
-    
+
     .footer-btn:hover {
       background: rgba(255, 255, 255, 0.04);
       border-color: var(--border-hover);
       color: var(--text-primary);
     }
-    
+
     .footer-btn:active {
       transform: scale(0.97);
     }
-    
+
     .footer-btn svg {
       width: 14px;
       height: 14px;
       flex-shrink: 0;
     }
-    
-    /* ═══════════════════════════════════════════════════════════
-       AMBIENT BACKGROUND
-       ═══════════════════════════════════════════════════════════ */
+
     .ambient {
       position: fixed;
       inset: 0;
@@ -391,7 +376,7 @@
       z-index: -1;
       overflow: hidden;
     }
-    
+
     .ambient-orb {
       position: absolute;
       border-radius: 50%;
@@ -399,7 +384,7 @@
       opacity: 0.12;
       animation: float 25s ease-in-out infinite;
     }
-    
+
     .ambient-orb.pro {
       width: 350px;
       height: 350px;
@@ -407,7 +392,7 @@
       top: -120px;
       left: -100px;
     }
-    
+
     .ambient-orb.her {
       width: 280px;
       height: 280px;
@@ -416,138 +401,129 @@
       right: -60px;
       animation-delay: -12s;
     }
-    
+
     @keyframes float {
       0%, 100% { transform: translate(0, 0) scale(1); }
       33% { transform: translate(25px, -25px) scale(1.03); }
       66% { transform: translate(-15px, 15px) scale(0.97); }
     }
-    
-    /* ═══════════════════════════════════════════════════════════
-       UTILITY
-       ═══════════════════════════════════════════════════════════ */
+
     .spin {
       animation: spin 1s linear infinite;
     }
-    
+
     @keyframes spin {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
-    
-    /* ═══════════════════════════════════════════════════════════
-       RESPONSIVE - TABLET
-       ═══════════════════════════════════════════════════════════ */
+
     @media (max-width: 768px) {
       .dashboard {
         padding: 2rem 1.25rem;
         padding-bottom: 5.5rem;
       }
-      
+
       .dashboard-header {
         margin-bottom: 2rem;
       }
-      
+
       .dashboard-title {
         font-size: 1.5rem;
       }
-      
+
       .mode-cards {
         gap: 1rem;
         max-width: 520px;
       }
-      
+
       .mode-card {
         padding: 1.75rem 1.5rem;
       }
-      
+
       .mode-icon {
         font-size: 2rem;
         margin-bottom: 1rem;
       }
-      
+
       .mode-title {
         font-size: 1.0625rem;
       }
-      
+
       .mode-description {
         font-size: 0.8125rem;
       }
     }
-    
-    /* ═══════════════════════════════════════════════════════════
-       RESPONSIVE - MOBILE
-       ═══════════════════════════════════════════════════════════ */
+
     @media (max-width: 540px) {
       .dashboard {
         justify-content: flex-start;
         padding-top: 4rem;
         padding-bottom: 6rem;
       }
-      
+
       .dashboard-header {
         margin-bottom: 2rem;
       }
-      
+
       .dashboard-label {
         font-size: 0.625rem;
       }
-      
+
       .dashboard-title {
         font-size: 1.375rem;
       }
-      
+
       .mode-cards {
         grid-template-columns: 1fr;
         gap: 0.875rem;
         max-width: 100%;
       }
-      
+
       .mode-card {
         padding: 1.5rem 1.25rem;
         border-radius: var(--radius-xl);
       }
-      
+
       .mode-card:hover {
         transform: none;
         box-shadow: none;
       }
-      
+
       .mode-card:active {
         transform: scale(0.985);
         background: var(--bg-secondary);
       }
-      
+
       .mode-icon {
         font-size: 1.75rem;
         margin-bottom: 0.875rem;
       }
-      
+
       .mode-title {
         font-size: 1rem;
         margin-bottom: 0.5rem;
       }
-      
+
       .mode-description {
         font-size: 0.75rem;
         line-height: 1.5;
       }
-      
+
       .dashboard-footer {
         padding: 1rem;
       }
-      
+
       .footer-btn {
         padding: 0.5rem 0.875rem;
         font-size: 0.6875rem;
         border-radius: 0.625rem;
       }
-      
+
       .footer-btn svg {
         width: 12px;
         height: 12px;
       }
-      
+
       .ambient-orb.pro {
         width: 250px;
         height: 250px;
@@ -555,7 +531,7 @@
         left: -80px;
         filter: blur(100px);
       }
-      
+
       .ambient-orb.her {
         width: 200px;
         height: 200px;
@@ -564,45 +540,42 @@
         filter: blur(100px);
       }
     }
-    
-    /* ═══════════════════════════════════════════════════════════
-       RESPONSIVE - SMALL MOBILE
-       ═══════════════════════════════════════════════════════════ */
+
     @media (max-width: 360px) {
       .dashboard {
         padding: 3rem 1rem 5.5rem;
       }
-      
+
       .lock-content {
         padding: 1.5rem 1rem;
       }
-      
+
       .lock-title {
         font-size: 1.25rem;
       }
-      
+
       .lock-input {
         padding: 0.75rem 0.875rem;
         font-size: 0.9375rem;
       }
-      
+
       .lock-btn {
         width: 46px;
         height: 46px;
       }
-      
+
       .mode-card {
         padding: 1.25rem 1rem;
       }
-      
+
       .mode-icon {
         font-size: 1.5rem;
       }
-      
+
       .mode-title {
         font-size: 0.9375rem;
       }
-      
+
       .mode-description {
         font-size: 0.6875rem;
       }
@@ -610,13 +583,12 @@
   </style>
 </head>
 <body>
-  <!-- Ambient Background -->
+
   <div class="ambient">
     <div class="ambient-orb pro"></div>
     <div class="ambient-orb her"></div>
   </div>
 
-  <!-- Lock Screen -->
   <div class="lock-screen" id="lockScreen">
     <div class="lock-content">
       <div class="lock-icon">
@@ -628,7 +600,7 @@
       </div>
       <h1 class="lock-title">Private Space</h1>
       <p class="lock-subtitle">Enter password to unlock</p>
-      
+
       <form class="lock-form" id="lockForm" onsubmit="return false;">
         <div class="lock-input-wrapper">
           <input type="password" class="lock-input" id="passwordInput" placeholder="Password" autocomplete="off" autofocus>
@@ -639,36 +611,35 @@
           </svg>
         </button>
       </form>
-      
+
       <div class="lock-error" id="lockError"></div>
-      
+
       <div class="lock-hint">
         All data encrypted locally
       </div>
     </div>
   </div>
 
-  <!-- Dashboard -->
   <div class="dashboard" id="dashboard">
     <header class="dashboard-header">
       <div class="dashboard-label">Private Space</div>
       <h1 class="dashboard-title">Choose Your World</h1>
     </header>
-    
+
     <div class="mode-cards">
       <a href="professional.html" class="mode-card professional" id="cardProfessional">
         <span class="mode-icon">🧠</span>
         <h2 class="mode-title">Professional Space</h2>
         <p class="mode-description">Website control, projects, navigation, pages, and site settings.</p>
       </a>
-      
+
       <a href="personal.html" class="mode-card personal" id="cardPersonal">
         <span class="mode-icon">💖</span>
         <h2 class="mode-title">Personal Space</h2>
         <p class="mode-description">Her AI, photos, videos, memories, daily rituals, and mood tracking.</p>
       </a>
     </div>
-    
+
     <footer class="dashboard-footer">
       <a href="/" class="footer-btn" id="btnHome">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -677,7 +648,7 @@
         </svg>
         <span>Return to Home</span>
       </a>
-      
+
       <button class="footer-btn" id="btnLock">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
@@ -689,56 +660,43 @@
   </div>
 
   <script>
-    /**
-     * Private Space Dashboard
-     * 
-     * AUTHENTICATION POLICY:
-     * - Auth state exists ONLY in memory (this.unlocked variable)
-     * - On page refresh, state is lost → lock screen shown
-     * - sessionStorage is used ONLY for cross-page navigation within single session
-     * - sessionStorage is CLEARED on this page load before auth check
-     */
+
     const Dashboard = {
-      // In-memory auth state (lost on refresh)
+
       unlocked: false,
-      
-      // Storage keys
+
       SESSION_KEY: 'ps_session_active',
       HASH_STORAGE_KEY: 'ps_auth_hash',
-      
-      // Default password hash (SHA-256)
+
       DEFAULT_HASH: '2e2c2c5e6de58479ac00c9ce456c25745fb949153b87c55718a73294497f1489',
-      
+
       init() {
-        // CRITICAL: Clear session on page load (forces re-auth on refresh)
+
         sessionStorage.removeItem(this.SESSION_KEY);
-        
-        // Always start locked
+
         this.unlocked = false;
         this.showLockScreen();
         this.bindEvents();
       },
-      
+
       bindEvents() {
-        // Form submission
+
         document.getElementById('lockForm').addEventListener('submit', (e) => {
           e.preventDefault();
           this.unlock();
         });
-        
-        // Lock button
+
         document.getElementById('btnLock').addEventListener('click', () => {
           this.lock();
         });
-        
-        // Prevent navigation if not unlocked
+
         document.getElementById('cardProfessional').addEventListener('click', (e) => {
           if (!this.unlocked) {
             e.preventDefault();
             this.showLockScreen();
           }
         });
-        
+
         document.getElementById('cardPersonal').addEventListener('click', (e) => {
           if (!this.unlocked) {
             e.preventDefault();
@@ -746,24 +704,23 @@
           }
         });
       },
-      
+
       showLockScreen() {
         document.getElementById('lockScreen').classList.remove('hidden');
         document.getElementById('dashboard').classList.remove('visible');
-        
-        // Clear and focus input
+
         const input = document.getElementById('passwordInput');
         if (input) {
           input.value = '';
           setTimeout(() => input.focus(), 100);
         }
       },
-      
+
       showDashboard() {
         document.getElementById('lockScreen').classList.add('hidden');
         document.getElementById('dashboard').classList.add('visible');
       },
-      
+
       async computeHash(input) {
         const encoder = new TextEncoder();
         const data = encoder.encode(input);
@@ -771,38 +728,34 @@
         const hashArray = Array.from(new Uint8Array(hashBuffer));
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
       },
-      
+
       getStoredHash() {
         return localStorage.getItem(this.HASH_STORAGE_KEY) || this.DEFAULT_HASH;
       },
-      
+
       async unlock() {
         const input = document.getElementById('passwordInput');
         const btn = document.getElementById('unlockBtn');
         const errorEl = document.getElementById('lockError');
         const password = input?.value?.trim();
-        
-        // Clear previous error
+
         errorEl.textContent = '';
-        
-        // Validate input
+
         if (!password) {
           input.classList.add('shake');
           setTimeout(() => input.classList.remove('shake'), 500);
           errorEl.textContent = 'Please enter password';
           return;
         }
-        
-        // Show loading state
+
         btn.disabled = true;
         btn.innerHTML = '<svg class="spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="12"/></svg>';
-        
-        // Verify password
+
         const inputHash = await this.computeHash(password);
         const storedHash = this.getStoredHash();
-        
+
         if (inputHash !== storedHash) {
-          // Failed
+
           input.classList.add('shake');
           setTimeout(() => input.classList.remove('shake'), 500);
           errorEl.textContent = 'Incorrect password';
@@ -812,33 +765,27 @@
           btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>';
           return;
         }
-        
-        // Success - set in-memory state
+
         this.unlocked = true;
-        
-        // Set session flag for sub-page navigation only
+
         sessionStorage.setItem(this.SESSION_KEY, 'true');
-        
-        // Show dashboard
+
         this.showDashboard();
-        
-        // Reset button
+
         input.value = '';
         btn.disabled = false;
         btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>';
       },
-      
+
       lock() {
-        // Clear all auth state
+
         this.unlocked = false;
         sessionStorage.removeItem(this.SESSION_KEY);
-        
-        // Show lock screen
+
         this.showLockScreen();
       }
     };
-    
-    // Initialize on DOM ready
+
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => Dashboard.init());
     } else {

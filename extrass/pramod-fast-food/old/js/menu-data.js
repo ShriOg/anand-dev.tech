@@ -1,18 +1,7 @@
-/**
- * menu-data.js — Single source of truth for menu items.
- *
- * Tries to fetch from backend via Api.fetchMenu() first.
- * If network fails, falls back to the hard-coded static menu.
- * Only items with active !== false are exposed to downstream consumers.
- *
- * Each category:  { title, icon, items[] }
- * Each item:      { id, name, desc, prices[{label,value}], special?, active? }
- */
 'use strict';
 
 const MenuData = (() => {
 
-    /** Whether data was successfully loaded from the live API */
     let _isLive = false;
 
     const _staticCategories = {
@@ -117,10 +106,8 @@ const MenuData = (() => {
         },
     };
 
-    /** Active categories — what downstream modules actually see */
     let categories = {};
 
-    /** Filter out inactive items from a categories object */
     const _filterActive = (cats) => {
         const result = {};
         for (const [key, cat] of Object.entries(cats)) {
@@ -132,53 +119,33 @@ const MenuData = (() => {
         return result;
     };
 
-    /** Populate categories from static data (immediate, synchronous) */
     const _initStatic = () => {
         categories = _filterActive(_staticCategories);
     };
 
-    // Start with static data so everything works synchronously
     _initStatic();
 
-    /* ---------- Public helpers ---------- */
-
-    /** All categories as an ordered array of [key, data] */
     const entries = () => Object.entries(categories);
 
-    /** Flat list of every item across all categories */
     const allItems = () => Object.values(categories).flatMap(c => c.items);
 
-    /** Lookup a single item by id */
     const findById = (id) => allItems().find(i => i.id === id);
 
-    /** Category keys */
     const keys = () => Object.keys(categories);
 
-    /** Single category by key */
     const get = (key) => categories[key];
 
-    /**
-     * Replace categories wholesale (for live API data).
-     * Filters out inactive items automatically.
-     */
     const load = (data) => {
         Object.keys(categories).forEach(k => delete categories[k]);
         Object.assign(categories, _filterActive(data));
     };
 
-    /**
-     * fetchFromApi — DISABLED (frontend-only mode).
-     * Always uses the static menu. No network calls.
-     * Signature kept so callers don't break.
-     * @returns {Promise<{live:boolean}>}
-     */
     const fetchFromApi = async () => {
         _initStatic();
         _isLive = false;
         return { live: false };
     };
 
-    /** Did the last load come from the live API? */
     const isLive = () => _isLive;
 
     return Object.freeze({ entries, allItems, findById, keys, get, load, fetchFromApi, isLive });

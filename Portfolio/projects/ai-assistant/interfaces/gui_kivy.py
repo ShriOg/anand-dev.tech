@@ -22,26 +22,23 @@ import os
 from brain.router import CommandRouter
 from actions.schema import ActionStatus
 
-
 class MessageBubble(BoxLayout):
     text = StringProperty("")
     is_user = BooleanProperty(False)
     timestamp = StringProperty("")
 
-
 class ConversationView(ScrollView):
     pass
-
 
 class StatusIndicator(Label):
     status = StringProperty("idle")
     dot_opacity = NumericProperty(1)
     pulse_anim = None
-    
+
     def on_status(self, instance, value):
         if self.pulse_anim:
             self.pulse_anim.cancel(self)
-        
+
         if value in ('listening', 'processing'):
             self.pulse_anim = Animation(dot_opacity=0.4, duration=0.6) + Animation(dot_opacity=1, duration=0.6)
             self.pulse_anim.repeat = True
@@ -49,16 +46,15 @@ class StatusIndicator(Label):
         else:
             self.dot_opacity = 1
 
-
 class MicButton(Button):
     mic_state = StringProperty("idle")
     glow_intensity = NumericProperty(0)
     pulse_anim = None
-    
+
     def on_mic_state(self, instance, value):
         if self.pulse_anim:
             self.pulse_anim.cancel(self)
-        
+
         if value == 'listening':
             self.pulse_anim = Animation(glow_intensity=1, duration=0.5) + Animation(glow_intensity=0.4, duration=0.5)
             self.pulse_anim.repeat = True
@@ -68,7 +64,6 @@ class MicButton(Button):
             self.pulse_anim.start(self)
         else:
             self.glow_intensity = 0
-
 
 class AssistantRoot(BoxLayout):
     status_text = StringProperty("● Idle")
@@ -81,7 +76,7 @@ class AssistantRoot(BoxLayout):
         self.router = router
         self.voice = voice_interface
         self.voice_available = voice_interface is not None and voice_interface.is_available()
-        
+
         if self.voice:
             self.voice.set_state_callback(self._on_voice_state_change)
             self.voice.set_result_callback(self._on_voice_result)
@@ -92,11 +87,11 @@ class AssistantRoot(BoxLayout):
         text = input_field.text.strip()
         if not text:
             return
-        
+
         input_field.text = ""
         self._add_message(text, is_user=True)
         self._set_status("processing")
-        
+
         threading.Thread(target=self._process_command, args=(text,), daemon=True).start()
 
     def _process_command(self, text: str):
@@ -106,20 +101,20 @@ class AssistantRoot(BoxLayout):
     def _handle_result(self, result):
         self._add_message(result.message, is_user=False, status=result.status)
         self._set_status("idle")
-        
+
         if result.data and result.data.get("exit"):
             Clock.schedule_once(lambda dt: App.get_running_app().stop(), 0.5)
 
     def _add_message(self, text: str, is_user: bool = False, status: ActionStatus = None):
         container = self.ids.message_container
-        
+
         bubble = MessageBubble()
         bubble.text = text
         bubble.is_user = is_user
         bubble.timestamp = datetime.now().strftime("%H:%M")
-        
+
         container.add_widget(bubble)
-        
+
         Clock.schedule_once(lambda dt: self._scroll_to_bottom(), 0.1)
 
     def _scroll_to_bottom(self):
@@ -143,7 +138,7 @@ class AssistantRoot(BoxLayout):
         if not self.voice or not self.voice_available:
             self._add_message("Voice input is not available. Install voice dependencies.", is_user=False)
             return
-        
+
         if self.mic_state == "listening":
             self.voice._stt.stop_listening()
             self._set_status("idle")
@@ -175,7 +170,6 @@ class AssistantRoot(BoxLayout):
         for msg in welcome_messages:
             self._add_message(msg, is_user=False)
 
-
 class AssistantApp(App):
     def __init__(self, router: CommandRouter, enable_voice: bool = False, **kwargs):
         super().__init__(**kwargs)
@@ -183,7 +177,7 @@ class AssistantApp(App):
         self.enable_voice = enable_voice
         self.voice_interface = None
         self.title = "AI Assistant"
-        
+
         if enable_voice:
             try:
                 from interfaces.voice import VoiceInterface
@@ -196,29 +190,27 @@ class AssistantApp(App):
         Window.size = (700, 600)
         Window.minimum_width = 450
         Window.minimum_height = 400
-        
-        # Set app icon
+
         icon_path = os.path.join(os.path.dirname(__file__), '..', 'assets', 'icons', 'app.ico')
         if os.path.exists(icon_path):
             self.icon = icon_path
-        
+
         kv_path = os.path.join(os.path.dirname(__file__), '..', 'ui', 'assistant.kv')
         if os.path.exists(kv_path):
             Builder.load_file(kv_path)
-        
+
         self.root_widget = AssistantRoot(
             router=self.router,
             voice_interface=self.voice_interface
         )
-        
+
         Clock.schedule_once(lambda dt: self.root_widget.show_welcome(), 0.3)
-        
+
         return self.root_widget
 
     def on_stop(self):
         if self.voice_interface:
             self.voice_interface.stop()
-
 
 class GUIKivyInterface:
     def __init__(self, router: CommandRouter, enable_voice: bool = False):
@@ -237,12 +229,10 @@ class GUIKivyInterface:
         if self._app:
             self._app.stop()
 
-
 def run_kivy_gui(enable_voice: bool = False):
     router = CommandRouter()
     gui = GUIKivyInterface(router, enable_voice=enable_voice)
     gui.start()
-
 
 if __name__ == "__main__":
     run_kivy_gui(enable_voice=True)

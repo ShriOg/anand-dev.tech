@@ -5,9 +5,8 @@ from datetime import datetime
 from actions.schema import Action, ActionResult
 from adapters import BaseAdapter
 
-
 class MacOSAdapter(BaseAdapter):
-    
+
     APP_ALIASES = {
         "browser": "Safari",
         "safari": "Safari",
@@ -128,7 +127,7 @@ class MacOSAdapter(BaseAdapter):
                 screenshots_dir.mkdir(parents=True, exist_ok=True)
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 path = str(screenshots_dir / f"screenshot_{timestamp}.png")
-            
+
             subprocess.run(
                 ["screencapture", "-x", path],
                 check=True,
@@ -177,7 +176,7 @@ class MacOSAdapter(BaseAdapter):
                 text=True
             )
             output = result.stdout
-            
+
             import re
             match = re.search(r"(\d+)%", output)
             if match:

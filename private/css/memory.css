@@ -1,15 +1,9 @@
-/* ═══════════════════════════════════════════════════════════
-   PRIVATE SPACE - MEMORY
-   ═══════════════════════════════════════════════════════════ */
-
-/* Memory Layout */
 .ps-memory {
   display: flex;
   flex-direction: column;
   gap: var(--ps-space-6);
 }
 
-/* Memory Section */
 .ps-memory-section {
   background: var(--ps-bg-secondary);
   border: 1px solid var(--ps-border-subtle);
@@ -62,7 +56,6 @@
   padding: var(--ps-space-4);
 }
 
-/* Memory Item */
 .ps-memory-item {
   display: flex;
   align-items: flex-start;
@@ -142,7 +135,6 @@
   color: var(--ps-error);
 }
 
-/* Short Term Memory - Session Context */
 .ps-memory-short-term .ps-memory-section-icon {
   color: var(--ps-info);
 }
@@ -152,7 +144,6 @@
   color: var(--ps-info);
 }
 
-/* Working Memory */
 .ps-memory-working .ps-memory-section-icon {
   color: var(--ps-warning);
 }
@@ -162,7 +153,6 @@
   color: var(--ps-warning);
 }
 
-/* Long Term Memory */
 .ps-memory-long-term .ps-memory-section-icon {
   color: var(--ps-success);
 }
@@ -172,7 +162,6 @@
   color: var(--ps-success);
 }
 
-/* Add Memory Form */
 .ps-memory-add-form {
   display: flex;
   flex-direction: column;
@@ -202,7 +191,6 @@
   gap: var(--ps-space-2);
 }
 
-/* Memory Consent Dialog */
 .ps-memory-consent {
   background: var(--ps-bg-secondary);
   border: 1px solid var(--ps-accent);
@@ -263,7 +251,6 @@
   padding-left: 36px;
 }
 
-/* Memory Influence Indicator */
 .ps-memory-influence {
   display: flex;
   align-items: center;
@@ -282,7 +269,6 @@
   border-radius: 50%;
 }
 
-/* Empty State */
 .ps-memory-empty {
   text-align: center;
   padding: var(--ps-space-8);

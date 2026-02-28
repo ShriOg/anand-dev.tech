@@ -1,62 +1,50 @@
-/**
- * ═══════════════════════════════════════════════════════════
- * PRIVATE SPACE - PROJECTS MANAGER
- * Full CRUD for Website Projects
- * ═══════════════════════════════════════════════════════════
- */
-
 const ProjectsManager = {
   currentProject: null,
   projects: [],
-  
+
   async init() {
     await Database.init();
     await this.loadProjects();
     this.bindEvents();
     this.render();
   },
-  
+
   async loadProjects() {
     this.projects = await Database.getAll(DB_STORES.PROJECTS);
     this.projects.sort((a, b) => (a.order || 0) - (b.order || 0));
   },
-  
+
   bindEvents() {
-    // Add project button
+
     document.getElementById('addProjectBtn')?.addEventListener('click', () => {
       this.openEditor();
     });
-    
-    // Save project
+
     document.getElementById('saveProjectBtn')?.addEventListener('click', () => {
       this.saveProject();
     });
-    
-    // Cancel edit
+
     document.getElementById('cancelProjectBtn')?.addEventListener('click', () => {
       this.closeEditor();
     });
-    
-    // AI assist button
+
     document.getElementById('aiAssistProjectBtn')?.addEventListener('click', () => {
       this.openAIAssist();
     });
-    
-    // Search
+
     document.getElementById('projectsSearch')?.addEventListener('input', (e) => {
       this.filterProjects(e.target.value);
     });
-    
-    // Status filter
+
     document.getElementById('projectsStatusFilter')?.addEventListener('change', (e) => {
       this.filterByStatus(e.target.value);
     });
   },
-  
+
   render() {
     const container = document.getElementById('projectsList');
     if (!container) return;
-    
+
     if (this.projects.length === 0) {
       container.innerHTML = `
         <div class="ps-empty">
@@ -75,23 +63,23 @@ const ProjectsManager = {
       `;
       return;
     }
-    
+
     container.innerHTML = this.projects.map((project, index) => this.renderProjectCard(project, index)).join('');
     this.initDragDrop();
   },
-  
+
   renderProjectCard(project, index) {
     const statusColors = {
       published: 'var(--ps-success)',
       draft: 'var(--ps-warning)',
       hidden: 'var(--ps-text-muted)'
     };
-    
+
     const isFeatured = project.featured || false;
     const isHidden = project.status === 'hidden';
     const isFirst = index === 0;
     const isLast = index === this.projects.length - 1;
-    
+
     return `
       <div class="ps-project-card ${isFeatured ? 'ps-project-featured' : ''} ${isHidden ? 'ps-project-hidden' : ''}" data-id="${project.id}" draggable="true">
         <div class="ps-project-card-drag">
@@ -174,12 +162,12 @@ const ProjectsManager = {
       </div>
     `;
   },
-  
+
   openEditor(projectId = null) {
     const modal = document.getElementById('projectEditorModal');
     const form = document.getElementById('projectEditorForm');
     const title = document.getElementById('projectEditorTitle');
-    
+
     if (projectId) {
       this.currentProject = this.projects.find(p => p.id === projectId);
       title.textContent = 'Edit Project';
@@ -191,16 +179,16 @@ const ProjectsManager = {
       document.getElementById('projectImages').innerHTML = '';
       document.getElementById('projectLinks').innerHTML = '';
     }
-    
+
     modal.classList.add('active');
   },
-  
+
   closeEditor() {
     const modal = document.getElementById('projectEditorModal');
     modal.classList.remove('active');
     this.currentProject = null;
   },
-  
+
   populateForm(project) {
     document.getElementById('projectTitle').value = project.title || '';
     document.getElementById('projectSlug').value = project.slug || '';
@@ -209,8 +197,7 @@ const ProjectsManager = {
     document.getElementById('projectCategory').value = project.category || '';
     document.getElementById('projectThumbnail').value = project.thumbnail || '';
     document.getElementById('projectTech').value = (project.technologies || []).join(', ');
-    
-    // Render images
+
     const imagesContainer = document.getElementById('projectImages');
     imagesContainer.innerHTML = (project.images || []).map((img, i) => `
       <div class="ps-image-item" data-index="${i}">
@@ -218,8 +205,7 @@ const ProjectsManager = {
         <button type="button" class="ps-image-remove" onclick="ProjectsManager.removeImage(${i})">×</button>
       </div>
     `).join('');
-    
-    // Render links
+
     const linksContainer = document.getElementById('projectLinks');
     linksContainer.innerHTML = (project.links || []).map((link, i) => `
       <div class="ps-link-item" data-index="${i}">
@@ -233,11 +219,11 @@ const ProjectsManager = {
       </div>
     `).join('');
   },
-  
+
   async saveProject() {
     const form = document.getElementById('projectEditorForm');
     const formData = new FormData(form);
-    
+
     const project = {
       id: this.currentProject?.id || crypto.randomUUID(),
       title: formData.get('title') || 'Untitled Project',
@@ -252,23 +238,22 @@ const ProjectsManager = {
       order: this.currentProject?.order ?? this.projects.length,
       createdAt: this.currentProject?.createdAt || Date.now()
     };
-    
+
     await Database.put(DB_STORES.PROJECTS, project);
     await this.loadProjects();
     this.render();
     this.closeEditor();
-    
-    // Sync to public site
+
     this.syncToPublicSite();
-    
+
     Toast.show('Project saved successfully', 'success');
   },
-  
+
   collectImages() {
     const container = document.getElementById('projectImages');
     return Array.from(container.querySelectorAll('.ps-image-item img')).map(img => img.src);
   },
-  
+
   collectLinks() {
     const container = document.getElementById('projectLinks');
     return Array.from(container.querySelectorAll('.ps-link-item')).map(item => {
@@ -276,7 +261,7 @@ const ProjectsManager = {
       return { label: inputs[0].value, url: inputs[1].value };
     }).filter(link => link.label && link.url);
   },
-  
+
   addImage() {
     const url = prompt('Enter image URL:');
     if (url) {
@@ -290,13 +275,13 @@ const ProjectsManager = {
       `);
     }
   },
-  
+
   removeImage(index) {
     const container = document.getElementById('projectImages');
     const item = container.querySelector(`[data-index="${index}"]`);
     item?.remove();
   },
-  
+
   addLink() {
     const container = document.getElementById('projectLinks');
     const index = container.children.length;
@@ -312,38 +297,38 @@ const ProjectsManager = {
       </div>
     `);
   },
-  
+
   removeLink(index) {
     const container = document.getElementById('projectLinks');
     const item = container.querySelector(`[data-index="${index}"]`);
     item?.remove();
   },
-  
+
   async deleteProject(id) {
     if (!confirm('Are you sure you want to delete this project?')) return;
-    
+
     await Database.delete(DB_STORES.PROJECTS, id);
     await this.loadProjects();
     this.render();
     this.syncToPublicSite();
     Toast.show('Project deleted', 'success');
   },
-  
+
   async toggleVisibility(id) {
     const project = this.projects.find(p => p.id === id);
     if (!project) return;
-    
+
     project.status = project.status === 'hidden' ? 'published' : 'hidden';
     await Database.put(DB_STORES.PROJECTS, project);
     await this.loadProjects();
     this.render();
     this.syncToPublicSite();
   },
-  
+
   async toggleFeatured(id) {
     const project = this.projects.find(p => p.id === id);
     if (!project) return;
-    
+
     project.featured = !project.featured;
     project.updatedAt = Date.now();
     await Database.put(DB_STORES.PROJECTS, project);
@@ -352,11 +337,11 @@ const ProjectsManager = {
     this.syncToPublicSite();
     Toast.show(project.featured ? 'Project featured' : 'Project unfeatured', 'success');
   },
-  
+
   async duplicateProject(id) {
     const project = this.projects.find(p => p.id === id);
     if (!project) return;
-    
+
     const duplicate = {
       ...project,
       id: `project_${Date.now()}`,
@@ -367,49 +352,48 @@ const ProjectsManager = {
       createdAt: Date.now(),
       updatedAt: Date.now()
     };
-    
+
     await Database.put(DB_STORES.PROJECTS, duplicate);
     await this.loadProjects();
     this.render();
     Toast.show('Project duplicated', 'success');
   },
-  
+
   async moveProject(id, direction) {
     const index = this.projects.findIndex(p => p.id === id);
     if (index === -1) return;
-    
+
     const newIndex = index + direction;
     if (newIndex < 0 || newIndex >= this.projects.length) return;
-    
-    // Swap orders
+
     const currentProject = this.projects[index];
     const targetProject = this.projects[newIndex];
-    
+
     const tempOrder = currentProject.order;
     currentProject.order = targetProject.order;
     targetProject.order = tempOrder;
-    
+
     await Database.put(DB_STORES.PROJECTS, currentProject);
     await Database.put(DB_STORES.PROJECTS, targetProject);
     await this.loadProjects();
     this.render();
     this.syncToPublicSite();
   },
-  
+
   filterProjects(query) {
     const cards = document.querySelectorAll('.ps-project-card');
     const q = query.toLowerCase();
-    
+
     cards.forEach(card => {
       const title = card.querySelector('.ps-project-card-title')?.textContent.toLowerCase() || '';
       const desc = card.querySelector('.ps-project-card-desc')?.textContent.toLowerCase() || '';
       card.style.display = (title.includes(q) || desc.includes(q)) ? '' : 'none';
     });
   },
-  
+
   filterByStatus(status) {
     const cards = document.querySelectorAll('.ps-project-card');
-    
+
     cards.forEach(card => {
       if (status === 'all') {
         card.style.display = '';
@@ -419,23 +403,23 @@ const ProjectsManager = {
       card.style.display = (cardStatus === status.toLowerCase()) ? '' : 'none';
     });
   },
-  
+
   initDragDrop() {
     const container = document.getElementById('projectsList');
     let draggedItem = null;
-    
+
     container.querySelectorAll('.ps-project-card').forEach(card => {
       card.addEventListener('dragstart', (e) => {
         draggedItem = card;
         card.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
       });
-      
+
       card.addEventListener('dragend', () => {
         card.classList.remove('dragging');
         this.updateOrder();
       });
-      
+
       card.addEventListener('dragover', (e) => {
         e.preventDefault();
         if (draggedItem !== card) {
@@ -450,11 +434,11 @@ const ProjectsManager = {
       });
     });
   },
-  
+
   async updateOrder() {
     const cards = document.querySelectorAll('.ps-project-card');
     const updates = [];
-    
+
     cards.forEach((card, index) => {
       const id = card.dataset.id;
       const project = this.projects.find(p => p.id === id);
@@ -463,19 +447,19 @@ const ProjectsManager = {
         updates.push(Database.put(DB_STORES.PROJECTS, project));
       }
     });
-    
+
     await Promise.all(updates);
     await this.loadProjects();
     this.syncToPublicSite();
   },
-  
+
   generateSlug(title) {
     return (title || 'project')
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
   },
-  
+
   formatDate(timestamp) {
     if (!timestamp) return '';
     return new Date(timestamp).toLocaleDateString('en-US', {
@@ -484,29 +468,27 @@ const ProjectsManager = {
       year: 'numeric'
     });
   },
-  
+
   syncToPublicSite() {
-    // Store projects for public site consumption
+
     const publicProjects = this.projects
       .filter(p => p.status === 'published')
       .map(({ id, title, slug, description, thumbnail, technologies, links, category }) => ({
         id, title, slug, description, thumbnail, technologies, links, category
       }));
-    
+
     localStorage.setItem('ps_public_projects', JSON.stringify(publicProjects));
-    
-    // Dispatch event for live update
+
     window.dispatchEvent(new CustomEvent('projectsUpdated', { detail: publicProjects }));
   },
-  
-  // AI Assist
+
   openAIAssist() {
     const description = document.getElementById('projectDescription').value;
     if (!description) {
       Toast.show('Please add a description first', 'warning');
       return;
     }
-    
+
     AIAssist.open({
       content: description,
       type: 'project_description',
@@ -517,5 +499,4 @@ const ProjectsManager = {
   }
 };
 
-// Export
 window.ProjectsManager = ProjectsManager;

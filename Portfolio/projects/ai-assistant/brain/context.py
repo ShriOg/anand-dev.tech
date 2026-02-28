@@ -3,7 +3,6 @@ from dataclasses import dataclass, field
 from collections import deque
 from datetime import datetime
 
-
 @dataclass
 class ConversationTurn:
     user_input: str
@@ -11,7 +10,6 @@ class ConversationTurn:
     timestamp: datetime = field(default_factory=datetime.now)
     action_type: Optional[str] = None
     success: bool = True
-
 
 class ContextManager:
     def __init__(self, max_history: int = 10):
@@ -81,7 +79,7 @@ class ContextManager:
     def get_context_summary(self) -> str:
         if not self.history:
             return "No previous context."
-        
+
         last_turns = list(self.history)[-3:]
         summary_parts = []
         for turn in last_turns:

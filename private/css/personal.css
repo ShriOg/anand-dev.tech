@@ -1,8 +1,3 @@
-/* ═══════════════════════════════════════════════════════════
-   PERSONAL SPACE - HER MODE
-   Emotional, Warm, Pink-Tinted Theme
-   ═══════════════════════════════════════════════════════════ */
-
 *, *::before, *::after {
   margin: 0;
   padding: 0;
@@ -10,36 +5,34 @@
 }
 
 :root {
-  /* Colors - Warm Pink Theme */
+
   --bg-primary: #000000;
   --bg-secondary: #080808;
   --bg-tertiary: #0c0c0c;
   --bg-elevated: #111111;
   --bg-hover: rgba(232, 164, 184, 0.04);
   --bg-active: rgba(232, 164, 184, 0.08);
-  
+
   --text-primary: rgba(255, 255, 255, 0.92);
   --text-secondary: rgba(255, 255, 255, 0.58);
   --text-tertiary: rgba(255, 255, 255, 0.36);
   --text-muted: rgba(255, 255, 255, 0.22);
-  
-  /* Her Accent - Soft Pink */
+
   --her-accent: #e8a4b8;
   --her-accent-dim: #d98fa5;
   --her-accent-hover: #f0bcc8;
   --her-accent-subtle: rgba(232, 164, 184, 0.12);
   --her-accent-muted: rgba(232, 164, 184, 0.06);
   --her-accent-glow: rgba(232, 164, 184, 0.15);
-  
+
   --success: #4ade80;
   --warning: #facc15;
   --error: #f87171;
-  
+
   --border-subtle: rgba(255, 255, 255, 0.04);
   --border-default: rgba(232, 164, 184, 0.1);
   --border-strong: rgba(232, 164, 184, 0.2);
-  
-  /* Spacing */
+
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -49,8 +42,7 @@
   --space-8: 2rem;
   --space-10: 2.5rem;
   --space-12: 3rem;
-  
-  /* Typography */
+
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --text-xs: 0.6875rem;
   --text-sm: 0.8125rem;
@@ -58,26 +50,22 @@
   --text-lg: 1.0625rem;
   --text-xl: 1.25rem;
   --text-2xl: 1.5rem;
-  
-  /* Layout */
+
   --sidebar-width: 260px;
   --chat-sidebar-width: 240px;
   --mobile-nav-height: 64px;
-  
-  /* Radius */
+
   --radius-sm: 0.375rem;
   --radius-md: 0.625rem;
   --radius-lg: 0.875rem;
   --radius-xl: 1.125rem;
   --radius-2xl: 1.5rem;
-  
-  /* Shadows */
+
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
   --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.35);
   --shadow-glow: 0 0 30px rgba(232, 164, 184, 0.15);
-  
-  /* Transitions */
+
   --transition-fast: 0.15s ease;
   --transition-normal: 0.25s ease;
   --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -93,9 +81,6 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   AUTH CHECK
-   ═══════════════════════════════════════════════════════════ */
 .auth-check {
   position: fixed;
   inset: 0;
@@ -131,9 +116,6 @@ html, body {
   to { transform: rotate(360deg); }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   AMBIENT BACKGROUND
-   ═══════════════════════════════════════════════════════════ */
 .her-ambient {
   position: fixed;
   inset: 0;
@@ -184,9 +166,6 @@ html, body {
   66% { transform: translate(-30px, 30px) scale(0.9); opacity: 0.06; }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   APP LAYOUT
-   ═══════════════════════════════════════════════════════════ */
 .her-app {
   display: flex;
   height: 100vh;
@@ -200,9 +179,6 @@ html, body {
   opacity: 1;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   SIDEBAR - SCROLLABLE
-   ═══════════════════════════════════════════════════════════ */
 .her-sidebar {
   width: var(--sidebar-width);
   height: 100vh;
@@ -273,7 +249,6 @@ html, body {
   height: 18px;
 }
 
-/* Navigation - SCROLLABLE */
 .her-nav {
   flex: 1;
   padding: var(--space-4) var(--space-3);
@@ -356,7 +331,6 @@ html, body {
   opacity: 1;
 }
 
-/* Sidebar Footer */
 .her-sidebar-footer {
   padding: var(--space-3);
   border-top: 1px solid var(--border-subtle);
@@ -375,9 +349,6 @@ html, body {
   color: var(--error);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   MAIN CONTENT
-   ═══════════════════════════════════════════════════════════ */
 .her-main {
   flex: 1;
   height: 100vh;
@@ -385,7 +356,6 @@ html, body {
   background: transparent;
 }
 
-/* Sections */
 .her-section {
   display: none;
   height: 100%;
@@ -430,15 +400,11 @@ html, body {
   overflow-y: auto;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   CHAT LAYOUT
-   ═══════════════════════════════════════════════════════════ */
 .her-chat-layout {
   display: flex;
   height: 100%;
 }
 
-/* Chat Sidebar */
 .her-chat-sidebar {
   width: var(--chat-sidebar-width);
   background: rgba(8, 8, 8, 0.6);
@@ -539,7 +505,6 @@ html, body {
   color: var(--text-muted);
 }
 
-/* Chat Main */
 .her-chat-main {
   flex: 1;
   display: flex;
@@ -592,7 +557,6 @@ html, body {
   50% { opacity: 0.5; }
 }
 
-/* AI Connection Banner */
 .her-ai-banner {
   display: none;
   position: absolute;
@@ -663,7 +627,6 @@ html, body {
   height: 18px;
 }
 
-/* Chat Messages */
 .her-chat-messages {
   flex: 1;
   overflow-y: auto;
@@ -702,10 +665,6 @@ html, body {
   font-style: italic;
 }
 
-/* Message Bubbles - Unified Styles */
-/* Legacy alias support removed - use .her-message-user / .her-message-assistant */
-
-/* Typing Indicator */
 .her-typing-indicator {
   display: flex;
   gap: 4px;
@@ -728,7 +687,6 @@ html, body {
   50% { opacity: 1; transform: scale(1); }
 }
 
-/* Chat Input */
 .her-chat-input-container {
   padding: var(--space-4) var(--space-5);
   border-top: 1px solid var(--border-subtle);
@@ -801,9 +759,6 @@ html, body {
   height: 18px;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   BUTTONS
-   ═══════════════════════════════════════════════════════════ */
 .her-btn {
   display: inline-flex;
   align-items: center;
@@ -839,9 +794,6 @@ html, body {
   background: rgba(232, 164, 184, 0.2);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   IMPORTED CHATS GRID
-   ═══════════════════════════════════════════════════════════ */
 .her-imported-chats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -906,9 +858,6 @@ html, body {
   color: var(--text-muted);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   EMPTY STATE
-   ═══════════════════════════════════════════════════════════ */
 .her-empty-state {
   text-align: center;
   padding: var(--space-12) var(--space-6);
@@ -934,9 +883,6 @@ html, body {
   color: var(--text-tertiary);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   TOAST NOTIFICATIONS
-   ═══════════════════════════════════════════════════════════ */
 .her-toast-container {
   position: fixed;
   bottom: var(--space-6);
@@ -982,9 +928,6 @@ html, body {
   to { opacity: 0; transform: translateX(20px); }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   CONFIRMATION DIALOG
-   ═══════════════════════════════════════════════════════════ */
 .her-confirm-overlay {
   position: fixed;
   inset: 0;
@@ -1064,9 +1007,6 @@ html, body {
   border-color: rgba(239, 68, 68, 0.5);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   MODAL
-   ═══════════════════════════════════════════════════════════ */
 .her-modal-overlay {
   position: fixed;
   inset: 0;
@@ -1149,11 +1089,6 @@ html, body {
   max-height: calc(90vh - 80px);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   MOBILE MENU & SIDEBAR
-   ═══════════════════════════════════════════════════════════ */
-
-/* Mobile Menu Button - Hidden on desktop */
 .her-mobile-menu-btn {
   display: none;
   width: 40px;
@@ -1180,7 +1115,6 @@ html, body {
   height: 20px;
 }
 
-/* Sidebar Close Button - Hidden on desktop */
 .her-sidebar-close {
   display: none;
   width: 32px;
@@ -1205,7 +1139,6 @@ html, body {
   height: 18px;
 }
 
-/* Sidebar Overlay for Mobile */
 .her-sidebar-overlay {
   position: fixed;
   inset: 0;
@@ -1223,9 +1156,6 @@ html, body {
   pointer-events: auto;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════════════════════════════════ */
 @media (max-width: 1024px) {
   .her-sidebar {
     position: fixed;
@@ -1237,26 +1167,23 @@ html, body {
     z-index: 1000;
     transition: transform var(--transition-smooth);
   }
-  
+
   .her-sidebar.open {
     transform: translateX(0);
   }
-  
-  /* Show mobile menu button */
+
   .her-mobile-menu-btn {
     display: flex;
   }
-  
-  /* Show sidebar close button */
+
   .her-sidebar-close {
     display: flex;
   }
-  
+
   .her-chat-sidebar {
     display: none;
   }
-  
-  /* Main content should NOT blur */
+
   .her-main {
     filter: none !important;
     backdrop-filter: none !important;
@@ -1269,30 +1196,30 @@ html, body {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .her-workspace {
     padding: 0 var(--space-4) var(--space-4);
   }
-  
+
   .her-chat-messages {
     padding: var(--space-4);
   }
-  
+
   .her-chat-input-container {
     padding: var(--space-3);
   }
-  
+
   .her-message {
     max-width: 90%;
   }
-  
+
   .her-message-text,
   .her-message-bubble {
     text-shadow: none !important;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  
+
   .her-toast-container {
     left: var(--space-4);
     right: var(--space-4);
@@ -1300,9 +1227,6 @@ html, body {
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   PHOTOS GRID
-   ═══════════════════════════════════════════════════════════ */
 .her-photos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -1372,9 +1296,6 @@ html, body {
   background: var(--error);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   VIDEOS GRID
-   ═══════════════════════════════════════════════════════════ */
 .her-videos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -1466,9 +1387,6 @@ html, body {
   opacity: 1;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   LIGHTBOX
-   ═══════════════════════════════════════════════════════════ */
 .her-lightbox,
 .her-video-player {
   position: fixed;
@@ -1543,9 +1461,6 @@ html, body {
   right: var(--space-6);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   DAILY ENTRY
-   ═══════════════════════════════════════════════════════════ */
 .her-daily-container {
   max-width: 700px;
   margin: 0 auto;
@@ -1649,9 +1564,6 @@ html, body {
   white-space: pre-wrap;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   MOOD
-   ═══════════════════════════════════════════════════════════ */
 .her-mood-container {
   max-width: 100%;
   margin: 0 auto;
@@ -1831,9 +1743,6 @@ html, body {
   color: var(--error);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   MEMORIES
-   ═══════════════════════════════════════════════════════════ */
 .her-memory-form {
   background: var(--bg-secondary);
   border-radius: var(--radius-lg);
@@ -1985,9 +1894,6 @@ html, body {
   color: var(--error);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   DAILY HISTORY
-   ═══════════════════════════════════════════════════════════ */
 .her-daily-history {
   margin-top: var(--space-8);
   padding-top: var(--space-6);
@@ -2022,9 +1928,6 @@ html, body {
   white-space: pre-wrap;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   MOOD HISTORY
-   ═══════════════════════════════════════════════════════════ */
 .her-mood-history {
   margin-top: var(--space-8);
   padding-top: var(--space-6);
@@ -2069,7 +1972,6 @@ html, body {
   color: var(--text-tertiary);
 }
 
-/* Memory Delete Button */
 .her-memory-delete {
   width: 24px;
   height: 24px;
@@ -2089,7 +1991,6 @@ html, body {
   color: var(--error);
 }
 
-/* Memory Mood Tag */
 .her-memory-mood {
   margin-top: var(--space-3);
   font-size: var(--text-xs);
@@ -2100,36 +2001,29 @@ html, body {
   display: inline-block;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   RESPONSIVE FOR NEW SECTIONS
-   ═══════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
   .her-photos-grid {
     grid-template-columns: repeat(3, 1fr);
     gap: var(--space-2);
   }
-  
+
   .her-videos-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .her-mood-selector {
     gap: var(--space-2);
   }
-  
+
   .her-mood-option {
     padding: var(--space-3);
   }
-  
+
   .her-mood-option span {
     font-size: 1.5rem;
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   HER MODE - CHAT MESSAGE STYLING
-   Clean, consistent, mobile-first bubbles
-   ═══════════════════════════════════════════════════════════ */
 @keyframes messageSlideIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -2196,7 +2090,6 @@ html, body {
   text-align: right;
 }
 
-/* Message grouping for natural chat flow */
 .her-message.group-start {
   margin-top: var(--space-3);
 }
@@ -2217,7 +2110,6 @@ html, body {
   border-radius: 18px 18px 18px 4px;
 }
 
-/* Typing Indicator - Improved */
 .her-typing-indicator {
   align-self: flex-start;
 }
@@ -2262,7 +2154,6 @@ html, body {
   }
 }
 
-/* Streaming Message Cursor */
 .her-streaming-message .her-message-bubble {
   padding: var(--space-3) var(--space-4);
   background: rgba(232, 164, 184, 0.12);
@@ -2282,7 +2173,6 @@ html, body {
   51%, 100% { opacity: 0; }
 }
 
-/* Export Options Modal */
 .her-export-options {
   text-align: center;
   padding: var(--space-4);
@@ -2342,7 +2232,6 @@ html, body {
   }
 }
 
-/* Session Items - Chat Sidebar */
 .her-session-item {
   display: flex;
   flex-direction: column;
@@ -2392,10 +2281,6 @@ html, body {
   color: var(--text-muted);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   IMPORTED CHAT VIEWER - WHATSAPP + INSTAGRAM STYLES
-   READ-ONLY viewer for training reference
-   ═══════════════════════════════════════════════════════════ */
 .her-imported-chats-section {
   display: grid;
   grid-template-columns: 280px 1fr;
@@ -2404,7 +2289,6 @@ html, body {
   min-height: 400px;
 }
 
-/* Chat Cards Grid */
 .her-imported-chat-card {
   position: relative;
   background: var(--bg-tertiary);
@@ -2483,7 +2367,6 @@ html, body {
   color: var(--error);
 }
 
-/* Chat Viewer Container */
 .her-chat-viewer {
   background: var(--bg-secondary);
   border: 1px solid var(--border-subtle);
@@ -2540,7 +2423,6 @@ html, body {
   color: var(--her-accent);
 }
 
-/* Toggle Switch */
 .her-toggle {
   position: relative;
   width: 36px;
@@ -2582,7 +2464,6 @@ html, body {
   transform: translateX(16px);
 }
 
-/* Chat Viewer Messages */
 .her-chat-viewer-messages {
   flex: 1;
   overflow-y: auto;
@@ -2608,7 +2489,6 @@ html, body {
   font-size: var(--text-sm);
 }
 
-/* Imported Chat Viewer - Her Style Chat Bubbles */
 .her-chat-viewer-header {
   display: flex;
   align-items: center;
@@ -2674,11 +2554,6 @@ html, body {
   opacity: 0.7;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   IMPORTED CHATS - ADVANCED FEATURES
-   ═══════════════════════════════════════════════════════════ */
-
-/* Chat Cards Grid */
 .her-imported-chats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -2821,7 +2696,6 @@ html, body {
   height: 16px;
 }
 
-/* Chat Viewer Section */
 .her-chat-viewer {
   background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
   border: 1px solid var(--border-subtle);
@@ -2833,7 +2707,6 @@ html, body {
   position: relative;
 }
 
-/* Chat Viewer Header */
 .her-chat-viewer-header {
   display: flex;
   align-items: center;
@@ -2948,7 +2821,6 @@ html, body {
   height: 18px;
 }
 
-/* Search Bar */
 .her-chat-viewer-search-bar {
   display: flex;
   align-items: center;
@@ -3008,7 +2880,6 @@ html, body {
   color: var(--her-accent);
 }
 
-/* Messages Container with Scrubber */
 .her-chat-viewer-scroll-wrapper {
   flex: 1;
   position: relative;
@@ -3042,7 +2913,6 @@ html, body {
   background: var(--border-strong);
 }
 
-/* Message Styles */
 .her-chat-msg-group {
   display: flex;
   flex-direction: column;
@@ -3198,7 +3068,6 @@ html, body {
   opacity: 0.9;
 }
 
-/* Emotion Heatmap */
 .her-chat-msg.heatmap-positive {
   background-blend-mode: overlay;
   position: relative;
@@ -3231,7 +3100,6 @@ html, body {
   pointer-events: none;
 }
 
-/* Search Highlight */
 .her-chat-msg-highlighted {
   box-shadow: inset 0 0 0 2px var(--her-accent);
   animation: pulse 0.6s ease;
@@ -3248,7 +3116,6 @@ html, body {
   padding: 0 2px;
 }
 
-/* Timeline Scrubber */
 .her-timeline-scrubber {
   position: absolute;
   right: 8px;
@@ -3313,7 +3180,6 @@ html, body {
   opacity: 1;
 }
 
-/* Chat Locked State */
 .her-chat-locked-overlay {
   position: absolute;
   inset: 0;
@@ -3366,7 +3232,6 @@ html, body {
   margin-bottom: var(--space-2);
 }
 
-/* Search No Results State */
 .her-chat-search-no-results {
   display: flex;
   flex-direction: column;
@@ -3385,7 +3250,6 @@ html, body {
   margin-bottom: var(--space-3);
 }
 
-/* Improved Message Time Styling */
 .her-chat-msg-time-separator {
   display: flex;
   align-items: center;
@@ -3395,12 +3259,10 @@ html, body {
   color: var(--text-muted);
 }
 
-/* Smooth scroll behavior */
 .her-chat-viewer-messages {
   scroll-behavior: smooth;
 }
 
-/* Media Viewer Modal */
 .her-media-viewer-overlay {
   position: fixed;
   inset: 0;
@@ -3509,7 +3371,6 @@ html, body {
   color: var(--text-primary);
 }
 
-/* Generic Message Bubble Base */
 .her-chat-msg {
   max-width: 75%;
   padding: var(--space-2) var(--space-3);
@@ -3522,7 +3383,6 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Role-based alignment - LEFT */
 .msg-left {
   align-self: flex-start;
   background: var(--bg-elevated);
@@ -3530,7 +3390,6 @@ html, body {
   border-bottom-left-radius: 4px;
 }
 
-/* Role-based alignment - RIGHT */
 .msg-right {
   align-self: flex-end;
   background: var(--her-accent-subtle);
@@ -3538,7 +3397,6 @@ html, body {
   border-bottom-right-radius: 4px;
 }
 
-/* Platform: WhatsApp */
 .platform-whatsapp .her-chat-msg {
   border-radius: 8px;
 }
@@ -3559,7 +3417,6 @@ html, body {
   display: none;
 }
 
-/* Platform: Instagram */
 .platform-instagram .her-chat-msg {
   border-radius: 22px;
   padding: var(--space-3) var(--space-4);
@@ -3582,7 +3439,6 @@ html, body {
   text-align: right;
 }
 
-/* Message grouping */
 .her-chat-msg.group-start {
   margin-top: var(--space-3);
 }
@@ -3591,7 +3447,6 @@ html, body {
   word-break: break-word;
 }
 
-/* Legacy classes for backward compatibility */
 .wa-bubble {
   padding: var(--space-2) var(--space-3);
   border-radius: 8px;
@@ -3643,9 +3498,6 @@ html, body {
   margin-top: 4px;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   IMPORT MODAL STYLES
-   ═══════════════════════════════════════════════════════════ */
 .her-import-form {
   display: flex;
   flex-direction: column;
@@ -3861,9 +3713,6 @@ html, body {
   align-self: flex-end;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   TRAINING UI - STYLE TRAINING MODAL
-   ═══════════════════════════════════════════════════════════ */
 .her-training-modal {
   max-width: 600px;
 }
@@ -3935,16 +3784,12 @@ html, body {
   color: var(--error);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   MOBILE-FIRST RESPONSIVE - CHAT & VIEWER
-   One-hand usable, thumb-safe spacing
-   ═══════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
-  /* Chat layout mobile optimization */
+
   .her-chat-layout {
     flex-direction: column;
   }
-  
+
   .her-chat-sidebar {
     position: fixed;
     top: 0;
@@ -3957,63 +3802,61 @@ html, body {
     z-index: 300;
     background: var(--bg-secondary);
   }
-  
+
   .her-chat-sidebar.open {
     transform: translateX(0);
   }
-  
+
   .her-chat-main {
     height: calc(100vh - var(--mobile-nav-height) - 60px);
   }
-  
+
   .her-chat-messages {
     padding: var(--space-3);
   }
-  
+
   .her-message {
     max-width: 90%;
   }
-  
+
   .her-message-bubble {
     padding: var(--space-3);
     font-size: var(--text-sm);
   }
-  
-  /* Input area - thumb safe */
+
   .her-chat-input-container {
     padding: var(--space-3);
     padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
   }
-  
+
   .her-chat-input-wrapper {
     border-radius: var(--radius-2xl);
     padding: var(--space-2);
   }
-  
+
   .her-send-btn {
     width: 44px;
     height: 44px;
   }
-  
-  /* Imported chats mobile */
+
   .her-imported-chats-section {
     grid-template-columns: 1fr;
     gap: 0;
     height: 100%;
   }
-  
+
   .her-imported-chats-list {
     width: 100%;
     height: auto;
     max-height: 50vh;
     overflow-y: auto;
   }
-  
+
   .her-imported-chats-grid {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: var(--space-3);
   }
-  
+
   .her-chat-viewer {
     width: 100%;
     min-height: 50vh;
@@ -4021,115 +3864,107 @@ html, body {
     border: none;
     border-radius: 0;
   }
-  
+
   .her-chat-viewer-header {
     gap: var(--space-2);
     padding: var(--space-3);
   }
-  
+
   .her-chat-viewer-back {
     display: flex !important;
   }
-  
+
   .her-chat-viewer-title-group {
     flex: 1;
   }
-  
+
   .her-chat-viewer-title {
     gap: var(--space-2);
   }
-  
+
   .her-chat-viewer-platform-icon {
     font-size: 1.25rem;
   }
-  
+
   .her-chat-viewer-title-text h3 {
     font-size: var(--text-sm);
   }
-  
+
   .her-chat-viewer-controls {
     gap: var(--space-1);
   }
-  
+
   .her-chat-viewer-btn {
     width: 32px;
     height: 32px;
   }
-  
+
   .her-chat-viewer-btn svg {
     width: 16px;
     height: 16px;
   }
-  
+
   .her-chat-viewer-search-bar {
     gap: var(--space-1);
     padding: var(--space-2) var(--space-3);
   }
-  
+
   .her-chat-search-input {
     font-size: 14px;
   }
-  
+
   .her-chat-viewer-messages {
     padding: var(--space-3);
   }
-  
+
   .her-chat-msg {
     max-width: 85%;
   }
-  
-  /* Training form mobile */
+
   .her-training-form-row {
     grid-template-columns: 1fr;
   }
-  
-  /* Import modal mobile */
+
   .her-modal {
     max-width: 100%;
     margin: var(--space-3);
     max-height: calc(100vh - var(--space-6));
   }
-  
+
   .her-modal-body {
     max-height: calc(100vh - 140px);
   }
-  
-  /* Timeline scrubber hidden on mobile by default */
+
   .her-timeline-scrubber {
     display: none !important;
   }
-  
+
   .her-timeline-scrubber.active {
     display: flex !important;
   }
-  
-  /* Media viewer optimized for touch */
+
   .her-media-viewer-nav {
     width: 48px;
     height: 48px;
   }
-  
+
   .her-media-viewer-close {
     width: 48px;
     height: 48px;
   }
 }
 
-/* Safe area support for modern phones */
 @supports (padding: max(0px)) {
   .her-chat-input-container {
     padding-bottom: max(var(--space-3), env(safe-area-inset-bottom));
   }
-  
+
   .her-mobile-nav {
     padding-bottom: env(safe-area-inset-bottom);
     height: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom));
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   TIMELINE COMPARISON - Cross-chat reflection tool
-   ═══════════════════════════════════════════════════════════ */
 .her-comparison-overlay {
   position: fixed;
   inset: 0;
@@ -4200,7 +4035,6 @@ html, body {
   padding: var(--space-5);
 }
 
-/* Chat Selection */
 .her-comparison-selection {
   display: flex;
   flex-direction: column;
@@ -4298,7 +4132,6 @@ html, body {
   cursor: not-allowed;
 }
 
-/* Comparison View */
 .her-comparison-view {
   display: flex;
   flex-direction: column;
@@ -4360,7 +4193,6 @@ html, body {
   color: var(--her-accent);
 }
 
-/* Timescale */
 .her-comparison-timescale {
   display: flex;
   justify-content: space-between;
@@ -4373,7 +4205,6 @@ html, body {
   color: var(--text-muted);
 }
 
-/* Timeline Arcs */
 .her-comparison-arcs {
   display: flex;
   flex-direction: column;
@@ -4445,7 +4276,6 @@ html, body {
   outline-offset: 1px;
 }
 
-/* Phase density colors */
 .her-arc-phase.density-high {
   background: rgba(232, 164, 184, 0.6);
 }
@@ -4462,7 +4292,6 @@ html, body {
   background: rgba(255, 255, 255, 0.02);
 }
 
-/* Emotional intensity bands */
 .her-arc-emotion-band {
   position: absolute;
   left: 0;
@@ -4484,7 +4313,6 @@ html, body {
   background: linear-gradient(90deg, rgba(74, 222, 128, 0.3), rgba(148, 163, 184, 0.3), rgba(248, 113, 113, 0.3));
 }
 
-/* Phase Details */
 .her-comparison-phase-details {
   background: var(--bg-elevated);
   border: 1px solid var(--border-default);
@@ -4511,9 +4339,6 @@ html, body {
   line-height: 1.5;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   REFLECTION PANEL - AI-assisted gentle observations
-   ═══════════════════════════════════════════════════════════ */
 .her-reflection-panel {
   position: fixed;
   bottom: var(--space-6);
@@ -4595,15 +4420,11 @@ html, body {
   font-style: italic;
 }
 
-/* Reflection Toggle Button Active State */
 #toggleReflectionBtn.active {
   background: var(--her-accent-subtle);
   color: var(--her-accent);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   SAVE TO MEMORIES - Message → Memory bridge
-   ═══════════════════════════════════════════════════════════ */
 .her-save-memory-overlay {
   position: fixed;
   inset: 0;
@@ -4714,7 +4535,6 @@ html, body {
   background: var(--bg-tertiary);
 }
 
-/* Message Context Menu */
 .her-msg-context-menu {
   position: absolute;
   background: var(--bg-elevated);
@@ -4754,48 +4574,43 @@ html, body {
   flex-shrink: 0;
 }
 
-/* Long press indicator */
 .her-chat-msg.long-press-active {
   transform: scale(0.98);
   opacity: 0.9;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   MOBILE RESPONSIVE - New features
-   ═══════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
-  /* Comparison Modal - Fullscreen on mobile */
+
   .her-comparison-overlay {
     padding: 0;
   }
-  
+
   .her-comparison-modal {
     max-width: 100%;
     max-height: 100%;
     border-radius: 0;
     height: 100vh;
   }
-  
+
   .her-comparison-chat-list {
     grid-template-columns: 1fr;
   }
-  
+
   .her-comparison-arcs.sidebyside {
     flex-direction: column;
   }
-  
+
   .her-comparison-view-toggle {
     order: -1;
     width: 100%;
     justify-content: center;
   }
-  
+
   .her-comparison-controls {
     flex-direction: column;
     align-items: stretch;
   }
-  
-  /* Reflection Panel - Bottom sheet on mobile */
+
   .her-reflection-panel {
     bottom: 0;
     right: 0;
@@ -4804,13 +4619,12 @@ html, body {
     max-width: 100%;
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   }
-  
-  /* Save Memory Modal */
+
   .her-save-memory-modal {
     max-width: 100%;
     max-height: 90vh;
   }
-  
+
   .her-save-memory-body {
     padding: var(--space-4);
   }

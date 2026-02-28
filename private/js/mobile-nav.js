@@ -1,42 +1,5 @@
-/**
- * ═══════════════════════════════════════════════════════════════════════════
- * MOBILE SIDE NAVIGATION - UNIFIED SYSTEM (LOCKED)
- * ═══════════════════════════════════════════════════════════════════════════
- * 
- * MANDATORY STRATEGY:
- * - Mobile uses the SAME SIDE NAV structure as desktop
- * - NO bottom navigation bar (STRICTLY FORBIDDEN)
- * - Left side nav, collapsible, icon-only when collapsed
- * - Same sections, same order, same logic
- * 
- * NAV CONTENT (MUST MATCH DESKTOP):
- * 
- * CONNECT:
- * - Her AI
- * - Imported Chats
- * 
- * GALLERY:
- * - She Gallery
- * - Photos
- * - Videos
- * 
- * RITUALS:
- * - Daily Entry
- * - Mood
- * - Memories
- * 
- * - "Back to Dashboard" at bottom
- * 
- * BEHAVIOR:
- * - Swipe from left OR tap hamburger to expand
- * - Tap outside to collapse
- * - Smooth slide animation
- * 
- * ═══════════════════════════════════════════════════════════════════════════
- */
-
 const MobileSideNav = {
-  // State
+
   expanded: false,
   currentSection: null,
   touchStartX: 0,
@@ -44,8 +7,7 @@ const MobileSideNav = {
   touchCurrentX: 0,
   swipeThreshold: 50,
   edgeSwipeZone: 30,
-  
-  // NAV CONFIGURATION - MUST MATCH DESKTOP EXACTLY
+
   config: {
     sections: [
       {
@@ -119,57 +81,44 @@ const MobileSideNav = {
       icon: '<svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>'
     }
   },
-  
-  /**
-   * Initialize mobile side nav
-   * @param {string} activeSection - ID of current active section
-   */
+
   init(activeSection) {
-    // Only init on mobile
+
     if (!this.isMobile()) {
       console.log('[MobileSideNav] Desktop detected, skipping init');
       return;
     }
-    
+
     this.currentSection = activeSection;
     this.render();
     this.bindEvents();
     console.log('[MobileSideNav] Initialized with active section:', activeSection);
   },
-  
-  /**
-   * Check if mobile viewport
-   */
+
   isMobile() {
     return window.innerWidth <= 768;
   },
-  
-  /**
-   * Render the mobile side nav
-   */
+
   render() {
-    // Remove any existing nav
+
     const existingNav = document.getElementById('mobileSideNav');
     const existingBackdrop = document.getElementById('mobileNavBackdrop');
     const existingToggle = document.getElementById('mobileNavToggle');
-    
+
     if (existingNav) existingNav.remove();
     if (existingBackdrop) existingBackdrop.remove();
     if (existingToggle) existingToggle.remove();
-    
-    // Create backdrop
+
     const backdrop = document.createElement('div');
     backdrop.className = 'mobile-nav-backdrop';
     backdrop.id = 'mobileNavBackdrop';
-    
-    // Create side nav
+
     const nav = document.createElement('nav');
     nav.className = 'mobile-side-nav';
     nav.id = 'mobileSideNav';
     nav.setAttribute('role', 'navigation');
     nav.setAttribute('aria-label', 'Main navigation');
-    
-    // Header with logo
+
     nav.innerHTML = `
       <div class="mobile-side-nav-header">
         <a href="/private/personal.html" class="mobile-nav-logo">
@@ -180,20 +129,17 @@ const MobileSideNav = {
       <div class="mobile-side-nav-content" id="mobileSideNavContent"></div>
       <div class="mobile-side-nav-footer" id="mobileSideNavFooter"></div>
     `;
-    
-    // Render nav sections
+
     const content = nav.querySelector('#mobileSideNavContent');
     this.config.sections.forEach(section => {
       const sectionEl = this.createSection(section);
       content.appendChild(sectionEl);
     });
-    
-    // Render footer
+
     const footer = nav.querySelector('#mobileSideNavFooter');
     const backItem = this.createNavItem(this.config.footer, true);
     footer.appendChild(backItem);
-    
-    // Create hamburger toggle button
+
     const toggle = document.createElement('button');
     toggle.className = 'mobile-nav-toggle';
     toggle.id = 'mobileNavToggle';
@@ -206,162 +152,126 @@ const MobileSideNav = {
         <line x1="3" y1="18" x2="21" y2="18"/>
       </svg>
     `;
-    
-    // Append to body
+
     document.body.appendChild(backdrop);
     document.body.appendChild(nav);
     document.body.appendChild(toggle);
   },
-  
-  /**
-   * Create a nav section
-   */
+
   createSection(section) {
     const sectionEl = document.createElement('div');
     sectionEl.className = 'mobile-nav-section';
-    
-    // Section label
+
     const label = document.createElement('div');
     label.className = 'mobile-nav-section-label';
     label.textContent = section.label;
     sectionEl.appendChild(label);
-    
-    // Section items
+
     section.items.forEach(item => {
       const navItem = this.createNavItem(item);
       sectionEl.appendChild(navItem);
     });
-    
+
     return sectionEl;
   },
-  
-  /**
-   * Create a nav item
-   */
+
   createNavItem(item, isBack = false) {
     const isActive = this.currentSection === item.id;
-    
+
     const link = document.createElement('a');
     link.className = `mobile-nav-item${isActive ? ' active' : ''}${isBack ? ' back-item' : ''}`;
     link.href = item.href;
     link.setAttribute('aria-label', item.label);
     link.setAttribute('aria-current', isActive ? 'page' : 'false');
-    
+
     link.innerHTML = `
       <span class="mobile-nav-item-icon">${item.icon}</span>
       <span class="mobile-nav-item-label">${item.label}</span>
     `;
-    
-    // Close nav on click
+
     link.addEventListener('click', (e) => {
-      // Allow natural navigation, just close the nav
+
       this.collapse();
     });
-    
+
     return link;
   },
-  
-  /**
-   * Bind event listeners
-   */
+
   bindEvents() {
     const nav = document.getElementById('mobileSideNav');
     const backdrop = document.getElementById('mobileNavBackdrop');
     const toggle = document.getElementById('mobileNavToggle');
-    
-    // Toggle button click
+
     if (toggle) {
       toggle.addEventListener('click', () => this.toggle());
     }
-    
-    // Backdrop click to close
+
     if (backdrop) {
       backdrop.addEventListener('click', () => this.collapse());
     }
-    
-    // Escape key to close
+
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && this.expanded) {
         this.collapse();
       }
     });
-    
-    // Touch events for swipe gestures
+
     document.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: true });
     document.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
     document.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: true });
-    
-    // Handle resize
+
     window.addEventListener('resize', () => {
       if (!this.isMobile()) {
         this.collapse();
       }
     });
   },
-  
-  /**
-   * Handle touch start
-   */
+
   handleTouchStart(e) {
     this.touchStartX = e.touches[0].clientX;
     this.touchStartY = e.touches[0].clientY;
     this.touchCurrentX = this.touchStartX;
   },
-  
-  /**
-   * Handle touch move
-   */
+
   handleTouchMove(e) {
     if (!e.touches.length) return;
-    
+
     this.touchCurrentX = e.touches[0].clientX;
     const touchCurrentY = e.touches[0].clientY;
-    
+
     const deltaX = this.touchCurrentX - this.touchStartX;
     const deltaY = Math.abs(touchCurrentY - this.touchStartY);
-    
-    // Only handle horizontal swipes
+
     if (deltaY > Math.abs(deltaX)) return;
-    
-    // Edge swipe to open (from left edge)
+
     if (!this.expanded && this.touchStartX <= this.edgeSwipeZone && deltaX > 0) {
-      // Prevent scroll during swipe
+
       e.preventDefault();
     }
-    
-    // Swipe left to close (when expanded)
+
     if (this.expanded && deltaX < -10) {
       e.preventDefault();
     }
   },
-  
-  /**
-   * Handle touch end
-   */
+
   handleTouchEnd(e) {
     const deltaX = this.touchCurrentX - this.touchStartX;
-    
-    // Edge swipe to open
+
     if (!this.expanded && this.touchStartX <= this.edgeSwipeZone && deltaX > this.swipeThreshold) {
       this.expand();
       return;
     }
-    
-    // Swipe left to close
+
     if (this.expanded && deltaX < -this.swipeThreshold) {
       this.collapse();
       return;
     }
-    
-    // Reset
+
     this.touchStartX = 0;
     this.touchStartY = 0;
     this.touchCurrentX = 0;
   },
-  
-  /**
-   * Toggle nav
-   */
+
   toggle() {
     if (this.expanded) {
       this.collapse();
@@ -369,59 +279,46 @@ const MobileSideNav = {
       this.expand();
     }
   },
-  
-  /**
-   * Expand nav
-   */
+
   expand() {
     const nav = document.getElementById('mobileSideNav');
     const backdrop = document.getElementById('mobileNavBackdrop');
     const toggle = document.getElementById('mobileNavToggle');
-    
+
     if (nav) nav.classList.add('expanded');
     if (backdrop) backdrop.classList.add('visible');
     if (toggle) toggle.setAttribute('aria-expanded', 'true');
-    
+
     this.expanded = true;
-    
-    // Prevent body scroll
+
     document.body.style.overflow = 'hidden';
-    
+
     console.log('[MobileSideNav] Expanded');
   },
-  
-  /**
-   * Collapse nav
-   */
+
   collapse() {
     const nav = document.getElementById('mobileSideNav');
     const backdrop = document.getElementById('mobileNavBackdrop');
     const toggle = document.getElementById('mobileNavToggle');
-    
+
     if (nav) nav.classList.remove('expanded');
     if (backdrop) backdrop.classList.remove('visible');
     if (toggle) toggle.setAttribute('aria-expanded', 'false');
-    
+
     this.expanded = false;
-    
-    // Restore body scroll
+
     document.body.style.overflow = '';
-    
+
     console.log('[MobileSideNav] Collapsed');
   },
-  
-  /**
-   * Set active section
-   */
+
   setActive(sectionId) {
     this.currentSection = sectionId;
-    
-    // Update nav items
+
     document.querySelectorAll('.mobile-nav-item').forEach(item => {
       const href = item.getAttribute('href');
       let isActive = false;
-      
-      // Check all sections for matching item
+
       this.config.sections.forEach(section => {
         section.items.forEach(navItem => {
           if (navItem.href === href && navItem.id === sectionId) {
@@ -429,29 +326,25 @@ const MobileSideNav = {
           }
         });
       });
-      
+
       item.classList.toggle('active', isActive);
       item.setAttribute('aria-current', isActive ? 'page' : 'false');
     });
   },
-  
-  /**
-   * Destroy nav
-   */
+
   destroy() {
     const nav = document.getElementById('mobileSideNav');
     const backdrop = document.getElementById('mobileNavBackdrop');
     const toggle = document.getElementById('mobileNavToggle');
-    
+
     if (nav) nav.remove();
     if (backdrop) backdrop.remove();
     if (toggle) toggle.remove();
-    
+
     document.body.style.overflow = '';
   }
 };
 
-// Auto-initialize if data attribute present
 document.addEventListener('DOMContentLoaded', () => {
   const navInit = document.body.getAttribute('data-mobile-nav');
   if (navInit) {
@@ -459,15 +352,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Export for module use
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = MobileSideNav;
 }
 
-// Also expose globally for compatibility
 window.MobileSideNav = MobileSideNav;
 
-// Deprecation notice for old MobileNav
 window.MobileNav = {
   init: function(activeSection) {
     console.warn('[MobileNav] DEPRECATED: Bottom navigation is no longer supported. Using MobileSideNav instead.');

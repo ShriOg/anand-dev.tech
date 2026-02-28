@@ -4,12 +4,10 @@ from abc import ABC, abstractmethod
 from typing import Optional
 from enum import Enum, auto
 
-
 class TTSEngine(Enum):
     PYTTSX3 = auto()
     SYSTEM = auto()
     DISABLED = auto()
-
 
 class BaseTTS(ABC):
     @abstractmethod
@@ -23,7 +21,6 @@ class BaseTTS(ABC):
     @abstractmethod
     def is_available(self) -> bool:
         pass
-
 
 class Pyttsx3TTS(BaseTTS):
     def __init__(self):
@@ -68,7 +65,6 @@ class Pyttsx3TTS(BaseTTS):
 
     def is_available(self) -> bool:
         return self._initialized
-
 
 class SystemTTS(BaseTTS):
     def __init__(self):
@@ -119,7 +115,6 @@ class SystemTTS(BaseTTS):
 
     def is_available(self) -> bool:
         return self._available
-
 
 class TextToSpeech:
     def __init__(self, engine: TTSEngine = TTSEngine.PYTTSX3):

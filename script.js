@@ -1,14 +1,5 @@
-/**
- * CINEMATIC ENVIRONMENTAL SYSTEM
- * Three.js particle field · Offset spring glow · Proximity cards
- */
-
 (function () {
     'use strict';
-
-    // ==========================================
-    // SPRING PHYSICS — damped harmonic oscillator
-    // ==========================================
 
     function createSpring(stiffness, damping) {
         return { x: 0, y: 0, vx: 0, vy: 0, stiffness: stiffness, damping: damping };
@@ -23,21 +14,13 @@
         s.y += s.vy * dt;
     }
 
-    // ==========================================
-    // CONSTANTS
-    // ==========================================
-
-    var GLOW_OFFSET_X = 15;   // subtle offset right
-    var GLOW_OFFSET_Y = 15;   // subtle offset down
+    var GLOW_OFFSET_X = 15;
+    var GLOW_OFFSET_Y = 15;
     var PARTICLE_COUNT_DESKTOP = 800;
     var PARTICLE_COUNT_MOBILE  = 250;
     var REPEL_RADIUS = 120;
     var REPEL_FORCE  = 160;
     var RETURN_STIFFNESS = 2.0;
-
-    // ==========================================
-    // STATE
-    // ==========================================
 
     var S = {
         rawX: 0, rawY: 0,
@@ -53,22 +36,18 @@
         rafId: null,
         lastTime: 0,
         frameCount: 0,
-        // Three.js
+
         scene: null, camera: null, renderer: null,
         particleGeo: null,
         positions: null, originals: null,
         particleCount: 0,
         mouse3D: { x: 0, y: 0 },
         camTarget: { x: 0, y: 0 },
-        // Grain
+
         grainCtx: null, grainW: 128, grainH: 128
     };
 
     var el = {};
-
-    // ==========================================
-    // INIT
-    // ==========================================
 
     function init() {
         el.envLight  = document.querySelector('.env-light');
@@ -97,10 +76,6 @@
         tick(S.lastTime);
     }
 
-    // ==========================================
-    // THREE.JS PARTICLE SYSTEM
-    // ==========================================
-
     function initThreeJS() {
         if (typeof THREE === 'undefined' || !el.particleContainer) return;
 
@@ -108,21 +83,17 @@
         var h = window.innerHeight;
         var dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-        // Scene
         S.scene = new THREE.Scene();
 
-        // Camera
         S.camera = new THREE.PerspectiveCamera(60, w / h, 1, 1500);
         S.camera.position.z = 500;
 
-        // Renderer — transparent so page background shows
         S.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false });
         S.renderer.setSize(w, h);
         S.renderer.setPixelRatio(dpr);
         S.renderer.setClearColor(0x000000, 0);
         el.particleContainer.appendChild(S.renderer.domElement);
 
-        // Generate soft glow texture
         var texCanvas = document.createElement('canvas');
         texCanvas.width = 64;
         texCanvas.height = 64;
@@ -136,7 +107,6 @@
         tctx.fillRect(0, 0, 64, 64);
         var texture = new THREE.CanvasTexture(texCanvas);
 
-        // Particle geometry
         S.particleCount = S.isMobile ? PARTICLE_COUNT_MOBILE : PARTICLE_COUNT_DESKTOP;
         var count = S.particleCount;
         var positions = new Float32Array(count * 3);
@@ -162,7 +132,6 @@
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         S.particleGeo = geometry;
 
-        // Material — additive blending for glow
         var material = new THREE.PointsMaterial({
             map: texture,
             size: 4.5,
@@ -176,7 +145,6 @@
 
         S.scene.add(new THREE.Points(geometry, material));
 
-        // Resize handler
         window.addEventListener('resize', function () {
             var nw = window.innerWidth;
             var nh = window.innerHeight;
@@ -185,10 +153,6 @@
             S.renderer.setSize(nw, nh);
         });
     }
-
-    // ==========================================
-    // MOUSE TRACKING — raw input, offset target
-    // ==========================================
 
     function initMouseTracking() {
         var inactivityTimer;
@@ -201,15 +165,12 @@
             S.rawX = e.clientX;
             S.rawY = e.clientY;
 
-            // Offset target for the glow (subtle down-right)
             S.targetX = e.clientX + GLOW_OFFSET_X;
             S.targetY = e.clientY + GLOW_OFFSET_Y;
 
-            // NDC for Three.js mouse interaction
             S.mouse3D.x = (e.clientX / window.innerWidth) * 2 - 1;
             S.mouse3D.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
-            // Camera parallax target
             S.camTarget.x = S.mouse3D.x * 30;
             S.camTarget.y = S.mouse3D.y * 20;
 
@@ -228,16 +189,11 @@
         });
     }
 
-    // ==========================================
-    // UNIFIED RENDER LOOP
-    // ==========================================
-
     function tick(now) {
         var dt = Math.min((now - S.lastTime) / 1000, 0.05);
         S.lastTime = now;
         S.frameCount++;
 
-        // Breathing
         S.breathPhase += dt * 0.7;
         var breathVal = 0.9 + Math.sin(S.breathPhase) * 0.1;
 
@@ -247,18 +203,12 @@
             updateAtmosphere();
         }
 
-        // Three.js particles (always run for ambient drift)
         updateParticles(dt);
 
-        // Grain (every 3 frames)
         if (S.frameCount % 3 === 0) renderGrain();
 
         S.rafId = requestAnimationFrame(tick);
     }
-
-    // ==========================================
-    // OFFSET GLOW — 3-layer spring-driven
-    // ==========================================
 
     function updateGlow(dt, breathVal) {
         S.smoothVel += (S.velocity - S.smoothVel) * 0.08;
@@ -266,12 +216,10 @@
 
         var speedScale = Math.min(1 + S.smoothVel * 0.0015, 1.18);
 
-        // Step springs toward offset target
         stepSpring(S.halo, S.targetX, S.targetY, dt);
         stepSpring(S.glow, S.targetX, S.targetY, dt);
         stepSpring(S.core, S.targetX, S.targetY, dt);
 
-        // Apply transforms
         el.halo.style.transform =
             'translate(' + S.halo.x + 'px,' + S.halo.y + 'px) scale(' + (speedScale * 0.9) + ')';
         el.glow.style.transform =
@@ -279,16 +227,11 @@
         el.core.style.transform =
             'translate(' + S.core.x + 'px,' + S.core.y + 'px) scale(' + (speedScale * 1.05) + ')';
 
-        // Opacity: breathing + speed-reactive
         el.core.style.opacity = breathVal;
         var glowOp = 0.65 + S.smoothVel * 0.003;
         el.glow.style.opacity = Math.min(glowOp, 0.95);
         el.halo.style.opacity = Math.min(glowOp * 0.65, 0.7);
     }
-
-    // ==========================================
-    // THREE.JS PARTICLE UPDATE
-    // ==========================================
 
     function updateParticles(dt) {
         if (!S.renderer || !S.particleGeo) return;
@@ -298,14 +241,12 @@
         var count = S.particleCount;
         var time = S.breathPhase;
 
-        // Map mouse to world space (approximate projection)
         var mx = S.mouse3D.x * 600;
         var my = S.mouse3D.y * 400;
 
         var driftSpeed = 8;
         var isDesktopActive = !S.isMobile && S.isActive;
 
-        // Camera parallax (smooth follow)
         S.camera.position.x += (S.camTarget.x - S.camera.position.x) * 0.03;
         S.camera.position.y += (S.camTarget.y - S.camera.position.y) * 0.03;
         S.camera.lookAt(0, 0, 0);
@@ -319,12 +260,10 @@
             var oy = orig[idx + 1];
             var oz = orig[idx + 2];
 
-            // Gentle 3D drift (unique per particle via index offset)
             var dX = Math.sin(time * 0.3 + i * 0.1) * driftSpeed * dt;
             var dY = Math.cos(time * 0.2 + i * 0.07) * driftSpeed * dt;
             var dZ = Math.sin(time * 0.15 + i * 0.13) * driftSpeed * 0.5 * dt;
 
-            // Mouse repulsion (desktop only)
             var fX = 0, fY = 0;
             if (isDesktopActive) {
                 var ddx = px - mx;
@@ -337,7 +276,6 @@
                 }
             }
 
-            // Spring back to original position
             var rX = (ox - px) * RETURN_STIFFNESS * dt;
             var rY = (oy - py) * RETURN_STIFFNESS * dt;
             var rZ = (oz - pz) * RETURN_STIFFNESS * dt;
@@ -350,10 +288,6 @@
         S.particleGeo.attributes.position.needsUpdate = true;
         S.renderer.render(S.scene, S.camera);
     }
-
-    // ==========================================
-    // PROXIMITY-BASED CARD INTERACTION
-    // ==========================================
 
     function updateCardProximity() {
         var mx = S.core.x;
@@ -371,16 +305,14 @@
 
             var maxDist = 500;
             var proximity = Math.max(0, 1 - dist / maxDist);
-            proximity = proximity * proximity; // ease-in curve
+            proximity = proximity * proximity;
 
-            // CSS custom properties for pseudo-element effects
             card.style.setProperty('--proximity', proximity.toFixed(3));
             var lx = ((mx - rect.left) / rect.width) * 100;
             var ly = ((my - rect.top) / rect.height) * 100;
             card.style.setProperty('--light-x', lx + '%');
             card.style.setProperty('--light-y', ly + '%');
 
-            // Dynamic border glow & surface brightening
             if (proximity > 0.05) {
                 var ba = (proximity * 0.3).toFixed(3);
                 var sa = (proximity * 0.2).toFixed(3);
@@ -397,7 +329,6 @@
                 card.style.background = '';
             }
 
-            // 3D tilt when close
             if (proximity > 0.25) {
                 var ax = (my - cy) / 35;
                 var ay = (cx - mx) / 35;
@@ -410,10 +341,6 @@
             }
         }
     }
-
-    // ==========================================
-    // ATMOSPHERE — background reacts to light
-    // ==========================================
 
     function updateAtmosphere() {
         if (!el.atmGrad) return;
@@ -431,10 +358,6 @@
         var bright = (1 + (S.glow.y / window.innerHeight) * 0.04 - 0.02).toFixed(4);
         el.atmosphere.style.filter = 'hue-rotate(' + hue + 'deg) brightness(' + bright + ')';
     }
-
-    // ==========================================
-    // FILM GRAIN
-    // ==========================================
 
     function initGrain() {
         var canvas = el.grainCanvas;
@@ -459,10 +382,6 @@
         ctx.putImageData(img, 0, 0);
     }
 
-    // ==========================================
-    // MOBILE — ambient breathing
-    // ==========================================
-
     function initMobileBreathing() {
         var ambients = document.querySelectorAll('.atmosphere__ambient');
         ambients.forEach(function (g, i) {
@@ -470,10 +389,6 @@
             g.style.opacity = '0.35';
         });
     }
-
-    // ==========================================
-    // LIFECYCLE
-    // ==========================================
 
     document.addEventListener('visibilitychange', function () {
         if (document.hidden) {
@@ -487,10 +402,6 @@
     window.addEventListener('beforeunload', function () {
         if (S.rafId) cancelAnimationFrame(S.rafId);
     });
-
-    // ==========================================
-    // BOOT
-    // ==========================================
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);

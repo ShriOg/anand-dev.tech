@@ -1,16 +1,5 @@
-/* ================================================================
-   Admin Dashboard — Pramod Fast Food
-   ================================================================
-   Fully isolated from customer frontend.
-   Spacing  : 4px base (--sp-1…--sp-10)
-   Radii    : sm 6 / md 10 / lg 16 / full 9999
-   Shadows  : 3-tier
-   ================================================================ */
-
-/* ---------- Reset ---------- */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
-/* ---------- Design Tokens ---------- */
 :root{
     --c-brand:       #e85d04;
     --c-brand-light: #f48c06;
@@ -24,7 +13,6 @@
     --c-blue:        #3b82f6;
     --c-purple:      #8b5cf6;
 
-    /* Light theme */
     --c-bg:          #f4f5f7;
     --c-surface:     #ffffff;
     --c-surface-alt: #f9fafb;
@@ -39,26 +27,20 @@
     --sidebar-active:#e85d04;
     --sidebar-w:     240px;
 
-    /* Spacing */
     --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:20px;--sp-6:24px;--sp-8:32px;--sp-10:40px;
 
-    /* Radii */
     --r-sm:6px;--r-md:10px;--r-lg:16px;--r-full:9999px;
 
-    /* Shadows */
     --sh-sm:0 1px 2px rgba(0,0,0,.05);
     --sh-md:0 4px 12px rgba(0,0,0,.07);
     --sh-lg:0 10px 32px rgba(0,0,0,.10);
 
-    /* Motion */
     --ease:cubic-bezier(.4,0,.2,1);
     --dur:0.2s;
 
-    /* Font */
     --ff:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 }
 
-/* Dark mode tokens */
 [data-theme="dark"]{
     --c-bg:          #0f0f17;
     --c-surface:     #1a1a28;
@@ -81,9 +63,6 @@ body{
     overflow-x:hidden;
 }
 
-/* ================================================================
-   PASSWORD GATE
-   ================================================================ */
 .gate{
     position:fixed;inset:0;z-index:9999;
     background:var(--c-bg);
@@ -142,9 +121,6 @@ body{
 .gate__btn:disabled{opacity:.6;cursor:not-allowed}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ================================================================
-   SIDEBAR
-   ================================================================ */
 .sidebar{
     position:fixed;top:0;left:0;bottom:0;
     width:var(--sidebar-w);
@@ -205,21 +181,14 @@ body{
 }
 .sidebar__install-btn:hover{background:var(--c-brand);color:#fff}
 
-/* Fix: author display:flex overrides native [hidden] */
 .sidebar[hidden]{display:none}
 
-/* ================================================================
-   MAIN LAYOUT
-   ================================================================ */
 .layout{
     margin-left:var(--sidebar-w);
     min-height:100dvh;
     transition:margin .3s var(--ease);
 }
 
-/* ================================================================
-   TOPBAR
-   ================================================================ */
 .topbar{
     position:sticky;top:0;z-index:50;
     display:flex;align-items:center;gap:var(--sp-4);
@@ -241,9 +210,6 @@ body{
     font-size:12.5px;font-weight:600;
 }
 
-/* ================================================================
-   PAGE CONTAINER
-   ================================================================ */
 .page-container{padding:var(--sp-6)}
 .page{animation:fadeUp .3s var(--ease) both}
 
@@ -276,9 +242,6 @@ body{
 }
 .tool-btn--outline:hover{border-color:var(--c-brand);color:var(--c-brand);background:transparent}
 
-/* ================================================================
-   STATS GRID (Dashboard)
-   ================================================================ */
 .stats-grid{
     display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
     gap:var(--sp-4);margin-bottom:var(--sp-6);
@@ -297,9 +260,6 @@ body{
 .stat-card--accent .stat-card__val{color:var(--c-brand)}
 .stat-card--green .stat-card__val{color:var(--c-green)}
 
-/* ================================================================
-   PANEL (generic card container)
-   ================================================================ */
 .panel{
     background:var(--c-surface);border-radius:var(--r-lg);
     border:1px solid var(--c-border);box-shadow:var(--sh-sm);
@@ -318,9 +278,6 @@ body{
 .panel__action:hover{color:var(--c-brand-dark)}
 .panel__body{padding:var(--sp-4) var(--sp-5)}
 
-/* ================================================================
-   ORDER CARDS (Live Orders)
-   ================================================================ */
 .orders-grid{display:flex;flex-direction:column;gap:var(--sp-3)}
 
 .order-card{
@@ -392,7 +349,6 @@ body{
 .status-select--completed{border-color:var(--c-green);color:var(--c-green-dark)}
 .status-select--cancelled{border-color:var(--c-red);color:var(--c-red)}
 
-/* Premium inline status pill buttons */
 .status-buttons{display:flex;gap:8px;flex-wrap:wrap}
 .status-btn{
     background:transparent;border:none;padding:7px 14px;
@@ -410,7 +366,6 @@ body{
 
 .order-card__actions{display:flex;align-items:center;gap:var(--sp-2)}
 
-/* Delete order button */
 .btn-delete-order{
     padding:5px 10px;font-size:11px;font-weight:600;
     border:1.5px solid var(--c-red);border-radius:var(--r-sm);
@@ -420,7 +375,6 @@ body{
 .btn-delete-order:hover{background:var(--c-red);color:#fff}
 .btn-delete-order:disabled{opacity:.5;cursor:not-allowed}
 
-/* Fade-out animation for deleted cards */
 .order-card--fade-out{
     animation:orderFadeOut .35s var(--ease) forwards;
     pointer-events:none;
@@ -430,9 +384,6 @@ body{
     100%{opacity:0;transform:scale(.96)}
 }
 
-/* ================================================================
-   DATA TABLE (History)
-   ================================================================ */
 .table-wrap{overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--c-border);background:var(--c-surface)}
 .data-table{width:100%;border-collapse:collapse;font-size:13px}
 .data-table th{
@@ -459,7 +410,6 @@ body{
 .status-badge--completed{background:#d1fae5;color:#065f46}
 .status-badge--cancelled{background:#fee2e2;color:#991b1b}
 
-/* Pagination */
 .pagination{
     display:flex;align-items:center;justify-content:center;
     gap:var(--sp-2);padding:var(--sp-4);
@@ -475,9 +425,6 @@ body{
 .pagination__btn.active{background:var(--c-brand);color:#fff;border-color:var(--c-brand)}
 .pagination__btn:disabled{opacity:.4;cursor:not-allowed}
 
-/* ================================================================
-   MENU MANAGEMENT CARDS
-   ================================================================ */
 .menu-mgmt-grid{display:flex;flex-direction:column;gap:var(--sp-3)}
 
 .menu-mgmt-card{
@@ -513,7 +460,6 @@ body{
 
 .menu-mgmt-card__toggles{display:flex;gap:var(--sp-3);align-items:center}
 
-/* Toggle switch */
 .toggle{
     position:relative;display:inline-flex;align-items:center;gap:var(--sp-2);
     cursor:pointer;font-size:12px;color:var(--c-text-soft);font-weight:500;
@@ -543,15 +489,11 @@ body{
 .menu-mgmt-card__save:hover{background:var(--c-brand-dark)}
 .menu-mgmt-card__save:active{transform:scale(.95)}
 
-/* ================================================================
-   ANALYTICS
-   ================================================================ */
 .analytics-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-5)}
 .analytics-grid .panel:last-child{grid-column:1/-1}
 .chart-container{position:relative;min-height:200px}
 .chart-container canvas{width:100%!important;height:auto!important}
 
-/* Top items list */
 .top-item{
     display:flex;align-items:center;gap:var(--sp-3);
     padding:var(--sp-2) 0;font-size:13px;
@@ -565,9 +507,6 @@ body{
 .top-item__name{flex:1;font-weight:500}
 .top-item__count{font-weight:700;color:var(--c-text-soft)}
 
-/* ================================================================
-   TOAST (admin version)
-   ================================================================ */
 .admin-toast{
     position:fixed;top:var(--sp-5);right:var(--sp-5);
     max-width:340px;padding:var(--sp-3) var(--sp-5);
@@ -583,9 +522,6 @@ body{
 .admin-toast--error{border-left-color:var(--c-red)}
 .admin-toast--info{border-left-color:var(--c-blue)}
 
-/* ================================================================
-   CONFIRM DIALOG
-   ================================================================ */
 .confirm-overlay{
     position:fixed;inset:0;z-index:200;
     background:rgba(0,0,0,.45);backdrop-filter:blur(3px);
@@ -612,9 +548,6 @@ body{
 .confirm-dialog__btn--ok{background:var(--c-red);color:#fff}
 .confirm-dialog__btn--ok:hover{background:var(--c-red-dark)}
 
-/* ================================================================
-   SKELETON ROWS
-   ================================================================ */
 .skeleton-rows{display:flex;flex-direction:column;gap:var(--sp-3)}
 .skeleton-row{
     height:48px;border-radius:var(--r-sm);
@@ -623,14 +556,8 @@ body{
 }
 @keyframes shimmer{to{background-position:-200% 0}}
 
-/* ================================================================
-   ANIMATIONS
-   ================================================================ */
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-/* ================================================================
-   DASHBOARD RECENT ORDER ROW
-   ================================================================ */
 .recent-row{
     display:flex;align-items:center;gap:var(--sp-3);
     padding:var(--sp-3) 0;font-size:13px;
@@ -641,9 +568,6 @@ body{
 .recent-row__total{font-weight:700;color:var(--c-green);min-width:60px;text-align:right}
 .recent-row__status{min-width:90px;text-align:center}
 
-/* ================================================================
-   RESPONSIVE
-   ================================================================ */
 @media(max-width:860px){
     .sidebar{transform:translateX(-100%)}
     .sidebar.open{transform:translateX(0)}
@@ -660,9 +584,6 @@ body{
     .tool-input,.tool-select{flex:1;min-width:120px}
 }
 
-/* ================================================================
-   COLD-START BANNER
-   ================================================================ */
 .cold-banner{
     background:linear-gradient(90deg,#fef3c7,#fde68a,#fef3c7);
     background-size:200% 100%;
@@ -672,11 +593,6 @@ body{
     text-align:center;margin-bottom:var(--sp-4);
 }
 
-/* ================================================================
-   MICRO-INTERACTIONS & POLISH
-   ================================================================ */
-
-/* --- Universal button press --- */
 .tool-btn:active,
 .gate__btn:active,
 .menu-mgmt-card__save:active,
@@ -686,7 +602,6 @@ body{
 .confirm-dialog__btn:active,
 .panel__action:active{transform:scale(.94)}
 
-/* --- Nav item hover indicator --- */
 .nav-item::before{
     content:'';position:absolute;left:0;top:50%;
     width:3px;height:0;border-radius:0 var(--r-sm) var(--r-sm) 0;
@@ -697,28 +612,23 @@ body{
 .nav-item:hover::before{height:55%}
 .nav-item.active::before{height:60%;background:#fff}
 
-/* --- Stat card enhanced hover --- */
 .stat-card{
     transition:transform .25s var(--ease),box-shadow .25s var(--ease);
 }
 .stat-card:hover{transform:translateY(-3px);box-shadow:var(--sh-lg)}
 .stat-card__val{transition:color var(--dur)}
 
-/* --- Panel hover elevation --- */
 .panel{transition:box-shadow .25s var(--ease)}
 .panel:hover{box-shadow:var(--sh-md)}
 
-/* --- Order card slide-in entrance --- */
 .order-card{animation:fadeSlideUp .35s var(--ease) both}
 .order-card--new{animation:fadeSlideUp .35s var(--ease) both,pulseGlow 2s var(--ease)}
 @keyframes fadeSlideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pulseGlow{0%,100%{box-shadow:var(--sh-sm)}50%{box-shadow:0 0 0 4px rgba(232,93,4,.15),var(--sh-md)}}
 
-/* --- Status badge pulse for pending --- */
 .status-badge--pending{animation:pendingPulse 2.5s ease-in-out infinite}
 @keyframes pendingPulse{0%,100%{opacity:1}50%{opacity:.65}}
 
-/* --- Socket status live pulse --- */
 .topbar__status{transition:color var(--dur)}
 .topbar__status--live{color:var(--c-green)}
 .topbar__status--live::before{
@@ -732,7 +642,6 @@ body{
 .topbar__status--offline{color:var(--c-red)}
 @keyframes livePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.45;transform:scale(1.35)}}
 
-/* --- Page transition --- */
 .page{
     animation:pageIn .3s var(--ease) both;
 }
@@ -740,7 +649,6 @@ body{
 @keyframes pageIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pageOut{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-6px)}}
 
-/* --- Empty state component --- */
 .empty-state{
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     padding:var(--sp-10) var(--sp-6);text-align:center;
@@ -750,7 +658,6 @@ body{
 .empty-state__title{font-size:15px;font-weight:700;color:var(--c-text);margin-bottom:var(--sp-1)}
 .empty-state__sub{font-size:13px;color:var(--c-text-soft);max-width:260px}
 
-/* --- Button loading spinner --- */
 .btn--loading{
     pointer-events:none;opacity:.7;position:relative;color:transparent!important;
 }
@@ -762,21 +669,16 @@ body{
     animation:spin .55s linear infinite;
 }
 
-/* --- Recent row hover --- */
 .recent-row{transition:background var(--dur);border-radius:var(--r-sm);padding-left:var(--sp-2);padding-right:var(--sp-2)}
 .recent-row:hover{background:var(--c-surface-alt)}
 
-/* --- History table row fade-in --- */
 .data-table tbody tr{animation:fadeSlideUp .25s var(--ease) both}
 
-/* --- Menu card save button reveal --- */
 .menu-mgmt-card__save{transition:opacity .25s var(--ease),background var(--dur),transform .12s}
 
-/* --- Topbar shadow on scroll --- */
 .topbar{transition:box-shadow .25s var(--ease)}
 .topbar--scrolled{box-shadow:var(--sh-md)}
 
-/* --- Sidebar overlay for mobile --- */
 @media(max-width:860px){
     .sidebar-overlay{
         position:fixed;inset:0;z-index:99;
@@ -787,38 +689,31 @@ body{
     .sidebar-overlay--visible{opacity:1;pointer-events:auto}
 }
 
-/* --- Toggle switch bounce --- */
 .toggle__track{transition:background .25s var(--ease)}
 .toggle__track::after{transition:transform .25s cubic-bezier(.34,1.56,.64,1)}
 
-/* --- Confirm dialog entrance --- */
 .confirm-overlay:not([hidden]){animation:overlayIn .2s var(--ease)}
 .confirm-overlay:not([hidden]) .confirm-dialog{animation:dialogPop .3s cubic-bezier(.34,1.56,.64,1)}
 @keyframes overlayIn{from{opacity:0}to{opacity:1}}
 @keyframes dialogPop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
 
-/* --- Toast entrance enhancement --- */
 .admin-toast--visible{transform:translateX(0);opacity:1;animation:toastSlide .4s var(--ease)}
 @keyframes toastSlide{from{transform:translateX(120%) scale(.95);opacity:0}to{transform:translateX(0) scale(1);opacity:1}}
 
-/* --- Skeleton enhanced (card shape) --- */
 .skeleton-card{
     height:120px;border-radius:var(--r-md);
     background:linear-gradient(90deg,var(--c-surface-alt) 25%,var(--c-border) 50%,var(--c-surface-alt) 75%);
     background-size:200% 100%;animation:shimmer 1.4s infinite linear;
 }
 
-/* --- Interactive cursor safeguard --- */
 [data-action],[data-goto],[data-page]{cursor:pointer}
 .status-select:hover,.tool-select:hover{border-color:var(--c-brand)}
 
-/* --- Stat card skeleton --- */
 .stat-card .stat-card__val{
     min-width:40px;display:inline-block;
     transition:transform .2s var(--ease);
 }
 
-/* --- Animated counter pop --- */
 @keyframes statValPop{
     0%{transform:scale(1)}
     50%{transform:scale(1.12)}

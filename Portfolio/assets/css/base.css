@@ -1,12 +1,3 @@
-/* 
-   ANAND DEV OS — Base Styles
-   Reset, typography, and foundational elements
-*/
-
-/* ══════════════════════════════════════════════════════════════════════════
-   RESET
-   ══════════════════════════════════════════════════════════════════════════ */
-
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -73,10 +64,6 @@ input, textarea, select {
   border: none;
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   TYPOGRAPHY
-   ══════════════════════════════════════════════════════════════════════════ */
-
 h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   line-height: var(--leading-tight);
@@ -101,10 +88,6 @@ p {
 .text-muted { color: var(--text-muted); }
 .text-accent { color: var(--accent-primary); }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   UTILITY CLASSES
-   ══════════════════════════════════════════════════════════════════════════ */
-
 .sr-only {
   position: absolute;
   width: 1px;
@@ -116,10 +99,6 @@ p {
   white-space: nowrap;
   border: 0;
 }
-
-/* ══════════════════════════════════════════════════════════════════════════
-   SCROLLBAR
-   ══════════════════════════════════════════════════════════════════════════ */
 
 ::-webkit-scrollbar {
   width: 8px;
@@ -139,20 +118,16 @@ p {
   background: var(--bg-glass-hover);
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   PRINT STYLES
-   ══════════════════════════════════════════════════════════════════════════ */
-
 @media print {
   .nav, .footer, .hero__bg, .btn {
     display: none !important;
   }
-  
+
   body {
     background: white;
     color: black;
   }
-  
+
   * {
     color: black !important;
     background: transparent !important;

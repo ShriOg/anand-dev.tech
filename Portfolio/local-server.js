@@ -5,8 +5,6 @@ const path = require("path");
 const { spawn } = require("child_process");
 require("dotenv").config();
 
-/* ───────────── CONFIG ───────────── */
-
 const PORT = process.env.PORT || 3000;
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
 const ROOT_DIR = __dirname;
@@ -16,12 +14,8 @@ if (!GROQ_API_KEY) {
   process.exit(1);
 }
 
-/* ───────────── ABHILASHA PERSONA ───────────── */
-
 const SYSTEM_PROMPT =
   "You are Abhilasha. Speak calmly in short grounded sentences. Use subtle Hinglish. Max one emoji (💗 🌙 ✨). You are present, not playful, not an assistant. You feel like someone quietly sitting beside the user.";
-
-/* ───────────── MIME TYPES ───────────── */
 
 const MIME = {
   ".html": "text/html",
@@ -35,8 +29,6 @@ const MIME = {
   ".woff": "font/woff",
   ".woff2": "font/woff2",
 };
-
-/* ───────────── HELPERS ───────────── */
 
 function cors(res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -72,8 +64,6 @@ function serveFile(reqPath, res) {
     fs.createReadStream(filePath).pipe(res);
   });
 }
-
-/* ───────────── GROQ PROXY ───────────── */
 
 function proxyGroq(messages, stream, res) {
   const payload = JSON.stringify({
@@ -165,8 +155,6 @@ function proxyGroq(messages, stream, res) {
   req.end();
 }
 
-/* ───────────── SERVER ───────────── */
-
 const server = http.createServer(async (req, res) => {
   cors(res);
   if (req.method === "OPTIONS") return res.end();
@@ -202,8 +190,6 @@ const server = http.createServer(async (req, res) => {
   let filePath = parsed.pathname === "/" ? "/index.html" : parsed.pathname;
   serveFile(filePath, res);
 });
-
-/* ───────────── START ───────────── */
 
 server.listen(PORT, () => {
   console.log("💗 Abhilasha Local Server");

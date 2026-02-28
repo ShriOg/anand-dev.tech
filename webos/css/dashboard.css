@@ -635,25 +635,25 @@ body {
     width: 60px;
     padding: 16px 0;
   }
-  
+
   .dock-icon {
     width: 40px;
     height: 40px;
     font-size: 20px;
   }
-  
+
   .workspace {
     padding: 16px;
   }
-  
+
   .files-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .admin-stats {
     grid-template-columns: 1fr;
   }
-  
+
   .chat-message {
     max-width: 85%;
   }

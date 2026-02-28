@@ -1,25 +1,15 @@
-/**
- * ui.js — All DOM rendering: menu cards, cart modal, stats, skeletons, toasts.
- *
- * Rendering is pure: each function reads MenuData / Cart / State and
- * writes to a known container. No side-effects outside the DOM.
- */
 'use strict';
 
 const UI = (() => {
-    /* ---------- DOM shorthand ---------- */
+
     const $ = (s, ctx = document) => ctx.querySelector(s);
     const $$ = (s, ctx = document) => ctx.querySelectorAll(s);
 
-    /* ---------- Internal state ---------- */
     const _prevQty = new Map();
     let _lastCartCount = 0;
-    let _checkoutStep = 'cart'; // 'cart' | 'form' | 'summary'
+    let _checkoutStep = 'cart';
     let _customerInfo = {};
 
-    /* ====================================================================
-       STATS
-    ==================================================================== */
     const renderStats = () => {
         const items = MenuData.allItems();
         const specials = items.filter(i => i.special).length;
@@ -34,9 +24,6 @@ const UI = (() => {
         if (avgEl) avgEl.textContent = `₹${avg}`;
     };
 
-    /* ====================================================================
-       SKELETON LOADER
-    ==================================================================== */
     const showSkeleton = () => {
         const container = $('#menuContainer');
         container.innerHTML = Array.from({ length: 4 }, () => `
@@ -48,9 +35,6 @@ const UI = (() => {
         `).join('');
     };
 
-    /* ====================================================================
-       MENU RENDERING
-    ==================================================================== */
     const _matchSearch = (item, query) => {
         if (!query) return true;
         const q = query.toLowerCase();
@@ -175,9 +159,6 @@ const UI = (() => {
         });
     };
 
-    /* ====================================================================
-       CART BADGE
-    ==================================================================== */
     const renderCartBadge = () => {
         const badge = $('#cartBadge');
         const c = Cart.count();
@@ -192,11 +173,6 @@ const UI = (() => {
         _lastCartCount = c;
     };
 
-    /* ====================================================================
-       CART MODAL
-    ==================================================================== */
-
-    /** Pick up to 6 random menu items not currently in cart, render as collapsible dropdown */
     const _renderSuggestions = () => {
         const cartIds = new Set(Cart.snapshot().map(i => i.id));
         const available = MenuData.allItems().filter(i => !cartIds.has(i.id));
@@ -231,20 +207,18 @@ const UI = (() => {
         const footerEl = $('#cartFooter');
         const titleEl  = $('.cart-modal__title');
 
-        /* --- Checkout FORM step --- */
         if (_checkoutStep === 'form') {
             if (titleEl) titleEl.innerHTML = '<span class="cart-modal__title-icon">📋</span> Details';
             _renderCheckoutForm(listEl, footerEl);
             return;
         }
-        /* --- Order SUMMARY step --- */
+
         if (_checkoutStep === 'summary') {
             if (titleEl) titleEl.innerHTML = '<span class="cart-modal__title-icon">📦</span> Summary';
             _renderOrderSummary(listEl, footerEl);
             return;
         }
 
-        /* --- Default CART step --- */
         if (titleEl) titleEl.innerHTML = '<span class="cart-modal__title-icon">🛒</span> Your Cart';
         const items = Cart.snapshot();
 
@@ -286,7 +260,6 @@ const UI = (() => {
             <button class="checkout-btn" id="checkoutBtn" data-action="checkout-start">💬 Place Order via WhatsApp</button>`;
     };
 
-    /* ---------- Checkout Form ---------- */
     const _renderCheckoutForm = (listEl, footerEl) => {
         const ci = _customerInfo;
         listEl.innerHTML = `
@@ -336,7 +309,6 @@ const UI = (() => {
             </div>`;
     };
 
-    /* ---------- Order Summary ---------- */
     const _renderOrderSummary = (listEl, footerEl) => {
         const ci = _customerInfo;
         const items = Cart.snapshot();
@@ -376,7 +348,6 @@ const UI = (() => {
             </div>`;
     };
 
-    /* ---------- Checkout Step Manager ---------- */
     const setCheckoutStep = (step) => { _checkoutStep = step; renderCartModal(); };
     const getCheckoutStep = () => _checkoutStep;
     const setCustomerInfo = (info) => { _customerInfo = info; };
@@ -394,9 +365,6 @@ const UI = (() => {
         }
     };
 
-    /* ====================================================================
-       TOAST (mini feedback when item added)
-    ==================================================================== */
     let _toastTimer;
     const showToast = (message) => {
         let el = $('#toast');
@@ -414,9 +382,6 @@ const UI = (() => {
         _toastTimer = setTimeout(() => el.classList.remove('toast--visible'), 2200);
     };
 
-    /* ====================================================================
-       ACTIVE STATES (tabs, chips)
-    ==================================================================== */
     const setActiveTab = (key) => {
         $$('.tab').forEach(t => {
             const active = t.dataset.category === key;
@@ -433,9 +398,6 @@ const UI = (() => {
         });
     };
 
-    /* ====================================================================
-       LOYALTY BAR (frontend-ready placeholder)
-    ==================================================================== */
     const renderLoyaltyBar = (user) => {
         const el = $('#loyaltyBar');
         if (!el) return;
@@ -456,7 +418,6 @@ const UI = (() => {
         }
     };
 
-    /* ---------- Public surface ---------- */
     return Object.freeze({
         $, $$,
         renderStats, showSkeleton, renderMenu,

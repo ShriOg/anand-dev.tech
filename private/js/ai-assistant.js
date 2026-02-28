@@ -1,44 +1,27 @@
-/**
- * ═══════════════════════════════════════════════════════════
- * PROFESSIONAL SPACE - AI ASSISTANT MODULE
- * Portfolio optimization, recruiter-focused AI tools
- * ═══════════════════════════════════════════════════════════
- */
-
 const AIAssistant = {
   isOpen: false,
   currentProject: null,
   activeTab: 'actions',
-  
-  // AI Provider - Uses Gemini API (free tier)
+
   API_KEY_STORAGE: 'pro_ai_api_key',
   apiKey: null,
-  
-  // ════════════════════════════════════════════════════════════
-  // REPAIR FALLBACK STATE (NOT FEEDBACK)
-  // ════════════════════════════════════════════════════════════
-  // Fallback responses are for RECOVERY, not conversational replies.
-  // A fallback message triggers ONLY ONCE per failure event.
-  // After triggering, normal logic resumes. Fallback MUST NOT repeat.
-  // ════════════════════════════════════════════════════════════
+
   fallbackState: {
     triggered: false,
     lastFailureId: null,
     lastAction: null
   },
-  
-  // Check if fallback can be triggered (prevents repetition)
+
   canTriggerFallback(action, failureId) {
-    // If same failure for same action, don't repeat fallback
-    if (this.fallbackState.triggered && 
+
+    if (this.fallbackState.triggered &&
         this.fallbackState.lastFailureId === failureId &&
         this.fallbackState.lastAction === action) {
       return false;
     }
     return true;
   },
-  
-  // Mark fallback as triggered
+
   markFallbackTriggered(action, failureId) {
     this.fallbackState = {
       triggered: true,
@@ -46,8 +29,7 @@ const AIAssistant = {
       lastAction: action
     };
   },
-  
-  // Reset fallback state (call on successful API response)
+
   resetFallbackState() {
     this.fallbackState = {
       triggered: false,
@@ -55,104 +37,90 @@ const AIAssistant = {
       lastAction: null
     };
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // INITIALIZATION
-  // ═══════════════════════════════════════════════════════════
+
   init() {
     this.loadApiKey();
     this.bindEvents();
     this.injectPanelHTML();
-    // Open panel by default
+
     this.openPanel();
   },
-  
+
   loadApiKey() {
     this.apiKey = localStorage.getItem(this.API_KEY_STORAGE) || null;
   },
-  
+
   saveApiKey(key) {
     this.apiKey = key;
     localStorage.setItem(this.API_KEY_STORAGE, key);
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // EVENT BINDING
-  // ═══════════════════════════════════════════════════════════
+
   bindEvents() {
-    // AI Panel toggle
+
     document.getElementById('aiPanelToggle')?.addEventListener('click', () => this.togglePanel());
     document.getElementById('aiPanelClose')?.addEventListener('click', () => this.closePanel());
-    
-    // Tab switching
+
     document.querySelectorAll('.ai-tab').forEach(tab => {
       tab.addEventListener('click', () => this.switchTab(tab.dataset.tab));
     });
-    
-    // API Key setup
+
     document.getElementById('aiSaveApiKey')?.addEventListener('click', () => this.handleSaveApiKey());
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // PANEL MANAGEMENT
-  // ═══════════════════════════════════════════════════════════
+
   injectPanelHTML() {
-    // Panel is already in HTML
+
   },
-  
+
   togglePanel() {
     this.isOpen ? this.closePanel() : this.openPanel();
   },
-  
+
   openPanel() {
     this.isOpen = true;
     document.getElementById('aiPanel')?.classList.add('open');
     document.querySelector('.pro-main')?.classList.add('ai-panel-open');
-    
+
     if (!this.apiKey) {
       this.showApiKeySetup();
     } else {
       this.loadPanelContent();
     }
   },
-  
+
   closePanel() {
     this.isOpen = false;
     document.getElementById('aiPanel')?.classList.remove('open');
     document.querySelector('.pro-main')?.classList.remove('ai-panel-open');
   },
-  
+
   switchTab(tabName) {
     this.activeTab = tabName;
-    
+
     document.querySelectorAll('.ai-tab').forEach(tab => {
       tab.classList.toggle('active', tab.dataset.tab === tabName);
     });
-    
+
     document.querySelectorAll('.ai-tab-content').forEach(content => {
       content.classList.toggle('active', content.id === `ai-content-${tabName}`);
     });
-    
+
     this.loadTabContent(tabName);
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // API KEY MANAGEMENT
-  // ═══════════════════════════════════════════════════════════
+
   showApiKeySetup() {
     document.getElementById('aiSetupView').style.display = 'block';
     document.getElementById('aiMainView').style.display = 'none';
   },
-  
+
   hideApiKeySetup() {
     document.getElementById('aiSetupView').style.display = 'none';
     document.getElementById('aiMainView').style.display = 'block';
   },
-  
+
   handleSaveApiKey() {
     const input = document.getElementById('aiApiKeyInput');
     const key = input?.value.trim();
-    
+
     if (key && key.length > 10) {
       this.saveApiKey(key);
       this.hideApiKeySetup();
@@ -162,19 +130,16 @@ const AIAssistant = {
       this.toast('Invalid API key', 'error');
     }
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // CONTENT LOADING
-  // ═══════════════════════════════════════════════════════════
+
   loadPanelContent() {
     this.hideApiKeySetup();
     this.loadTabContent(this.activeTab);
   },
-  
+
   loadTabContent(tab) {
     switch(tab) {
       case 'actions':
-        // Actions tab is handled by AIActions module
+
         break;
       case 'analyze':
         this.loadPortfolioAnalysis();
@@ -190,16 +155,13 @@ const AIAssistant = {
         break;
     }
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // PORTFOLIO ANALYSIS
-  // ═══════════════════════════════════════════════════════════
+
   async loadPortfolioAnalysis() {
     const container = document.getElementById('ai-content-analyze');
     if (!container) return;
-    
+
     const projects = ProApp.projects || [];
-    
+
     if (projects.length === 0) {
       container.innerHTML = `
         <div class="ai-empty">
@@ -209,10 +171,9 @@ const AIAssistant = {
       `;
       return;
     }
-    
-    // Calculate portfolio metrics
+
     const metrics = this.calculatePortfolioMetrics(projects);
-    
+
     container.innerHTML = `
       <div class="ai-metrics-grid">
         <div class="ai-metric">
@@ -232,21 +193,21 @@ const AIAssistant = {
           <span class="ai-metric-label">Technologies</span>
         </div>
       </div>
-      
+
       <div class="ai-section">
         <h4 class="ai-section-title">Project Impact Scores</h4>
         <div class="ai-project-scores">
           ${projects.map(p => this.renderProjectScore(p)).join('')}
         </div>
       </div>
-      
+
       <div class="ai-section">
         <h4 class="ai-section-title">Recommendations</h4>
         <div class="ai-recommendations">
           ${this.generateRecommendations(projects, metrics)}
         </div>
       </div>
-      
+
       <div class="ai-actions">
         <button class="ai-btn ai-btn-primary" onclick="AIAssistant.analyzeAllProjects()">
           Run Full Analysis
@@ -254,43 +215,39 @@ const AIAssistant = {
       </div>
     `;
   },
-  
+
   calculatePortfolioMetrics(projects) {
     const published = projects.filter(p => p.status === 'published').length;
     const techSet = new Set();
     projects.forEach(p => (p.tech || []).forEach(t => techSet.add(t)));
-    
+
     const scores = projects.map(p => this.calculateImpactScore(p));
     const avgScore = scores.length ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0;
-    
+
     return { published, techCount: techSet.size, avgScore, techSet: Array.from(techSet) };
   },
-  
+
   calculateImpactScore(project) {
-    let score = 50; // Base score
-    
-    // Technical depth (has tech stack)
+    let score = 50;
+
     if (project.tech && project.tech.length > 0) score += project.tech.length * 3;
-    
-    // Description quality
+
     const desc = project.description || '';
     if (desc.length > 50) score += 10;
     if (desc.length > 150) score += 10;
-    
-    // Has URLs
+
     if (project.liveUrl) score += 10;
     if (project.githubUrl) score += 10;
-    
-    // Status
+
     if (project.status === 'published') score += 10;
-    
+
     return Math.min(100, score);
   },
-  
+
   renderProjectScore(project) {
     const score = this.calculateImpactScore(project);
     const scoreClass = score >= 70 ? 'high' : score >= 50 ? 'medium' : 'low';
-    
+
     return `
       <div class="ai-project-score-item">
         <div class="ai-project-score-info">
@@ -311,31 +268,31 @@ const AIAssistant = {
       </div>
     `;
   },
-  
+
   generateRecommendations(projects, metrics) {
     const recs = [];
-    
+
     if (metrics.published < projects.length / 2) {
       recs.push({ type: 'warning', text: 'Consider publishing more projects to showcase your work' });
     }
-    
+
     if (metrics.techCount < 5) {
       recs.push({ type: 'info', text: 'Add more technologies to demonstrate versatility' });
     }
-    
+
     if (metrics.avgScore < 60) {
       recs.push({ type: 'warning', text: 'Improve project descriptions for better impact scores' });
     }
-    
+
     const lowScoreProjects = projects.filter(p => this.calculateImpactScore(p) < 50);
     if (lowScoreProjects.length > 0) {
       recs.push({ type: 'action', text: `${lowScoreProjects.length} project(s) need improvement` });
     }
-    
+
     if (recs.length === 0) {
       recs.push({ type: 'success', text: 'Portfolio is well-optimized' });
     }
-    
+
     return recs.map(r => `
       <div class="ai-recommendation ${r.type}">
         <span class="ai-rec-indicator"></span>
@@ -343,23 +300,20 @@ const AIAssistant = {
       </div>
     `).join('');
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // SEO ANALYSIS
-  // ═══════════════════════════════════════════════════════════
+
   async loadSEOAnalysis() {
     const container = document.getElementById('ai-content-seo');
     if (!container) return;
-    
+
     const projects = ProApp.projects || [];
-    
+
     if (projects.length === 0) {
       container.innerHTML = `<div class="ai-empty"><p>No projects to analyze</p></div>`;
       return;
     }
-    
+
     const seoData = this.analyzeSEO(projects);
-    
+
     container.innerHTML = `
       <div class="ai-section">
         <h4 class="ai-section-title">Keyword Density</h4>
@@ -372,7 +326,7 @@ const AIAssistant = {
           `).join('')}
         </div>
       </div>
-      
+
       <div class="ai-section">
         <h4 class="ai-section-title">Readability Scores</h4>
         <div class="ai-readability-list">
@@ -387,7 +341,7 @@ const AIAssistant = {
           }).join('')}
         </div>
       </div>
-      
+
       <div class="ai-section">
         <h4 class="ai-section-title">Missing Keywords</h4>
         <div class="ai-suggestions">
@@ -395,7 +349,7 @@ const AIAssistant = {
         </div>
         <p class="ai-hint">Consider adding these terms to improve discoverability</p>
       </div>
-      
+
       <div class="ai-actions">
         <button class="ai-btn ai-btn-primary" onclick="AIAssistant.runSEOOptimization()">
           Generate SEO Suggestions
@@ -403,75 +357,72 @@ const AIAssistant = {
       </div>
     `;
   },
-  
+
   analyzeSEO(projects) {
     const wordCounts = {};
     const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'it', 'as', 'was', 'that', 'this', 'from']);
-    
+
     projects.forEach(p => {
       const text = `${p.title || ''} ${p.description || ''} ${(p.tech || []).join(' ')}`.toLowerCase();
       const words = text.split(/\W+/).filter(w => w.length > 2 && !stopWords.has(w));
-      
+
       words.forEach(word => {
         wordCounts[word] = (wordCounts[word] || 0) + 1;
       });
     });
-    
+
     const keywords = Object.entries(wordCounts)
       .map(([word, count]) => ({ word, count }))
       .sort((a, b) => b.count - a.count);
-    
+
     const techKeywords = ['python', 'javascript', 'react', 'node', 'api', 'database', 'machine', 'learning', 'cloud', 'aws', 'docker', 'kubernetes'];
     const presentKeywords = new Set(keywords.map(k => k.word));
     const missingKeywords = techKeywords.filter(k => !presentKeywords.has(k));
-    
+
     return { keywords, missingKeywords };
   },
-  
+
   calculateReadability(text) {
     if (!text || text.length < 10) return { score: 0, level: 'low' };
-    
+
     const words = text.split(/\s+/).length;
     const sentences = text.split(/[.!?]+/).filter(s => s.trim()).length || 1;
     const avgWordsPerSentence = words / sentences;
-    
+
     let score = 100;
     if (avgWordsPerSentence > 25) score -= 30;
     else if (avgWordsPerSentence > 20) score -= 15;
-    
+
     if (words < 20) score -= 20;
     if (words > 200) score -= 10;
-    
+
     score = Math.max(0, Math.min(100, score));
     const level = score >= 70 ? 'high' : score >= 50 ? 'medium' : 'low';
-    
+
     return { score, level };
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // RECRUITER VIEW
-  // ═══════════════════════════════════════════════════════════
+
   async loadRecruiterView() {
     const container = document.getElementById('ai-content-recruiter');
     if (!container) return;
-    
+
     const projects = ProApp.projects || [];
-    
+
     if (projects.length === 0) {
       container.innerHTML = `<div class="ai-empty"><p>No projects to analyze</p></div>`;
       return;
     }
-    
+
     container.innerHTML = `
       <div class="ai-section">
         <h4 class="ai-section-title">First Impression Analysis</h4>
         <p class="ai-description">Simulating a 30-second recruiter skim-pass</p>
-        
+
         <div class="ai-recruiter-analysis">
           ${projects.slice(0, 5).map(p => this.renderRecruiterView(p)).join('')}
         </div>
       </div>
-      
+
       <div class="ai-section">
         <h4 class="ai-section-title">Suggested Order</h4>
         <p class="ai-description">Optimal project display order for recruiter engagement</p>
@@ -485,7 +436,7 @@ const AIAssistant = {
           `).join('')}
         </div>
       </div>
-      
+
       <div class="ai-actions">
         <button class="ai-btn ai-btn-primary" onclick="AIAssistant.runRecruiterAnalysis()">
           Run Deep Analysis
@@ -493,10 +444,10 @@ const AIAssistant = {
       </div>
     `;
   },
-  
+
   renderRecruiterView(project) {
     const insights = this.getRecruiterInsights(project);
-    
+
     return `
       <div class="ai-recruiter-project">
         <div class="ai-recruiter-header">
@@ -511,30 +462,30 @@ const AIAssistant = {
       </div>
     `;
   },
-  
+
   getRecruiterInsights(project) {
     const willRead = [];
     const willSkip = [];
     let suggestion = '';
     let clarity = 'medium';
-    
+
     if (project.title && project.title.length < 30) willRead.push('Title');
     else willSkip.push('Long title');
-    
+
     if (project.tech && project.tech.length > 0) willRead.push('Tech stack');
     else willSkip.push('Missing tech');
-    
+
     const desc = project.description || '';
     if (desc.length > 50 && desc.length < 200) willRead.push('Description');
     else if (desc.length >= 200) willSkip.push('Long description');
     else willSkip.push('Short description');
-    
+
     if (project.liveUrl) willRead.push('Live demo');
     if (project.githubUrl) willRead.push('Source code');
-    
+
     if (willRead.length >= 4) clarity = 'high';
     else if (willRead.length <= 2) clarity = 'low';
-    
+
     if (willSkip.includes('Missing tech')) {
       suggestion = 'Add technology stack to show technical skills';
     } else if (willSkip.includes('Long description')) {
@@ -542,12 +493,12 @@ const AIAssistant = {
     } else if (willSkip.includes('Short description')) {
       suggestion = 'Expand description to highlight impact';
     }
-    
+
     const clarityLabel = clarity === 'high' ? 'Clear' : clarity === 'medium' ? 'Moderate' : 'Needs Work';
-    
+
     return { willRead, willSkip, suggestion, clarity, clarityLabel };
   },
-  
+
   getSuggestedOrder(projects) {
     return projects
       .map(p => ({
@@ -558,7 +509,7 @@ const AIAssistant = {
       .sort((a, b) => b.score - a.score)
       .slice(0, 5);
   },
-  
+
   getOrderReason(project) {
     const score = this.calculateImpactScore(project);
     if (score >= 80) return 'High impact';
@@ -566,17 +517,14 @@ const AIAssistant = {
     if (project.tech && project.tech.length >= 3) return 'Strong tech';
     return 'Needs improvement';
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // SKILLS MAP
-  // ═══════════════════════════════════════════════════════════
+
   async loadSkillsMap() {
     const container = document.getElementById('ai-content-skills');
     if (!container) return;
-    
+
     const projects = ProApp.projects || [];
     const skills = this.extractSkills(projects);
-    
+
     container.innerHTML = `
       <div class="ai-section">
         <h4 class="ai-section-title">Extracted Skills</h4>
@@ -586,7 +534,7 @@ const AIAssistant = {
           `).join('')}
         </div>
       </div>
-      
+
       <div class="ai-section">
         <h4 class="ai-section-title">Skill Categories</h4>
         <div class="ai-skill-categories">
@@ -598,14 +546,14 @@ const AIAssistant = {
           `).join('')}
         </div>
       </div>
-      
+
       <div class="ai-section">
         <h4 class="ai-section-title">Missing Skills to Consider</h4>
         <div class="ai-suggestions">
           ${skills.suggestions.map(s => `<span class="ai-tag suggestion">${s}</span>`).join('')}
         </div>
       </div>
-      
+
       <div class="ai-section">
         <h4 class="ai-section-title">Resume Export</h4>
         <p class="ai-description">Copy-ready skills for resume</p>
@@ -618,7 +566,7 @@ const AIAssistant = {
       </div>
     `;
   },
-  
+
   extractSkills(projects) {
     const skillCounts = {};
     const categories = {
@@ -627,16 +575,16 @@ const AIAssistant = {
       'Tools': [],
       'Concepts': []
     };
-    
+
     const languageKeywords = ['python', 'javascript', 'typescript', 'java', 'c++', 'go', 'rust', 'ruby', 'php', 'swift', 'kotlin', 'html', 'css', 'sql'];
     const frameworkKeywords = ['react', 'vue', 'angular', 'node', 'express', 'django', 'flask', 'spring', 'rails', 'next', 'nuxt'];
     const toolKeywords = ['git', 'docker', 'kubernetes', 'aws', 'gcp', 'azure', 'mongodb', 'postgresql', 'redis', 'jenkins', 'terraform'];
-    
+
     projects.forEach(p => {
       (p.tech || []).forEach(tech => {
         const normalized = tech.toLowerCase().trim();
         skillCounts[normalized] = (skillCounts[normalized] || 0) + 1;
-        
+
         if (languageKeywords.some(l => normalized.includes(l))) {
           if (!categories['Languages'].includes(tech)) categories['Languages'].push(tech);
         } else if (frameworkKeywords.some(f => normalized.includes(f))) {
@@ -648,18 +596,18 @@ const AIAssistant = {
         }
       });
     });
-    
+
     const extracted = Object.entries(skillCounts)
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count);
-    
+
     const presentSkills = new Set(extracted.map(s => s.name.toLowerCase()));
     const allKeywords = [...languageKeywords, ...frameworkKeywords, ...toolKeywords];
     const suggestions = allKeywords.filter(k => !presentSkills.has(k)).slice(0, 8);
-    
+
     return { extracted, categories, suggestions };
   },
-  
+
   copyResumeSkills() {
     const box = document.getElementById('aiResumeSkills');
     if (box) {
@@ -668,22 +616,19 @@ const AIAssistant = {
       });
     }
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // PROJECT-LEVEL AI
-  // ═══════════════════════════════════════════════════════════
+
   openProjectAI(projectId) {
     const project = ProApp.projects.find(p => p.id === projectId);
     if (!project) return;
-    
+
     this.currentProject = project;
     this.showProjectAIModal(project);
   },
-  
+
   showProjectAIModal(project) {
     const score = this.calculateImpactScore(project);
     const insights = this.getRecruiterInsights(project);
-    
+
     document.getElementById('modalTitle').textContent = 'AI Project Tools';
     document.getElementById('modalBody').innerHTML = `
       <div class="ai-project-modal">
@@ -693,7 +638,7 @@ const AIAssistant = {
             Impact: ${score}
           </span>
         </div>
-        
+
         <div class="ai-project-modal-section">
           <h5>Quick Actions</h5>
           <div class="ai-quick-actions">
@@ -732,7 +677,7 @@ const AIAssistant = {
             </button>
           </div>
         </div>
-        
+
         <div class="ai-project-modal-section">
           <h5>Drafts Generator</h5>
           <div class="ai-draft-types">
@@ -750,7 +695,7 @@ const AIAssistant = {
             </button>
           </div>
         </div>
-        
+
         <div class="ai-project-modal-section">
           <h5>One-Click Optimization</h5>
           <button class="ai-btn ai-btn-primary ai-btn-full" onclick="AIAssistant.makeRecruiterReady('${project.id}')">
@@ -758,7 +703,7 @@ const AIAssistant = {
           </button>
           <p class="ai-hint">AI will analyze and suggest improvements. You approve each change.</p>
         </div>
-        
+
         <div id="aiProjectOutput" class="ai-project-output" style="display: none;">
           <div class="ai-output-header">
             <h5>AI Suggestion</h5>
@@ -781,173 +726,161 @@ const AIAssistant = {
         </div>
       </div>
     `;
-    
+
     ProApp.openModal();
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // AI GENERATION FUNCTIONS
-  // ═══════════════════════════════════════════════════════════
+
   pendingSuggestion: null,
-  
+
   async improveDescription(projectId) {
     const project = ProApp.projects.find(p => p.id === projectId);
     if (!project) return;
-    
+
     this.showLoading('Improving description...');
-    
+
     const original = project.description || '';
     const improved = await this.callAI('improve_description', {
       title: project.title,
       description: original,
       tech: project.tech
     });
-    
+
     this.showSuggestion('Description', original, improved, {
       type: 'description',
       projectId,
       field: 'description'
     });
   },
-  
+
   async generateBullets(projectId) {
     const project = ProApp.projects.find(p => p.id === projectId);
     if (!project) return;
-    
+
     this.showLoading('Converting to bullets...');
-    
+
     const original = project.description || '';
     const bullets = await this.callAI('convert_bullets', {
       title: project.title,
       description: original
     });
-    
+
     this.showSuggestion('Bullet Points', original, bullets, {
       type: 'description',
       projectId,
       field: 'description'
     });
   },
-  
+
   async suggestTitle(projectId) {
     const project = ProApp.projects.find(p => p.id === projectId);
     if (!project) return;
-    
+
     this.showLoading('Suggesting title...');
-    
+
     const original = project.title || '';
     const suggested = await this.callAI('suggest_title', {
       title: original,
       description: project.description,
       tech: project.tech
     });
-    
+
     this.showSuggestion('Title', original, suggested, {
       type: 'title',
       projectId,
       field: 'title'
     });
   },
-  
+
   async suggestTech(projectId) {
     const project = ProApp.projects.find(p => p.id === projectId);
     if (!project) return;
-    
+
     this.showLoading('Analyzing tech stack...');
-    
+
     const original = (project.tech || []).join(', ');
     const suggested = await this.callAI('suggest_tech', {
       title: project.title,
       description: project.description,
       currentTech: project.tech
     });
-    
+
     this.showSuggestion('Tech Stack', original, suggested, {
       type: 'tech',
       projectId,
       field: 'tech'
     });
   },
-  
+
   async generateDraft(projectId, draftType) {
     const project = ProApp.projects.find(p => p.id === projectId);
     if (!project) return;
-    
+
     const labels = {
       recruiter: 'Recruiter Description',
       resume: 'Resume Bullets',
       casestudy: 'Case Study Intro',
       elevator: 'Elevator Pitch'
     };
-    
+
     this.showLoading(`Generating ${labels[draftType]}...`);
-    
+
     const draft = await this.callAI(`draft_${draftType}`, {
       title: project.title,
       description: project.description,
       tech: project.tech
     });
-    
+
     this.showSuggestion(labels[draftType], project.description || 'No current description', draft, {
       type: 'description',
       projectId,
       field: 'description'
     });
   },
-  
+
   async makeRecruiterReady(projectId) {
     const project = ProApp.projects.find(p => p.id === projectId);
     if (!project) return;
-    
+
     this.showLoading('Running full optimization...');
-    
+
     const optimized = await this.callAI('recruiter_ready', {
       title: project.title,
       description: project.description,
       tech: project.tech
     });
-    
+
     this.showSuggestion('Recruiter-Ready Version', project.description || '', optimized, {
       type: 'description',
       projectId,
       field: 'description'
     });
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // AI API CALL - Uses shared AIService backend
-  // ═══════════════════════════════════════════════════════════
+
   async callAI(action, data) {
-    // ═══════════════════════════════════════════════════════════════
-    // AI-FIRST: Try shared backend service FIRST
-    // Local fallback is ONLY for failures, not as default
-    // ═══════════════════════════════════════════════════════════════
-    
-    // Try shared AI backend first (secure, no exposed keys)
+
     if (typeof AIService !== 'undefined' && AIService.isAvailable()) {
       try {
         const result = await AIService.action('professional', action, data);
-        
+
         if (result.success && result.response) {
-          // Success - reset fallback state
+
           this.resetFallbackState();
           console.log('[AI Assistant] Backend AI response received');
           return result.response;
         }
-        
+
         throw new Error(result.error || 'Empty response from backend');
-        
+
       } catch (backendError) {
         console.warn('[AI Assistant] Backend AI failed:', backendError.message);
-        // Fall through to legacy/fallback
+
       }
     }
-    
-    // Legacy: Try direct API if key is configured (deprecated)
+
     if (this.apiKey) {
       try {
         const prompt = this.buildPrompt(action, data);
-        
+
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${this.apiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -959,42 +892,37 @@ const AIAssistant = {
             }
           })
         });
-        
+
         if (!response.ok) {
           throw new Error('API request failed');
         }
-        
+
         const result = await response.json();
         const aiResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
-        
+
         if (aiResponse) {
           this.resetFallbackState();
           return aiResponse;
         }
-        
+
         throw new Error('Empty response');
-        
+
       } catch (e) {
         console.warn('[AI Assistant] Legacy API error:', e);
-        // Fall through to local fallback
+
       }
     }
-    
-    // ════════════════════════════════════════════════════════════
-    // REPAIR FALLBACK (NOT FEEDBACK)
-    // API error - trigger fallback ONCE per failure type
-    // ════════════════════════════════════════════════════════════
+
     const failureId = `api-error-${Date.now()}`;
     if (this.canTriggerFallback(action, failureId)) {
       this.markFallbackTriggered(action, failureId);
       console.log('[AI Assistant] Using local fallback');
       return this.localAIFallback(action, data);
     }
-    
-    // Fallback already triggered - return last known good result or empty
+
     return data.description || '';
   },
-  
+
   buildPrompt(action, data) {
     const prompts = {
       improve_description: `Improve this project description for a technical portfolio. Make it clear, concise, and recruiter-friendly. Keep technical accuracy.
@@ -1066,68 +994,58 @@ Tech Stack: ${(data.tech || []).join(', ')}
 
 Respond with ONLY the optimized description, no explanations.`
     };
-    
+
     return prompts[action] || prompts.improve_description;
   },
-  
-  // ════════════════════════════════════════════════════════════
-  // LOCAL AI FALLBACK (REPAIR MODE)
-  // ════════════════════════════════════════════════════════════
-  // This is part of the REPAIR FALLBACK system.
-  // It provides heuristic-based improvements when API is unavailable.
-  // This fallback triggers ONCE per failure - not as a default reply.
-  // ════════════════════════════════════════════════════════════
+
   localAIFallback(action, data) {
-    // Simple heuristic-based improvements when API is unavailable
+
     const desc = data.description || '';
     const title = data.title || 'Project';
     const tech = data.tech || [];
-    
+
     switch(action) {
       case 'improve_description':
         if (desc.length < 50) {
           return `${title} - A ${tech.length > 0 ? tech.slice(0, 2).join(' and ') + ' ' : ''}project demonstrating technical problem-solving and implementation skills.`;
         }
         return desc.replace(/\s+/g, ' ').trim();
-        
+
       case 'convert_bullets':
         const sentences = desc.split(/[.!?]+/).filter(s => s.trim());
         return sentences.map(s => `- ${s.trim()}`).join('\n');
-        
+
       case 'suggest_title':
         if (tech.length > 0) {
           return `${tech[0]} ${title.includes('Project') ? '' : 'Project'}`.trim();
         }
         return title;
-        
+
       case 'suggest_tech':
         const common = ['Git', 'Docker', 'REST API', 'CI/CD'];
         const missing = common.filter(c => !tech.some(t => t.toLowerCase().includes(c.toLowerCase())));
         return [...tech, ...missing.slice(0, 2)].join(', ');
-        
+
       case 'draft_recruiter':
         return `Built ${title.toLowerCase()} using ${tech.slice(0, 3).join(', ')}. ${desc.slice(0, 150)}${desc.length > 150 ? '...' : ''}`;
-        
+
       case 'draft_resume':
         return `- Developed ${title} using ${tech.slice(0, 2).join(' and ')}\n- Implemented core functionality demonstrating technical proficiency\n- Delivered working solution with clean, maintainable code`;
-        
+
       case 'draft_casestudy':
         return `This project addresses ${desc.slice(0, 100)}${desc.length > 100 ? '...' : ''} The solution leverages ${tech.slice(0, 2).join(' and ')} to create an effective implementation.`;
-        
+
       case 'draft_elevator':
         return `${title} is a ${tech[0] || 'software'} project that ${desc.slice(0, 80)}${desc.length > 80 ? '...' : ''}`;
-        
+
       case 'recruiter_ready':
         return `${title}: ${desc.replace(/\s+/g, ' ').trim().slice(0, 200)}${desc.length > 200 ? '...' : ''} Built with ${tech.join(', ')}.`;
-        
+
       default:
         return desc;
     }
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // SUGGESTION DISPLAY
-  // ═══════════════════════════════════════════════════════════
+
   showLoading(message) {
     const output = document.getElementById('aiProjectOutput');
     if (output) {
@@ -1140,13 +1058,13 @@ Respond with ONLY the optimized description, no explanations.`
       `;
     }
   },
-  
+
   showSuggestion(type, original, suggested, meta) {
     this.pendingSuggestion = { type, original, suggested, meta };
-    
+
     const output = document.getElementById('aiProjectOutput');
     if (!output) return;
-    
+
     output.style.display = 'block';
     output.innerHTML = `
       <div class="ai-output-header">
@@ -1169,48 +1087,44 @@ Respond with ONLY the optimized description, no explanations.`
       </div>
     `;
   },
-  
+
   discardSuggestion() {
     this.pendingSuggestion = null;
     const output = document.getElementById('aiProjectOutput');
     if (output) output.style.display = 'none';
     this.toast('Suggestion discarded');
   },
-  
+
   async applySuggestion() {
     if (!this.pendingSuggestion) return;
-    
+
     const { meta, suggested } = this.pendingSuggestion;
     const project = ProApp.projects.find(p => p.id === meta.projectId);
-    
+
     if (!project) {
       this.toast('Project not found', 'error');
       return;
     }
-    
-    // Apply the change
+
     if (meta.field === 'tech') {
       project.tech = suggested.split(',').map(t => t.trim()).filter(Boolean);
     } else {
       project[meta.field] = suggested;
     }
-    
+
     try {
       await Database.put('projects', project);
       await ProApp.loadProjects();
       this.toast('Change applied');
       this.pendingSuggestion = null;
-      
+
       const output = document.getElementById('aiProjectOutput');
       if (output) output.style.display = 'none';
     } catch (e) {
       this.toast('Failed to apply change', 'error');
     }
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // GLOBAL ACTIONS
-  // ═══════════════════════════════════════════════════════════
+
   async analyzeAllProjects() {
     this.toast('Running full portfolio analysis...');
     setTimeout(() => {
@@ -1218,7 +1132,7 @@ Respond with ONLY the optimized description, no explanations.`
       this.toast('Analysis complete');
     }, 1000);
   },
-  
+
   async runSEOOptimization() {
     if (!this.apiKey) {
       this.toast('Add API key for AI suggestions', 'error');
@@ -1230,7 +1144,7 @@ Respond with ONLY the optimized description, no explanations.`
       this.toast('SEO analysis updated');
     }, 1500);
   },
-  
+
   async runRecruiterAnalysis() {
     this.toast('Running recruiter analysis...');
     setTimeout(() => {
@@ -1238,10 +1152,7 @@ Respond with ONLY the optimized description, no explanations.`
       this.toast('Recruiter analysis complete');
     }, 1000);
   },
-  
-  // ═══════════════════════════════════════════════════════════
-  // UTILITIES
-  // ═══════════════════════════════════════════════════════════
+
   toast(message, type = 'info') {
     if (typeof ProApp !== 'undefined' && ProApp.toast) {
       ProApp.toast(message, type);
@@ -1249,7 +1160,7 @@ Respond with ONLY the optimized description, no explanations.`
       console.log(`[AI] ${message}`);
     }
   },
-  
+
   escapeHtml(str) {
     if (!str) return '';
     const div = document.createElement('div');
@@ -1258,8 +1169,7 @@ Respond with ONLY the optimized description, no explanations.`
   }
 };
 
-// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-  // Wait for ProApp to initialize
+
   setTimeout(() => AIAssistant.init(), 500);
 });

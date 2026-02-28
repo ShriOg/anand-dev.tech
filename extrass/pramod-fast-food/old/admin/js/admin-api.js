@@ -1,14 +1,7 @@
-/**
- * admin-api.js — API layer for admin dashboard.
- *
- * Handles all HTTP requests to the restaurant API.
- * No JWT — auth is handled by the client-side password gate.
- */
 'use strict';
 
 const AdminAPI = (() => {
 
-    /* ---------- Config ---------- */
     const BASE_URL = window.location.hostname === 'localhost'
         ? 'http://localhost:10000/api'
         : 'https://anand-os-backend.onrender.com/api';
@@ -16,7 +9,6 @@ const AdminAPI = (() => {
     const COLD_START_RETRY_DELAY = 2000;
     let _serverAwake = false;
 
-    /* ---------- Core fetch wrapper (with cold-start retry) ---------- */
     const _singleFetch = async (endpoint, options = {}) => {
         const headers = {
             'Content-Type': 'application/json',
@@ -44,7 +36,7 @@ const AdminAPI = (() => {
         try {
             return await _singleFetch(endpoint, options);
         } catch (err) {
-            /* Retry once on cold-start (network-level failures only) */
+
             if (!_serverAwake && (err.message === 'Failed to fetch' || err.name === 'TypeError')) {
                 console.log('[AdminAPI] Server may be waking up — retrying in 3.5s…');
                 document.dispatchEvent(new CustomEvent('admin:cold-start'));
@@ -56,10 +48,8 @@ const AdminAPI = (() => {
         }
     };
 
-    /* ---------- Dashboard Stats ---------- */
     const getStats = () => _fetch('/restaurant/stats');
 
-    /* ---------- Orders ---------- */
     const getOrders = (params = {}) => {
         const qs = new URLSearchParams();
         if (params.status) qs.set('status', params.status);
@@ -87,7 +77,6 @@ const AdminAPI = (() => {
             body: JSON.stringify({ status }),
         });
 
-    /* ---------- Menu ---------- */
     const getMenu = () => _fetch('/restaurant/menu');
 
     const updateMenuItem = (itemId, data) =>
@@ -96,10 +85,8 @@ const AdminAPI = (() => {
             body: JSON.stringify(data),
         });
 
-    /* ---------- Analytics ---------- */
     const getAnalytics = () => _fetch('/restaurant/analytics');
 
-    /* ---------- Public surface ---------- */
     return Object.freeze({
         getStats, getOrders, getRecentOrders, getTodayOrders,
         updateOrderStatus,

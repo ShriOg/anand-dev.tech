@@ -11,13 +11,13 @@ def check_python_version():
         print(f"❌ Python {version.major}.{version.minor} found")
         print("   Required: Python 3.10+ (3.14 recommended)")
         return False
-    
+
     is_64bit = sys.maxsize > 2**32
     if not is_64bit:
         print("❌ Python is 32-bit")
         print("   Required: 64-bit Python")
         return False
-    
+
     print(f"✅ Python {version.major}.{version.minor}.{version.micro} (64-bit)")
     return True
 
@@ -30,10 +30,10 @@ def check_files():
         "config.json",
         "stats.json"
     ]
-    
+
     script_dir = Path(__file__).parent
     all_exist = True
-    
+
     for filename in required_files:
         filepath = script_dir / filename
         if filepath.exists():
@@ -41,14 +41,14 @@ def check_files():
         else:
             print(f"❌ {filename} - NOT FOUND")
             all_exist = False
-    
+
     return all_exist
 
 def check_json_files():
     script_dir = Path(__file__).parent
-    
+
     print("\n[JSON Validation]")
-    
+
     config_path = script_dir / "config.json"
     try:
         with open(config_path, 'r') as f:
@@ -58,7 +58,7 @@ def check_json_files():
     except Exception as e:
         print(f"❌ config.json - {str(e)}")
         return False
-    
+
     stats_path = script_dir / "stats.json"
     try:
         with open(stats_path, 'r') as f:
@@ -71,47 +71,47 @@ def check_json_files():
 
 def check_imports():
     print("\n[Module Imports]")
-    
+
     try:
         import tkinter
         print("✅ tkinter (UI framework)")
     except ImportError:
         print("❌ tkinter - NOT AVAILABLE")
         return False
-    
+
     try:
         import ctypes
         print("✅ ctypes (Windows API)")
     except ImportError:
         print("❌ ctypes - NOT AVAILABLE")
         return False
-    
+
     try:
         from threading import Thread, RLock, Event
         print("✅ threading (concurrency)")
     except ImportError:
         print("❌ threading - NOT AVAILABLE")
         return False
-    
+
     return True
 
 def main():
     print("\n" + "="*60)
     print("  ANAND FOCUS ENGINE™ - SETUP VERIFICATION")
     print("="*60 + "\n")
-    
+
     print("[Python Environment]")
     python_ok = check_python_version()
-    
+
     print("\n[Required Files]")
     files_ok = check_files()
-    
+
     json_ok = check_json_files()
-    
+
     imports_ok = check_imports()
-    
+
     print("\n" + "="*60)
-    
+
     if python_ok and files_ok and json_ok and imports_ok:
         print("✅ ALL CHECKS PASSED - Ready to use!")
         print("\nLaunch with:")

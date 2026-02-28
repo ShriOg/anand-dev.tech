@@ -14,19 +14,19 @@ async function initDashboard() {
 
 function loadModule(moduleName) {
   currentModule = moduleName;
-  
+
   document.querySelectorAll('.dock-icon').forEach(icon => {
     icon.classList.remove('active');
   });
-  
+
   const activeIcon = document.querySelector(`[data-module="${moduleName}"]`);
   if (activeIcon) {
     activeIcon.classList.add('active');
   }
-  
+
   const workspace = document.getElementById('workspace');
   workspace.innerHTML = '';
-  
+
   switch(moduleName) {
     case 'notes':
       initNotesModule(workspace);

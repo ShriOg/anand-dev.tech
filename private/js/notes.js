@@ -1,10 +1,3 @@
-/**
- * ═══════════════════════════════════════════════════════════
- * PRIVATE SPACE - NOTES MODULE
- * Markdown editor with folders, tags, and auto-save
- * ═══════════════════════════════════════════════════════════
- */
-
 const PSNotes = (function() {
   'use strict';
 
@@ -14,23 +7,16 @@ const PSNotes = (function() {
   let _saveTimeout = null;
   let _searchQuery = '';
 
-  /**
-   * Load notes view
-   */
   async function load() {
     await loadNotes();
     render();
   }
 
-  /**
-   * Load all notes from storage
-   */
   async function loadNotes() {
     try {
       _notes = await PSStorage.getAll(PSStorage.STORES.NOTES);
       _notes.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-      
-      // Extract unique folders
+
       const folderSet = new Set(_folders);
       _notes.forEach(note => {
         if (note.folder) folderSet.add(note.folder);
@@ -41,9 +27,6 @@ const PSNotes = (function() {
     }
   }
 
-  /**
-   * Render notes interface
-   */
   function render() {
     const container = document.querySelector('#section-notes .ps-workspace');
     if (!container) return;
@@ -52,8 +35,8 @@ const PSNotes = (function() {
       <div class="ps-notes">
         <div class="ps-notes-sidebar">
           <div class="ps-notes-sidebar-header">
-            <input type="text" class="ps-input ps-input-search ps-notes-search" 
-                   placeholder="Search notes..." 
+            <input type="text" class="ps-input ps-input-search ps-notes-search"
+                   placeholder="Search notes..."
                    value="${escapeHtml(_searchQuery)}"
                    oninput="PSNotes.search(this.value)">
             <div class="ps-notes-actions">
@@ -67,7 +50,7 @@ const PSNotes = (function() {
             ${renderFolders()}
           </div>
         </div>
-        
+
         <div class="ps-notes-editor">
           ${_currentNote ? renderEditor() : renderEmptyState()}
         </div>
@@ -79,13 +62,10 @@ const PSNotes = (function() {
     }
   }
 
-  /**
-   * Render folder structure
-   */
   function renderFolders() {
     return _folders.map(folder => {
       const folderNotes = filterNotes().filter(n => (n.folder || 'General') === folder);
-      
+
       return `
         <div class="ps-folder open">
           <div class="ps-folder-header" onclick="this.parentElement.classList.toggle('open')">
@@ -95,7 +75,7 @@ const PSNotes = (function() {
           </div>
           <div class="ps-folder-items">
             ${folderNotes.map(note => `
-              <div class="ps-note-item ${note.id === _currentNote?.id ? 'active' : ''}" 
+              <div class="ps-note-item ${note.id === _currentNote?.id ? 'active' : ''}"
                    onclick="PSNotes.selectNote('${note.id}')">
                 <svg class="ps-note-icon icon-sm" viewBox="0 0 24 24">
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -114,29 +94,23 @@ const PSNotes = (function() {
     }).join('');
   }
 
-  /**
-   * Filter notes based on search
-   */
   function filterNotes() {
     if (!_searchQuery) return _notes;
-    
+
     const query = _searchQuery.toLowerCase();
-    return _notes.filter(note => 
+    return _notes.filter(note =>
       (note.title || '').toLowerCase().includes(query) ||
       (note.content || '').toLowerCase().includes(query) ||
       (note.tags || []).some(tag => tag.toLowerCase().includes(query))
     );
   }
 
-  /**
-   * Render editor
-   */
   function renderEditor() {
     return `
       <div class="ps-editor-header">
-        <input type="text" class="ps-editor-title-input" 
+        <input type="text" class="ps-editor-title-input"
                id="noteTitle"
-               value="${escapeHtml(_currentNote.title || '')}" 
+               value="${escapeHtml(_currentNote.title || '')}"
                placeholder="Untitled"
                oninput="PSNotes.updateTitle(this.value)">
         <div class="ps-editor-actions">
@@ -149,7 +123,7 @@ const PSNotes = (function() {
           </button>
         </div>
       </div>
-      
+
       <div class="ps-editor-meta">
         <div class="ps-editor-folder-select">
           <svg class="icon-sm" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
@@ -169,20 +143,20 @@ const PSNotes = (function() {
               </span>
             `).join('')}
           </div>
-          <input type="text" class="ps-editor-tag-input" 
+          <input type="text" class="ps-editor-tag-input"
                  id="tagInput"
-                 placeholder="Add tag..." 
+                 placeholder="Add tag..."
                  onkeydown="PSNotes.handleTagInput(event)">
         </div>
       </div>
-      
+
       <div class="ps-editor-content">
-        <textarea class="ps-markdown-editor" 
+        <textarea class="ps-markdown-editor"
                   id="noteContent"
                   placeholder="Start writing..."
                   oninput="PSNotes.updateContent(this.value)">${escapeHtml(_currentNote.content || '')}</textarea>
       </div>
-      
+
       <div class="ps-note-ai-actions">
         <button class="ps-note-ai-btn" onclick="PSNotes.aiAction('summarize')">
           <svg viewBox="0 0 24 24"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
@@ -200,9 +174,6 @@ const PSNotes = (function() {
     `;
   }
 
-  /**
-   * Render empty state
-   */
   function renderEmptyState() {
     return `
       <div class="ps-empty">
@@ -219,9 +190,6 @@ const PSNotes = (function() {
     `;
   }
 
-  /**
-   * Setup editor event listeners
-   */
   function setupEditor() {
     const content = document.getElementById('noteContent');
     if (content) {
@@ -229,9 +197,6 @@ const PSNotes = (function() {
     }
   }
 
-  /**
-   * Create new note
-   */
   async function createNote(folder = 'General') {
     const note = {
       id: PSCrypto.generateId(),
@@ -249,9 +214,6 @@ const PSNotes = (function() {
     render();
   }
 
-  /**
-   * Select note
-   */
   async function selectNote(noteId) {
     const note = _notes.find(n => n.id === noteId);
     if (note) {
@@ -260,9 +222,6 @@ const PSNotes = (function() {
     }
   }
 
-  /**
-   * Update note title
-   */
   function updateTitle(title) {
     if (_currentNote) {
       _currentNote.title = title;
@@ -270,9 +229,6 @@ const PSNotes = (function() {
     }
   }
 
-  /**
-   * Update note content
-   */
   function updateContent(content) {
     if (_currentNote) {
       _currentNote.content = content;
@@ -280,9 +236,6 @@ const PSNotes = (function() {
     }
   }
 
-  /**
-   * Update note folder
-   */
   function updateFolder(folder) {
     if (_currentNote) {
       _currentNote.folder = folder;
@@ -290,15 +243,12 @@ const PSNotes = (function() {
     }
   }
 
-  /**
-   * Handle tag input
-   */
   function handleTagInput(event) {
     if (event.key === 'Enter' || event.key === ',') {
       event.preventDefault();
       const input = event.target;
       const tag = input.value.trim().replace(',', '');
-      
+
       if (tag && _currentNote) {
         if (!_currentNote.tags) _currentNote.tags = [];
         if (!_currentNote.tags.includes(tag)) {
@@ -311,9 +261,6 @@ const PSNotes = (function() {
     }
   }
 
-  /**
-   * Remove tag
-   */
   function removeTag(tag) {
     if (_currentNote && _currentNote.tags) {
       _currentNote.tags = _currentNote.tags.filter(t => t !== tag);
@@ -322,9 +269,6 @@ const PSNotes = (function() {
     }
   }
 
-  /**
-   * Queue save with debounce
-   */
   function queueSave() {
     if (_saveTimeout) {
       clearTimeout(_saveTimeout);
@@ -338,34 +282,26 @@ const PSNotes = (function() {
     }, 500);
   }
 
-  /**
-   * Save current note
-   */
   async function saveNote() {
     if (!_currentNote) return;
 
     _currentNote.updatedAt = Date.now();
     await PSStorage.save(PSStorage.STORES.NOTES, _currentNote);
 
-    // Update notes list
     const index = _notes.findIndex(n => n.id === _currentNote.id);
     if (index !== -1) {
       _notes[index] = _currentNote;
     }
-    
-    // Re-sort
+
     _notes.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
   }
 
-  /**
-   * Update save status indicator
-   */
   function updateSaveStatus(status) {
     const el = document.getElementById('saveStatus');
     if (!el) return;
 
     el.className = 'ps-save-status ' + status;
-    
+
     if (status === 'saving') {
       el.innerHTML = `
         <svg class="ps-save-status-icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
@@ -379,9 +315,6 @@ const PSNotes = (function() {
     }
   }
 
-  /**
-   * Delete note
-   */
   function deleteNote() {
     if (!_currentNote) return;
 
@@ -394,17 +327,11 @@ const PSNotes = (function() {
     });
   }
 
-  /**
-   * Search notes
-   */
   function search(query) {
     _searchQuery = query;
     render();
   }
 
-  /**
-   * AI actions
-   */
   async function aiAction(action) {
     if (!_currentNote || !_currentNote.content) {
       PSUI.toast('Note is empty', 'warning');
@@ -413,7 +340,6 @@ const PSNotes = (function() {
 
     PSUI.toast(`${action === 'summarize' ? 'Summarizing' : action === 'expand' ? 'Expanding' : 'Finding related notes'}...`, 'info');
 
-    // Simulate AI processing
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     switch (action) {
@@ -460,9 +386,6 @@ const PSNotes = (function() {
     }
   }
 
-  /**
-   * Format date
-   */
   function formatDate(timestamp) {
     if (!timestamp) return '';
     const date = new Date(timestamp);
@@ -475,9 +398,6 @@ const PSNotes = (function() {
     return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
   }
 
-  /**
-   * Escape HTML
-   */
   function escapeHtml(str) {
     if (!str) return '';
     const div = document.createElement('div');
@@ -485,9 +405,6 @@ const PSNotes = (function() {
     return div.innerHTML;
   }
 
-  /**
-   * Get all notes (for external access)
-   */
   function getAllNotes() {
     return _notes;
   }

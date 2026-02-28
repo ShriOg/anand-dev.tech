@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <!-- Modular CSS (Site Design System) -->
+
   <link rel="stylesheet" href="../../assets/css/variables.css">
   <link rel="stylesheet" href="../../assets/css/base.css">
   <link rel="stylesheet" href="../../assets/css/layout.css">
@@ -19,18 +19,12 @@
   <link rel="stylesheet" href="../../assets/css/animations.css">
   <link rel="stylesheet" href="../../assets/css/responsive.css">
   <style>
-    /* ══════════════════════════════════════════════════════════════════════════
-       DOCUMENTATION PAGE STYLES
-       Uses CSS variables from site design system
-       ══════════════════════════════════════════════════════════════════════════ */
 
-    /* Page Layout */
     .doc-page {
       padding-top: var(--space-24);
       min-height: 100vh;
     }
 
-    /* Back Navigation */
     .doc-back {
       display: inline-flex;
       align-items: center;
@@ -59,7 +53,6 @@
       transform: translateX(-4px);
     }
 
-    /* Hero Section */
     .doc-hero {
       text-align: center;
       padding: var(--space-8) 0 var(--space-12);
@@ -104,7 +97,6 @@
       flex-wrap: wrap;
     }
 
-    /* Content Sections */
     .doc-content {
       padding: var(--space-8) 0 var(--space-16);
     }
@@ -141,7 +133,6 @@
       margin-bottom: var(--space-4);
     }
 
-    /* Tech Badges */
     .doc-tech-stack {
       display: flex;
       flex-wrap: wrap;
@@ -167,7 +158,6 @@
       border-color: var(--accent-primary);
     }
 
-    /* Feature Grid */
     .doc-feature-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -207,7 +197,6 @@
       line-height: var(--leading-relaxed);
     }
 
-    /* Terminal Demo */
     .doc-terminal {
       background: var(--bg-primary);
       border: 1px solid var(--border-secondary);
@@ -253,7 +242,6 @@
     .doc-terminal__output { color: var(--success); }
     .doc-terminal__info { color: var(--text-tertiary); }
 
-    /* Architecture Diagram */
     .doc-diagram {
       background: var(--bg-secondary);
       border: 1px solid var(--border-primary);
@@ -271,7 +259,6 @@
       margin: 0;
     }
 
-    /* Command Table */
     .doc-table {
       width: 100%;
       border-collapse: collapse;
@@ -313,7 +300,6 @@
       background: var(--bg-glass);
     }
 
-    /* Safety List */
     .doc-safety-list {
       list-style: none;
       padding: 0;
@@ -347,7 +333,6 @@
       margin: 0;
     }
 
-    /* Code Block */
     .doc-code {
       background: var(--bg-primary);
       border: 1px solid var(--border-primary);
@@ -367,7 +352,6 @@
     .doc-code .comment { color: var(--text-muted); }
     .doc-code .command { color: var(--accent-secondary); }
 
-    /* CTA Section */
     .doc-cta {
       background: linear-gradient(135deg, var(--accent-subtle), rgba(167, 139, 250, 0.08));
       border: 1px solid var(--border-secondary);
@@ -389,7 +373,6 @@
       margin-bottom: var(--space-6);
     }
 
-    /* Mobile Responsive */
     @media (max-width: 768px) {
       .doc-page {
         padding-top: var(--space-20);
@@ -433,7 +416,7 @@
   </style>
 </head>
 <body>
-  <!-- Navigation (Site Standard) -->
+
   <nav class="nav">
     <div class="nav__inner">
       <a href="../../" class="nav__logo">anand<span>.</span>dev</a>
@@ -454,7 +437,7 @@
 
   <main class="doc-page">
     <div class="container">
-      <!-- Back Navigation -->
+
       <a href="../../projects/" class="doc-back">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 12H5M12 19l-7-7 7-7"/>
@@ -462,12 +445,11 @@
         Back
       </a>
 
-      <!-- Hero Section -->
       <section class="doc-hero">
         <span class="doc-hero__badge">🤖 Desktop Application</span>
         <h1 class="doc-hero__title">AI Assistant</h1>
         <p class="doc-hero__subtitle">
-          A local-first, privacy-respecting, cross-platform desktop assistant. 
+          A local-first, privacy-respecting, cross-platform desktop assistant.
           Jarvis-style functionality that runs entirely on your machine.
         </p>
         <div class="doc-hero__actions">
@@ -484,22 +466,20 @@
       </section>
     </div>
 
-    <!-- Content -->
     <section class="doc-content">
       <div class="container">
-        
-        <!-- Overview -->
+
         <div class="doc-section">
           <h2 class="doc-section__title">Overview</h2>
           <div class="doc-text">
             <p>
-              AI Assistant is a cross-platform desktop application that brings Jarvis-style functionality 
-              to your computer. Built with a privacy-first architecture, all processing happens locally 
+              AI Assistant is a cross-platform desktop application that brings Jarvis-style functionality
+              to your computer. Built with a privacy-first architecture, all processing happens locally
               on your machine — no data is ever sent to external servers.
             </p>
             <p>
-              The system features a modular architecture with strict separation of concerns, making it 
-              easy to extend and maintain. Whether you're opening applications, controlling volume, 
+              The system features a modular architecture with strict separation of concerns, making it
+              easy to extend and maintain. Whether you're opening applications, controlling volume,
               or taking screenshots, every command is processed through a secure, permission-based system.
             </p>
           </div>
@@ -513,7 +493,6 @@
           </div>
         </div>
 
-        <!-- Terminal Demo -->
         <div class="doc-section">
           <h2 class="doc-section__title">See It In Action</h2>
           <div class="doc-terminal">
@@ -538,13 +517,12 @@
           </div>
         </div>
 
-        <!-- Architecture -->
         <div class="doc-section">
           <h2 class="doc-section__title">Architecture</h2>
           <div class="doc-text">
             <p>
-              The system follows a clean, layered architecture that separates concerns and enables 
-              easy testing and extension. The brain never touches OS-specific code, and adapters 
+              The system follows a clean, layered architecture that separates concerns and enables
+              easy testing and extension. The brain never touches OS-specific code, and adapters
               translate abstract commands into platform-specific implementations.
             </p>
           </div>
@@ -580,7 +558,6 @@
           </div>
         </div>
 
-        <!-- Features -->
         <div class="doc-section">
           <h2 class="doc-section__title">Key Features</h2>
           <div class="doc-feature-grid">
@@ -629,7 +606,6 @@
           </div>
         </div>
 
-        <!-- Commands -->
         <div class="doc-section">
           <h2 class="doc-section__title">Available Commands</h2>
           <table class="doc-table">
@@ -656,7 +632,6 @@
           </table>
         </div>
 
-        <!-- Safety -->
         <div class="doc-section">
           <h2 class="doc-section__title">Safety Features</h2>
           <ul class="doc-safety-list">
@@ -698,7 +673,6 @@
           </ul>
         </div>
 
-        <!-- Getting Started -->
         <div class="doc-section" id="getting-started">
           <h2 class="doc-section__title">Getting Started</h2>
           <div class="doc-text">
@@ -719,7 +693,6 @@
           </div>
         </div>
 
-        <!-- Future Roadmap -->
         <div class="doc-section">
           <h2 class="doc-section__title">Future Roadmap</h2>
           <div class="doc-feature-grid">
@@ -754,7 +727,6 @@
           </div>
         </div>
 
-        <!-- CTA -->
         <div class="doc-cta">
           <h2 class="doc-cta__title">Want to Contribute?</h2>
           <p class="doc-cta__text">This project is open source. Contributions, issues, and feature requests are welcome!</p>
@@ -767,7 +739,6 @@
     </section>
   </main>
 
-  <!-- Footer (Site Standard) -->
   <footer class="footer">
     <div class="container">
       <div class="footer__content">
@@ -781,7 +752,6 @@
     </div>
   </footer>
 
-  <!-- Minimal Scripts (Documentation doesn't need full app) -->
   <script src="../../assets/js/main.js"></script>
   <script src="../../assets/js/mobile.js"></script>
 </body>

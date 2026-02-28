@@ -1,15 +1,5 @@
-/**
- * PROJECT PAGE ENHANCEMENTS
- * Swipe-to-close, back navigation, and smooth transitions
- * For individual project pages like ai-assistant.html
- */
-
 (function() {
   'use strict';
-
-  // ════════════════════════════════════════════════════════════════════════════
-  // CONFIGURATION
-  // ════════════════════════════════════════════════════════════════════════════
 
   const config = {
     swipeThreshold: 100,
@@ -18,48 +8,37 @@
     mobileBreakpoint: 768
   };
 
-  // ════════════════════════════════════════════════════════════════════════════
-  // UTILITIES
-  // ════════════════════════════════════════════════════════════════════════════
-
   function isMobile() {
     return window.innerWidth <= config.mobileBreakpoint;
   }
 
   function isProjectPage() {
     const path = window.location.pathname;
-    // Check if we're on a project detail page (not the projects list)
-    // With folder-based routing: /pages/ai-assistant/ is a project page
-    // but /pages/projects/, /pages/lab/, etc. are NOT
+
     const mainPages = ['projects', 'lab', 'hire', 'contact', 'dev-os', 'hidden'];
     const pathSegments = path.split('/').filter(Boolean);
-    
+
     if (!path.includes('/pages/')) return false;
-    
+
     const pagesIndex = pathSegments.indexOf('pages');
     const pageName = pathSegments[pagesIndex + 1];
-    
+
     return pageName && !mainPages.includes(pageName);
   }
 
   function getBackUrl() {
-    // Try to get referrer first
+
     const referrer = document.referrer;
     if (referrer && referrer.includes(window.location.host)) {
-      // Check if referrer is projects page or home
+
       if (referrer.includes('/projects') || referrer.endsWith('/') || !referrer.includes('/pages/')) {
         return referrer;
       }
     }
-    
-    // Default to projects page
+
     const isInPages = window.location.pathname.includes('/pages/');
     return isInPages ? '../projects/' : 'pages/projects/';
   }
-
-  // ════════════════════════════════════════════════════════════════════════════
-  // BACK BUTTON
-  // ════════════════════════════════════════════════════════════════════════════
 
   function createBackButton() {
     if (document.querySelector('.page-back-btn')) return;
@@ -75,20 +54,15 @@
       <span class="page-back-btn__text">Back</span>
     `;
 
-    // Handle click with optional animation
     btn.addEventListener('click', (e) => {
-      // Let page-zoom.js handle the transition if available
+
       if (typeof PageZoomTransition !== 'undefined') {
-        // Navigation will happen normally, page-zoom handles animation
+
       }
     });
 
     document.body.appendChild(btn);
   }
-
-  // ════════════════════════════════════════════════════════════════════════════
-  // SWIPE INDICATOR
-  // ════════════════════════════════════════════════════════════════════════════
 
   function createSwipeIndicator() {
     if (!isMobile()) return;
@@ -98,15 +72,10 @@
     indicator.className = 'swipe-indicator swipe-indicator--visible';
     document.body.appendChild(indicator);
 
-    // Hide after a delay
     setTimeout(() => {
       indicator.classList.remove('swipe-indicator--visible');
     }, 2000);
   }
-
-  // ════════════════════════════════════════════════════════════════════════════
-  // SWIPE TO CLOSE
-  // ════════════════════════════════════════════════════════════════════════════
 
   function initSwipeToClose() {
     if (!isMobile()) return;
@@ -118,10 +87,9 @@
     let pageContent = document.querySelector('main, .page-content, body');
 
     function handleTouchStart(e) {
-      // Only handle if at top of page
+
       if (window.scrollY > 10) return;
-      
-      // Don't interfere with interactive elements
+
       if (e.target.closest('a, button, input, select, textarea')) return;
 
       startY = e.touches[0].clientY;
@@ -139,7 +107,6 @@
       currentY = e.touches[0].clientY;
       const deltaY = currentY - startY;
 
-      // Only track downward movement
       if (deltaY < 20) {
         isDragging = false;
         return;
@@ -147,22 +114,19 @@
 
       isDragging = true;
 
-      // Apply resistance and visual feedback
       const resistedDelta = deltaY * config.resistance;
-      
+
       if (pageContent) {
         pageContent.style.transform = `translateY(${resistedDelta}px)`;
         pageContent.style.transition = 'none';
         pageContent.style.opacity = Math.max(1 - (deltaY / 500), 0.5);
       }
 
-      // Show swipe indicator
       const indicator = document.querySelector('.swipe-indicator');
       if (indicator) {
         indicator.classList.add('swipe-indicator--visible');
       }
 
-      // Prevent scroll if dragging
       if (resistedDelta > 10) {
         e.preventDefault();
       }
@@ -175,20 +139,17 @@
       const deltaTime = Date.now() - startTime;
       const velocity = deltaY / deltaTime;
 
-      // Reset styles
       if (pageContent) {
         pageContent.style.transition = 'transform 300ms ease, opacity 300ms ease';
         pageContent.style.transform = '';
         pageContent.style.opacity = '';
       }
 
-      // Hide indicator
       const indicator = document.querySelector('.swipe-indicator');
       if (indicator) {
         indicator.classList.remove('swipe-indicator--visible');
       }
 
-      // Check if should navigate back
       if (deltaY > config.swipeThreshold || velocity > config.velocityThreshold) {
         navigateBack();
       }
@@ -198,8 +159,7 @@
 
     function navigateBack() {
       const backUrl = getBackUrl();
-      
-      // Animate out before navigation
+
       if (pageContent) {
         pageContent.style.transition = 'transform 250ms ease, opacity 250ms ease';
         pageContent.style.transform = 'translateY(100px)';
@@ -211,29 +171,20 @@
       }, 200);
     }
 
-    // Bind events
     document.addEventListener('touchstart', handleTouchStart, { passive: true });
     document.addEventListener('touchmove', handleTouchMove, { passive: false });
     document.addEventListener('touchend', handleTouchEnd, { passive: true });
   }
 
-  // ════════════════════════════════════════════════════════════════════════════
-  // KEYBOARD NAVIGATION
-  // ════════════════════════════════════════════════════════════════════════════
-
   function initKeyboardNav() {
     document.addEventListener('keydown', (e) => {
-      // ESC to go back
+
       if (e.key === 'Escape') {
         e.preventDefault();
         window.location.href = getBackUrl();
       }
     });
   }
-
-  // ════════════════════════════════════════════════════════════════════════════
-  // PAGE ENTRY ANIMATION
-  // ════════════════════════════════════════════════════════════════════════════
 
   function playEntryAnimation() {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -242,13 +193,11 @@
     const main = document.querySelector('main, .page-content');
     if (!main) return;
 
-    // Check if coming from zoom transition
     if (typeof PageZoomTransition !== 'undefined' && PageZoomTransition.getTransitionState()) {
-      // Let page-zoom.js handle the animation
+
       return;
     }
 
-    // Default fade-in animation
     main.style.opacity = '0';
     main.style.transform = 'translateY(20px)';
 
@@ -265,10 +214,6 @@
     });
   }
 
-  // ════════════════════════════════════════════════════════════════════════════
-  // INITIALIZE
-  // ════════════════════════════════════════════════════════════════════════════
-
   function init() {
     if (!isProjectPage()) return;
 
@@ -276,8 +221,7 @@
     createSwipeIndicator();
     initSwipeToClose();
     initKeyboardNav();
-    
-    // Play entry animation after DOM is ready
+
     if (document.readyState === 'complete') {
       playEntryAnimation();
     } else {
@@ -285,7 +229,6 @@
     }
   }
 
-  // Run initialization
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {

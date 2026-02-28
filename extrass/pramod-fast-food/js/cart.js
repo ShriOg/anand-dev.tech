@@ -1,16 +1,7 @@
-/**
- * cart.js — Cart logic: add / update / remove / totals / checkout.
- *
- * Cart entries are keyed by "itemId-sizeLabel" so the same item in
- * different sizes occupies different slots.
- *
- * Emits a custom 'cart:changed' event on document after every mutation
- * so UI can react without tight coupling.
- */
 'use strict';
 
 const Cart = (() => {
-    /** @type {Object.<string, {itemId:string, name:string, size:string, price:number, quantity:number}>} */
+
     const _items = {};
 
     const _key = (id, size) => `${id}-${size}`;
@@ -18,8 +9,6 @@ const Cart = (() => {
     const _emit = () => {
         document.dispatchEvent(new CustomEvent('cart:changed', { detail: snapshot() }));
     };
-
-    /* ---------- Public API ---------- */
 
     const add = (itemId, size, price) => {
         debug('Cart Add', { itemId, size, price });
@@ -59,19 +48,14 @@ const Cart = (() => {
         _emit();
     };
 
-    /** Quantity of a specific item+size (0 if not in cart) */
     const qty = (itemId, size) => _items[_key(itemId, size)]?.quantity || 0;
 
-    /** Total number of items (sum of quantities) */
     const count = () => Object.values(_items).reduce((s, i) => s + i.quantity, 0);
 
-    /** Total price */
     const total = () => Object.values(_items).reduce((s, i) => s + i.price * i.quantity, 0);
 
-    /** Immutable snapshot of cart entries */
     const snapshot = () => Object.values(_items).map(i => ({ ...i }));
 
-    /** Build WhatsApp checkout URL (legacy) */
     const checkoutURL = () => {
         const items = snapshot();
         if (!items.length) return null;
@@ -84,10 +68,8 @@ const Cart = (() => {
         return `https://wa.me/918595928413?text=${encodeURIComponent(msg)}`;
     };
 
-    /** Generate short order ID: PF + base36 timestamp */
     const generateOrderId = () => 'PF' + Date.now().toString(36).toUpperCase().slice(-6);
 
-    /** Human-readable timestamp */
     const formatTimestamp = () => {
         const d = new Date();
         const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -95,7 +77,6 @@ const Cart = (() => {
         return `${d.getDate()} ${M[d.getMonth()]} ${d.getFullYear()}, ${hr}:${String(d.getMinutes()).padStart(2,'0')} ${ap}`;
     };
 
-    /** Build professional WhatsApp checkout URL with customer info */
     const buildCheckoutMessage = (info, overrides = {}) => {
         const items = snapshot();
         if (!items.length) return null;
@@ -126,21 +107,12 @@ const Cart = (() => {
         return `https://wa.me/918595928413?text=${encodeURIComponent(msg)}`;
     };
 
-    /** Map frontend order types to backend enum values */
     const _mapOrderType = (type) => {
         if (type === 'Dine-In') return 'DINE_IN';
         if (type === 'Takeaway') return 'TAKEAWAY';
         return type;
     };
 
-    /**
-     * Submit order to backend API.
-     * Does NOT clear the cart — caller clears only on success.
-     * Does NOT build WhatsApp URL on success — backend handles the order.
-     *
-     * @param {object} info — { name, phone, orderType, persons?, table?, note? }
-     * @returns {Promise<{ok:boolean, orderId?:string, total?:number, source:string, error?:string}>}
-     */
     const submitOrder = async (info) => {
         debug('Submitting Order', info);
         const items = snapshot();
@@ -161,7 +133,6 @@ const Cart = (() => {
         debug('Final Payload', payload);
         console.log("Submitting Items:", payload.items);
 
-        // Try backend
         if (typeof Api !== 'undefined') {
             try {
                 const res = await Api.placeOrder(payload);
@@ -178,7 +149,6 @@ const Cart = (() => {
                     return { ok: true, orderId: backendOrderId, _id: d._id || null, total: backendTotal, source: 'server' };
                 }
 
-                // HTTP succeeded but backend returned failure
                 console.warn('[Cart] Backend returned non-success:', res);
                 debug('Order Failed', res);
             } catch (err) {
@@ -187,7 +157,6 @@ const Cart = (() => {
                 console.error(err);
             }
 
-            // Backend failed or returned error
             window.__BACKEND_CONNECTED__ = false;
             return {
                 ok: false,
@@ -196,17 +165,9 @@ const Cart = (() => {
             };
         }
 
-        // No API module — caller should use sendViaWhatsApp()
         return { ok: false, error: 'No API available', source: 'no-api' };
     };
 
-    /**
-     * Build WhatsApp checkout URL and return it.
-     * Used as fallback when backend is down.
-     *
-     * @param {object} info — { name, phone, orderType, persons?, table?, note? }
-     * @returns {{url:string, orderId:string, total:number}}
-     */
     const sendViaWhatsApp = (info) => {
         const orderId = generateOrderId();
         const orderTotal = total();

@@ -3,14 +3,12 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from actions.schema import ActionType, Action, create_action
 
-
 @dataclass
 class ParsedIntent:
     action_type: ActionType
     entities: Dict[str, str]
     confidence: float
     raw_input: str
-
 
 class IntentPattern:
     def __init__(self, patterns: List[str], action_type: ActionType, entity_extractors: Optional[Dict[str, str]] = None):
@@ -34,7 +32,6 @@ class IntentPattern:
                 return confidence, entities
         return None
 
-
 class IntentParser:
     def __init__(self):
         self.patterns: List[IntentPattern] = []
@@ -52,7 +49,7 @@ class IntentParser:
                 action_type=ActionType.OPEN_APP,
                 entity_extractors={"app_name": "app"}
             ),
-            
+
             IntentPattern(
                 patterns=[
                     r"^open\s+file\s+(?P<path>.+)$",
@@ -62,7 +59,7 @@ class IntentParser:
                 action_type=ActionType.OPEN_FILE,
                 entity_extractors={"path": "path"}
             ),
-            
+
             IntentPattern(
                 patterns=[
                     r"^open\s+folder\s+(?P<path>.+)$",
@@ -72,7 +69,7 @@ class IntentParser:
                 action_type=ActionType.OPEN_FOLDER,
                 entity_extractors={"path": "path"}
             ),
-            
+
             IntentPattern(
                 patterns=[
                     r"^(?:open\s+)?(?:url|website|site|link)\s+(?P<url>.+)$",
@@ -82,7 +79,7 @@ class IntentParser:
                 action_type=ActionType.OPEN_URL,
                 entity_extractors={"url": "url"}
             ),
-            
+
             IntentPattern(
                 patterns=[
                     r"^(?:set\s+)?volume\s+(?:to\s+)?(?P<level>\d+)(?:%)?$",
@@ -92,7 +89,7 @@ class IntentParser:
                 action_type=ActionType.ADJUST_VOLUME,
                 entity_extractors={"level": "level"}
             ),
-            
+
             IntentPattern(
                 patterns=[
                     r"^mute(?:\s+volume)?$",
@@ -101,7 +98,7 @@ class IntentParser:
                 action_type=ActionType.MUTE_VOLUME,
                 entity_extractors={}
             ),
-            
+
             IntentPattern(
                 patterns=[
                     r"^unmute(?:\s+volume)?$",
@@ -110,7 +107,7 @@ class IntentParser:
                 action_type=ActionType.UNMUTE_VOLUME,
                 entity_extractors={}
             ),
-            
+
             IntentPattern(
                 patterns=[
                     r"^(?:take\s+)?(?:a\s+)?screenshot$",
@@ -121,7 +118,7 @@ class IntentParser:
                 action_type=ActionType.TAKE_SCREENSHOT,
                 entity_extractors={"path": "path"}
             ),
-            
+
             IntentPattern(
                 patterns=[
                     r"^shutdown$",
@@ -132,7 +129,7 @@ class IntentParser:
                 action_type=ActionType.SHUTDOWN,
                 entity_extractors={}
             ),
-            
+
             IntentPattern(
                 patterns=[
                     r"^restart$",
@@ -142,7 +139,7 @@ class IntentParser:
                 action_type=ActionType.RESTART,
                 entity_extractors={}
             ),
-            
+
             IntentPattern(
                 patterns=[
                     r"^lock(?:\s+screen)?$",
@@ -151,7 +148,7 @@ class IntentParser:
                 action_type=ActionType.LOCK_SCREEN,
                 entity_extractors={}
             ),
-            
+
             IntentPattern(
                 patterns=[
                     r"^(?:what(?:'s|\s+is)\s+)?(?:the\s+)?time(?:\?)?$",
@@ -161,7 +158,7 @@ class IntentParser:
                 action_type=ActionType.GET_TIME,
                 entity_extractors={}
             ),
-            
+
             IntentPattern(
                 patterns=[
                     r"^(?:what(?:'s|\s+is)\s+)?(?:the\s+)?date(?:\?)?$",
@@ -171,7 +168,7 @@ class IntentParser:
                 action_type=ActionType.GET_DATE,
                 entity_extractors={}
             ),
-            
+
             IntentPattern(
                 patterns=[
                     r"^(?:what(?:'s|\s+is)\s+)?(?:the\s+)?battery(?:\s+level|\s+status)?(?:\?)?$",
@@ -181,7 +178,7 @@ class IntentParser:
                 action_type=ActionType.GET_BATTERY,
                 entity_extractors={}
             ),
-            
+
             IntentPattern(
                 patterns=[
                     r"^help$",
@@ -191,7 +188,7 @@ class IntentParser:
                 action_type=ActionType.HELP,
                 entity_extractors={}
             ),
-            
+
             IntentPattern(
                 patterns=[
                     r"^exit$",
@@ -203,7 +200,7 @@ class IntentParser:
                 action_type=ActionType.EXIT,
                 entity_extractors={}
             ),
-            
+
             IntentPattern(
                 patterns=[
                     r"^(?:enable\s+)?safe\s+mode$",
@@ -212,7 +209,7 @@ class IntentParser:
                 action_type=ActionType.ENABLE_SAFE_MODE,
                 entity_extractors={}
             ),
-            
+
             IntentPattern(
                 patterns=[
                     r"^disable\s+safe\s+mode$",
@@ -222,7 +219,7 @@ class IntentParser:
                 action_type=ActionType.DISABLE_SAFE_MODE,
                 entity_extractors={}
             ),
-            
+
             IntentPattern(
                 patterns=[
                     r"^status$",
@@ -236,7 +233,7 @@ class IntentParser:
 
     def parse(self, user_input: str) -> ParsedIntent:
         text = user_input.strip()
-        
+
         if not text:
             return ParsedIntent(
                 action_type=ActionType.UNKNOWN,
@@ -244,11 +241,11 @@ class IntentParser:
                 confidence=0.0,
                 raw_input=user_input
             )
-        
+
         best_match = None
         best_confidence = 0.0
         best_entities = {}
-        
+
         for pattern in self.patterns:
             result = pattern.match(text)
             if result:
@@ -257,7 +254,7 @@ class IntentParser:
                     best_confidence = confidence
                     best_match = pattern.action_type
                     best_entities = entities
-        
+
         if best_match:
             return ParsedIntent(
                 action_type=best_match,
@@ -265,7 +262,7 @@ class IntentParser:
                 confidence=best_confidence,
                 raw_input=user_input
             )
-        
+
         return ParsedIntent(
             action_type=ActionType.UNKNOWN,
             entities={},
@@ -277,7 +274,7 @@ class IntentParser:
         if intent.action_type == ActionType.ADJUST_VOLUME:
             level = int(intent.entities.get("level", 50))
             return create_action(ActionType.ADJUST_VOLUME, level=level)
-        
+
         return create_action(intent.action_type, **intent.entities)
 
     def add_pattern(self, pattern: IntentPattern):

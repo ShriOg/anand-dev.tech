@@ -11,24 +11,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Reuse admin design tokens + base reset -->
     <link rel="stylesheet" href="../admin/css/admin.css">
-    <!-- Page-specific overrides -->
+
     <link rel="stylesheet" href="customers.css">
 </head>
 <body data-theme="dark">
 
-    <!-- ==================== TOP BAR ==================== -->
     <header class="cust-topbar">
         <a href="../admin/" class="cust-topbar__back" aria-label="Back to Admin">← Admin</a>
         <h1 class="cust-topbar__title">👥 Customers</h1>
         <span class="cust-topbar__count" id="headerCount">—</span>
     </header>
 
-    <!-- ==================== MAIN ==================== -->
     <main class="cust-page">
 
-        <!-- Summary cards -->
         <section class="cust-cards">
             <div class="cust-card">
                 <span class="cust-card__icon">👤</span>
@@ -60,7 +56,6 @@
             </div>
         </section>
 
-        <!-- Search bar -->
         <div class="cust-search">
             <span class="cust-search__icon">🔍</span>
             <input
@@ -73,7 +68,6 @@
             <span class="cust-search__count" id="searchCount"></span>
         </div>
 
-        <!-- Table -->
         <div class="cust-table-wrap">
             <table class="cust-table">
                 <thead>
@@ -95,7 +89,6 @@
             </table>
         </div>
 
-        <!-- Empty state -->
         <div class="cust-empty" id="emptyState" hidden>
             <span class="cust-empty__icon">📭</span>
             <p>No customers found.</p>

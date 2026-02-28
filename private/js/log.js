@@ -1,10 +1,3 @@
-/**
- * ═══════════════════════════════════════════════════════════
- * PRIVATE SPACE - DAILY LOG MODULE
- * Date-based journal entries with auto-save
- * ═══════════════════════════════════════════════════════════
- */
-
 const PSLog = (function() {
   'use strict';
 
@@ -13,17 +6,11 @@ const PSLog = (function() {
   let _selectedDate = new Date();
   let _saveTimeout = null;
 
-  /**
-   * Load log view
-   */
   async function load() {
     await loadLogs();
     render();
   }
 
-  /**
-   * Load all logs from storage
-   */
   async function loadLogs() {
     try {
       _logs = await PSStorage.getAll(PSStorage.STORES.LOGS);
@@ -33,17 +20,11 @@ const PSLog = (function() {
     }
   }
 
-  /**
-   * Get log for specific date
-   */
   function getLogForDate(date) {
     const dateStr = formatDateKey(date);
     return _logs.find(log => log.date === dateStr);
   }
 
-  /**
-   * Render log interface
-   */
   function render() {
     const container = document.querySelector('#section-log .ps-workspace');
     if (!container) return;
@@ -58,7 +39,7 @@ const PSLog = (function() {
             ${renderEntryList()}
           </div>
         </div>
-        
+
         <div class="ps-log-editor">
           ${renderEditor(selectedLog)}
         </div>
@@ -66,9 +47,6 @@ const PSLog = (function() {
     `;
   }
 
-  /**
-   * Render mini calendar
-   */
   function renderCalendar() {
     const year = _currentDate.getFullYear();
     const month = _currentDate.getMonth();
@@ -80,23 +58,19 @@ const PSLog = (function() {
                         'July', 'August', 'September', 'October', 'November', 'December'];
     const dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 
-    // Get days from previous month
     const prevMonthDays = new Date(year, month, 0).getDate();
-    
+
     let days = [];
-    
-    // Previous month days
+
     for (let i = firstDay - 1; i >= 0; i--) {
       const d = new Date(year, month - 1, prevMonthDays - i);
       days.push({ date: d, isOtherMonth: true });
     }
-    
-    // Current month days
+
     for (let i = 1; i <= daysInMonth; i++) {
       days.push({ date: new Date(year, month, i), isOtherMonth: false });
     }
-    
-    // Next month days to fill grid
+
     const remaining = 42 - days.length;
     for (let i = 1; i <= remaining; i++) {
       const d = new Date(year, month + 1, i);
@@ -122,7 +96,7 @@ const PSLog = (function() {
             const isToday = isSameDay(date, today);
             const isSelected = isSameDay(date, _selectedDate);
             const hasEntry = _logs.some(log => log.date === formatDateKey(date));
-            
+
             return `
               <div class="ps-calendar-day ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''} ${hasEntry ? 'has-entry' : ''}"
                    onclick="PSLog.selectDate(${date.getFullYear()}, ${date.getMonth()}, ${date.getDate()})">
@@ -135,12 +109,9 @@ const PSLog = (function() {
     `;
   }
 
-  /**
-   * Render entry list
-   */
   function renderEntryList() {
     const recentLogs = _logs.slice(0, 10);
-    
+
     if (recentLogs.length === 0) {
       return `
         <div class="ps-empty" style="padding: 24px;">
@@ -154,9 +125,9 @@ const PSLog = (function() {
       const isSelected = log.date === formatDateKey(_selectedDate);
       const preview = (log.content || '').substring(0, 60);
       const wordCount = (log.content || '').split(/\s+/).filter(w => w).length;
-      
+
       return `
-        <div class="ps-log-entry-item ${isSelected ? 'active' : ''}" 
+        <div class="ps-log-entry-item ${isSelected ? 'active' : ''}"
              onclick="PSLog.selectDate(${date.getFullYear()}, ${date.getMonth()}, ${date.getDate()})">
           <div class="ps-log-entry-date">
             <div class="ps-log-entry-day">${date.getDate()}</div>
@@ -171,9 +142,6 @@ const PSLog = (function() {
     }).join('');
   }
 
-  /**
-   * Render editor
-   */
   function renderEditor(log) {
     const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -190,14 +158,14 @@ const PSLog = (function() {
           <span>${log ? 'Saved' : 'New entry'}</span>
         </div>
       </div>
-      
+
       <div class="ps-log-editor-content">
-        <textarea class="ps-log-textarea" 
+        <textarea class="ps-log-textarea"
                   id="logContent"
                   placeholder="What's on your mind today?"
                   oninput="PSLog.updateContent(this.value)">${escapeHtml(log?.content || '')}</textarea>
       </div>
-      
+
       <div class="ps-log-summary" id="logSummary">
         <div class="ps-log-summary-header">
           <span class="ps-log-summary-title">Weekly Summary</span>
@@ -214,14 +182,11 @@ const PSLog = (function() {
     `;
   }
 
-  /**
-   * Render stats
-   */
   function renderStats() {
     const today = new Date();
     const weekAgo = new Date(today);
     weekAgo.setDate(weekAgo.getDate() - 7);
-    
+
     const weekLogs = _logs.filter(log => {
       const logDate = new Date(log.date);
       return logDate >= weekAgo && logDate <= today;
@@ -251,17 +216,14 @@ const PSLog = (function() {
     `;
   }
 
-  /**
-   * Calculate writing streak
-   */
   function calculateStreak() {
     let streak = 0;
     let checkDate = new Date();
-    
+
     while (true) {
       const dateKey = formatDateKey(checkDate);
       const hasEntry = _logs.some(log => log.date === dateKey);
-      
+
       if (hasEntry) {
         streak++;
         checkDate.setDate(checkDate.getDate() - 1);
@@ -269,18 +231,15 @@ const PSLog = (function() {
         break;
       }
     }
-    
+
     return streak;
   }
 
-  /**
-   * Get weekly summary placeholder
-   */
   function getWeeklySummary() {
     const today = new Date();
     const weekAgo = new Date(today);
     weekAgo.setDate(weekAgo.getDate() - 7);
-    
+
     const weekLogs = _logs.filter(log => {
       const logDate = new Date(log.date);
       return logDate >= weekAgo && logDate <= today;
@@ -293,38 +252,25 @@ const PSLog = (function() {
     return '<p style="color: var(--ps-text-muted);">Click "Generate" to create an AI summary of your week.</p>';
   }
 
-  /**
-   * Navigate to previous month
-   */
   function prevMonth() {
     _currentDate.setMonth(_currentDate.getMonth() - 1);
     render();
   }
 
-  /**
-   * Navigate to next month
-   */
   function nextMonth() {
     _currentDate.setMonth(_currentDate.getMonth() + 1);
     render();
   }
 
-  /**
-   * Select date
-   */
   function selectDate(year, month, day) {
     _selectedDate = new Date(year, month, day);
     render();
-    
-    // Focus textarea
+
     setTimeout(() => {
       document.getElementById('logContent')?.focus();
     }, 100);
   }
 
-  /**
-   * Update log content
-   */
   function updateContent(content) {
     if (_saveTimeout) {
       clearTimeout(_saveTimeout);
@@ -338,14 +284,11 @@ const PSLog = (function() {
     }, 500);
   }
 
-  /**
-   * Save log entry
-   */
   async function saveLog(content) {
     const dateKey = formatDateKey(_selectedDate);
-    
+
     let log = _logs.find(l => l.date === dateKey);
-    
+
     if (log) {
       log.content = content;
       log.updatedAt = Date.now();
@@ -363,15 +306,12 @@ const PSLog = (function() {
     await PSStorage.save(PSStorage.STORES.LOGS, log);
   }
 
-  /**
-   * Update save status
-   */
   function updateSaveStatus(status) {
     const el = document.getElementById('logSaveStatus');
     if (!el) return;
 
     el.className = 'ps-save-status ' + status;
-    
+
     if (status === 'saving') {
       el.innerHTML = `
         <svg class="ps-save-status-icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
@@ -385,26 +325,21 @@ const PSLog = (function() {
     }
   }
 
-  /**
-   * Generate weekly summary
-   */
   async function generateSummary() {
     const summaryEl = document.getElementById('summaryContent');
     if (!summaryEl) return;
 
     summaryEl.innerHTML = '<p style="color: var(--ps-text-muted);">Generating summary...</p>';
 
-    // Get week's logs
     const today = new Date();
     const weekAgo = new Date(today);
     weekAgo.setDate(weekAgo.getDate() - 7);
-    
+
     const weekLogs = _logs.filter(log => {
       const logDate = new Date(log.date);
       return logDate >= weekAgo && logDate <= today;
     }).sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    // Simulate AI processing
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     if (weekLogs.length === 0) {
@@ -412,7 +347,6 @@ const PSLog = (function() {
       return;
     }
 
-    // Generate simple summary
     const totalWords = weekLogs.reduce((sum, log) => {
       return sum + (log.content || '').split(/\s+/).filter(w => w).length;
     }, 0);
@@ -425,9 +359,6 @@ const PSLog = (function() {
     summaryEl.innerHTML = summary;
   }
 
-  /**
-   * Format date to key string
-   */
   function formatDateKey(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -435,18 +366,12 @@ const PSLog = (function() {
     return `${year}-${month}-${day}`;
   }
 
-  /**
-   * Check if two dates are the same day
-   */
   function isSameDay(d1, d2) {
     return d1.getFullYear() === d2.getFullYear() &&
            d1.getMonth() === d2.getMonth() &&
            d1.getDate() === d2.getDate();
   }
 
-  /**
-   * Escape HTML
-   */
   function escapeHtml(str) {
     if (!str) return '';
     const div = document.createElement('div');

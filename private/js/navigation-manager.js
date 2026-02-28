@@ -1,66 +1,57 @@
-/**
- * ═══════════════════════════════════════════════════════════
- * PRIVATE SPACE - NAVIGATION MANAGER
- * Full CRUD for Website Navigation
- * ═══════════════════════════════════════════════════════════
- */
-
 const NavigationManager = {
   links: [],
-  
+
   async init() {
     await Database.init();
     await this.loadLinks();
     this.bindEvents();
     this.render();
   },
-  
+
   async loadLinks() {
     this.links = await Database.getAll(DB_STORES.NAVIGATION);
     this.links.sort((a, b) => (a.order || 0) - (b.order || 0));
-    
-    // Initialize with defaults if empty
+
     if (this.links.length === 0) {
       const defaults = [
         { label: 'Home', route: '/', visible: true, order: 0 },
         { label: 'Projects', route: '/pages/projects/', visible: true, order: 1 },
         { label: 'Contact', route: '/pages/contact/', visible: true, order: 2 }
       ];
-      
+
       for (const link of defaults) {
         await Database.add(DB_STORES.NAVIGATION, link);
       }
-      
+
       this.links = await Database.getAll(DB_STORES.NAVIGATION);
       this.links.sort((a, b) => a.order - b.order);
     }
   },
-  
+
   bindEvents() {
     document.getElementById('addNavLinkBtn')?.addEventListener('click', () => {
       this.openEditor();
     });
-    
+
     document.getElementById('saveNavLinkBtn')?.addEventListener('click', () => {
       this.saveLink();
     });
-    
+
     document.getElementById('cancelNavLinkBtn')?.addEventListener('click', () => {
       this.closeEditor();
     });
   },
-  
+
   render() {
     const container = document.getElementById('navLinksList');
     if (!container) return;
-    
-    // Update count
+
     const countEl = document.querySelector('#section-navigation .ps-nav-links-count');
     if (countEl) {
       const visibleCount = this.links.filter(l => l.visible).length;
       countEl.textContent = `${visibleCount}/${this.links.length}`;
     }
-    
+
     if (this.links.length === 0) {
       container.innerHTML = `
         <div class="ps-empty">
@@ -73,17 +64,17 @@ const NavigationManager = {
       `;
       return;
     }
-    
+
     container.innerHTML = this.links.map((link, index) => this.renderLinkItem(link, index)).join('');
     this.initDragDrop();
   },
-  
+
   renderLinkItem(link, index) {
     const isVisible = link.visible !== false;
     const isExternal = link.external || link.route?.startsWith('http');
     const isFirst = index === 0;
     const isLast = index === this.links.length - 1;
-    
+
     return `
       <div class="ps-nav-link-item ${isVisible ? '' : 'ps-nav-link-hidden'}" data-id="${link.id}" draggable="true">
         <div class="ps-nav-link-drag">
@@ -140,13 +131,13 @@ const NavigationManager = {
       </div>
     `;
   },
-  
+
   currentLink: null,
-  
+
   openEditor(linkId = null) {
     const modal = document.getElementById('navLinkEditorModal');
     const title = document.getElementById('navLinkEditorTitle');
-    
+
     if (linkId) {
       this.currentLink = this.links.find(l => l.id === linkId);
       title.textContent = 'Edit Link';
@@ -162,16 +153,16 @@ const NavigationManager = {
       document.getElementById('navLinkExternal').checked = false;
       document.getElementById('navLinkNewTab').checked = false;
     }
-    
+
     modal.classList.add('active');
   },
-  
+
   closeEditor() {
     const modal = document.getElementById('navLinkEditorModal');
     modal.classList.remove('active');
     this.currentLink = null;
   },
-  
+
   async saveLink() {
     const link = {
       id: this.currentLink?.id || crypto.randomUUID(),
@@ -183,31 +174,31 @@ const NavigationManager = {
       order: this.currentLink?.order ?? this.links.length,
       createdAt: this.currentLink?.createdAt || Date.now()
     };
-    
+
     await Database.put(DB_STORES.NAVIGATION, link);
     await this.loadLinks();
     this.render();
     this.closeEditor();
     this.syncToPublicSite();
-    
+
     Toast.show('Navigation link saved', 'success');
   },
-  
+
   async deleteLink(id) {
     if (!confirm('Delete this navigation link?')) return;
-    
+
     await Database.delete(DB_STORES.NAVIGATION, id);
     await this.loadLinks();
     this.render();
     this.syncToPublicSite();
-    
+
     Toast.show('Link deleted', 'success');
   },
-  
+
   async toggleVisibility(id) {
     const link = this.links.find(l => l.id === id);
     if (!link) return;
-    
+
     link.visible = !link.visible;
     await Database.put(DB_STORES.NAVIGATION, link);
     await this.loadLinks();
@@ -215,46 +206,45 @@ const NavigationManager = {
     this.syncToPublicSite();
     Toast.show(link.visible ? 'Link visible' : 'Link hidden', 'success');
   },
-  
+
   async moveLink(id, direction) {
     const index = this.links.findIndex(l => l.id === id);
     if (index === -1) return;
-    
+
     const newIndex = index + direction;
     if (newIndex < 0 || newIndex >= this.links.length) return;
-    
-    // Swap orders
+
     const currentLink = this.links[index];
     const targetLink = this.links[newIndex];
-    
+
     const tempOrder = currentLink.order;
     currentLink.order = targetLink.order;
     targetLink.order = tempOrder;
-    
+
     await Database.put(DB_STORES.NAVIGATION, currentLink);
     await Database.put(DB_STORES.NAVIGATION, targetLink);
     await this.loadLinks();
     this.render();
     this.syncToPublicSite();
   },
-  
+
   initDragDrop() {
     const container = document.getElementById('navLinksList');
     if (!container) return;
-    
+
     let draggedItem = null;
-    
+
     container.querySelectorAll('.ps-nav-link-item').forEach(item => {
       item.addEventListener('dragstart', (e) => {
         draggedItem = item;
         item.classList.add('dragging');
       });
-      
+
       item.addEventListener('dragend', () => {
         item.classList.remove('dragging');
         this.updateOrder();
       });
-      
+
       item.addEventListener('dragover', (e) => {
         e.preventDefault();
         if (draggedItem !== item) {
@@ -269,11 +259,11 @@ const NavigationManager = {
       });
     });
   },
-  
+
   async updateOrder() {
     const items = document.querySelectorAll('.ps-nav-link-item');
     const updates = [];
-    
+
     items.forEach((item, index) => {
       const id = item.dataset.id;
       const link = this.links.find(l => l.id === id);
@@ -282,17 +272,17 @@ const NavigationManager = {
         updates.push(Database.put(DB_STORES.NAVIGATION, link));
       }
     });
-    
+
     await Promise.all(updates);
     await this.loadLinks();
     this.syncToPublicSite();
   },
-  
+
   syncToPublicSite() {
     const publicNav = this.links
       .filter(l => l.visible)
       .map(({ label, route, external, newTab }) => ({ label, route, external, newTab }));
-    
+
     localStorage.setItem('ps_public_navigation', JSON.stringify(publicNav));
     window.dispatchEvent(new CustomEvent('navigationUpdated', { detail: publicNav }));
   }

@@ -31,12 +31,10 @@ body{
   color:var(--txt);
 }
 
-/* layout */
 .clock{display:flex;align-items:center;gap:14px}
 .group{display:flex;gap:8px}
 .sep{font-size:60px;color:var(--sep);padding-bottom:18px}
 
-/* digit */
 .digit{
   width:var(--w);
   height:var(--h);
@@ -64,7 +62,6 @@ body{
   font-weight:700;
 }
 
-/* top */
 .top{
   top:0;
   border-radius:var(--r) var(--r) 0 0;
@@ -73,7 +70,6 @@ body{
 }
 .top span{top:0}
 
-/* bottom */
 .bottom{
   bottom:0;
   border-radius:0 0 var(--r) var(--r);
@@ -82,11 +78,9 @@ body{
 }
 .bottom span{top:-100%}
 
-/* layers */
 .static{z-index:1}
 .flip{z-index:2}
 
-/* STRICT SEQUENTIAL FLIP */
 .flip.top{
   animation:flipTop var(--spd) cubic-bezier(.4,0,.2,1) forwards;
 }
@@ -99,7 +93,6 @@ body{
 @keyframes flipTop{to{transform:rotateX(-90deg)}}
 @keyframes flipBottom{to{transform:rotateX(0)}}
 
-/* controls */
 .controls{margin-top:30px;display:flex;gap:20px}
 button{
   background:transparent;
@@ -138,7 +131,7 @@ button:hover{border-color:#fff}
 </div>
 
 <script>
-/* ----- ENGINE ----- */
+
 const ids=["m1","m2","s1","s2","ms1","ms2"]
 const els={},vals={},busy={}
 
@@ -176,7 +169,6 @@ function flip(id,next){
   },{once:true})
 }
 
-/* ----- STOPWATCH (Tick-style timing) ----- */
 let running=false,startTime=0,elapsed=0,raf=null
 
 function update(){
@@ -196,7 +188,6 @@ function update(){
   raf=requestAnimationFrame(update)
 }
 
-/* ----- CONTROLS ----- */
 start.onclick=()=>{
   if(running){
     running=false

@@ -1,9 +1,3 @@
-/**
- * app.js — Orchestrator: wires events → state → UI.
- *
- * Single DOMContentLoaded listener.  All user interactions go through
- * event delegation on stable parent containers — zero inline handlers.
- */
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -17,22 +11,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalOverlay = $('#modalOverlay');
     let lastFocusedEl = null;
 
-    /* ==========  UTILITY  ========== */
     const debounce = (fn, ms) => {
         let t;
         return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
     };
 
-    /* ==========  THEME INIT  ========== */
     if (typeof Customer !== 'undefined') {
         const savedTheme = Customer.getTheme();
         document.documentElement.setAttribute('data-theme', savedTheme);
         UI.renderThemeToggle();
     }
 
-    /* ==========  USER SETUP MODAL (mandatory first visit)  ========== */
     const _initUserSetup = () => {
-        /* If session already exists, skip modal entirely */
+
         const existingName  = localStorage.getItem('pf_customer_name');
         const existingPhone = localStorage.getItem('pf_customer_phone');
         if (existingName && existingPhone) {
@@ -47,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const submitBtn = $('#setupSubmit');
         if (!modal) return;
 
-        /* Show modal — cannot be dismissed */
         requestAnimationFrame(() => modal.classList.add('user-setup--visible'));
         setTimeout(() => { if (nameIn) nameIn.focus(); }, 400);
 
@@ -72,17 +62,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            /* Save session */
             localStorage.setItem('pf_customer_name', name);
             localStorage.setItem('pf_customer_phone', phone);
 
-            /* Also push into Customer module for loyalty etc */
             if (typeof Customer !== 'undefined') {
                 Customer.setName(name);
                 Customer.setPhone(phone);
             }
 
-            /* Close modal */
             modal.classList.remove('user-setup--visible');
             setTimeout(() => modal.remove(), 300);
 
@@ -92,17 +79,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         submitBtn.addEventListener('click', _submit);
 
-        /* Enter key in either field submits */
         [nameIn, phoneIn].forEach(inp => {
             inp?.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') _submit();
             });
         });
 
-        /* Block closing by backdrop click — do nothing */
     };
 
-    /** Called once we have name + phone in localStorage */
     const _onSessionReady = () => {
         UI.renderGreeting();
         UI.renderAuthButton();
@@ -110,9 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
         _fetchOrdersByPhone();
     };
 
-    /* ==========  ORDER RESULT POPUP  ========== */
     const _showOrderResult = (success, data = {}) => {
-        /* Remove any existing popup */
+
         const existing = document.getElementById('orderResultPopup');
         if (existing) existing.remove();
 
@@ -122,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
         popup.setAttribute('role', 'alertdialog');
 
         if (success) {
-            const showWaBtn = !!data.url;  /* Only show WhatsApp button if URL provided */
+            const showWaBtn = !!data.url;
             popup.innerHTML = `
                 <div class="order-popup__inner">
                     <span class="order-popup__icon">✅</span>
@@ -140,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${data.viaWhatsApp ? '<p class="order-popup__hint">Order sent via WhatsApp — check your chat</p>' : '<p class="order-popup__hint">You\'ll get notified when your order status changes</p>'}
                 </div>`;
         } else if (data.serverDown && data.url) {
-            /* Server down — show apology with WhatsApp fallback */
+
             popup.innerHTML = `
                 <div class="order-popup__inner">
                     <span class="order-popup__icon">⚠️</span>
@@ -168,7 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(popup);
         requestAnimationFrame(() => popup.classList.add('order-popup--visible'));
 
-        /* Event delegation inside popup */
         popup.addEventListener('click', (e) => {
             const copyBtn = e.target.closest('[data-copy]');
             if (copyBtn) {
@@ -189,7 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        /* Auto-dismiss after 15s */
         setTimeout(() => {
             if (popup.parentNode) {
                 popup.classList.remove('order-popup--visible');
@@ -205,7 +186,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return d.innerHTML;
     };
 
-    /* ==========  CONNECTION INDICATOR  ========== */
     const _updateConnectionIndicator = (state) => {
         let el = document.getElementById('connIndicator');
         if (!el) {
@@ -222,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const info = map[state] || map.offline;
         el.className = `conn-indicator ${info.cls}`;
         el.innerHTML = `${info.dot} <span>${info.label}</span>`;
-        /* Auto-hide connected indicator after 3s */
+
         if (state === 'connected') {
             clearTimeout(el._hideTimer);
             el._hideTimer = setTimeout(() => el.classList.add('conn-indicator--hidden'), 3000);
@@ -232,12 +212,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    /* ==========  COLD START LISTENER  ========== */
     document.addEventListener('api:cold-start', () => {
         showToast('⏳ Server waking up — please wait…');
     });
 
-    /* ==========  NOTIFICATION SOUND  ========== */
     const _notifySound = new Audio('data:audio/wav;base64,UklGRl4GAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YToGAAD+/wIA/P8EAPv/BgD5/wgA9/8KAPb/CwD1/wwA9f8MAPT/DQD0/w0A9P8NAPX/DAD1/wwA9v8LAPX/DADz/w4A8P8RAPD/EQDx/xAA8v8PAPL/DwDy/w8A8P8RAPP/DgD4/wkA+/8GAP3/BAD+/wMA//8CAP//AgD//wIA//8CAP//AgD+/wMA/f8EAPz/BQD7/wYA+v8HAPn/CAD4/wkA+P8JAPj/CQD5/wgA+v8HAPv/BgD8/wUA/f8EAP7/AwD//wIA//8BAP//AQD//wEA//8BAP//AQD//wEAAAAAAAAAAAAA');
     _notifySound.volume = 0.7;
 
@@ -245,10 +223,9 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             _notifySound.currentTime = 0;
             _notifySound.play().catch(() => {});
-        } catch { /* audio blocked */ }
+        } catch {  }
     };
 
-    /* ==========  NOTIFICATION THROTTLE (3s per order)  ========== */
     const _notifThrottle = new Map();
     const _THROTTLE_MS = 3000;
 
@@ -258,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const now = Date.now();
         if (last && now - last < _THROTTLE_MS) return false;
         _notifThrottle.set(orderId, now);
-        /* Cleanup old entries */
+
         if (_notifThrottle.size > 50) {
             for (const [k, v] of _notifThrottle) {
                 if (now - v > 30000) _notifThrottle.delete(k);
@@ -267,7 +244,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
     };
 
-    /* ==========  WEB PUSH NOTIFICATIONS  ========== */
     const _requestNotifPermission = () => {
         if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
             Notification.requestPermission().catch(() => {});
@@ -277,19 +253,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const _sendPushNotification = (title, body, icon) => {
         if (typeof Notification === 'undefined') return;
         if (Notification.permission !== 'granted') return;
-        if (!document.hidden) return; /* Only when tab not focused */
+        if (!document.hidden) return;
         try {
             new Notification(title, { body, icon: icon || '🥟', tag: 'pf-order-update' });
-        } catch { /* SW-only context */ }
+        } catch {  }
     };
 
-    /* Request permission after first user interaction */
     document.addEventListener('click', function _reqPerm() {
         _requestNotifPermission();
         document.removeEventListener('click', _reqPerm);
     });
 
-    /* ==========  CUSTOMER ORDER NOTIFICATIONS (Socket.IO)  ========== */
     let _customerSocket = null;
     let _lastOrderId = null;
 
@@ -312,7 +286,6 @@ document.addEventListener('DOMContentLoaded', () => {
             debug('Socket Connected');
             _updateConnectionIndicator('connected');
 
-            /* Join user's phone room so only their orders get pushed */
             const phone = localStorage.getItem('pf_customer_phone');
             if (phone) {
                 _customerSocket.emit('join-room', phone);
@@ -326,7 +299,6 @@ document.addEventListener('DOMContentLoaded', () => {
             debug('Socket Status Update', data);
             _showOrderNotification(data);
 
-            /* Update local orders history */
             if (typeof Customer !== 'undefined' && data.orderId) {
                 Customer.updateOrderStatus(data.orderId, data.status);
                 UI.renderGreeting();
@@ -334,7 +306,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        /* Listen for new orders placed by this phone */
         _customerSocket.on('restaurant:new-order', (data) => {
             if (!data) return;
             const profile = typeof Customer !== 'undefined' ? Customer.getProfile() : null;
@@ -356,22 +327,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        /* Listen for order updates matching saved orders */
         _customerSocket.on('restaurant:order-updated', (order) => {
             if (!order) return;
             console.log('[CustomerSocket] order-updated:', order._id, order.status);
 
-            /* Instant DOM update */
             UI.updateOrderCard(order);
 
-            /* Update local storage */
             const id = order._id || order.orderId;
             const status = (order.status || '').toUpperCase();
             if (typeof Customer !== 'undefined' && id) {
                 Customer.updateOrderStatus(id, status);
             }
 
-            /* Sound + push for actionable statuses */
             if (_shouldNotify(id) && ['PREPARING', 'READY', 'COMPLETED'].includes(status)) {
                 _playNotifySound();
                 _sendPushNotification('Order Update', `Order is now ${status}`, '🥟');
@@ -381,7 +348,6 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.renderGreeting();
         });
 
-        /* Listen for order deletions */
         _customerSocket.on('restaurant:order-deleted', ({ orderId }) => {
             console.log('[CustomerSocket] order-deleted:', orderId);
             const card = document.querySelector(`[data-id="${orderId}"]`);
@@ -402,13 +368,12 @@ document.addEventListener('DOMContentLoaded', () => {
             _updateConnectionIndicator('offline');
         });
 
-        /* Listen for menu updates — clear cache and reload */
         _customerSocket.on('restaurant:menu-updated', () => {
             console.log('[CustomerSocket] Menu updated — clearing cache');
             if (typeof MenuData !== 'undefined' && MenuData.clearCache) {
                 MenuData.clearCache();
             }
-            /* Re-fetch from server (bypasses cache since we just cleared it) */
+
             MenuData.connectLive().then((result) => {
                 if (result.live) {
                     renderStats();
@@ -424,10 +389,6 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('pf_last_order', orderId);
     };
 
-    /**
-     * Fetch orders from backend by phone number and render them.
-     * Phone comes strictly from localStorage.pf_customer_phone.
-     */
     const _fetchOrdersByPhone = async () => {
         if (typeof Api === 'undefined') return;
         const phone = localStorage.getItem('pf_customer_phone');
@@ -439,7 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const res = await Api.fetchOrdersByPhone(phone);
             if (res.ok && Array.isArray(res.data)) {
                 console.log('[Orders] Fetched', res.data.length, 'orders for phone:', phone);
-                /* Sync backend orders into local storage */
+
                 res.data.forEach(order => {
                     Customer.saveOrder({
                         orderId: order.orderId || order._id,
@@ -473,7 +434,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const info = statusLabels[data.status] || { icon: '📦', label: data.status, desc: 'Order status updated' };
         const customerName = (typeof Customer !== 'undefined' ? Customer.getName() : '') || 'Guest';
 
-        /* Remove any existing notification */
         const existing = document.getElementById('orderNotification');
         if (existing) existing.remove();
 
@@ -494,16 +454,13 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(notif);
         requestAnimationFrame(() => notif.classList.add('order-notif--visible'));
 
-        /* Vibrate on mobile */
         if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
 
-        /* Dismiss */
         notif.querySelector('.order-notif__close').addEventListener('click', () => {
             notif.classList.remove('order-notif--visible');
             setTimeout(() => notif.remove(), 300);
         });
 
-        /* Auto-dismiss */
         setTimeout(() => {
             if (notif.parentNode) {
                 notif.classList.remove('order-notif--visible');
@@ -512,23 +469,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 8000);
     };
 
-    /* ==========  INITIAL RENDER (NON-BLOCKING)  ========== */
-    /* Render static menu immediately — no skeleton, no waiting for API */
     State.set('loading', false);
     renderStats();
     renderMenu();
 
-    /* Restore last tracked order ID */
     const savedOrderId = localStorage.getItem('pf_last_order');
     if (savedOrderId) _lastOrderId = savedOrderId;
 
-    /* Gate everything behind user setup — socket + fetch only fire after session exists */
     _initUserSetup();
-
-    /* ==========  NON-BLOCKING BACKGROUND CONNECT  ========== */
-    /* While user browses the static menu, silently ping the backend
-       every 3 s. Once the server is awake, deep-merge the live menu
-       into the running state without resetting cart or scroll. */
 
     const _connectBanner = (() => {
         const el = document.createElement('div');
@@ -543,7 +491,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         el.innerHTML = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#f59e0b;animation:cbPulse 1.5s infinite"></span> Connecting to live server…';
 
-        /* Add pulse keyframe once */
         if (!document.getElementById('cbPulseStyle')) {
             const s = document.createElement('style');
             s.id = 'cbPulseStyle';
@@ -561,7 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const _backgroundConnect = async () => {
         const PING_MS = 3000;
-        const MAX_ATTEMPTS = 40; /* ~2 min max */
+        const MAX_ATTEMPTS = 40;
         let attempts = 0;
 
         const tryConnect = async () => {
@@ -577,16 +524,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     clearInterval(_bgPingTimer);
                     _bgPingTimer = null;
 
-                    /* Remove banner smoothly */
                     _connectBanner.style.transform = 'translateY(-100%)';
                     setTimeout(() => _connectBanner.remove(), 300);
 
-                    /* Refresh stats & menu (preserves cart & scroll) */
                     renderStats();
                     if (result.changedIds && result.changedIds.length > 0) {
                         renderMenu();
                     }
-                    /* Re-render cart to hide WhatsApp fallback button */
+
                     renderCartModal();
                     return true;
                 }
@@ -609,18 +554,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         };
 
-        /* First attempt immediately */
         if (await tryConnect()) return;
 
-        /* Keep pinging */
         _bgPingTimer = setInterval(() => tryConnect(), PING_MS);
     };
 
     _backgroundConnect();
 
-    /* ==========  BACKEND STATUS PING (Step 2)  ========== */
-    /* Proactively detect backend status via GET /api/restaurant/stats.
-       This sets __BACKEND_CONNECTED__ BEFORE user reaches checkout. */
     (async () => {
         if (typeof Api === 'undefined') return;
         debug('Checking Backend Connection');
@@ -632,7 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.__BACKEND_CONNECTED__ = true;
                 console.log('[BackendPing] Backend is connected');
                 debug('Backend Connected');
-                /* Re-render cart modal if open, to hide WhatsApp button */
+
                 renderCartModal();
             } else {
                 window.__BACKEND_CONNECTED__ = false;
@@ -646,14 +586,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     })();
 
-    // Fetch loyalty profile if authenticated
     (async () => {
         if (typeof Api !== 'undefined' && Api.isAuthenticated()) {
             await Api.fetchProfile();
         }
     })();
 
-    /* ==========  STATE → UI SUBSCRIPTIONS  ========== */
     const updateTabIndicator = (activeTab) => {
         if (!tabs || !tabIndicator || !activeTab) return;
         requestAnimationFrame(() => {
@@ -691,7 +629,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderCartModal();
     });
 
-    /* ==========  EVENT DELEGATION: menu container  ========== */
     $('#menuContainer').addEventListener('click', (e) => {
         const btn = e.target.closest('[data-action]');
         if (!btn) return;
@@ -717,7 +654,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    /* ==========  TABS  ========== */
     $('#menuTabs').addEventListener('click', (e) => {
         const tab = e.target.closest('.tab');
         if (!tab) return;
@@ -726,14 +662,12 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTabIndicator(tab);
     });
 
-    /* ==========  FILTER CHIPS  ========== */
     $('#filterBar').addEventListener('click', (e) => {
         const chip = e.target.closest('.chip');
         if (!chip) return;
         State.set('filter', chip.dataset.filter);
     });
 
-    /* ==========  SEARCH  ========== */
     const searchInput = $('#searchInput');
     const searchClear = $('#searchClear');
     const debouncedSearch = debounce((q) => State.set('search', q), 180);
@@ -751,12 +685,10 @@ document.addEventListener('DOMContentLoaded', () => {
         searchInput.focus();
     });
 
-    /* ==========  CART MODAL  ========== */
     $('#cartBtn').addEventListener('click',     () => toggleCart());
     $('#modalOverlay').addEventListener('click', () => toggleCart(false));
     $('#closeCart').addEventListener('click',    () => toggleCart(false));
 
-    /* ==========  CART MODAL: delegation for +/−, clear, checkout flow, suggestions  ========== */
     cartModal.addEventListener('click', (e) => {
         const btn = e.target.closest('[data-action]');
         if (!btn) return;
@@ -798,7 +730,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!name) { showToast('Please enter your name'); $('#custName')?.focus(); return; }
                 if (!phone || !/^\d{10}$/.test(phone)) { showToast('Enter valid 10-digit phone'); $('#custPhone')?.focus(); return; }
 
-                /* Persist user details for auto-fill on next visit */
                 localStorage.setItem('pf_customer_name', name);
                 localStorage.setItem('pf_customer_phone', phone);
 
@@ -821,16 +752,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         const result = await Cart.submitOrder(info);
 
                         if (result.ok && result.source === 'server') {
-                            /* === Backend accepted the order === */
+
                             window.__BACKEND_CONNECTED__ = true;
 
-                            /* Save customer data + loyalty points */
                             if (typeof Customer !== 'undefined') {
                                 const { earnedPoints } = Customer.recordOrder(info, result.total, Cart.snapshot());
                                 if (earnedPoints > 0) {
                                     showToast(`+${earnedPoints} loyalty points earned!`);
                                 }
-                                /* Save to orders history */
+
                                 Customer.saveOrder({
                                     orderId: result.orderId,
                                     _id: result._id || null,
@@ -848,7 +778,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 orderId: result.orderId,
                                 total: result.total,
                                 name: info.name,
-                                /* No url → WhatsApp button hidden in popup */
+
                             });
 
                             if (result.orderId) _trackOrder(result.orderId);
@@ -863,7 +793,6 @@ document.addEventListener('DOMContentLoaded', () => {
                             return;
                         }
 
-                        /* === Backend failed — show apology popup with WhatsApp fallback === */
                         window.__BACKEND_CONNECTED__ = false;
                         const waData = Cart.sendViaWhatsApp(info);
                         _showOrderResult(false, {
@@ -873,7 +802,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         });
                         btn.disabled = false;
                         btn.textContent = '✅ Place Order';
-                        /* Re-render cart to show WhatsApp button */
+
                         renderCartModal();
 
                     } catch (err) {
@@ -894,11 +823,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             }
             case 'checkout-wa': {
-                /* Direct WhatsApp send — bypasses backend entirely */
+
                 const waInfo = UI.getCustomerInfo();
                 if (!Cart.count()) return;
 
-                /* Save customer data + loyalty points even for WhatsApp orders */
                 if (typeof Customer !== 'undefined') {
                     const waTotal = Cart.total();
                     Customer.recordOrder(waInfo, waTotal, Cart.snapshot());
@@ -919,7 +847,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
             }
             case 'repeat-order': {
-                /* Restore last order from Customer localStorage */
+
                 if (typeof Customer !== 'undefined' && Customer.repeatLastOrder()) {
                     showToast('Last order restored!');
                 } else {
@@ -930,7 +858,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    /* Order-type toggle inside checkout form */
     cartModal.addEventListener('change', (e) => {
         if (e.target.name === 'orderType') {
             const dineIn = $('#dineInFields');
@@ -941,7 +868,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Close cart on Escape + trap focus in modal
     document.addEventListener('keydown', (e) => {
         if (!State.get('cartOpen')) return;
         if (e.key === 'Escape') return toggleCart(false);
@@ -961,7 +887,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Swipe down to close (mobile)
     let touchStartY = 0;
     let touchActive = false;
     cartModal.addEventListener('touchstart', (e) => {
@@ -978,7 +903,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: true });
     cartModal.addEventListener('touchend', () => { touchActive = false; }, { passive: true });
 
-    /* ==========  BACK TO TOP  ========== */
     const btt = $('#backToTop');
     let scrollTick = false;
 
@@ -1008,17 +932,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateTabIndicator(document.querySelector('.tab.active'));
 
-    /* Listen for customer updates (order placed) to refresh greeting */
     document.addEventListener('customer:updated', () => {
         UI.renderGreeting();
     });
 
-    /* Listen for orders history changes */
     document.addEventListener('orders:updated', () => {
         UI.renderGreeting();
     });
 
-    /* ==========  THEME TOGGLE  ========== */
     const themeToggle = $('#themeToggle');
     if (themeToggle) {
         themeToggle.addEventListener('click', () => {
@@ -1030,7 +951,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /* ==========  ORDERS PANEL  ========== */
     const ordersBtn = $('#ordersBtn');
     if (ordersBtn) {
         ordersBtn.addEventListener('click', () => UI.toggleOrdersPanel(true));
@@ -1046,7 +966,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ordersOverlay.addEventListener('click', () => UI.toggleOrdersPanel(false));
     }
 
-    /* Close orders panel on Escape */
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             const panel = $('#ordersPanel');
@@ -1056,7 +975,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    /* Reorder from orders panel */
     const ordersPanel = $('#ordersPanel');
     if (ordersPanel) {
         ordersPanel.addEventListener('click', (e) => {
@@ -1080,7 +998,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /* Cancel PENDING orders from customer panel */
     document.addEventListener('click', async (e) => {
         if (!e.target.classList.contains('cancel-order')) return;
 
@@ -1097,12 +1014,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            /* Update local storage */
             if (typeof Customer !== 'undefined') {
                 Customer.updateOrderStatus(id, 'CANCELLED');
             }
 
-            /* Re-render panel to show updated state */
             UI.renderOrdersPanel();
             UI.renderGreeting();
 
@@ -1113,7 +1028,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    /* Delete cancelled orders from customer panel */
     document.addEventListener('click', async (e) => {
         if (!e.target.classList.contains('delete-cancelled')) return;
 
@@ -1124,7 +1038,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const BASE_URL = 'https://anand-os-backend.onrender.com/api';
             await fetch(`${BASE_URL}/restaurant/orders/${id}`, { method: 'DELETE' });
 
-            /* Remove card from DOM */
             const card = e.target.closest('.order-card');
             if (card) {
                 card.style.transition = 'opacity .3s ease, transform .3s ease';
@@ -1133,7 +1046,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => card.remove(), 300);
             }
 
-            /* Remove from local storage */
             if (typeof Customer !== 'undefined' && Customer.removeOrder) {
                 Customer.removeOrder(id);
             }

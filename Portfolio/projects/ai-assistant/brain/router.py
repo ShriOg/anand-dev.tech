@@ -8,7 +8,6 @@ from brain.intent_parser import IntentParser, ParsedIntent
 from brain.context import ContextManager
 from utils.config import config_manager, PermissionTier
 
-
 class CommandRouter:
     def __init__(self):
         self.intent_parser = IntentParser()
@@ -58,7 +57,7 @@ class CommandRouter:
         config_manager.record_command()
 
         intent = self.intent_parser.parse(user_input)
-        
+
         if intent.action_type == ActionType.UNKNOWN:
             return self._handle_unknown(intent)
 
@@ -162,7 +161,7 @@ class CommandRouter:
         stats = self.context.get_session_stats()
         safe_mode = "ON" if config_manager.is_safe_mode() else "OFF"
         kill_switch = "ACTIVE" if config_manager.is_kill_switch_active() else "INACTIVE"
-        
+
         status = f"""Assistant Status:
 - Platform: {platform.system()} {platform.release()}
 - Safe Mode: {safe_mode}

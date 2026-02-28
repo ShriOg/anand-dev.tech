@@ -1,14 +1,3 @@
-/**
- * CONTENT LOADER
- * Single source of truth content injection system
- * Reads content.json and populates DOM via data-attributes
- * 
- * Architecture:
- * - content.json is the ONLY editable content file
- * - HTML files are structure-only (no hardcoded text)
- * - This loader bridges data to DOM
- */
-
 const ContentLoader = (function() {
   'use strict';
 
@@ -16,9 +5,6 @@ const ContentLoader = (function() {
   let basePath = './';
   let isInitialized = false;
 
-  /**
-   * Detect base path based on current URL depth
-   */
   function detectBasePath() {
     const path = window.location.pathname;
     const depth = (path.match(/\/pages\//g) || []).length;
@@ -28,16 +14,13 @@ const ContentLoader = (function() {
     return './';
   }
 
-  /**
-   * Fetch and cache content.json
-   */
   async function loadContent(forceRefresh = false) {
     if (content && !forceRefresh) {
       return content;
     }
 
     basePath = detectBasePath();
-    
+
     try {
       const response = await fetch(`${basePath}assets/content.json`);
       if (!response.ok) {
@@ -51,9 +34,6 @@ const ContentLoader = (function() {
     }
   }
 
-  /**
-   * Escape HTML to prevent XSS
-   */
   function escapeHtml(text) {
     if (!text) return '';
     const div = document.createElement('div');
@@ -61,22 +41,16 @@ const ContentLoader = (function() {
     return div.innerHTML;
   }
 
-  /**
-   * Resolve relative URLs based on current page depth
-   */
   function resolveUrl(href) {
     if (!href) return '#';
     if (href.startsWith('http') || href.startsWith('mailto:')) {
       return href;
     }
-    // Convert absolute paths to relative
+
     const cleanHref = href.replace(/^\//, '');
     return basePath + cleanHref;
   }
 
-  /**
-   * Inject text content into element by data-content attribute
-   */
   function injectText(selector, text) {
     const elements = document.querySelectorAll(selector);
     elements.forEach(el => {
@@ -84,9 +58,6 @@ const ContentLoader = (function() {
     });
   }
 
-  /**
-   * Inject HTML content into element
-   */
   function injectHtml(selector, html) {
     const elements = document.querySelectorAll(selector);
     elements.forEach(el => {
@@ -94,9 +65,6 @@ const ContentLoader = (function() {
     });
   }
 
-  /**
-   * Render navigation links
-   */
   function renderNavigation() {
     if (!content?.navigation) return;
 
@@ -104,13 +72,12 @@ const ContentLoader = (function() {
     if (!navContainer) return;
 
     const currentPath = window.location.pathname;
-    
-    // Filter out hidden navigation items
+
     const visibleLinks = content.navigation.filter(link => link.status !== 'hidden');
-    
+
     const html = visibleLinks.map(link => {
       const href = resolveUrl(link.href);
-      const isActive = currentPath.includes(link.id) || 
+      const isActive = currentPath.includes(link.id) ||
                        (link.id === 'home' && (currentPath === '/' || currentPath.endsWith('index.html') || currentPath === basePath));
       const activeClass = isActive ? ' nav__link--active' : '';
       return `<a href="${href}" class="nav__link${activeClass}" data-nav="${link.id}">${escapeHtml(link.label)}</a>`;
@@ -119,9 +86,6 @@ const ContentLoader = (function() {
     navContainer.innerHTML = html;
   }
 
-  /**
-   * Render logo
-   */
   function renderLogo() {
     if (!content?.site?.logo) return;
 
@@ -133,9 +97,6 @@ const ContentLoader = (function() {
     });
   }
 
-  /**
-   * Render hero section
-   */
   function renderHero() {
     if (!content?.hero) return;
 
@@ -144,7 +105,6 @@ const ContentLoader = (function() {
     injectText('[data-content="hero-subtitle"]', content.hero.subtitle);
     injectText('[data-content="hero-philosophy"]', content.hero.philosophy);
 
-    // CTA buttons
     const primaryCta = document.querySelector('[data-content="hero-cta-primary"]');
     const secondaryCta = document.querySelector('[data-content="hero-cta-secondary"]');
 
@@ -159,9 +119,6 @@ const ContentLoader = (function() {
     }
   }
 
-  /**
-   * Render featured projects section header
-   */
   function renderFeaturedHeader() {
     if (!content?.sections?.featuredProjects) return;
 
@@ -169,9 +126,6 @@ const ContentLoader = (function() {
     injectText('[data-content="featured-title"]', content.sections.featuredProjects.title);
   }
 
-  /**
-   * Render projects page header
-   */
   function renderProjectsHeader() {
     if (!content?.sections?.projects) return;
 
@@ -180,9 +134,6 @@ const ContentLoader = (function() {
     injectText('[data-content="projects-description"]', content.sections.projects.description);
   }
 
-  /**
-   * Render skills section
-   */
   function renderSkills() {
     if (!content?.sections?.skills?.categories) return;
 
@@ -191,7 +142,7 @@ const ContentLoader = (function() {
 
     const html = content.sections.skills.categories.map((category, index) => {
       const delayClass = index > 0 ? ` reveal--delay-${index}` : '';
-      const skillTags = category.items.map(item => 
+      const skillTags = category.items.map(item =>
         `<span class="skill-tag">${escapeHtml(item)}</span>`
       ).join('');
 
@@ -206,9 +157,6 @@ const ContentLoader = (function() {
     container.innerHTML = html;
   }
 
-  /**
-   * Render footer
-   */
   function renderFooter() {
     if (!content?.footer) return;
 
@@ -224,9 +172,6 @@ const ContentLoader = (function() {
     injectText('[data-content="footer-copyright"]', content.footer.copyright);
   }
 
-  /**
-   * Get filtered projects (excludes hidden)
-   */
   function getVisibleProjects() {
     if (!content?.projects) return [];
     return content.projects
@@ -234,21 +179,15 @@ const ContentLoader = (function() {
       .sort((a, b) => (a.order || 999) - (b.order || 999));
   }
 
-  /**
-   * Get featured projects only
-   */
   function getFeaturedProjects() {
     return getVisibleProjects().filter(p => p.featured);
   }
 
-  /**
-   * Render project card HTML
-   */
   function renderProjectCard(project, options = {}) {
     const { showArrow = true, isFromPages = false } = options;
     const icons = content?.icons || {};
-    
-    const liveUrlHtml = project.liveUrl 
+
+    const liveUrlHtml = project.liveUrl
       ? `<a href="${resolveUrl(project.liveUrl)}" target="_blank" rel="noopener" class="action-btn action-btn--primary">
           <span class="action-btn__icon">${icons.play || ''}</span>
           View Live
@@ -294,9 +233,6 @@ const ContentLoader = (function() {
     `;
   }
 
-  /**
-   * Render project section content
-   */
   function renderSection(section) {
     let contentHtml = '';
 
@@ -320,7 +256,7 @@ const ContentLoader = (function() {
 
       case 'table':
         const headersHtml = (section.headers || []).map(h => `<th>${escapeHtml(h)}</th>`).join('');
-        const rowsHtml = (section.rows || []).map(row => 
+        const rowsHtml = (section.rows || []).map(row =>
           `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`
         ).join('');
         contentHtml = `
@@ -346,13 +282,10 @@ const ContentLoader = (function() {
     `;
   }
 
-  /**
-   * Render hidden content template for overlay
-   */
   function renderProjectContentTemplate(project) {
     const icons = content?.icons || {};
-    
-    const liveUrlHtml = project.liveUrl 
+
+    const liveUrlHtml = project.liveUrl
       ? `<a href="${resolveUrl(project.liveUrl)}" target="_blank" rel="noopener" class="action-btn action-btn--primary action-btn--large">
           <span class="action-btn__icon">${icons.play || ''}</span>
           View Live Demo
@@ -405,28 +338,21 @@ const ContentLoader = (function() {
     `;
   }
 
-  /**
-   * Render projects into a container
-   */
   function renderProjects(container, options = {}) {
     if (!container) return;
 
     const { featuredOnly = false } = options;
     const projects = featuredOnly ? getFeaturedProjects() : getVisibleProjects();
-    
+
     const html = projects.map(project => renderProjectCard(project, options)).join('');
     container.innerHTML = html;
 
-    // Re-observe for reveal animations
     initializeRevealObserver(container);
   }
 
-  /**
-   * Initialize reveal observer for dynamically added elements
-   */
   function initializeRevealObserver(container) {
     const revealElements = container.querySelectorAll('.reveal');
-    
+
     const revealObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -442,27 +368,19 @@ const ContentLoader = (function() {
     revealElements.forEach(el => revealObserver.observe(el));
   }
 
-  /**
-   * Update page meta tags
-   */
   function updateMeta() {
     if (!content?.meta) return;
 
-    // Update title if not already set
     if (document.querySelector('[data-content="page-title"]')) {
       document.title = content.meta.title;
     }
 
-    // Update meta description
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc && content.meta.description) {
       metaDesc.setAttribute('content', content.meta.description);
     }
   }
 
-  /**
-   * Initialize all content injection
-   */
   async function init() {
     if (isInitialized) return content;
 
@@ -472,7 +390,6 @@ const ContentLoader = (function() {
       return null;
     }
 
-    // Render all sections
     renderLogo();
     renderNavigation();
     renderHero();
@@ -482,13 +399,11 @@ const ContentLoader = (function() {
     renderFooter();
     updateMeta();
 
-    // Render featured projects on homepage
     const featuredGrid = document.querySelector('[data-content="featured-projects"]');
     if (featuredGrid) {
       renderProjects(featuredGrid, { featuredOnly: true });
     }
 
-    // Render all projects on projects page
     const projectsGrid = document.querySelector('[data-content="all-projects"]');
     if (projectsGrid) {
       renderProjects(projectsGrid, { featuredOnly: false });
@@ -496,13 +411,11 @@ const ContentLoader = (function() {
 
     isInitialized = true;
 
-    // Dispatch event for other scripts to know content is ready
     window.dispatchEvent(new CustomEvent('contentLoaded', { detail: content }));
 
     return content;
   }
 
-  // Public API
   return {
     init,
     loadContent,
@@ -516,14 +429,12 @@ const ContentLoader = (function() {
   };
 })();
 
-// Auto-initialize on DOM ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => ContentLoader.init());
 } else {
   ContentLoader.init();
 }
 
-// Export for module systems
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = ContentLoader;
 }

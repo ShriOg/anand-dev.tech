@@ -1,28 +1,15 @@
-/* ================================================================
-   Pramod Fast Food — Production Stylesheet
-   ================================================================
-   Spacing scale : 4 px base (--sp-1 = 4px … --sp-8 = 32px)
-   Radius scale  : sm 6 / md 12 / lg 18 / full 9999
-   Shadows       : 3-tier (sm / md / lg)
-   Colors        : warm-brand + food-grade greens
-   ================================================================ */
-
-/* ---------- Reset ---------- */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 
-/* ---------- Design Tokens ---------- */
 :root{
-    /* Brand */
+
     --c-brand:       #e85d04;
     --c-brand-light: #f48c06;
     --c-brand-dark:  #d63300;
     --c-accent:      #9d0208;
 
-    /* Greens (price / veg) */
     --c-green:       #2d6a4f;
     --c-green-light: #52b788;
 
-    /* Neutrals */
     --c-bg:          #fdf8f0;
     --c-surface:     #ffffff;
     --c-muted:       #f5f0e8;
@@ -31,22 +18,17 @@
     --c-text-soft:   #6b705c;
     --c-text-lighter:#9a9a8e;
 
-    /* Spacing */
     --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:20px;--sp-6:24px;--sp-8:32px;--sp-10:40px;
 
-    /* Radii */
     --r-sm:6px;--r-md:12px;--r-lg:18px;--r-full:9999px;
 
-    /* Shadows */
     --sh-sm:0 1px 2px rgba(0,0,0,.04),0 1px 3px rgba(0,0,0,.06);
     --sh-md:0 2px 8px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
     --sh-lg:0 8px 28px rgba(0,0,0,.10),0 2px 8px rgba(0,0,0,.04);
 
-    /* Motion */
     --ease:cubic-bezier(.4,0,.2,1);
     --dur:0.22s;
 
-    /* Font */
     --ff:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 }
 
@@ -60,9 +42,6 @@ body{
     overflow-x:hidden;
 }
 
-/* ================================================================
-   HERO HEADER
-   ================================================================ */
 .hero{
     background:linear-gradient(135deg,var(--c-brand) 0%,var(--c-brand-dark) 100%);
     color:#fff;
@@ -96,9 +75,6 @@ body{
 .hero--compact .hero__emoji{transform:scale(.85)}
 .hero--compact .hero__badge{opacity:.7}
 
-/* ================================================================
-   SEARCH SECTION  (sticky below hero)
-   ================================================================ */
 .search-bar{
     padding:var(--sp-3) var(--sp-4);
     background:var(--c-surface);
@@ -132,7 +108,6 @@ body{
 .search-box__clear.show{display:block}
 .search-box__clear:hover{color:var(--c-brand)}
 
-/* Filter chips */
 .filters{display:flex;gap:var(--sp-2);overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
 .filters::-webkit-scrollbar{display:none}
 
@@ -146,9 +121,6 @@ body{
 .chip:hover{border-color:var(--c-brand-light);color:var(--c-brand)}
 .chip.active{background:var(--c-brand);color:#fff;border-color:var(--c-brand)}
 
-/* ================================================================
-   CATEGORY TABS
-   ================================================================ */
 .tabs-wrap{
     background:var(--c-surface);border-bottom:1px solid var(--c-border);
     box-shadow:var(--sh-sm);
@@ -174,14 +146,8 @@ body{
     pointer-events:none;
 }
 
-/* ================================================================
-   MAIN CONTAINER
-   ================================================================ */
 .main{padding:var(--sp-4);padding-bottom:120px;max-width:680px;margin:0 auto}
 
-/* ================================================================
-   STATS BAR
-   ================================================================ */
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:var(--sp-6)}
 .stat{
     background:var(--c-surface);padding:14px var(--sp-3);border-radius:var(--r-md);
@@ -192,9 +158,6 @@ body{
 .stat__val{font-size:22px;font-weight:800;color:var(--c-brand);line-height:1.2}
 .stat__lbl{font-size:10px;color:var(--c-text-soft);margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
 
-/* ================================================================
-   CATEGORY SECTIONS
-   ================================================================ */
 .cat-section{margin-bottom:var(--sp-8);animation:fadeUp .4s var(--ease) both}
 .cat-head{
     display:flex;align-items:center;gap:var(--sp-3);
@@ -210,14 +173,8 @@ body{
     font-size:11px;font-weight:700;
 }
 
-/* ================================================================
-   MENU GRID
-   ================================================================ */
 .menu-grid{display:flex;flex-direction:column;gap:10px}
 
-/* ================================================================
-   CARD
-   ================================================================ */
 .card{
     background:var(--c-surface);border-radius:var(--r-md);padding:var(--sp-4);
     box-shadow:var(--sh-sm);border:1px solid var(--c-border);
@@ -229,7 +186,6 @@ body{
 .card:hover{transform:translateY(-4px);box-shadow:0 10px 24px rgba(232,93,4,.12),var(--sh-md)}
 .card:active{transform:scale(.995)}
 
-/* Special variant */
 .card--special{border-color:#fdd49e;background:linear-gradient(135deg,#fffcf5,#fff7eb)}
 .card--special::after{
     content:'';position:absolute;top:-18px;right:-18px;
@@ -238,7 +194,7 @@ body{
 }
 
 .card__head{display:flex;align-items:flex-start;gap:var(--sp-2);margin-bottom:var(--sp-1)}
-/* Veg dot */
+
 .veg-dot{
     width:16px;height:16px;min-width:16px;margin-top:2px;
     border:2px solid var(--c-green);border-radius:2px;
@@ -264,7 +220,6 @@ body{
 
 .card__desc{font-size:12.5px;color:var(--c-text-soft);line-height:1.4;margin-bottom:var(--sp-3);padding-left:24px}
 
-/* Prices row */
 .card__prices{
     display:flex;gap:10px;padding-top:var(--sp-3);
     border-top:1px dashed var(--c-border);
@@ -278,9 +233,6 @@ body{
 .price-label{display:block;font-size:10.5px;color:var(--c-text-soft);font-weight:600;text-transform:uppercase;letter-spacing:.3px}
 .price-val{font-size:19px;font-weight:800;color:var(--c-green);line-height:1.4}
 
-/* ================================================================
-   CART BUTTONS (inside cards)
-   ================================================================ */
 .cart-ctrl{min-height:34px;display:flex;align-items:center;justify-content:center}
 
 .add-btn{
@@ -310,9 +262,6 @@ body{
 .qty-btn:active{transform:scale(.88)}
 .qty-val{color:#fff;font-weight:700;font-size:13.5px;min-width:22px;text-align:center}
 
-/* ================================================================
-   FLOATING CART BUTTON
-   ================================================================ */
 .cart-fab{
     position:fixed;bottom:var(--sp-6);right:var(--sp-4);
     width:58px;height:58px;
@@ -335,9 +284,6 @@ body{
 }
 .cart-fab__badge.badge-pop{animation:badgePop .38s var(--ease)}
 
-/* ================================================================
-   MODAL OVERLAY / CART MODAL
-   ================================================================ */
 .overlay{
     position:fixed;inset:0;background:rgba(0,0,0,.42);
     backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
@@ -372,7 +318,6 @@ body{
 }
 .cart-modal__close:hover{background:#fde8e8;color:var(--c-brand-dark);border-color:#f5c6c6}
 
-/* Cart items list */
 .cart-modal__list{flex:1;overflow-y:auto;padding:var(--sp-4) var(--sp-5);-webkit-overflow-scrolling:touch}
 
 .cart-row{
@@ -388,7 +333,6 @@ body{
 .cart-row__meta{font-size:11.5px;color:var(--c-text-soft)}
 .cart-row__price{font-size:15px;font-weight:800;color:var(--c-green)}
 
-/* Cart footer */
 .cart-modal__foot{padding:var(--sp-4) var(--sp-5);border-top:1px solid var(--c-border);background:var(--c-muted)}
 .cart-total{display:flex;justify-content:space-between;margin-bottom:var(--sp-3);font-size:17px;font-weight:700}
 .cart-total__val{color:var(--c-green)}
@@ -404,23 +348,16 @@ body{
 .checkout-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(37,211,102,.3)}
 .checkout-btn:active{transform:scale(.98)}
 
-/* Empty cart */
 .empty-cart{text-align:center;padding:var(--sp-10) var(--sp-4);color:var(--c-text-soft)}
 .empty-cart__icon{font-size:52px;margin-bottom:var(--sp-3);opacity:.4}
 .empty-cart__title{font-size:15px;font-weight:600;margin-bottom:var(--sp-1)}
 .empty-cart__hint{font-size:12.5px;color:var(--c-text-lighter)}
 
-/* ================================================================
-   EMPTY STATE (no search results)
-   ================================================================ */
 .empty-state{text-align:center;padding:var(--sp-10) var(--sp-4);color:var(--c-text-soft)}
 .empty-state__icon{font-size:48px;margin-bottom:var(--sp-3);opacity:.35;display:block}
 .empty-state__text{font-size:16px;font-weight:600;margin-bottom:var(--sp-1)}
 .empty-state__hint{font-size:13px;color:var(--c-text-lighter)}
 
-/* ================================================================
-   TOAST
-   ================================================================ */
 .toast{
     position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);
     background:var(--c-text);color:#fff;
@@ -432,9 +369,6 @@ body{
 }
 .toast--visible{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
 
-/* ================================================================
-   FOOTER
-   ================================================================ */
 .footer{
     background:var(--c-surface);border-top:1px solid var(--c-border);
     padding:var(--sp-6) var(--sp-4);
@@ -455,9 +389,6 @@ body{
 
 .footer__info{font-size:12.5px;color:var(--c-text-soft);text-align:center;line-height:1.6;padding:var(--sp-3) 0 var(--sp-1)}
 
-/* ================================================================
-   BACK TO TOP
-   ================================================================ */
 .btt{
     position:fixed;bottom:96px;right:var(--sp-4);
     width:42px;height:42px;
@@ -471,16 +402,10 @@ body{
 .btt:hover{background:var(--c-brand);color:#fff;border-color:var(--c-brand)}
 .btt:active{transform:scale(.88)}
 
-/* ================================================================
-    MENU FADE TRANSITION
-    ================================================================ */
 #menuContainer{transition:opacity .2s var(--ease),transform .2s var(--ease);will-change:opacity,transform}
 #menuContainer.menu-fade-out{opacity:0;transform:translateY(6px)}
 #menuContainer.menu-fade-in{opacity:1;transform:translateY(0)}
 
-/* ================================================================
-    SPECIAL RIBBON
-    ================================================================ */
 .special-ribbon{
      position:sticky;top:108px;z-index:5;
      margin:0 0 var(--sp-3);padding:8px 14px;
@@ -490,9 +415,6 @@ body{
      box-shadow:var(--sh-sm);
 }
 
-/* ================================================================
-    MODAL BACKGROUND SCALE
-    ================================================================ */
 body.modal-open .hero,
 body.modal-open .search-bar,
 body.modal-open .tabs-wrap,
@@ -504,9 +426,6 @@ body.modal-open .cart-fab{
      transition:transform .28s var(--ease);
 }
 
-/* ================================================================
-   SKELETON LOADER
-   ================================================================ */
 .skeleton-section{margin-bottom:var(--sp-6)}
 .skeleton{
     background:linear-gradient(90deg,var(--c-muted) 25%,#ebe5d8 50%,var(--c-muted) 75%);
@@ -516,9 +435,6 @@ body.modal-open .cart-fab{
 .skeleton--header{height:52px;margin-bottom:var(--sp-3)}
 .skeleton--card{height:140px;margin-bottom:var(--sp-2)}
 
-/* ================================================================
-   ANIMATIONS
-   ================================================================ */
 @keyframes fadeUp{
     from{opacity:0;transform:translateY(14px)}
     to{opacity:1;transform:translateY(0)}
@@ -534,7 +450,6 @@ body.modal-open .cart-fab{
 @keyframes badgePop{0%{transform:scale(1)}60%{transform:scale(1.28)}100%{transform:scale(1)}}
 @keyframes shimmer{to{background-position:-200% 0}}
 
-/* Stagger menu cards */
 .card:nth-child(1){animation-delay:.02s}
 .card:nth-child(2){animation-delay:.06s}
 .card:nth-child(3){animation-delay:.10s}
@@ -544,9 +459,6 @@ body.modal-open .cart-fab{
 .card:nth-child(7){animation-delay:.26s}
 .card:nth-child(8){animation-delay:.30s}
 
-/* ================================================================
-   RESPONSIVE  (tablet+)
-   ================================================================ */
 @media(min-width:580px){
     .hero{padding:36px 24px 28px}
     .hero__title{font-size:30px}
@@ -558,9 +470,6 @@ body.modal-open .cart-fab{
     .menu-grid{grid-template-columns:repeat(3,1fr)}
 }
 
-/* ================================================================
-   CART ROW CONTROLS (+/− inside cart modal)
-   ================================================================ */
 .cart-row__controls{
     display:flex;align-items:center;gap:2px;
     background:var(--c-muted);border:1px solid var(--c-border);
@@ -579,9 +488,6 @@ body.modal-open .cart-fab{
     font-size:13px;font-weight:700;color:var(--c-text);
 }
 
-/* ================================================================
-   CLEAR CART BUTTON
-   ================================================================ */
 .cart-actions{display:flex;justify-content:flex-end;margin-bottom:var(--sp-2)}
 .clear-cart-btn{
     background:none;border:1px solid #f5c6c6;color:#c0392b;
@@ -591,9 +497,6 @@ body.modal-open .cart-fab{
 }
 .clear-cart-btn:hover{background:#fde8e8;border-color:#e74c3c}
 
-/* ================================================================
-   CART SUGGESTIONS (dropdown)
-   ================================================================ */
 .cart-suggestions{margin-top:var(--sp-4);padding-top:var(--sp-3);border-top:1px dashed var(--c-border)}
 .cart-suggestions__toggle{
     display:flex;align-items:center;width:100%;gap:var(--sp-2);
@@ -633,9 +536,6 @@ body.modal-open .cart-fab{
 .suggest-card__add:hover{background:var(--c-brand-dark)}
 .suggest-card__add:active{transform:scale(.93)}
 
-/* ================================================================
-   CHECKOUT FORM (inside cart modal)
-   ================================================================ */
 .checkout-form{padding:var(--sp-2) 0}
 .form-group{margin-bottom:var(--sp-3)}
 .form-group--half{flex:1;margin-bottom:0}
@@ -657,7 +557,6 @@ body.modal-open .cart-fab{
 .form-input--textarea{resize:vertical;min-height:48px}
 .form-row{display:flex;gap:var(--sp-3)}
 
-/* Order type toggle */
 .order-type-toggle{display:flex;gap:var(--sp-2)}
 .order-type-opt{
     flex:1;display:flex;align-items:center;justify-content:center;gap:var(--sp-1);
@@ -671,7 +570,6 @@ body.modal-open .cart-fab{
     background:rgba(232,93,4,.08);border-color:var(--c-brand);color:var(--c-brand);
 }
 
-/* Checkout navigation buttons */
 .checkout-nav{display:flex;gap:var(--sp-3)}
 .checkout-back-btn{
     flex:0 0 auto;padding:13px 18px;
@@ -692,9 +590,6 @@ body.modal-open .cart-fab{
 .checkout-next-btn:active,.checkout-confirm-btn:active{transform:scale(.97)}
 .checkout-confirm-btn:disabled{opacity:.65;cursor:not-allowed;transform:none}
 
-/* ================================================================
-   ORDER SUMMARY (inside cart modal)
-   ================================================================ */
 .order-summary{padding:var(--sp-2) 0}
 .order-summary__info{
     display:flex;flex-direction:column;gap:var(--sp-1);
@@ -720,9 +615,6 @@ body.modal-open .cart-fab{
 }
 .order-summary__total-val{color:var(--c-green)}
 
-/* ================================================================
-   LOYALTY BAR
-   ================================================================ */
 .loyalty-bar{
     display:flex;align-items:center;justify-content:space-between;
     padding:8px var(--sp-4);background:var(--c-surface);
@@ -739,9 +631,6 @@ body.modal-open .cart-fab{
 .loyalty__stats{display:flex;gap:var(--sp-3)}
 .loyalty__stat{font-weight:600;color:var(--c-text-soft)}
 
-/* ================================================================
-   LIVE / OFFLINE INDICATOR
-   ================================================================ */
 .live-indicator{
     display:inline-flex;align-items:center;gap:5px;
     font-size:11px;font-weight:600;letter-spacing:.3px;
@@ -756,9 +645,6 @@ body.modal-open .cart-fab{
 .live-indicator--off{color:var(--c-text-soft);background:rgba(0,0,0,.04)}
 .live-indicator--off .live-dot{background:#9ca3af}
 
-/* ================================================================
-   ORDER RESULT POPUP
-   ================================================================ */
 .order-popup{
     position:fixed;inset:0;z-index:10000;
     display:flex;align-items:center;justify-content:center;
@@ -804,13 +690,9 @@ body.modal-open .cart-fab{
 .order-popup__btn--close:hover{background:#e0e0e0}
 .order-popup__hint{font-size:12px;color:#999;margin:0}
 
-/* Error variant */
 .order-popup--error .order-popup__inner{border-top:4px solid #ef4444}
 .order-popup--success .order-popup__inner{border-top:4px solid #22c55e}
 
-/* ================================================================
-   ORDER STATUS NOTIFICATION (customer)
-   ================================================================ */
 .order-notif{
     position:fixed;top:16px;right:16px;z-index:10001;
     max-width:380px;width:calc(100% - 32px);
@@ -846,7 +728,6 @@ body.modal-open .cart-fab{
 }
 @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.35}}
 
-/* ---------- Connection Indicator ---------- */
 .conn-indicator{
     position:fixed;bottom:12px;left:12px;z-index:800;
     display:flex;align-items:center;gap:4px;

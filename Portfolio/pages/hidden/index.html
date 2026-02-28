@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <!-- Modular CSS -->
+
   <link rel="stylesheet" href="../../assets/css/variables.css">
   <link rel="stylesheet" href="../../assets/css/base.css">
   <link rel="stylesheet" href="../../assets/css/layout.css">
@@ -48,19 +48,18 @@
     </div>
   </nav>
 
-  <!-- Password Gate -->
   <div class="password-gate" id="password-gate">
     <form class="password-form" id="password-form">
       <div class="password-form__icon">🔒</div>
       <h1 class="password-form__title">Dev Only</h1>
       <p class="password-form__description">
-        This area contains draft experiments, notes, and future ideas. 
+        This area contains draft experiments, notes, and future ideas.
         Not meant for public consumption.
       </p>
-      <input 
-        type="password" 
-        class="password-form__input" 
-        id="password-input" 
+      <input
+        type="password"
+        class="password-form__input"
+        id="password-input"
         placeholder="Enter password"
         autocomplete="off"
         autofocus
@@ -70,7 +69,6 @@
     </form>
   </div>
 
-  <!-- Hidden Content -->
   <main class="hidden-content" id="hidden-content">
     <div class="container container--narrow">
       <header class="section-header" style="padding-top: var(--space-24);">
@@ -81,17 +79,16 @@
         </p>
       </header>
 
-      <!-- Draft Experiments -->
       <section class="hidden-section">
         <h2 class="hidden-section__title">Draft Experiments</h2>
-        
+
         <div class="draft-item">
           <div class="draft-item__header">
             <h3 class="draft-item__title">WebGL Fluid Simulation</h3>
             <span class="draft-item__status">WIP</span>
           </div>
           <p class="draft-item__description">
-            Experimenting with GPU-accelerated fluid dynamics. Currently fighting with shader compilation 
+            Experimenting with GPU-accelerated fluid dynamics. Currently fighting with shader compilation
             and render target ping-ponging. Performance is nowhere near where it needs to be.
           </p>
         </div>
@@ -102,7 +99,7 @@
             <span class="draft-item__status">WIP</span>
           </div>
           <p class="draft-item__description">
-            Trying to create meaningful visualizations from audio analysis. Web Audio API gives good 
+            Trying to create meaningful visualizations from audio analysis. Web Audio API gives good
             frequency data but mapping that to interesting visuals is harder than expected.
           </p>
         </div>
@@ -113,20 +110,19 @@
             <span class="draft-item__status">WIP</span>
           </div>
           <p class="draft-item__description">
-            Testing llama.cpp bindings for the AI assistant project. Model loading is slow and 
+            Testing llama.cpp bindings for the AI assistant project. Model loading is slow and
             memory usage is high. Need to figure out quantization and context window management.
           </p>
         </div>
       </section>
 
-      <!-- Notes -->
       <section class="hidden-section">
         <h2 class="hidden-section__title">Random Notes</h2>
-        
+
         <div class="note-card">
           <time class="note-card__date">2024-12-29</time>
           <p class="note-card__content">
-            Need to revisit the particle system connection algorithm. Current approach doesn't 
+            Need to revisit the particle system connection algorithm. Current approach doesn't
             scale well with varying connection distances. Maybe look into k-d trees?
           </p>
         </div>
@@ -134,8 +130,8 @@
         <div class="note-card">
           <time class="note-card__date">2024-12-27</time>
           <p class="note-card__content">
-            Portfolio animation timing feels off. Hero load animation is good but the reveal 
-            animations feel disconnected. Try reducing delay between reveals and making them 
+            Portfolio animation timing feels off. Hero load animation is good but the reveal
+            animations feel disconnected. Try reducing delay between reveals and making them
             more sequential instead of simultaneous.
           </p>
         </div>
@@ -143,8 +139,8 @@
         <div class="note-card">
           <time class="note-card__date">2024-12-25</time>
           <p class="note-card__content">
-            Read about Bézier curves for smooth gesture interpolation. Might be overkill for 
-            current needs but would be interesting to implement. Bookmark: 
+            Read about Bézier curves for smooth gesture interpolation. Might be overkill for
+            current needs but would be interesting to implement. Bookmark:
             "A Primer on Bézier Curves" by Pomax.
           </p>
         </div>
@@ -152,8 +148,8 @@
         <div class="note-card">
           <time class="note-card__date">2024-12-22</time>
           <p class="note-card__content">
-            The NowHang notification timing is still wrong. Users are getting pinged too 
-            often or not at all. Need to implement smart batching based on user activity 
+            The NowHang notification timing is still wrong. Users are getting pinged too
+            often or not at all. Need to implement smart batching based on user activity
             patterns and time of day.
           </p>
         </div>
@@ -161,20 +157,19 @@
         <div class="note-card">
           <time class="note-card__date">2024-12-18</time>
           <p class="note-card__content">
-            CSS scroll-driven animations are coming. This could replace a lot of the 
+            CSS scroll-driven animations are coming. This could replace a lot of the
             intersection observer code. Keep an eye on browser support.
           </p>
         </div>
       </section>
 
-      <!-- Future Ideas -->
       <section class="hidden-section">
         <h2 class="hidden-section__title">Future Ideas (Unfiltered)</h2>
-        
+
         <div class="idea-card">
           <h4 class="idea-card__title">Procedural Music Generator</h4>
           <p class="idea-card__description">
-            Generate ambient music based on code activity. Typing triggers notes, errors 
+            Generate ambient music based on code activity. Typing triggers notes, errors
             create dissonance, successful builds resolve to major chords. Silly? Maybe. Fun? Definitely.
           </p>
         </div>
@@ -182,7 +177,7 @@
         <div class="idea-card">
           <h4 class="idea-card__title">Git History Visualization</h4>
           <p class="idea-card__description">
-            3D visualization of git history where commits are particles, branches are streams, 
+            3D visualization of git history where commits are particles, branches are streams,
             and merges create collisions. Could be beautiful or a complete mess.
           </p>
         </div>
@@ -190,7 +185,7 @@
         <div class="idea-card">
           <h4 class="idea-card__title">Keyboard Heatmap</h4>
           <p class="idea-card__description">
-            Track which keys I press most while coding. Visualize over time. Might reveal 
+            Track which keys I press most while coding. Visualize over time. Might reveal
             interesting patterns about coding habits. Or just show that I press backspace too much.
           </p>
         </div>
@@ -198,7 +193,7 @@
         <div class="idea-card">
           <h4 class="idea-card__title">AI Pair Programmer Voice</h4>
           <p class="idea-card__description">
-            Instead of chat-based AI assistance, have a voice that speaks suggestions 
+            Instead of chat-based AI assistance, have a voice that speaks suggestions
             out loud. Like having a pair programmer but without the social awkwardness.
           </p>
         </div>
@@ -206,17 +201,16 @@
         <div class="idea-card">
           <h4 class="idea-card__title">Code Archaeology Tool</h4>
           <p class="idea-card__description">
-            Tool that traces the history of a specific line of code. Who wrote it, when, 
-            why (from commit messages), and how many times it's been modified. 
+            Tool that traces the history of a specific line of code. Who wrote it, when,
+            why (from commit messages), and how many times it's been modified.
             Understand code through its history.
           </p>
         </div>
       </section>
 
-      <!-- Personal Reminders -->
       <section class="hidden-section">
         <h2 class="hidden-section__title">Reminders to Self</h2>
-        
+
         <div class="card" style="padding: var(--space-6);">
           <ul style="font-size: var(--text-sm); color: var(--text-secondary);">
             <li style="margin-bottom: var(--space-3); padding-left: var(--space-4); position: relative;">
@@ -259,12 +253,11 @@
     </div>
   </footer>
 
-  <!-- Core Scripts -->
   <script src="../../assets/js/main.js"></script>
   <script src="../../assets/js/mobile.js"></script>
-  <!-- Content Loader - Single Source of Truth -->
+
   <script src="../../assets/js/content-loader.js"></script>
-  <!-- Interactions & Transitions -->
+
   <script src="../../assets/js/transitions.js"></script>
   <script src="../../assets/js/gestures.js"></script>
   <script src="../../assets/js/app.js"></script>

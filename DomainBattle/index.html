@@ -8,7 +8,6 @@
 </head>
 <body>
 
-  <!-- Auth Gate -->
   <div id="auth-gate" class="screen hidden">
     <div class="auth-box">
       <h1>DOMAIN BATTLE</h1>
@@ -17,7 +16,6 @@
     </div>
   </div>
 
-  <!-- Lobby Screen -->
   <div id="lobby" class="screen hidden">
     <div class="lobby-container">
       <h1 class="title">DOMAIN BATTLE</h1>
@@ -42,19 +40,15 @@
     </div>
   </div>
 
-  <!-- Battle Screen -->
   <div id="battle" class="screen hidden">
     <div class="battle-container">
 
-      <!-- Phase Banner -->
       <div class="phase-banner">
         <span id="phase-label">LOBBY</span>
       </div>
 
-      <!-- Arena -->
       <div class="arena">
 
-        <!-- Player 1 -->
         <div class="player-col player-col--left">
           <h2 class="player-name" id="p1-name">Player 1</h2>
           <div class="energy-bar-wrap">
@@ -63,7 +57,6 @@
           <span class="energy-value" id="p1-energy-val">100</span>
         </div>
 
-        <!-- Dominance Meter -->
         <div class="dominance-col">
           <p class="dominance-label">DOMINANCE</p>
           <div class="dominance-track">
@@ -76,7 +69,6 @@
           </div>
         </div>
 
-        <!-- Player 2 -->
         <div class="player-col player-col--right">
           <h2 class="player-name" id="p2-name">Player 2</h2>
           <div class="energy-bar-wrap">
@@ -87,7 +79,6 @@
 
       </div>
 
-      <!-- Actions -->
       <div class="actions" id="actions">
         <button class="btn btn--attack" data-action="attack">⚔ Attack</button>
         <button class="btn btn--defend" data-action="defend">🛡 Defend</button>
@@ -95,7 +86,6 @@
         <button class="btn btn--focus"  data-action="focus">🎯 Focus</button>
       </div>
 
-      <!-- Result Overlay -->
       <div id="result-overlay" class="result-overlay hidden">
         <div class="result-box">
           <h2 id="result-title"></h2>

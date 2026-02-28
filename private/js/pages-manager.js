@@ -1,26 +1,18 @@
-/**
- * ═══════════════════════════════════════════════════════════
- * PRIVATE SPACE - PAGES MANAGER
- * Full CRUD for Website Pages
- * ═══════════════════════════════════════════════════════════
- */
-
 const PagesManager = {
   pages: [],
   currentPage: null,
-  
+
   async init() {
     await Database.init();
     await this.loadPages();
     this.bindEvents();
     this.render();
   },
-  
+
   async loadPages() {
     this.pages = await Database.getAll(DB_STORES.PAGES);
     this.pages.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
-    
-    // Initialize with existing pages if empty
+
     if (this.pages.length === 0) {
       const existingPages = [
         { title: 'Projects', route: '/pages/projects/', hidden: false, enabled: true },
@@ -29,42 +21,41 @@ const PagesManager = {
         { title: 'Hire', route: '/pages/hire/', hidden: true, enabled: true },
         { title: 'Hidden', route: '/pages/hidden/', hidden: true, enabled: true }
       ];
-      
+
       for (const page of existingPages) {
         await Database.add(DB_STORES.PAGES, page);
       }
-      
+
       this.pages = await Database.getAll(DB_STORES.PAGES);
     }
   },
-  
+
   bindEvents() {
     document.getElementById('addPageBtn')?.addEventListener('click', () => {
       this.openEditor();
     });
-    
+
     document.getElementById('savePageBtn')?.addEventListener('click', () => {
       this.savePage();
     });
-    
+
     document.getElementById('cancelPageBtn')?.addEventListener('click', () => {
       this.closeEditor();
     });
   },
-  
+
   render() {
     const publicContainer = document.getElementById('publicPagesList');
     const hiddenContainer = document.getElementById('hiddenPagesList');
-    
+
     const publicPages = this.pages.filter(p => !p.hidden);
     const hiddenPages = this.pages.filter(p => p.hidden);
-    
-    // Update section counts
+
     const publicCount = document.querySelector('#section-pages .ps-pages-count.public');
     const hiddenCount = document.querySelector('#section-pages .ps-pages-count.hidden');
     if (publicCount) publicCount.textContent = publicPages.length;
     if (hiddenCount) hiddenCount.textContent = hiddenPages.length;
-    
+
     if (publicContainer) {
       publicContainer.innerHTML = publicPages.length ? publicPages.map(p => this.renderPageCard(p)).join('') : `
         <div class="ps-empty ps-empty-sm">
@@ -72,7 +63,7 @@ const PagesManager = {
         </div>
       `;
     }
-    
+
     if (hiddenContainer) {
       hiddenContainer.innerHTML = hiddenPages.length ? hiddenPages.map(p => this.renderPageCard(p, true)).join('') : `
         <div class="ps-empty ps-empty-sm">
@@ -81,10 +72,10 @@ const PagesManager = {
       `;
     }
   },
-  
+
   renderPageCard(page, isHidden = false) {
     const isEnabled = page.enabled !== false;
-    
+
     return `
       <div class="ps-page-card ${isEnabled ? '' : 'ps-page-disabled'}" data-id="${page.id}">
         <div class="ps-page-card-icon">
@@ -148,11 +139,11 @@ const PagesManager = {
       </div>
     `;
   },
-  
+
   openEditor(pageId = null) {
     const modal = document.getElementById('pageEditorModal');
     const title = document.getElementById('pageEditorTitle');
-    
+
     if (pageId) {
       this.currentPage = this.pages.find(p => p.id === pageId);
       title.textContent = 'Edit Page';
@@ -172,15 +163,15 @@ const PagesManager = {
       document.getElementById('pageHidden').checked = false;
       document.getElementById('pageEnabled').checked = true;
     }
-    
+
     modal.classList.add('active');
   },
-  
+
   closeEditor() {
     document.getElementById('pageEditorModal').classList.remove('active');
     this.currentPage = null;
   },
-  
+
   async savePage() {
     const page = {
       id: this.currentPage?.id || crypto.randomUUID(),
@@ -192,31 +183,31 @@ const PagesManager = {
       enabled: document.getElementById('pageEnabled').checked,
       createdAt: this.currentPage?.createdAt || Date.now()
     };
-    
+
     await Database.put(DB_STORES.PAGES, page);
     await this.loadPages();
     this.render();
     this.closeEditor();
     this.syncToPublicSite();
-    
+
     Toast.show('Page saved', 'success');
   },
-  
+
   async deletePage(id) {
     if (!confirm('Delete this page configuration?')) return;
-    
+
     await Database.delete(DB_STORES.PAGES, id);
     await this.loadPages();
     this.render();
     this.syncToPublicSite();
-    
+
     Toast.show('Page deleted', 'success');
   },
-  
+
   async toggleEnabled(id) {
     const page = this.pages.find(p => p.id === id);
     if (!page) return;
-    
+
     page.enabled = !page.enabled;
     await Database.put(DB_STORES.PAGES, page);
     await this.loadPages();
@@ -224,11 +215,11 @@ const PagesManager = {
     this.syncToPublicSite();
     Toast.show(page.enabled ? 'Page enabled' : 'Page disabled', 'success');
   },
-  
+
   async duplicatePage(id) {
     const page = this.pages.find(p => p.id === id);
     if (!page) return;
-    
+
     const duplicate = {
       ...page,
       id: crypto.randomUUID(),
@@ -237,29 +228,28 @@ const PagesManager = {
       enabled: false,
       createdAt: Date.now()
     };
-    
+
     await Database.put(DB_STORES.PAGES, duplicate);
     await this.loadPages();
     this.render();
     Toast.show('Page duplicated', 'success');
   },
-  
+
   openHiddenPage(route) {
-    // Set trusted admin flag
+
     sessionStorage.setItem('trusted_admin', 'true');
     sessionStorage.setItem('trusted_admin_timestamp', Date.now().toString());
-    
-    // Open in new tab with trusted context
+
     window.open(route, '_blank');
   },
-  
+
   syncToPublicSite() {
     const pagesConfig = this.pages
       .filter(p => p.enabled)
       .map(({ route, hidden, metaTitle, metaDescription }) => ({
         route, hidden, metaTitle, metaDescription
       }));
-    
+
     localStorage.setItem('ps_pages_config', JSON.stringify(pagesConfig));
     window.dispatchEvent(new CustomEvent('pagesUpdated', { detail: pagesConfig }));
   }

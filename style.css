@@ -1,12 +1,3 @@
-/* ==========================================
-   CINEMATIC LANDING PAGE — ENVIRONMENTAL LIGHTING
-   Apple-level premium design system
-   ========================================== */
-
-/* ==========================================
-   RESET & BASE
-   ========================================== */
-
 * {
     margin: 0;
     padding: 0;
@@ -50,11 +41,6 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* ==========================================
-   ENVIRONMENTAL LIGHTING SYSTEM
-   Three-layer parallax light with blend modes
-   ========================================== */
-
 .env-light {
     position: fixed;
     inset: 0;
@@ -66,7 +52,6 @@ body {
 
 .env-light.active { opacity: 1; }
 
-/* Layer 1 — Large ultra-soft ambient halo */
 .env-light__halo {
     position: fixed;
     width: 1100px;
@@ -84,7 +69,6 @@ body {
     will-change: transform;
 }
 
-/* Layer 2 — Medium soft glow */
 .env-light__glow {
     position: fixed;
     width: 600px;
@@ -102,7 +86,6 @@ body {
     will-change: transform;
 }
 
-/* Layer 3 — Small bright core */
 .env-light__core {
     position: fixed;
     width: 320px;
@@ -120,10 +103,6 @@ body {
     transform: translate(-50%, -50%);
     will-change: transform;
 }
-
-/* ==========================================
-   ATMOSPHERE
-   ========================================== */
 
 .atmosphere {
     position: fixed;
@@ -179,7 +158,6 @@ body {
     animation: drift3 26s ease-in-out infinite;
 }
 
-/* Three.js particle field */
 #particleField {
     position: fixed;
     inset: 0;
@@ -187,7 +165,6 @@ body {
     pointer-events: none;
 }
 
-/* Film grain overlay */
 .atmosphere__grain {
     position: absolute;
     inset: 0;
@@ -197,10 +174,6 @@ body {
     opacity: 0.03;
     mix-blend-mode: overlay;
 }
-
-/* ==========================================
-   MAIN CONTAINER
-   ========================================== */
 
 .container {
     position: relative;
@@ -213,10 +186,6 @@ body {
     padding: var(--spacing-lg);
     gap: var(--spacing-2xl);
 }
-
-/* ==========================================
-   HERO
-   ========================================== */
 
 .hero-section {
     text-align: center;
@@ -270,10 +239,6 @@ body {
     animation: fadeInUp 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards 0.7s;
 }
 
-/* ==========================================
-   FEATURE CARDS — Proximity-reactive glass
-   ========================================== */
-
 .cards-section {
     width: 100%;
     max-width: 1200px;
@@ -308,7 +273,7 @@ body {
         box-shadow 0.8s ease,
         background 0.8s ease;
     animation: floatCard 6s ease-in-out infinite;
-    /* JS writes --proximity (0-1) and --light-x / --light-y for reflection */
+
     --proximity: 0;
     --light-x: 50%;
     --light-y: 50%;
@@ -318,7 +283,6 @@ body {
 .feature-card:nth-child(2) { animation-delay: 2s; }
 .feature-card:nth-child(3) { animation-delay: 4s; }
 
-/* Animated gradient border — intensity driven by --proximity */
 .feature-card::before {
     content: '';
     position: absolute;
@@ -340,7 +304,6 @@ body {
     pointer-events: none;
 }
 
-/* Light reflection that sweeps across card surface */
 .feature-card::after {
     content: '';
     position: absolute;
@@ -368,7 +331,6 @@ body {
     transition: opacity 0.8s ease;
 }
 
-/* Hover adds on top of proximity effects */
 .feature-card:hover {
     border-color: var(--glass-border-lit);
     box-shadow:
@@ -442,10 +404,6 @@ body {
     transform: translateX(0);
 }
 
-/* ==========================================
-   KEYFRAMES
-   ========================================== */
-
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(30px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -478,10 +436,6 @@ body {
     0%, 100% { transform: translateY(0); }
     50%      { transform: translateY(-8px); }
 }
-
-/* ==========================================
-   RESPONSIVE
-   ========================================== */
 
 @media (max-width: 1024px) {
     .cards-container {
@@ -517,10 +471,6 @@ body {
     .card-title { font-size: 1.5rem; }
     .card-description { font-size: 0.9375rem; }
 }
-
-/* ==========================================
-   ACCESSIBILITY & PERFORMANCE
-   ========================================== */
 
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {

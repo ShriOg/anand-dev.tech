@@ -1,11 +1,5 @@
-/* ═══════════════════════════════════════════════════════════
-   PRIVATE SPACE - FOCUS MODE
-   Deep Concentration × Minimal Distraction × Calm
-   ═══════════════════════════════════════════════════════════ */
-
-/* Focus Mode Active - Deeper, Calmer */
 [data-focus-mode="true"] {
-  /* Even deeper black, softer text */
+
   --ps-bg-primary: #050506;
   --ps-bg-secondary: #08080a;
   --ps-text-primary: rgba(255, 255, 255, 0.82);
@@ -14,7 +8,6 @@
   --ps-border-subtle: rgba(255, 255, 255, 0.04);
 }
 
-/* Hide all chrome in focus mode */
 [data-focus-mode="true"] .ps-sidebar,
 [data-focus-mode="true"] .ps-topbar,
 [data-focus-mode="true"] .ps-ai-panel,
@@ -30,14 +23,12 @@
   margin-left: 0 !important;
 }
 
-/* Centered, reading-optimized content */
 [data-focus-mode="true"] .ps-workspace {
   max-width: 680px;
   margin: 0 auto;
   padding: var(--ps-space-16) var(--ps-space-8);
 }
 
-/* Editor improvements for focus */
 [data-focus-mode="true"] .ps-editor-textarea,
 [data-focus-mode="true"] .ps-notes-content,
 [data-focus-mode="true"] .ps-log-content {
@@ -62,7 +53,6 @@
   flex: 1;
 }
 
-/* Hide secondary UI */
 [data-focus-mode="true"] .ps-save-status,
 [data-focus-mode="true"] .ps-note-ai-actions,
 [data-focus-mode="true"] .ps-log-summary {
@@ -70,7 +60,6 @@
   pointer-events: none;
 }
 
-/* Focus Mode Exit Control - Subtle until hover */
 .ps-focus-exit {
   position: fixed;
   top: var(--ps-space-6);
@@ -85,7 +74,7 @@
   border-radius: var(--ps-radius-lg);
   color: var(--ps-text-muted);
   opacity: 0;
-  transition: 
+  transition:
     opacity var(--ps-duration-slow) var(--ps-ease-smooth),
     transform var(--ps-duration-normal) var(--ps-ease-smooth);
   z-index: var(--ps-z-sticky);
@@ -96,7 +85,6 @@
   display: flex;
 }
 
-/* Show on mouse movement near top-right */
 .ps-focus-exit:hover {
   opacity: 1 !important;
   color: var(--ps-text-primary);
@@ -109,27 +97,25 @@
   height: 18px;
 }
 
-/* Keep smooth transitions for the content */
 [data-focus-mode="true"] .ps-editor-textarea,
 [data-focus-mode="true"] .ps-notes-content {
   transition: none;
 }
 
-/* Mobile Focus Mode */
 @media (max-width: 768px) {
   [data-focus-mode="true"] .ps-workspace {
     padding: var(--ps-space-6);
     padding-top: var(--ps-space-10);
     max-width: 100%;
   }
-  
+
   [data-focus-mode="true"] .ps-editor-textarea,
   [data-focus-mode="true"] .ps-notes-content,
   [data-focus-mode="true"] .ps-log-content {
     font-size: var(--ps-text-base);
     line-height: 1.75;
   }
-  
+
   [data-focus-mode="true"] .ps-focus-exit {
     top: var(--ps-space-3);
     right: var(--ps-space-3);

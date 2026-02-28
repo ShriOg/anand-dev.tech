@@ -1,13 +1,7 @@
-/* ═══════════════════════════════════════════════════════════
-   PRIVATE SPACE - SETTINGS
-   ═══════════════════════════════════════════════════════════ */
-
-/* Settings Layout */
 .ps-settings {
   max-width: 720px;
 }
 
-/* Settings Section */
 .ps-settings-section {
   margin-bottom: var(--ps-space-8);
 }
@@ -30,7 +24,6 @@
   color: var(--ps-text-muted);
 }
 
-/* Settings Group */
 .ps-settings-group {
   background: var(--ps-bg-secondary);
   border: 1px solid var(--ps-border-subtle);
@@ -72,7 +65,6 @@
   margin-left: var(--ps-space-4);
 }
 
-/* Cloud Sync Section */
 .ps-sync-status {
   display: flex;
   align-items: center;
@@ -119,7 +111,6 @@
   gap: var(--ps-space-2);
 }
 
-/* Data Management */
 .ps-data-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -153,7 +144,6 @@
   gap: var(--ps-space-3);
 }
 
-/* Danger Zone */
 .ps-danger-zone {
   border-color: var(--ps-error);
 }
@@ -201,7 +191,6 @@
   background: #dc2626;
 }
 
-/* Select Input */
 .ps-select {
   padding: var(--ps-space-2) var(--ps-space-3);
   padding-right: var(--ps-space-8);
@@ -223,7 +212,6 @@
   outline: none;
 }
 
-/* Version Info */
 .ps-version-info {
   display: flex;
   align-items: center;

@@ -1,24 +1,10 @@
-/**
- * ANAND DEV OS — Mobile-Only JavaScript
- * Touch interactions, gestures, modals, scroll detection
- * No frameworks, vanilla JS only
- */
-
 (function() {
   'use strict';
-
-  // ════════════════════════════════════════════════════════════════════════════
-  // MOBILE DETECTION
-  // ════════════════════════════════════════════════════════════════════════════
 
   const isMobile = () => window.innerWidth <= 768;
   const isTouchDevice = () => 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
   if (!isMobile()) return;
-
-  // ════════════════════════════════════════════════════════════════════════════
-  // MOBILE TOP BAR — Auto-hide on Scroll
-  // ════════════════════════════════════════════════════════════════════════════
 
   const MobileTopBar = {
     nav: null,
@@ -36,7 +22,7 @@
 
     onScroll() {
       if (this.ticking) return;
-      
+
       requestAnimationFrame(() => {
         const currentScrollY = window.scrollY;
         const delta = currentScrollY - this.lastScrollY;
@@ -59,10 +45,6 @@
     }
   };
 
-  // ════════════════════════════════════════════════════════════════════════════
-  // MOBILE BOTTOM SHEET NAVIGATION
-  // ════════════════════════════════════════════════════════════════════════════
-
   const MobileBottomSheet = {
     sheet: null,
     backdrop: null,
@@ -77,12 +59,11 @@
     },
 
     createElements() {
-      // Create backdrop
+
       this.backdrop = document.createElement('div');
       this.backdrop.className = 'mobile-bottom-sheet__backdrop';
       document.body.appendChild(this.backdrop);
 
-      // Create sheet
       this.sheet = document.createElement('div');
       this.sheet.className = 'mobile-bottom-sheet';
       this.sheet.innerHTML = `
@@ -101,11 +82,10 @@
       const pathSegments = path.split('/').filter(Boolean);
       const isInPagesFolder = path.includes('/pages/');
       const isInProjectsFolder = path.includes('/projects/');
-      
-      // Detect current page from folder structure
+
       let currentPage = '';
       if (isInPagesFolder) {
-        // pages/projects/ or pages/projects/index.html -> 'projects'
+
         const pagesIndex = pathSegments.indexOf('pages');
         if (pagesIndex >= 0 && pathSegments[pagesIndex + 1]) {
           currentPage = pathSegments[pagesIndex + 1];
@@ -113,18 +93,18 @@
       } else if (path === '/' || path.endsWith('/index.html') || pathSegments.length === 0) {
         currentPage = 'home';
       }
-      
+
       let homeHref, pagesPrefix;
       if (isInPagesFolder) {
-        // Inside pages/*/index.html - go up two levels
+
         homeHref = '../../';
         pagesPrefix = '../';
       } else if (isInProjectsFolder) {
-        // Inside projects/* - go up appropriate levels
+
         homeHref = '../../';
         pagesPrefix = '../../pages/';
       } else {
-        // At root
+
         homeHref = './';
         pagesPrefix = 'pages/';
       }
@@ -157,22 +137,19 @@
     },
 
     bindEvents() {
-      // Toggle button
+
       const toggle = document.querySelector('.nav__toggle');
       if (toggle) {
         toggle.addEventListener('click', () => this.toggle());
       }
 
-      // Backdrop click
       this.backdrop.addEventListener('click', () => this.close());
 
-      // Handle drag
       const handle = this.sheet.querySelector('.mobile-bottom-sheet__handle');
       handle.addEventListener('touchstart', this.onTouchStart.bind(this), { passive: true });
       handle.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: false });
       handle.addEventListener('touchend', this.onTouchEnd.bind(this), { passive: true });
 
-      // Link clicks
       this.sheet.querySelectorAll('.mobile-bottom-sheet__link').forEach(link => {
         link.addEventListener('click', () => {
           setTimeout(() => this.close(), 150);
@@ -222,7 +199,7 @@
       this.sheet.classList.add('mobile-bottom-sheet--open');
       this.backdrop.classList.add('mobile-bottom-sheet__backdrop--visible');
       document.body.classList.add('mobile-menu-open');
-      
+
       const toggle = document.querySelector('.nav__toggle');
       toggle?.classList.add('nav__toggle--active');
     },
@@ -232,15 +209,11 @@
       this.sheet.classList.remove('mobile-bottom-sheet--open');
       this.backdrop.classList.remove('mobile-bottom-sheet__backdrop--visible');
       document.body.classList.remove('mobile-menu-open');
-      
+
       const toggle = document.querySelector('.nav__toggle');
       toggle?.classList.remove('nav__toggle--active');
     }
   };
-
-  // ════════════════════════════════════════════════════════════════════════════
-  // MOBILE PROJECT MODAL — Fullscreen Expansion
-  // ════════════════════════════════════════════════════════════════════════════
 
   const MobileProjectModal = {
     modal: null,
@@ -274,7 +247,7 @@
     },
 
     bindEvents() {
-      // Card clicks
+
       document.querySelectorAll('.focus-card').forEach(card => {
         card.addEventListener('click', (e) => {
           if (e.target.closest('.action-btn')) return;
@@ -283,18 +256,15 @@
         });
       });
 
-      // Close button
       this.modal.querySelector('.mobile-project-modal__close').addEventListener('click', () => {
         this.close();
       });
 
-      // Swipe to close
       const header = this.modal.querySelector('.mobile-project-modal__header');
       header.addEventListener('touchstart', this.onTouchStart.bind(this), { passive: true });
       header.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: false });
       header.addEventListener('touchend', this.onTouchEnd.bind(this), { passive: true });
 
-      // Hardware back button
       window.addEventListener('popstate', () => {
         if (this.isOpen) {
           this.close(false);
@@ -314,7 +284,7 @@
 
     onTouchStart(e) {
       if (this.modal.scrollTop > 0) return;
-      
+
       this.touchStartY = e.touches[0].clientY;
       this.touchCurrentY = this.touchStartY;
       this.isDragging = false;
@@ -323,7 +293,7 @@
 
     onTouchMove(e) {
       if (this.modal.scrollTop > 0) return;
-      
+
       this.touchCurrentY = e.touches[0].clientY;
       const deltaY = this.touchCurrentY - this.touchStartY;
 
@@ -357,31 +327,25 @@
       this.currentCard = card;
       this.isOpen = true;
 
-      // Get content from template
       const template = card.querySelector('.focus-card__content-template');
       const title = card.querySelector('.focus-card__title')?.textContent || 'Project';
-      
-      // Update modal title
+
       this.modal.querySelector('.mobile-project-modal__title').textContent = title;
 
-      // Build modal content
       const content = this.modal.querySelector('.mobile-project-modal__content');
-      
+
       if (template) {
         content.innerHTML = this.buildMobileContent(template.innerHTML, card);
       } else {
         content.innerHTML = this.buildFallbackContent(card);
       }
 
-      // Store scroll and lock body
       this.scrollPosition = window.scrollY;
       document.body.classList.add('mobile-modal-open');
       document.body.style.top = `-${this.scrollPosition}px`;
 
-      // Show modal
       this.modal.classList.add('mobile-project-modal--open');
 
-      // Update hash
       if (updateHash) {
         const hash = card.dataset.focusId || card.id;
         if (hash) {
@@ -391,13 +355,12 @@
     },
 
     buildMobileContent(templateHTML, card) {
-      // Transform desktop template to mobile-optimized structure
+
       const temp = document.createElement('div');
       temp.innerHTML = templateHTML;
 
       let html = '';
 
-      // Header with meta
       const header = temp.querySelector('.focus-overlay__header');
       if (header) {
         const summary = header.querySelector('.focus-overlay__summary');
@@ -408,19 +371,17 @@
         }
       }
 
-      // Sections
       const sections = temp.querySelectorAll('.focus-overlay__section');
       sections.forEach(section => {
         const title = section.querySelector('.focus-overlay__section-title')?.textContent || '';
         const content = section.querySelector('.focus-overlay__section-content')?.innerHTML || '';
-        
+
         html += `<div class="mobile-modal-section">
           <h3 class="mobile-modal-section__title">${title}</h3>
           <div class="mobile-modal-section__content">${content}</div>
         </div>`;
       });
 
-      // Actions
       const actions = temp.querySelector('.focus-overlay__actions');
       if (actions) {
         html += this.buildActionsFromCard(card);
@@ -428,7 +389,6 @@
         html += this.buildActionsFromCard(card);
       }
 
-      // Tech stack
       const techStack = temp.querySelector('.focus-overlay__tech-stack');
       if (techStack) {
         html += `<div class="mobile-modal-tech">${techStack.innerHTML}</div>`;
@@ -442,13 +402,13 @@
       if (actions.length === 0) return '';
 
       let html = '<div class="mobile-modal-actions">';
-      
+
       actions.forEach(btn => {
         const href = btn.getAttribute('href');
         const text = btn.textContent.trim();
         const isDisabled = btn.classList.contains('action-btn--disabled') || btn.getAttribute('aria-disabled') === 'true';
         const isPrimary = btn.classList.contains('action-btn--primary');
-        
+
         if (isDisabled) {
           html += `<span class="mobile-modal-action mobile-modal-action--secondary mobile-modal-action--disabled">${text}</span>`;
         } else {
@@ -483,17 +443,14 @@
       this.modal.style.opacity = '';
       this.modal.classList.remove('mobile-project-modal--open');
 
-      // Restore scroll
       document.body.classList.remove('mobile-modal-open');
       document.body.style.top = '';
       window.scrollTo(0, this.scrollPosition);
 
-      // Update hash
       if (updateHash && window.location.hash) {
         history.pushState(null, '', window.location.pathname + window.location.search);
       }
 
-      // Clear content after animation
       setTimeout(() => {
         this.modal.querySelector('.mobile-project-modal__content').innerHTML = '';
       }, 350);
@@ -501,10 +458,6 @@
       this.currentCard = null;
     }
   };
-
-  // ════════════════════════════════════════════════════════════════════════════
-  // TAP RIPPLE EFFECT
-  // ════════════════════════════════════════════════════════════════════════════
 
   const TapRipple = {
     init() {
@@ -517,39 +470,33 @@
       const el = e.currentTarget;
       const rect = el.getBoundingClientRect();
       const touch = e.touches[0];
-      
+
       const ripple = document.createElement('span');
       ripple.className = 'mobile-ripple';
-      
+
       const size = Math.max(rect.width, rect.height);
       ripple.style.width = ripple.style.height = `${size}px`;
       ripple.style.left = `${touch.clientX - rect.left - size / 2}px`;
       ripple.style.top = `${touch.clientY - rect.top - size / 2}px`;
-      
-      // Ensure position relative for ripple
+
       if (getComputedStyle(el).position === 'static') {
         el.style.position = 'relative';
       }
       el.style.overflow = 'hidden';
-      
+
       el.appendChild(ripple);
-      
+
       setTimeout(() => ripple.remove(), 400);
     }
   };
-
-  // ════════════════════════════════════════════════════════════════════════════
-  // MOBILE PARTICLES — Reduced Count + Touch Interaction
-  // ════════════════════════════════════════════════════════════════════════════
 
   const MobileParticles = {
     init() {
       const canvas = document.getElementById('particles-canvas');
       if (!canvas) return;
 
-      // Override desktop particle count
       if (window.particleSystem) {
-        // Reduce existing particles
+
         const reduceParticles = () => {
           if (window.particleSystem && window.particleSystem.particles) {
             const targetCount = Math.floor(window.particleSystem.particles.length * 0.3);
@@ -559,7 +506,6 @@
         setTimeout(reduceParticles, 100);
       }
 
-      // Add touch interaction
       canvas.addEventListener('touchmove', (e) => {
         if (window.particleSystem) {
           const rect = canvas.getBoundingClientRect();
@@ -580,10 +526,6 @@
     }
   };
 
-  // ════════════════════════════════════════════════════════════════════════════
-  // DESKTOP RECOMMENDED BADGES — For Lab Items
-  // ════════════════════════════════════════════════════════════════════════════
-
   const DesktopBadges = {
     init() {
       const isLabPage = window.location.pathname.includes('lab');
@@ -591,17 +533,13 @@
 
       document.querySelectorAll('.focus-card__tag').forEach(tag => {
         if (!tag.querySelector('.mobile-desktop-badge')) {
-          tag.insertAdjacentHTML('afterend', 
+          tag.insertAdjacentHTML('afterend',
             '<span class="mobile-desktop-badge">Desktop Recommended</span>'
           );
         }
       });
     }
   };
-
-  // ════════════════════════════════════════════════════════════════════════════
-  // LAZY LOAD IMAGES — Performance
-  // ════════════════════════════════════════════════════════════════════════════
 
   const LazyLoad = {
     init() {
@@ -610,7 +548,7 @@
           img.loading = 'lazy';
         });
       } else {
-        // Fallback for older browsers
+
         const imageObserver = new IntersectionObserver((entries) => {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -628,19 +566,14 @@
     }
   };
 
-  // ════════════════════════════════════════════════════════════════════════════
-  // PREVENT FOCUS OVERLAY ON MOBILE — Disable Desktop System
-  // ════════════════════════════════════════════════════════════════════════════
-
   const DisableDesktopOverlay = {
     init() {
-      // Destroy desktop CardFocusSystem if it exists
+
       if (window.cardFocusSystem) {
         window.cardFocusSystem.destroy();
         window.cardFocusSystem = null;
       }
 
-      // Remove any existing overlay elements
       const backdrop = document.getElementById('focus-overlay-backdrop');
       const overlay = document.getElementById('focus-overlay');
       backdrop?.remove();
@@ -648,15 +581,10 @@
     }
   };
 
-  // ════════════════════════════════════════════════════════════════════════════
-  // INITIALIZE
-  // ════════════════════════════════════════════════════════════════════════════
-
   function init() {
-    // Disable desktop overlays first
+
     DisableDesktopOverlay.init();
 
-    // Initialize mobile components
     MobileTopBar.init();
     MobileBottomSheet.init();
     MobileProjectModal.init();
@@ -666,14 +594,12 @@
     LazyLoad.init();
   }
 
-  // Run on DOM ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
 
-  // Re-init on resize (crossing breakpoint)
   let wasDesktop = !isMobile();
   window.addEventListener('resize', () => {
     const isNowMobile = isMobile();

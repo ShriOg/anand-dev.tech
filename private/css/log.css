@@ -1,15 +1,9 @@
-/* ═══════════════════════════════════════════════════════════
-   PRIVATE SPACE - DAILY LOG
-   ═══════════════════════════════════════════════════════════ */
-
-/* Log Layout */
 .ps-log {
   display: flex;
   height: 100%;
   gap: var(--ps-space-4);
 }
 
-/* Log Sidebar - Calendar */
 .ps-log-sidebar {
   width: 280px;
   flex-shrink: 0;
@@ -18,7 +12,6 @@
   border-right: 1px solid var(--ps-border-subtle);
 }
 
-/* Mini Calendar */
 .ps-calendar {
   padding: var(--ps-space-4);
   border-bottom: 1px solid var(--ps-border-subtle);
@@ -116,7 +109,6 @@
   background: white;
 }
 
-/* Entry List */
 .ps-log-entries {
   flex: 1;
   overflow-y: auto;
@@ -180,7 +172,6 @@
   margin-top: var(--ps-space-1);
 }
 
-/* Log Editor */
 .ps-log-editor {
   flex: 1;
   display: flex;
@@ -237,7 +228,6 @@
   color: var(--ps-text-muted);
 }
 
-/* Weekly Summary */
 .ps-log-summary {
   padding: var(--ps-space-4);
   border-top: 1px solid var(--ps-border-subtle);
@@ -276,7 +266,6 @@
   line-height: var(--ps-leading-relaxed);
 }
 
-/* Stats */
 .ps-log-stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

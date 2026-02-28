@@ -13,7 +13,7 @@ async function initAdminModule(container) {
       <div id="usersList" class="users-list"></div>
     </div>
   `;
-  
+
   await loadAdminData();
 }
 
@@ -23,10 +23,10 @@ async function loadAdminData() {
       api.get('/api/admin/stats'),
       api.get('/api/admin/users'),
     ]);
-    
+
     adminStats = stats;
     adminUsers = users.users || [];
-    
+
     renderAdminStats();
     renderAdminUsers();
   } catch (error) {
@@ -37,7 +37,7 @@ async function loadAdminData() {
 
 function renderAdminStats() {
   const statsContainer = document.getElementById('adminStats');
-  
+
   statsContainer.innerHTML = `
     <div class="stat-card">
       <div class="stat-icon">👥</div>
@@ -72,12 +72,12 @@ function renderAdminStats() {
 
 function renderAdminUsers() {
   const usersList = document.getElementById('usersList');
-  
+
   if (adminUsers.length === 0) {
     usersList.innerHTML = '<p class="empty-state">No users found</p>';
     return;
   }
-  
+
   usersList.innerHTML = `
     <table class="users-table">
       <thead>
@@ -106,7 +106,7 @@ function renderAdminUsers() {
 
 async function deleteUser(userId) {
   if (!confirm('Are you sure you want to delete this user?')) return;
-  
+
   try {
     await api.delete(`/api/admin/users/${userId}`);
     await loadAdminData();

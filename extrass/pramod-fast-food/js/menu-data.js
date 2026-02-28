@@ -1,24 +1,11 @@
-/**
- * menu-data.js — Single source of truth for menu items.
- *
- * Tries to fetch from backend via Api.fetchMenu() first.
- * If network fails, falls back to the hard-coded static menu.
- * Only items with active !== false are exposed to downstream consumers.
- *
- * Each category:  { title, icon, items[] }
- * Each item:      { id, name, desc, prices[{label,value}], special?, active? }
- */
 'use strict';
 
-/** Global server readiness flag */
 window.__SERVER_READY__ = false;
 
-/** Backend connection flag — true once any API call succeeds */
 window.__BACKEND_CONNECTED__ = false;
 
 const MenuData = (() => {
 
-    /** Whether data was successfully loaded from the live API */
     let _isLive = false;
 
     const _staticCategories = {
@@ -123,10 +110,8 @@ const MenuData = (() => {
         },
     };
 
-    /** Active categories — what downstream modules actually see */
     let categories = {};
 
-    /** Filter out inactive items from a categories object */
     const _filterActive = (cats) => {
         const result = {};
         for (const [key, cat] of Object.entries(cats)) {
@@ -138,10 +123,9 @@ const MenuData = (() => {
         return result;
     };
 
-    /** Populate categories from static data (immediate, synchronous) */
     const _initStatic = () => {
         categories = _filterActive(_staticCategories);
-        // Stamp string _id on static items so all items use _id consistently
+
         for (const cat of Object.values(categories)) {
             cat.items.forEach(item => {
                 if (!item._id) item._id = String(item.id);
@@ -150,37 +134,23 @@ const MenuData = (() => {
         debug('Static Menu Loaded', Object.values(categories).flatMap(c => c.items));
     };
 
-    // Start with static data so everything works synchronously
     _initStatic();
 
-    /* ---------- Public helpers ---------- */
-
-    /** All categories as an ordered array of [key, data] */
     const entries = () => Object.entries(categories);
 
-    /** Flat list of every item across all categories */
     const allItems = () => Object.values(categories).flatMap(c => c.items);
 
-    /** Lookup a single item by _id (string) */
     const findById = (id) => allItems().find(i => i._id === String(id));
 
-    /** Category keys */
     const keys = () => Object.keys(categories);
 
-    /** Single category by key */
     const get = (key) => categories[key];
 
-    /**
-     * Replace categories wholesale (for live API data).
-     * Filters out inactive items automatically.
-     * Preserves static category order when the incoming keys match.
-     */
     const load = (data) => {
         Object.keys(categories).forEach(k => delete categories[k]);
 
         const active = _filterActive(data);
 
-        // Insert in static order first, then any extra keys
         for (const key of _staticCategoryOrder) {
             if (active[key]) categories[key] = active[key];
         }
@@ -189,33 +159,18 @@ const MenuData = (() => {
         }
     };
 
-    /* ============================================================
-       STATIC METADATA — category keys, titles, icons, order.
-       Used as the canonical reference for normalizing server data.
-    ============================================================ */
-
-    /** Ordered array of canonical category keys (defines tab order) */
     const _staticCategoryOrder = Object.keys(_staticCategories);
 
-    /** Map of { key → { title, icon } } from static data */
     const _staticMeta = {};
     for (const [key, cat] of Object.entries(_staticCategories)) {
         _staticMeta[key] = { title: cat.title, icon: cat.icon };
     }
 
-    /**
-     * Build a lookup: category title (lowercased) → static key
-     * e.g. "steam momos" → "steam", "chilli potato" → "potato"
-     */
     const _titleToKey = {};
     for (const [key, cat] of Object.entries(_staticCategories)) {
         _titleToKey[cat.title.toLowerCase()] = key;
     }
 
-    /**
-     * Build a lookup: item name (lowercased) → static item.
-     * Used for fallback desc when server doesn't send one.
-     */
     const _staticItemByName = {};
     for (const cat of Object.values(_staticCategories)) {
         for (const item of cat.items) {
@@ -223,31 +178,15 @@ const MenuData = (() => {
         }
     }
 
-    /* ============================================================
-       NORMALIZATION — convert any server shape into the exact
-       categories structure the UI expects (keys, icons, order).
-       ZERO changes to UI code required.
-    ============================================================ */
-
-    /**
-     * Resolve a server category string to a static category key.
-     * Tries exact title match first, then keyword heuristics.
-     *
-     * @param {string} raw — raw category string from backend
-     * @returns {string} canonical static key, or slugified fallback
-     */
     const _resolveCategory = (raw) => {
         if (!raw) return 'other';
 
         const lower = raw.toLowerCase().trim();
 
-        // Exact title match: "Steam Momos" → "steam"
         if (_titleToKey[lower]) return _titleToKey[lower];
 
-        // Exact key match: "steam" → "steam"
         if (_staticMeta[lower]) return lower;
 
-        // Keyword heuristic (order matters — more specific first)
         const kwMap = [
             ['kurkure', 'kurkure'], ['gravy', 'gravy'], ['chilli momo', 'chilli'],
             ['fried momo', 'fried'], ['steam', 'steam'], ['noodle', 'noodles'],
@@ -259,18 +198,12 @@ const MenuData = (() => {
             if (lower.includes(kw)) return key;
         }
 
-        // Slugified fallback for truly unknown categories
         return lower.replace(/\s+/g, '-');
     };
 
-    /**
-     * Normalize a single item's prices to [ { label: string, value: number } ].
-     * Handles every known backend format.
-     */
     const _normalizePrices = (raw) => {
         if (!raw) return [];
 
-        // Single price shorthand
         if (typeof raw === 'number') return [{ label: 'Regular', value: raw }];
 
         if (!Array.isArray(raw)) return [];
@@ -284,15 +217,6 @@ const MenuData = (() => {
         });
     };
 
-    /**
-     * Normalize a single server item to the canonical shape the UI expects.
-     *
-     * Canonical shape:
-     *   { _id, name, desc, special, prices: [{ label, value }] }
-     *
-     * Server overrides: price, special, active.
-     * Static provides: fallback desc.
-     */
     const _normalizeItem = (serverItem) => {
         const _id = String(serverItem._id || serverItem.id || '');
         const name = String(serverItem.name || '');
@@ -300,7 +224,6 @@ const MenuData = (() => {
         const special = !!serverItem.special;
         const active = serverItem.active !== false;
 
-        // Fallback desc from static if server didn't provide one
         const staticMatch = _staticItemByName[name.toLowerCase()];
         const desc = String(
             serverItem.desc || serverItem.description || staticMatch?.desc || ''
@@ -309,42 +232,22 @@ const MenuData = (() => {
         return { _id, name, desc, special, active, prices };
     };
 
-    /**
-     * normalizeServerMenu(serverData)
-     *
-     * THE SINGLE PUBLIC NORMALIZER.
-     *
-     * Accepts any server response shape and returns an object
-     * with the EXACT same key → { title, icon, items[] } structure
-     * as _staticCategories.  Preserves static category order, icons,
-     * and titles so the UI renders identically.
-     *
-     * Supported input shapes:
-     *   1. Flat array of items    [ { _id, name, category, … } ]
-     *   2. Wrapped categories     { categories: { key: { title, icon, items[] } } }
-     *   3. Top-level categories   { steam: { title, icon, items[] }, … }
-     *
-     * @param {Array|Object} serverData
-     * @returns {Object} canonical categories object
-     */
     const normalizeMenuFromServer = (serverData) => {
         if (!serverData) return {};
         debug('Server Menu Raw', serverData);
 
-        /* --- Step A: reduce any shape to a flat array of raw items --- */
-
         let flatItems = [];
 
         if (Array.isArray(serverData)) {
-            // Shape 1: flat array
+
             flatItems = serverData;
         } else if (typeof serverData === 'object') {
-            // Shape 2 or 3
+
             const root = serverData.categories || serverData;
             if (typeof root === 'object' && !Array.isArray(root)) {
                 for (const [key, cat] of Object.entries(root)) {
                     if (!cat || !Array.isArray(cat.items)) continue;
-                    // Inject category name into each item so resolver can work
+
                     for (const item of cat.items) {
                         flatItems.push({
                             ...item,
@@ -357,27 +260,21 @@ const MenuData = (() => {
 
         if (!flatItems.length) return {};
 
-        /* --- Step B: filter inactive, normalise, bucket by static key --- */
-
-        /** Buckets: key → normalised items[] */
         const buckets = {};
 
         for (const raw of flatItems) {
-            if (raw.active === false) continue;          // skip inactive
+            if (raw.active === false) continue;
 
             const item = _normalizeItem(raw);
-            if (item.active === false) continue;          // double-check
+            if (item.active === false) continue;
 
             const key = _resolveCategory(raw.category);
             if (!buckets[key]) buckets[key] = [];
             buckets[key].push(item);
         }
 
-        /* --- Step C: assemble output in static category order --- */
-
         const result = {};
 
-        // First: known categories in their original order
         for (const key of _staticCategoryOrder) {
             if (!buckets[key] || !buckets[key].length) continue;
             const meta = _staticMeta[key] || {};
@@ -388,9 +285,8 @@ const MenuData = (() => {
             };
         }
 
-        // Then: any genuinely new categories from the server
         for (const [key, items] of Object.entries(buckets)) {
-            if (result[key]) continue;                    // already placed
+            if (result[key]) continue;
             result[key] = {
                 title: key.charAt(0).toUpperCase() + key.slice(1).replace(/-/g, ' '),
                 icon:  '🍽️',
@@ -401,32 +297,13 @@ const MenuData = (() => {
         return result;
     };
 
-    /* ============================================================
-       LIVE DATA — deep-merge server data into running menu state
-    ============================================================ */
-
-    /**
-     * Merge live (server) categories into the active menu without
-     * resetting the whole DOM object.  Returns array of changed item IDs
-     * so the UI can do a targeted re-render.
-     *
-     * Rules:
-     *   - New items / categories are added
-     *   - Changed fields (price, special, active, name, desc) are patched
-     *   - Items removed on server are removed locally
-     *   - Cart is NOT touched (it stores its own copy of data)
-     *   - Static icons, titles, and category order are preserved
-     *
-     * @param {Object} liveCats — **already** normalised via normalizeMenuFromServer()
-     * @returns {string[]} IDs of items that actually changed
-     */
     const setLiveData = (liveCats) => {
         const changedIds = [];
         const filtered = _filterActive(liveCats);
 
         for (const [key, liveCat] of Object.entries(filtered)) {
             if (!categories[key]) {
-                // Brand-new category from server — adopt static meta if available
+
                 const meta = _staticMeta[key] || {};
                 categories[key] = {
                     title: meta.title || liveCat.title || key,
@@ -439,30 +316,27 @@ const MenuData = (() => {
 
             const currentCat = categories[key];
 
-            // Always prefer static meta for title/icon to keep UI identical
             const meta = _staticMeta[key];
             if (meta) {
                 currentCat.title = meta.title;
                 currentCat.icon  = meta.icon;
             } else {
-                // Non-static category — take server's title/icon if better
+
                 if (liveCat.title) currentCat.title = liveCat.title;
                 if (liveCat.icon && liveCat.icon !== '🍽️') currentCat.icon = liveCat.icon;
             }
 
-            // Build fast-lookup for current items
             const currentMap = new Map(currentCat.items.map(i => [i._id, i]));
 
             for (const liveItem of liveCat.items) {
                 const existing = currentMap.get(liveItem._id);
                 if (!existing) {
-                    // New item
+
                     currentCat.items.push({ ...liveItem });
                     changedIds.push(liveItem._id);
                     continue;
                 }
 
-                // Diff individual fields
                 let changed = false;
                 for (const prop of ['name', 'desc', 'special', 'active']) {
                     if (existing[prop] !== liveItem[prop]) {
@@ -471,7 +345,6 @@ const MenuData = (() => {
                     }
                 }
 
-                // Deep-compare prices
                 if (JSON.stringify(existing.prices) !== JSON.stringify(liveItem.prices)) {
                     existing.prices = liveItem.prices.map(p => ({ ...p }));
                     changed = true;
@@ -480,14 +353,12 @@ const MenuData = (() => {
                 if (changed) changedIds.push(existing._id);
             }
 
-            // Remove items deleted on server
             const liveIds = new Set(liveCat.items.map(i => i._id));
             const removed = currentCat.items.filter(i => !liveIds.has(i._id));
             removed.forEach(i => changedIds.push(i._id));
             currentCat.items = currentCat.items.filter(i => liveIds.has(i._id));
         }
 
-        // Remove categories that no longer exist on server
         for (const key of Object.keys(categories)) {
             if (!filtered[key]) {
                 categories[key].items.forEach(i => changedIds.push(i._id));
@@ -501,11 +372,6 @@ const MenuData = (() => {
         return changedIds;
     };
 
-    /**
-     * Fetch menu from backend API and load it.
-     * Falls back to static data on any failure.
-     * @returns {Promise<{live:boolean, error?:string}>}
-     */
     const fetchFromApi = async () => {
         if (typeof Api === 'undefined') {
             _isLive = false;
@@ -527,16 +393,12 @@ const MenuData = (() => {
             }
         }
 
-        // Fallback to static
         _initStatic();
         _isLive = false;
         window.__SERVER_READY__ = false;
         return { live: false, error: res.error || 'Empty menu data' };
     };
 
-    /* ============================================================
-       SMART MENU CACHE — 5-minute TTL in localStorage
-    ============================================================ */
     const CACHE_KEY = 'pf_menu_cache';
     const CACHE_TIME_KEY = 'pf_menu_cache_time';
     const FIVE_MIN = 5 * 60 * 1000;
@@ -548,7 +410,7 @@ const MenuData = (() => {
             if (raw && ts && (Date.now() - parseInt(ts, 10) < FIVE_MIN)) {
                 return JSON.parse(raw);
             }
-        } catch { /* corrupt cache — ignore */ }
+        } catch {  }
         return null;
     };
 
@@ -556,7 +418,7 @@ const MenuData = (() => {
         try {
             localStorage.setItem(CACHE_KEY, JSON.stringify(data));
             localStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
-        } catch { /* quota exceeded — ignore */ }
+        } catch {  }
     };
 
     const clearCache = () => {
@@ -564,15 +426,8 @@ const MenuData = (() => {
         localStorage.removeItem(CACHE_TIME_KEY);
     };
 
-    /**
-     * Non-destructive background connect: fetches live menu and deep-merges
-     * into the running state.  Does NOT reset to static on failure.
-     * Uses smart cache with 5-minute TTL to reduce backend load.
-     *
-     * @returns {Promise<{live:boolean, changedIds?:string[], error?:string}>}
-     */
     const connectLive = async () => {
-        /* Try local cache first */
+
         const cached = _getCached();
         if (cached && Object.keys(cached).length) {
             debug('Menu loaded from cache');
@@ -600,7 +455,6 @@ const MenuData = (() => {
         }
     };
 
-    /** Did the last load come from the live API? */
     const isLive = () => _isLive;
 
     return Object.freeze({

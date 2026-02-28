@@ -1,12 +1,3 @@
-/* 
-   ANAND DEV OS — Component Styles
-   Buttons, cards, forms, and UI components
-*/
-
-/* ══════════════════════════════════════════════════════════════════════════
-   BUTTONS
-   ══════════════════════════════════════════════════════════════════════════ */
-
 .btn {
   display: inline-flex;
   align-items: center;
@@ -67,10 +58,6 @@
   min-height: 36px;
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   CARDS
-   ══════════════════════════════════════════════════════════════════════════ */
-
 .card {
   background: var(--bg-secondary);
   border: 1px solid var(--border-primary);
@@ -98,7 +85,6 @@
   box-shadow: var(--shadow-lg);
 }
 
-/* Project Card */
 .project-card {
   position: relative;
   background: var(--bg-secondary);
@@ -179,7 +165,6 @@
   color: var(--text-primary);
 }
 
-/* Featured Card */
 .featured-card {
   display: flex;
   flex-direction: column;
@@ -188,7 +173,7 @@
   border: 1px solid var(--border-primary);
   border-radius: var(--radius-xl);
   text-decoration: none;
-  transition: 
+  transition:
     border-color var(--duration-normal) var(--ease-out),
     box-shadow var(--duration-normal) var(--ease-out),
     background var(--duration-normal) var(--ease-out);
@@ -266,7 +251,6 @@
   transform: translateX(4px);
 }
 
-/* Case Study Card */
 .case-study-card {
   display: grid;
   grid-template-columns: 1fr;
@@ -360,10 +344,6 @@
   height: 16px;
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   FOCUS CARD SYSTEM
-   ══════════════════════════════════════════════════════════════════════════ */
-
 .focus-card {
   position: relative;
   background: var(--bg-secondary);
@@ -371,7 +351,7 @@
   border-radius: var(--radius-xl);
   overflow: hidden;
   cursor: pointer;
-  transition: 
+  transition:
     box-shadow var(--focus-duration-hover) var(--focus-easing-hover),
     border-color var(--focus-duration-hover) var(--focus-easing-hover);
   will-change: transform, box-shadow;
@@ -466,7 +446,7 @@
   background: var(--bg-elevated);
   border-radius: var(--radius-full);
   color: var(--text-secondary);
-  transition: 
+  transition:
     background var(--focus-duration-hover) var(--focus-easing-hover),
     color var(--focus-duration-hover) var(--focus-easing-hover);
 }
@@ -476,7 +456,6 @@
   color: var(--text-primary);
 }
 
-/* Focus Card Actions */
 .focus-card__actions {
   display: flex;
   gap: var(--space-2);
@@ -484,7 +463,6 @@
   flex-wrap: wrap;
 }
 
-/* Action Buttons */
 .action-btn {
   display: inline-flex;
   align-items: center;
@@ -502,7 +480,7 @@
   text-decoration: none;
   white-space: nowrap;
   min-height: 44px;
-  transition: 
+  transition:
     color 120ms var(--ease-out),
     background 120ms var(--ease-out),
     border-color 120ms var(--ease-out),
@@ -579,10 +557,6 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fafafa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'/%3E%3Cpolyline points='15 3 21 3 21 9'/%3E%3Cline x1='10' y1='14' x2='21' y2='3'/%3E%3C/svg%3E");
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   FOCUS OVERLAY
-   ══════════════════════════════════════════════════════════════════════════ */
-
 .focus-overlay-backdrop {
   position: fixed;
   inset: 0;
@@ -592,7 +566,7 @@
   -webkit-backdrop-filter: blur(var(--focus-backdrop-blur));
   opacity: 0;
   visibility: hidden;
-  transition: 
+  transition:
     opacity var(--focus-duration-close) var(--focus-easing-close),
     visibility var(--focus-duration-close) var(--focus-easing-close);
 }
@@ -600,7 +574,7 @@
 .focus-overlay-backdrop--active {
   opacity: 1;
   visibility: visible;
-  transition: 
+  transition:
     opacity var(--focus-duration-open) var(--focus-easing-open),
     visibility var(--focus-duration-open) var(--focus-easing-open);
 }
@@ -635,7 +609,7 @@
   overflow-y: auto;
   opacity: 0;
   transform: scale(0.95) translateY(20px);
-  transition: 
+  transition:
     opacity var(--focus-duration-close) var(--focus-easing-close),
     transform var(--focus-duration-close) var(--focus-easing-close);
   box-shadow: var(--shadow-xl), var(--focus-glow-spread);
@@ -644,7 +618,7 @@
 .focus-overlay--active .focus-overlay__panel {
   opacity: 1;
   transform: scale(1) translateY(0);
-  transition: 
+  transition:
     opacity var(--focus-duration-open) var(--focus-easing-open),
     transform var(--focus-duration-open) var(--focus-easing-open);
   transition-delay: 50ms;
@@ -668,7 +642,7 @@
   font-size: var(--text-xl);
   cursor: pointer;
   z-index: 10;
-  transition: 
+  transition:
     background var(--duration-fast) var(--ease-out),
     color var(--duration-fast) var(--ease-out),
     border-color var(--duration-fast) var(--ease-out);
@@ -806,10 +780,6 @@ body.focus-overlay-open {
   outline-offset: 4px;
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   FORM ELEMENTS
-   ══════════════════════════════════════════════════════════════════════════ */
-
 .range-input {
   width: 100%;
   height: 4px;
@@ -863,7 +833,7 @@ body.focus-overlay-open {
   height: 20px;
   background: var(--text-secondary);
   border-radius: var(--radius-full);
-  transition: transform var(--duration-fast) var(--ease-out), 
+  transition: transform var(--duration-fast) var(--ease-out),
               background var(--duration-fast) var(--ease-out);
 }
 
@@ -876,11 +846,6 @@ body.focus-overlay-open {
   background: var(--text-primary);
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   PAGE-SPECIFIC COMPONENTS
-   ══════════════════════════════════════════════════════════════════════════ */
-
-/* Case Study */
 .case-study {
   padding: clamp(4rem, 10vw, 6rem) 0;
 }
@@ -978,7 +943,6 @@ body.focus-overlay-open {
   border-radius: var(--radius-full);
 }
 
-/* Code Block */
 .code-block {
   background: var(--bg-tertiary);
   border: 1px solid var(--border-primary);
@@ -997,7 +961,6 @@ body.focus-overlay-open {
   white-space: pre;
 }
 
-/* Architecture Diagram */
 .architecture-diagram {
   padding: var(--space-4);
   background: var(--bg-tertiary);
@@ -1023,7 +986,6 @@ body.focus-overlay-open {
   line-height: 1.6;
 }
 
-/* Tradeoff Table */
 .tradeoff-table {
   width: 100%;
   border-collapse: collapse;
@@ -1058,7 +1020,6 @@ body.focus-overlay-open {
   border-bottom: none;
 }
 
-/* Tech Stack */
 .tech-stack {
   display: flex;
   flex-wrap: wrap;
@@ -1075,7 +1036,6 @@ body.focus-overlay-open {
   border-radius: var(--radius-sm);
 }
 
-/* Back Link */
 .back-link {
   display: inline-flex;
   align-items: center;
@@ -1096,7 +1056,6 @@ body.focus-overlay-open {
   height: 16px;
 }
 
-/* Lab Demo */
 .lab-demo {
   background: var(--bg-secondary);
   border: 1px solid var(--border-primary);
@@ -1156,7 +1115,6 @@ body.focus-overlay-open {
   color: var(--accent-primary);
 }
 
-/* Dev OS Tabs */
 .dev-os__tabs {
   display: flex;
   gap: var(--space-2);
@@ -1204,7 +1162,6 @@ body.focus-overlay-open {
   display: block;
 }
 
-/* Log Entry */
 .log-entry {
   padding: var(--space-4);
   background: var(--bg-secondary);
@@ -1252,7 +1209,6 @@ body.focus-overlay-open {
   border-radius: var(--radius-sm);
 }
 
-/* Idea Card */
 .idea-card {
   padding: var(--space-4);
   background: var(--bg-secondary);
@@ -1297,7 +1253,6 @@ body.focus-overlay-open {
   color: var(--success);
 }
 
-/* Tool Card */
 .tool-card {
   display: flex;
   align-items: flex-start;
@@ -1355,7 +1310,6 @@ body.focus-overlay-open {
   min-height: 44px;
 }
 
-/* Failure Card */
 .failure-card {
   padding: var(--space-4);
   background: var(--bg-secondary);
@@ -1419,7 +1373,6 @@ body.focus-overlay-open {
   display: block;
 }
 
-/* Hire Page */
 .hire-hero {
   padding: clamp(5rem, 12vw, 8rem) 0 clamp(2.5rem, 6vw, 4rem);
   text-align: center;
@@ -1524,7 +1477,6 @@ body.focus-overlay-open {
   text-align: center;
 }
 
-/* Password Gate */
 .password-gate {
   min-height: 100dvh;
   display: flex;
@@ -1615,7 +1567,6 @@ body.focus-overlay-open {
   display: block;
 }
 
-/* Hidden Section */
 .hidden-section {
   margin-bottom: var(--space-12);
 }
@@ -1637,7 +1588,6 @@ body.focus-overlay-open {
   border-radius: var(--radius-full);
 }
 
-/* Draft Item */
 .draft-item {
   padding: var(--space-4);
   background: var(--bg-secondary);
@@ -1672,7 +1622,6 @@ body.focus-overlay-open {
   color: var(--text-tertiary);
 }
 
-/* Note Card */
 .note-card {
   padding: var(--space-4);
   background: var(--bg-secondary);
@@ -1693,7 +1642,6 @@ body.focus-overlay-open {
   color: var(--text-secondary);
 }
 
-/* Project Preview */
 .project-preview {
   position: relative;
   background: var(--bg-secondary);
@@ -1752,7 +1700,6 @@ body.focus-overlay-open {
   align-self: flex-start;
 }
 
-/* Experiment */
 .experiment-list {
   display: flex;
   flex-direction: column;
@@ -1786,7 +1733,6 @@ body.focus-overlay-open {
   color: var(--text-tertiary);
 }
 
-/* Profile Download */
 .profile-download {
   margin-top: var(--space-8);
   text-align: center;
@@ -1808,7 +1754,6 @@ body.focus-overlay-open {
   margin-bottom: var(--space-4);
 }
 
-/* Case Studies List */
 .case-studies-list {
   display: flex;
   flex-direction: column;

@@ -1,13 +1,4 @@
 #!/usr/bin/env python3
-"""
-Simple HTTP server for Pramod Fast Food menu app.
-Serves static files from the current directory.
-
-Usage:
-    python3 serve.py
-    # or
-    python3 serve.py --port 8080
-"""
 
 import http.server
 import socketserver
@@ -18,27 +9,24 @@ import webbrowser
 from urllib.parse import urlparse
 
 class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
-    """Custom handler with better logging and SPA support."""
 
     def end_headers(self):
-        """Add cache-busting headers for development."""
+
         self.send_header('Cache-Control', 'no-store, no-cache, max-age=0')
         self.send_header('Access-Control-Allow-Origin', '*')
         super().end_headers()
 
     def log_message(self, format, *args):
-        """Pretty-print requests."""
+
         sys.stderr.write(f"[{self.log_date_time_string()}] {format % args}\n")
 
     def do_GET(self):
-        """Serve index.html for all routes (SPA support)."""
+
         path = urlparse(self.path).path
 
-        # Try exact file first
         if os.path.isfile(self.translate_path(path)):
             return super().do_GET()
 
-        # If it's not a file extension, serve index.html
         if '.' not in path.split('/')[-1]:
             self.path = '/index.html'
 
@@ -55,7 +43,6 @@ def main():
     port = args.port
     url = f'http://{host}:{port}'
 
-    # Change to app directory
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
     with socketserver.TCPServer((host, port), MyHTTPRequestHandler) as httpd:

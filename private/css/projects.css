@@ -1,8 +1,3 @@
-/* ═══════════════════════════════════════════════════════════
-   PRIVATE SPACE - PROJECTS
-   ═══════════════════════════════════════════════════════════ */
-
-/* Projects Layout */
 .ps-projects {
   display: flex;
   flex-direction: column;
@@ -15,7 +10,6 @@
   }
 }
 
-/* Projects Sidebar */
 .ps-projects-sidebar {
   width: 100%;
   padding: var(--ps-space-4);
@@ -31,7 +25,6 @@
   }
 }
 
-/* Projects Header */
 .ps-projects-header {
   display: flex;
   align-items: center;
@@ -49,7 +42,6 @@
   letter-spacing: 0.05em;
 }
 
-/* Pinned Project */
 .ps-pinned-project {
   margin-bottom: var(--ps-space-3);
 }
@@ -83,21 +75,18 @@
   opacity: 1;
 }
 
-/* Projects Divider */
 .ps-projects-divider {
   height: 1px;
   background: var(--ps-border-subtle);
   margin: var(--ps-space-3) 0;
 }
 
-/* Projects List */
 .ps-projects-list {
   display: flex;
   flex-direction: column;
   gap: var(--ps-space-2);
 }
 
-/* Project Item */
 .ps-project-item {
   display: flex;
   align-items: center;
@@ -177,7 +166,6 @@
   height: 14px;
 }
 
-/* Projects Content */
 .ps-projects-content {
   flex: 1;
   padding: var(--ps-space-4);
@@ -188,7 +176,6 @@
   width: 280px;
 }
 
-/* Project Cards Grid */
 .ps-projects-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -198,7 +185,6 @@
   padding-bottom: var(--ps-space-4);
 }
 
-/* Project Card */
 .ps-project-card {
   background: var(--ps-bg-secondary);
   border: 1px solid var(--ps-border-subtle);
@@ -296,7 +282,6 @@
   border-radius: var(--ps-radius-full);
 }
 
-/* Project Detail */
 .ps-project-detail {
   display: flex;
   height: 100%;
@@ -331,7 +316,6 @@
   color: var(--ps-text-muted);
 }
 
-/* Project Sections */
 .ps-project-section {
   margin-bottom: var(--ps-space-6);
 }
@@ -349,7 +333,6 @@
   color: var(--ps-text-secondary);
 }
 
-/* Idea Dump */
 .ps-idea-list {
   display: flex;
   flex-direction: column;
@@ -388,7 +371,6 @@
   border-color: var(--ps-border-focus);
 }
 
-/* Research Notes */
 .ps-research-notes {
   display: flex;
   flex-direction: column;
@@ -417,7 +399,6 @@
   line-height: var(--ps-leading-relaxed);
 }
 
-/* TODO List */
 .ps-todo-list {
   display: flex;
   flex-direction: column;
@@ -522,7 +503,6 @@
   color: var(--ps-text-muted);
 }
 
-/* Project Sidebar */
 .ps-project-detail-sidebar {
   width: 280px;
   flex-shrink: 0;
@@ -543,7 +523,6 @@
   margin-bottom: var(--ps-space-3);
 }
 
-/* Linked Notes */
 .ps-linked-notes {
   display: flex;
   flex-direction: column;
