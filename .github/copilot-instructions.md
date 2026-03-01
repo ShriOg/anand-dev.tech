@@ -2,102 +2,132 @@
 
 ## Architecture Overview
 
-This is a personal portfolio + private dashboard for `anand-dev.tech`, hosted on GitHub Pages with a separate Node.js API backend. The project has **three layers**:
+Personal portfolio + private dashboard mono-repo for `anand-dev.tech`, hosted on GitHub Pages with a Node.js API backend. Four top-level layers:
 
 | Layer | Location | Purpose |
 |---|---|---|
-| **Public Portfolio** | `old/index.html`, `old/pages/`, `old/assets/` | Visitor-facing portfolio, projects, lab |
-| **Private Dashboard** | `old/private/` (own `css/`, `js/`) | Password-protected admin with Professional and Personal ("Her AI") modes |
-| **API Backend** | `old/api/`, `old/server/`, `old/local-server.js` | Node.js servers proxying AI requests to OpenAI/Groq — API keys never reach the browser |
+| **Landing Hub** | `index.html`, `script.js`, `style.css` | Three.js particle field with cards linking to WebOS, DomainBattle, Portfolio |
+| **Public Portfolio** | `Portfolio/` (`index.html`, `pages/`, `assets/`) | Visitor-facing portfolio, projects, lab experiments |
+| **Private Dashboard** | `private/` (own `css/`, `js/`, `she/`, `__/`) | Password-protected admin: Professional mode, Personal ("Her AI") mode, media gallery |
+| **API Backend** | `Portfolio/api/`, `Portfolio/server/`, `Portfolio/local-server.js` | Node.js servers proxying AI to OpenAI/Groq — keys never reach browser |
 
-The root `index.html` is a placeholder. All real site code lives under `old/`.
+Other sub-projects: `webos/` (browser OS), `DomainBattle/` (game), `extrass/` (restaurant PWAs).
 
-## Tech Stack & Zero-Dependency Philosophy
+## Sub-Projects
 
-**No frameworks, no build tools, no bundlers.** Frontend is pure vanilla HTML/CSS/JS. Backend uses minimal Express (or raw `http` for local dev). Do not introduce React, Vite, webpack, or any frontend framework unless explicitly requested.
+All three are **fully independent** from Portfolio/private — zero shared source code. They share a common Render backend (`anand-os-backend.onrender.com`) with JWT auth.
 
-- Public JS uses **IIFE Module Pattern** (e.g., `ContentLoader`, `App`) exposing public API via return object
-- Private JS uses **ES6 classes** and **object literals** for singletons (`AIService`, `Database`)
-- Inter-module communication via `CustomEvent` dispatching and globals — no import/export
-- All `<script>` tags are loaded in order; modules communicate through window globals
+**`webos/`** — Browser-based OS with windowed apps (Notes, Files, AI, Admin). IIFE modules + bare globals. Real JWT auth via `localStorage.accessToken`. Entry: `webos/index.html` (landing), `webos/os/index.html` (desktop). Config in `webos/js/config.js` sets `window.API_BASE_URL`.
 
-## CSS Conventions
+**`DomainBattle/`** — Real-time multiplayer game (Socket.IO via CDN). All logic in one file (`battle.js`, 3 object literals: `DOM`, `UI`, `SocketManager`). Requires webos login — reads same `accessToken` from localStorage.
 
-Seven modular CSS files loaded in order: `variables.css` → `base.css` → `layout.css` → `components.css` → `animations.css` → `responsive.css` → `zoom-transitions.css`.
+**`extrass/`** — Two PWA restaurant apps for "Pramod Fast Food":
+- Customer app: `extrass/pramod-fast-food/` — reactive `State` pub-sub store (`state.js`), frozen IIFE modules. PWA with service worker.
+- Admin dashboard: `extrass/admin/` — Socket.IO real-time orders, SHA-256 hash gate auth. Kitchen display at `kitchen.html`.
+- `extrass/old/` — Legacy Python server, unused. Only Python in the entire repo.
 
-- **Design tokens** in `old/assets/css/variables.css`: `--bg-*`, `--text-*`, `--accent-*`, `--space-1` through `--space-32`, `--z-base` through `--z-overlay`, fluid `clamp()` typography
-- **BEM naming**: `.block__element--modifier` (e.g., `.nav__link--active`, `.focus-card__preview-visual`)
-- **Dark-first theme**: public `#0a0a0b` background, private `#000000`. Blue accent `#3b82f6`, pink accent `#e8a4b8` for personal mode
-- Private dashboard has its own parallel CSS system in `old/private/css/` — do not mix with public CSS
+Gotcha: Render free tier has ~30s cold starts. DomainBattle/extrass have retry logic; webos does not.
 
-## Content Management
+## Zero-Dependency Philosophy
 
-`old/assets/content.json` is the **single source of truth** for all public content. HTML uses `data-content` attributes; `ContentLoader` maps JSON fields to DOM. No text is hardcoded in HTML — all projects, skills, nav items, and hero content come from this JSON.
+**No frameworks, no build tools, no bundlers.** Pure vanilla HTML/CSS/JS. Backend is minimal Express or raw `http`. Do not introduce React, Vite, webpack, etc. unless explicitly requested.
 
-When adding public content, update `content.json` first, then ensure corresponding `data-content` attributes exist in HTML.
+No `import`/`export` anywhere — all scripts load via ordered `<script>` tags and communicate through window globals.
 
 ## JavaScript Patterns
 
-```js
-// Public-side IIFE pattern (ContentLoader, App):
-const MyModule = (function() {
-  'use strict';
-  let state = null;
-  function doThing() { /* ... */ }
-  return { init, doThing }; // public API
-})();
+Two patterns are used depending on context:
 
-// Auto-init at file end:
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => MyModule.init());
-} else {
-  MyModule.init();
-}
+**1. IIFE Module (portfolio + unified dashboard `private/a.html`):**
+```js
+const PSChat = (function() {
+  'use strict';
+  let _messages = [];                    // private state uses _underscore prefix
+  function send(msg) { /* ... */ }
+  return { init, send };                 // public API
+})();
+```
+Portfolio modules: `ContentLoader`, `App` (PascalCase). Private unified modules use `PS` prefix: `PSAuth`, `PSChat`, `PSUI`, `PSSettings`, `PSSync`.
+
+**2. Object Literal (standalone private pages):**
+```js
+const ProApp = { currentChat: null, async init() { ... }, send() { ... } };
+const HerApp = { ... };    // personal.html
+const Toast  = { ... };    // also object literal, exposed via window.Toast
 ```
 
-- Canvas 2D for all animations (`ParticleSystem`, `WaveSimulation`)
-- `requestAnimationFrame` loops for rendering
-- `IntersectionObserver` for scroll-reveal
-- `<template>` elements hold overlay/case-study content, cloned on card open
-- Mobile gets a separate JS file (`mobile.js`); `app.js` defers with `if (isMobile()) return`
+Auto-init pattern used everywhere:
+```js
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => Module.init());
+} else { Module.init(); }
+```
+
+## CSS Architecture
+
+**Portfolio** (`Portfolio/assets/css/`): 7 files loaded in order — `variables.css` → `base.css` → `layout.css` → `components.css` → `animations.css` → `responsive.css` → `zoom-transitions.css`. Unprefixed tokens: `--bg-*`, `--text-*`, `--accent-*`, `--space-1`–`--space-32`.
+
+**Private** (`private/css/`): 20 files, parallel system with `--ps-` namespaced tokens (`--ps-bg-primary`, `--ps-text-secondary`). Do NOT mix private CSS with portfolio CSS.
+
+Both are dark-first. Portfolio: `#0a0a0b` bg, `#3b82f6` blue accent. Private: `#000000` bg, `#e8a4b8` pink accent for "Her" mode. BEM naming throughout: `.block__element--modifier`.
+
+## Content Management
+
+`Portfolio/assets/content.json` is the **single source of truth** for all public content (site metadata, navigation, hero, projects, skills). HTML uses `data-content` attributes; `content-loader.js` maps JSON → DOM. Zero hardcoded text in HTML.
+
+When adding public content: update `content.json` first, then add `data-content` attributes in HTML.
 
 ## AI Integration
 
-Two AI personas (Professional and "Abhilasha/Her") share `AIService` → backend → OpenAI/Groq pipeline:
+Two personas share one pipeline: `ai-service.js` → backend → LLM.
 
-- **Frontend**: `old/private/js/ai-service.js` (auto-detects local vs deployed endpoint)
-- **Backend**: `old/api/server.js` (production, OpenAI GPT-4o-mini) or `old/local-server.js` (local dev, Groq Llama 3.1 70B)
-- **Request**: `POST /api/chat` with `{ mode: "professional" | "her", messages }` — mode selects system prompt
-- **Security**: API keys in `.env`, never in client code. Rate limiting, body size limits, helmet headers on production
+| Server | Path | Provider | Use |
+|---|---|---|---|
+| Local dev | `Portfolio/local-server.js` | Groq (Llama 3.1 70B) | `node local-server.js`, raw `http` |
+| Production | `Portfolio/api/server.js` | OpenAI (GPT-4o-mini) | Express + helmet + rate-limit (30/min) |
+| Simple proxy | `Portfolio/server/server.js` | Groq | Minimal ESM proxy |
+
+Request: `POST /api/chat` with `{ mode: "professional" | "her", messages }` — mode selects system prompt server-side. API keys in `.env`, never client-side.
 
 ## Data Storage
 
-Private dashboard uses **IndexedDB** (`PrivateSpaceDB`) via `old/private/js/database.js` — 13 object stores for projects, chats, memories, mood, images, journal, etc. Generic CRUD: `Database.add/put/get/getAll/delete/clear/getByIndex`.
+`private/js/database.js` wraps IndexedDB (`PrivateSpaceDB` v3) with 16 object stores: projects, navigation, pages, settings, her_chats, pro_chats, training, memories, journal, mood, images, videos, imported_chats, etc. Generic CRUD: `Database.add/put/get/getAll/delete/clear/getByIndex`.
 
 Auth is client-side SHA-256 hash comparison (intentionally lightweight for personal use).
+
+## Private Dashboard Entry Points
+
+Three separate HTML files load different script sets:
+- `private/a.html` — Unified dashboard, loads ~24 scripts in dependency order
+- `private/professional.html` — Professional mode only (5 scripts)
+- `private/personal.html` — Personal/Her mode only (6 scripts)
+- `private/she/` — Media gallery with dedicated AI chat pages
+
+Secret access: `Ctrl+Shift+P` from root landing page, or click logo 5× within 2 seconds.
 
 ## Local Development
 
 ```bash
-cd old
-npm install    # only dependency: dotenv
-npm start      # runs local-server.js on port 3000, auto-opens browser
+cd Portfolio
+npm install          # only dependency: dotenv
+npm start            # runs local-server.js on port 3000, auto-opens browser
 ```
 
-Requires `.env` with `GROQ_API_KEY` for AI features. Server serves static files + proxies `/api/*` to Groq.
+Requires `Portfolio/.env` with `GROQ_API_KEY` for AI features.
 
-## Naming & File Conventions
+## Naming Conventions
 
 - **Files**: kebab-case (`content-loader.js`, `ai-service.js`)
-- **JS classes/modules**: PascalCase (`ContentLoader`, `ParticleSystem`)
-- **JS methods/variables**: camelCase
-- **Constants**: UPPER_SNAKE_CASE (`DB_NAME`, `SYSTEM_PROMPTS`)
-- **DOM attributes**: `data-content`, `data-preview`, `data-focus-id`, `data-project-id`
-- **Pages**: each gets own folder with `index.html` for clean URLs (`pages/projects/index.html`)
-- **Templates** in `old/templates/` use `{{mustache}}` placeholders as structural reference only (no templating engine)
+- **JS modules**: PascalCase (`ContentLoader`, `PSAuth`, `ProApp`)
+- **Methods/variables**: camelCase; private state: `_underscore` prefix
+- **Constants**: UPPER_SNAKE_CASE (`DB_NAME`, `SESSION_KEY`, `DEFAULT_SETTINGS`)
+- **CSS tokens**: Portfolio unprefixed (`--bg-primary`), Private `--ps-` prefixed (`--ps-bg-primary`)
+- **Pages**: each in own folder with `index.html` for clean URLs
 
 ## Key Gotchas
 
-- The `404.html` is fully self-contained (~730 lines with inline CSS/JS, dot-matrix aesthetic) — it does not share the site's CSS system
-- Three separate server files exist for different contexts; `local-server.js` ≠ `api/server.js` ≠ `server/server.js`
-- Secret private dashboard entry: `Ctrl+Shift+P` or click logo 5 times within 2 seconds
+- `404.html` (root) is fully self-contained with inline CSS/JS — does not share the site's CSS
+- Three separate server files exist: `local-server.js` ≠ `api/server.js` ≠ `server/server.js`
+- Root `index.html` is a Three.js landing hub, NOT a placeholder — it uses its own `script.js` + `style.css`
+- `private/` is at repo root, NOT inside `Portfolio/` — they are sibling directories
+- `private/she/` contains 500+ media files — avoid bulk reads of that directory

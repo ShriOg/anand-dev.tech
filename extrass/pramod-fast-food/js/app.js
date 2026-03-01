@@ -117,12 +117,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <p class="order-popup__total">Total: ₹${data.total || 0}</p>
                     <div class="order-popup__actions">
-                        <button class="track-btn order-popup__btn--track" onclick="window.location.href='/extrass/pramod-fast-food/track/?orderId=${encodeURIComponent(data.orderId || '')}'">📍 Track Your Order</button>
+                        <button class="track-btn order-popup__btn--track" onclick="openTrackModal('${data.orderId || ''}')">📍 Track Your Order</button>
                         ${showWaBtn ? `<button class="order-popup__btn order-popup__btn--wa" data-wa-url="${data.url}">💬 Send via WhatsApp</button>` : ''}
                         <button class="order-popup__btn order-popup__btn--close">Close</button>
                     </div>
                     ${data.viaWhatsApp ? '<p class="order-popup__hint">Order sent via WhatsApp — check your chat</p>' : '<p class="order-popup__hint">You\'ll get notified when your order status changes</p>'}
                 </div>`;
+
+            /* ── Auto-open track modal 1s after order placed ── */
+            if (data.orderId) {
+                if (typeof autoOpenTimer !== 'undefined') clearTimeout(autoOpenTimer);
+                window.userClosedTracking = false;
+                autoOpenTimer = setTimeout(() => {
+                    if (!window.userClosedTracking) openTrackModal(data.orderId);
+                }, 1000);
+            }
+
+            // (rest of popup wiring continues below)
         } else if (data.serverDown && data.url) {
 
             popup.innerHTML = `
@@ -338,6 +349,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const status = (order.status || '').toUpperCase();
             if (typeof Customer !== 'undefined' && id) {
                 Customer.updateOrderStatus(id, status);
+            }
+
+            // Live-refresh track modal if open for this order
+            if (typeof currentTrackedOrderId !== 'undefined'
+                && currentTrackedOrderId
+                && (order.orderId === currentTrackedOrderId || order._id === currentTrackedOrderId)) {
+                renderTrackContent(order);
             }
 
             if (_shouldNotify(id) && ['PREPARING', 'READY', 'COMPLETED'].includes(status)) {

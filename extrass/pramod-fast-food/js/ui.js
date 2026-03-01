@@ -609,7 +609,7 @@ const UI = (() => {
                 <div class="order-card__foot">
                     <span class="order-card__total">₹${order.total || 0}</span>
                     <div class="order-card__foot-actions">
-                        ${!isCancelled ? `<button class="track-btn" onclick="window.location.href='/extrass/pramod-fast-food/track/?orderId=${encodeURIComponent(order.orderId || order._id || '')}'">📍 Track</button>` : ''}
+                        ${!isCancelled ? `<button class="track-btn" onclick="openTrackModal('${order.orderId || order._id || ''}')">📍 Track</button>` : ''}
                         ${isPending ? `<button class="cancel-order" data-id="${order._id || order.orderId}">✕ Cancel</button>` : ''}
                         ${isCompleted ? `<button class="order-card__reorder" data-action="panel-reorder" data-order-id="${order.orderId}">🔁 Reorder</button>` : ''}
                         ${isCancelled ? `<button class="delete-cancelled" data-id="${order._id || order.orderId}">🗑 Delete</button>` : ''}

@@ -196,6 +196,27 @@
 
     <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode">🌙</button>
 
+    <!-- Track Order Modal -->
+    <div id="track-overlay" class="track-overlay">
+      <div class="track-modal" id="track-modal">
+        <canvas id="particle-bg"></canvas>
+        <button class="close-track" onclick="closeTrackModal()">✕</button>
+        <div id="track-content"></div>
+        <!-- Rating popup -->
+        <div id="rating-popup" class="rating-popup hidden">
+          <p>⭐ Rate Your Order</p>
+          <div class="stars" id="rating-stars">
+            <span data-rate="1">★</span>
+            <span data-rate="2">★</span>
+            <span data-rate="3">★</span>
+            <span data-rate="4">★</span>
+            <span data-rate="5">★</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous" defer></script>
     <script src="js/order-status.js"></script>
     <script src="js/api.js"></script>
@@ -211,6 +232,402 @@
         .register("/extrass/pramod-fast-food/sw.js")
         .then(() => console.log("PWA Service Worker Registered"))
         .catch(err => console.error("SW Registration Failed", err));
+    }
+    </script>
+
+    <!-- Track Modal Logic -->
+    <script>
+    'use strict';
+
+    /* ═══════════════════════════════════════════
+       CINEMATIC TRACK MODAL ENGINE
+       ═══════════════════════════════════════════ */
+
+    let currentTrackedOrderId = null;
+    let lastTrackStatus = null;
+    let miniInterval = null;
+    let _trackCountdown = null;
+    let _ratingTimeout = null;
+    let autoOpenTimer = null;
+    let autoCloseTimer = null;
+    window.userClosedTracking = false;
+    window.confettiLaunched = false;
+
+    const TRACK_API = 'https://anand-os-backend.onrender.com/api';
+
+    /* ── Pop sound (tiny inline WAV) ── */
+    const _popSound = new Audio('data:audio/wav;base64,UklGRl4GAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YToGAAD+/wIA/P8EAPv/BgD5/wgA9/8KAPb/CwD1/wwA9f8MAPT/DQD0/w0A9P8NAPX/DAD1/wwA9v8LAPX/DADz/w4A8P8RAPD/EQDx/xAA8v8PAPL/DwDy/w8A8P8RAPP/DgD4/wkA+/8GAP3/BAD+/wMA//8CAP//AgD//wIA//8CAP//AgD+/wMA/f8EAPz/BQD7/wYA+v8HAPn/CAD4/wkA+P8JAPj/CQD5/wgA+v8HAPv/BgD8/wUA/f8EAP7/AwD//wIA//8BAP//AQD//wEA//8BAP//AQD//wEAAAAAAAAAAAAA');
+    _popSound.volume = 0.5;
+
+    /* ── Status message bank ── */
+    const statusMessages = {
+      PENDING: [
+        '🧾 Your order has entered the system.',
+        '👀 The kitchen just noticed your order!',
+        "📦 We're getting things ready...",
+        '⏳ Sit tight, magic is about to begin.',
+        "🔥 Queue locked. You're in!",
+        '🍽 Order received. Chef is reviewing.',
+        '✨ Preparing the prep phase...',
+        '🛎 Kitchen bell rang!'
+      ],
+      PREPARING: [
+        '👨‍🍳 Chef is cooking with full focus!',
+        '🔥 Flames are on. Smells amazing already!',
+        '🥟 Freshly being made just for you.',
+        '🍜 Tossing and turning perfection.',
+        '⏳ Almost there... patience = reward.',
+        '💨 Fast hands in the kitchen!',
+        '🎯 Precision plating in progress.',
+        '🌶 Adding the final touches.'
+      ],
+      COMPLETED: [
+        '✅ Boom! Your order is ready!',
+        "🎉 That was quick, wasn’t it?",
+        '🍽 Ready to be enjoyed!',
+        '💚 Made with care. Delivered with love.',
+        '🔥 Perfect timing. Enjoy!',
+        "😋 Hope you're hungry!",
+        '🎊 Completion unlocked!',
+        '🚀 Order mission accomplished.'
+      ]
+    };
+
+    function getRandomMessage(status) {
+      const key = String(status || '').toUpperCase();
+      const msgs = statusMessages[key];
+      if (!msgs || !msgs.length) return '';
+      return msgs[Math.floor(Math.random() * msgs.length)];
+    }
+
+    /* ── Particle engine ── */
+    function startParticles() {
+      stopParticles();
+      const canvas = document.getElementById('particle-bg');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const modal = canvas.parentElement;
+      canvas.width = modal.offsetWidth;
+      canvas.height = modal.offsetHeight;
+
+      const particles = Array.from({length: 25}, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 3 + 1,
+        d: Math.random() * 1 + 0.5
+      }));
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = '#ff6b00';
+          ctx.fill();
+          p.y -= p.d;
+          if (p.y < 0) { p.y = canvas.height; p.x = Math.random() * canvas.width; }
+        });
+        window._particleFrame = requestAnimationFrame(animate);
+      }
+      animate();
+    }
+
+    function stopParticles() {
+      if (window._particleFrame) { cancelAnimationFrame(window._particleFrame); window._particleFrame = null; }
+      const c = document.getElementById('particle-bg');
+      if (c) { const ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height); }
+    }
+
+    /* ── Confetti burst ── */
+    function launchConfetti() {
+      if (typeof confetti !== 'function') return;
+      const end = Date.now() + 1500;
+      (function frame() {
+        confetti({ particleCount: 5, spread: 70, origin: { y: 0.6 } });
+        if (Date.now() < end) requestAnimationFrame(frame);
+      })();
+    }
+
+    /* ── Progress ring ── */
+    function animateProgress(percent) {
+      const el = document.querySelector('.progress-ring-fill');
+      if (!el) return;
+      const circumference = 2 * Math.PI * 40;
+      el.style.strokeDashoffset = circumference - (percent / 100) * circumference;
+    }
+
+    /* ── Mini countdown ring ── */
+    function startMiniCountdown(targetTime) {
+      clearInterval(miniInterval);
+      const circle = document.querySelector('.mini-fill');
+      const text = document.getElementById('mini-timer-text');
+      if (!circle || !text) return;
+
+      const total = Math.max(1, new Date(targetTime) - new Date());
+      const circumference = 2 * Math.PI * 30;
+
+      const tick = () => {
+        const remaining = new Date(targetTime) - new Date();
+        const pct = Math.max(0, remaining / total);
+        circle.style.strokeDashoffset = circumference - pct * circumference;
+        text.textContent = Math.max(0, Math.floor(remaining / 60000)) + 'm';
+        if (remaining <= 0) clearInterval(miniInterval);
+      };
+      tick();
+      miniInterval = setInterval(tick, 1000);
+    }
+
+    /* ── Share ── */
+    function shareOrderStatus() {
+      const text = `Order #${currentTrackedOrderId || '?'}\nStatus: ${lastTrackStatus || 'Unknown'}\nTrack here: ${window.location.origin}`;
+      if (navigator.share) {
+        navigator.share({ title: 'Track My Order', text }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(text).then(() => {
+          const btn = document.querySelector('.share-btn');
+          if (btn) { btn.textContent = '✅ Copied!'; setTimeout(() => { btn.textContent = '📤 Share Status'; }, 1500); }
+        }).catch(() => {});
+      }
+    }
+
+    /* ── Rating ── */
+    function showRatingPopup() {
+      const el = document.getElementById('rating-popup');
+      if (el) el.classList.remove('hidden');
+    }
+    function submitRating(rating) {
+      const el = document.getElementById('rating-popup');
+      if (el) el.innerHTML = '<p style="text-align:center;padding:8px;">❤️ Thanks for your feedback!</p>';
+    }
+    document.addEventListener('click', function(e) {
+      const star = e.target.closest('.stars span[data-rate]');
+      if (star) submitRating(star.dataset.rate);
+    });
+
+    /* ═══ FULL RESET (on modal close) ═══ */
+    function resetTrackState() {
+      clearInterval(miniInterval);  miniInterval = null;
+      clearInterval(_trackCountdown); _trackCountdown = null;
+      clearTimeout(_ratingTimeout); _ratingTimeout = null;
+      clearTimeout(autoOpenTimer);  autoOpenTimer = null;
+      clearTimeout(autoCloseTimer); autoCloseTimer = null;
+      stopParticles();
+      lastTrackStatus = null;
+      window.confettiLaunched = false;
+
+      const modal = document.getElementById('track-modal');
+      if (modal) modal.classList.remove('completed-glow', 'completed-gradient');
+      const rp = document.getElementById('rating-popup');
+      if (rp) { rp.classList.add('hidden'); rp.innerHTML = '<p>⭐ Rate Your Order</p><div class="stars" id="rating-stars"><span data-rate="1">★</span><span data-rate="2">★</span><span data-rate="3">★</span><span data-rate="4">★</span><span data-rate="5">★</span></div>'; }
+    }
+
+    /* ═══ OPEN / CLOSE (SLIDE UP / DOWN) ═══ */
+    async function openTrackModal(orderId) {
+      if (!orderId) return;
+      const overlay = document.getElementById('track-overlay');
+      if (overlay.classList.contains('active')) return; // prevent stacking
+
+      resetTrackState();
+      window.userClosedTracking = false;
+      currentTrackedOrderId = orderId;
+
+      const content = document.getElementById('track-content');
+      content.innerHTML = '<p style="text-align:center;color:#aaa;padding:30px;">Loading…</p>';
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+
+      await loadTrackedOrder(orderId);
+    }
+
+    function closeTrackModal() {
+      const overlay = document.getElementById('track-overlay');
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+
+      clearTimeout(autoOpenTimer);  autoOpenTimer = null;
+      clearTimeout(autoCloseTimer); autoCloseTimer = null;
+      clearInterval(miniInterval);  miniInterval = null;
+      clearInterval(_trackCountdown); _trackCountdown = null;
+      clearTimeout(_ratingTimeout); _ratingTimeout = null;
+      stopParticles();
+      lastTrackStatus = null;
+      window.confettiLaunched = false;
+      currentTrackedOrderId = null;
+
+      const modal = document.getElementById('track-modal');
+      if (modal) modal.classList.remove('completed-glow', 'completed-gradient', 'cancelled-glow');
+    }
+
+    // Close on overlay click
+    document.getElementById('track-overlay')?.addEventListener('click', function(e) {
+      if (e.target.id === 'track-overlay') {
+        window.userClosedTracking = true;
+        closeTrackModal();
+      }
+    });
+
+    /* ═══ LOAD ORDER ═══ */
+    async function loadTrackedOrder(orderId) {
+      try {
+        const res = await fetch(`${TRACK_API}/restaurant/orders/${orderId}`);
+        const data = await res.json();
+        if (!data.success || !data.order) { renderTrackError(); return; }
+        setTimeout(() => renderTrackContent(data.order), 120);
+      } catch (err) {
+        console.error('Track modal error:', err);
+        renderTrackError();
+      }
+    }
+
+    /* ═══ RENDER — THE CINEMATIC CORE ═══ */
+    function renderTrackContent(order) {
+      const container = document.getElementById('track-content');
+      const modal = document.getElementById('track-modal');
+      if (!container || !order) return;
+
+      const status = (order.status || 'Pending').toUpperCase();
+      const statusKey = status.toLowerCase();
+      const statusEmoji = { pending:'⏳', preparing:'🔥', ready:'📦', completed:'✅', cancelled:'❌' };
+      const emoji = statusEmoji[statusKey] || '📦';
+      const message = getRandomMessage(order.status);
+      const isPreparing = status === 'PREPARING';
+      const isCompleted = status === 'COMPLETED';
+      const isCancelled = status === 'CANCELLED';
+
+      /* ── Sound + Haptic on status change ── */
+      if (lastTrackStatus && lastTrackStatus !== status) {
+        try { _popSound.currentTime = 0; _popSound.play().catch(()=>{}); } catch(e){}
+        if (isCompleted && navigator.vibrate) navigator.vibrate([200, 100, 200]);
+      }
+      lastTrackStatus = status;
+
+      /* ── Build HTML ── */
+      let html = `
+        <h2 style="margin:0 0 12px;font-size:20px;font-weight:800;">Order #${order.orderId || order._id || 'N/A'}</h2>
+        <div class="track-status track-status--${statusKey}">
+          ${emoji} ${order.status || 'Pending'}
+        </div>
+        <div class="status-message"><span>${emoji}</span> ${message}</div>
+      `;
+
+      /* PREPARING — progress ring + chef typing + mini countdown */
+      if (isPreparing) {
+        html += `
+        <div class="preparing-visuals">
+          <div class="progress-ring-container">
+            <svg class="progress-ring" width="100" height="100">
+              <circle class="progress-ring-bg" stroke="#222" stroke-width="8" fill="transparent" r="40" cx="50" cy="50"/>
+              <circle class="progress-ring-fill" stroke="#ff6b00" stroke-width="8" fill="transparent" r="40" cx="50" cy="50"
+                stroke-linecap="round" style="stroke-dasharray:251.327;stroke-dashoffset:251.327;"/>
+            </svg>
+            <div class="progress-text">Preparing</div>
+          </div>
+          <div class="mini-timer">
+            <svg width="70" height="70">
+              <circle class="mini-bg" stroke="#222" stroke-width="6" fill="transparent" r="30" cx="35" cy="35"/>
+              <circle class="mini-fill" stroke="#ff6b00" stroke-width="6" fill="transparent" r="30" cx="35" cy="35"
+                stroke-linecap="round" style="stroke-dasharray:188.496;stroke-dashoffset:188.496;"/>
+            </svg>
+            <div class="mini-text" id="mini-timer-text">0m</div>
+          </div>
+        </div>
+        <div class="chef-typing">👨‍🍳 Chef is preparing<span class="dots"></span></div>
+        `;
+      }
+
+      html += `<p style="margin:12px 0;font-size:15px;">Total: <strong style="color:#ff6b00;">₹${Number(order.total) || 0}</strong></p>`;
+      html += '<div id="track-items" style="margin:12px 0;border-top:1px solid rgba(255,255,255,.06);padding-top:10px;"></div>';
+      html += '<div id="time-info"></div>';
+
+      /* COMPLETED — share button */
+      if (isCompleted) {
+        html += '<button class="share-btn" onclick="shareOrderStatus()">📤 Share Status</button>';
+      }
+
+      /* CANCELLED — apology */
+      if (isCancelled) {
+        html += '<div class="cancel-note">We sincerely apologize for the inconvenience. Please try ordering again or contact support.</div>';
+      }
+
+      container.innerHTML = html;
+
+      /* ── Items ── */
+      const itemsEl = document.getElementById('track-items');
+      if (itemsEl && Array.isArray(order.items)) {
+        order.items.forEach(item => {
+          const div = document.createElement('div');
+          div.style.cssText = 'display:flex;justify-content:space-between;padding:4px 0;font-size:14px;color:#ccc;';
+          div.innerHTML = `<span>${(item.name||'Item')}${item.size?' ('+item.size+')':''} × ${item.quantity||1}</span><span style="color:#22c55e;font-weight:600;">₹${(Number(item.price)||0)*(item.quantity||1)}</span>`;
+          itemsEl.appendChild(div);
+        });
+      }
+
+      renderTrackTimeInfo(order);
+
+      /* ── Status-specific effects ── */
+      if (isPreparing) {
+        startParticles();
+        setTimeout(() => animateProgress(70), 300);
+        if (order.estimatedCompletionTime) startMiniCountdown(order.estimatedCompletionTime);
+      } else {
+        stopParticles();
+      }
+
+      if (isCompleted && modal) {
+        modal.classList.add('completed-glow', 'completed-gradient');
+        if (!window.confettiLaunched) { launchConfetti(); window.confettiLaunched = true; }
+        clearTimeout(_ratingTimeout);
+        _ratingTimeout = setTimeout(showRatingPopup, 1500);
+        /* Auto-close 15s after completion */
+        clearTimeout(autoCloseTimer);
+        autoCloseTimer = setTimeout(() => closeTrackModal(), 15000);
+      } else if (isCancelled && modal) {
+        modal.classList.add('cancelled-glow');
+        modal.classList.remove('completed-glow', 'completed-gradient');
+      } else if (modal) {
+        modal.classList.remove('completed-glow', 'completed-gradient', 'cancelled-glow');
+      }
+    }
+
+    function renderTrackError() {
+      stopParticles();
+      const container = document.getElementById('track-content');
+      if (container) container.innerHTML = '<div style="text-align:center;color:#ff6b00;padding:30px;">Order not found.</div>';
+    }
+
+    /* ── Time info badges ── */
+    function renderTrackTimeInfo(order) {
+      const el = document.getElementById('time-info');
+      if (!el || !order) return;
+      el.innerHTML = '';
+      clearInterval(_trackCountdown);
+
+      const status = (order.status || '').toUpperCase();
+
+      if (status === 'PREPARING' && order.estimatedCompletionTime) {
+        const target = new Date(order.estimatedCompletionTime);
+        if (!isNaN(target.getTime())) {
+          const badge = document.createElement('div');
+          badge.className = 'track-time-badge';
+          const fmt = target.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+          const initMins = Math.max(0, Math.floor((target - new Date()) / 60000));
+          badge.innerHTML = `⏳ Ready in: <strong id="track-cd">${initMins}</strong> mins — by ${fmt}`;
+          el.appendChild(badge);
+          _trackCountdown = setInterval(() => {
+            const rem = Math.max(0, Math.floor((target - new Date()) / 60000));
+            const cdEl = document.getElementById('track-cd');
+            if (cdEl) cdEl.textContent = rem;
+            if (rem <= 0) clearInterval(_trackCountdown);
+          }, 1000);
+        }
+      }
+
+      if (status === 'COMPLETED' && order.actualCompletionTimeMinutes != null) {
+        const badge = document.createElement('div');
+        badge.className = 'track-time-badge track-time-badge--done';
+        badge.innerHTML = `✅ Completed in ${order.actualCompletionTimeMinutes || 0} minutes`;
+        el.appendChild(badge);
+      }
     }
     </script>
 </body>
