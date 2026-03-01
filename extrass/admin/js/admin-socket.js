@@ -8,6 +8,7 @@ const AdminSocket = (() => {
     const _EVENTS = {
         NEW_ORDER: 'restaurant:new-order',
         ORDER_UPDATED: 'restaurant:order-updated',
+        ORDER_DELETED: 'restaurant:order-deleted',
         TOP_ITEM_UPDATE: 'restaurant:top-item-update',
     };
 
@@ -75,6 +76,12 @@ const AdminSocket = (() => {
             console.log('[AdminSocket] Order updated:', data);
             debug('Socket Status Update', data);
             _emit('admin:order-updated', data);
+        });
+
+        _socket.on(_EVENTS.ORDER_DELETED, (data) => {
+            console.log('[AdminSocket] Order deleted:', data);
+            debug('Socket Order Deleted', data);
+            _emit('admin:order-deleted', data);
         });
 
         _socket.on(_EVENTS.TOP_ITEM_UPDATE, (data) => {

@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderOrderCards, prependOrderCard, updateOrderCard, renderHistoryTable, renderPagination,
             renderMenuItems, drawBarChart, drawLineChart, renderTopItems, renderAnalyticsKPI,
             highlightTopSelling, playNotifSound, animateCounter,
-            exportOrdersCSV } = AdminUI;
+            exportOrdersCSV, updateOrderStats } = AdminUI;
 
     let currentPage = 'dashboard';
     let liveOrders = [];
@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let menuCategories = [];
     let pendingCount = 0;
     let statsRefreshTimer = null;
+    let refreshTimeout = null;
 
     const HASH = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
     const GATE_KEY = 'adminUnlocked';
@@ -303,6 +304,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const recent = Array.isArray(recentPayload) ? recentPayload : (recentPayload?.orders || []);
             console.log('[Admin] Rendered', recent.length, 'recent orders');
             renderRecentOrders(recent);
+
+            if (typeof hideLoader === 'function') hideLoader();
         } catch (err) {
             debug('Fatal Error', err);
             console.error(err);
@@ -310,6 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? 'Server is starting up — will retry automatically…'
                 : 'Failed to load dashboard data';
             showToast(msg, 'error');
+            if (typeof hideLoader === 'function') hideLoader();
         }
     }
 
@@ -360,7 +364,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadLiveOrders() {
         console.log('[Admin] loadLiveOrders()');
-        debug('Fetching Live Orders');
+        await refreshOrders();
+    }
+
+    async function refreshOrders() {
+        debug('Refreshing Orders (backend source-of-truth)');
         try {
             const statusFilter = $('#ordersStatusFilter')?.value || '';
             const res = await AdminAPI.getTodayOrders({ status: statusFilter });
@@ -369,14 +377,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const payload = res?.data || res;
             liveOrders = Array.isArray(payload) ? payload : (payload?.orders || []);
             console.log('[Admin] Live orders count:', liveOrders.length);
-            debug('Orders Received', liveOrders);
+
             renderOrderCards(liveOrders);
             updatePendingBadge();
+            updateOrderStats(liveOrders);
         } catch (err) {
-            debug('Fatal Error', err);
-            console.error(err);
-            showToast('Failed to load orders', 'error');
+            console.error('Refresh failed:', err);
+            showToast('Failed to refresh orders', 'error');
         }
+    }
+
+    function scheduleRefresh() {
+        clearTimeout(refreshTimeout);
+        refreshTimeout = setTimeout(() => {
+            refreshOrders();
+        }, 200);
     }
 
     function updatePendingBadge() {
@@ -434,9 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     btn.disabled = false;
                     btn.style.opacity = '';
 
-                    if (order) order.status = ORDER_STATUS.CANCELLED;
-                    updatePendingBadge();
-                    if (order) updateOrderCard(mongoId, order);
+                    await refreshOrders();
                     debug('Order Cancelled', { mongoId, orderCode });
                     showToast('Order cancelled', 'success');
                 } catch (err) {
@@ -457,10 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.disabled = false;
                 btn.style.opacity = '';
 
-                if (order) order.status = newStatus;
-
-                updatePendingBadge();
-                if (order) updateOrderCard(mongoId, order);
+                await refreshOrders();
                 debug('Order Status Updated', { mongoId, orderCode, currentStatus, newStatus });
                 showToast(`Order updated to ${newStatus}`, 'success');
             } catch (err) {
@@ -483,16 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.textContent = '…';
                 await AdminAPI.deleteOrder(orderId);
 
-                liveOrders = liveOrders.filter(o => (o._id || o.orderId) !== orderId);
-                updatePendingBadge();
-
-                const card = btn.closest('.order-card');
-                if (card) {
-                    card.classList.add('order-card--fade-out');
-                    card.addEventListener('animationend', () => card.remove(), { once: true });
-                }
-
-                document.dispatchEvent(new CustomEvent('admin:order-deleted'));
+                await refreshOrders();
 
                 debug('Order Deleted', { orderId });
                 showToast('Order deleted successfully', 'success');
@@ -508,18 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('[Admin] admin:new-order event received:', order);
             if (!order) return;
 
-            const exists = liveOrders.find(o => (o._id || o.orderId) === (order._id || order.orderId));
-            if (exists) return;
-
-            liveOrders.unshift(order);
-            updatePendingBadge();
-
-            if (currentPage === 'orders') {
-                prependOrderCard(order);
-                // Auto-scroll newest order to top
-                const container = $('#liveOrdersContainer');
-                if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
-            }
+            scheduleRefresh();
 
             const todayEl = $('#statTodayOrders');
             const totalEl = $('#statTotalOrders');
@@ -544,15 +534,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('admin:order-updated', (e) => {
             const data = e.detail;
             if (!data) return;
-            const order = liveOrders.find(o => (o._id || o.orderId) === (data._id || data.orderId));
-            if (order) {
-                order.status = normalizeStatus(data.status);
-                updatePendingBadge();
-                if (currentPage === 'orders') loadLiveOrders();
-            }
+            scheduleRefresh();
         });
 
         document.addEventListener('admin:order-deleted', () => {
+            scheduleRefresh();
             const todayEl = $('#statTodayOrders');
             const totalEl = $('#statTotalOrders');
             if (todayEl) animateCounter(todayEl, Math.max(0, (parseInt(todayEl.textContent.replace(/[^\d]/g,''),10)||0) - 1));
@@ -872,4 +858,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+    refreshOrders();
 });

@@ -529,6 +529,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     _connectBanner.style.transform = 'translateY(-100%)';
                     setTimeout(() => _connectBanner.remove(), 300);
 
+                    if (typeof hideLoader === 'function') hideLoader();
+
                     renderStats();
                     if (result.changedIds && result.changedIds.length > 0) {
                         renderMenu();
@@ -548,6 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 clearInterval(_bgPingTimer);
                 _bgPingTimer = null;
                 _connectBanner.innerHTML = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ef4444"></span> Offline — using cached menu';
+                if (typeof hideLoader === 'function') hideLoader();
                 setTimeout(() => {
                     _connectBanner.style.transform = 'translateY(-100%)';
                     setTimeout(() => _connectBanner.remove(), 300);
@@ -748,6 +751,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 btn.disabled = true;
                 btn.textContent = '⏳ Placing order…';
+                if (typeof showLoader === 'function') showLoader('Placing your order...');
 
                 (async () => {
                     try {
@@ -776,6 +780,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 UI.renderGreeting();
                             }
 
+                            if (typeof hideLoader === 'function') hideLoader();
                             _showOrderResult(true, {
                                 orderId: result.orderId,
                                 total: result.total,
@@ -796,6 +801,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
 
                         window.__BACKEND_CONNECTED__ = false;
+                        if (typeof hideLoader === 'function') hideLoader();
                         const waData = Cart.sendViaWhatsApp(info);
                         _showOrderResult(false, {
                             error: 'Sorry, our server is temporarily unavailable.',
@@ -811,6 +817,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         debug('Fatal Error', err);
                         console.error(err);
                         window.__BACKEND_CONNECTED__ = false;
+                        if (typeof hideLoader === 'function') hideLoader();
                         const waData = Cart.sendViaWhatsApp(info);
                         _showOrderResult(false, {
                             error: 'Sorry, our server is temporarily unavailable.',

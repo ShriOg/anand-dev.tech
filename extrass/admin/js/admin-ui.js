@@ -202,7 +202,36 @@ const AdminUI = (() => {
             target.innerHTML = _emptyState('📋', 'No orders found', 'Live orders will show up here in realtime');
             return;
         }
-        target.innerHTML = orders.map(o => _orderCardHTML(o)).join('');
+
+        // Smart sorting: active → cancelled → completed
+        const active    = orders.filter(o => { const s = normalizeStatus(o.status); return s !== ORDER_STATUS.COMPLETED && s !== ORDER_STATUS.CANCELLED; });
+        const cancelled = orders.filter(o => normalizeStatus(o.status) === ORDER_STATUS.CANCELLED);
+        const completed = orders.filter(o => normalizeStatus(o.status) === ORDER_STATUS.COMPLETED);
+
+        let html = '';
+
+        if (active.length) {
+            html += `<div class="orders-section-label">🔥 Active Orders (${active.length})</div>`;
+            html += active.map(o => _orderCardHTML(o)).join('');
+        }
+
+        if (cancelled.length) {
+            html += `<div class="orders-section-label">❌ Cancelled (${cancelled.length})</div>`;
+            html += cancelled.map(o => {
+                const card = _orderCardHTML(o);
+                return card.replace('class="order-card', 'class="order-card order-card--cancelled-row moved-to-bottom');
+            }).join('');
+        }
+
+        if (completed.length) {
+            html += `<div class="orders-section-label">✅ Completed (${completed.length})</div>`;
+            html += completed.map(o => {
+                const card = _orderCardHTML(o);
+                return card.replace('class="order-card', 'class="order-card order-card--collapsed moved-to-bottom');
+            }).join('');
+        }
+
+        target.innerHTML = html;
     };
 
     const prependOrderCard = (order) => {
@@ -767,6 +796,37 @@ const AdminUI = (() => {
         </div>`;
     };
 
+    /** Update the active-badge and completed-today counter in the topbar */
+    const updateOrderStats = (orders) => {
+        if (!orders) return;
+
+        // Active count
+        const activeCount = orders.filter(o => {
+            const s = normalizeStatus(o.status);
+            return s === ORDER_STATUS.PENDING || s === ORDER_STATUS.PREPARING;
+        }).length;
+
+        let badgeEl = $('#activeOrdersBadge');
+        if (badgeEl) {
+            badgeEl.textContent = activeCount ? `${activeCount} Active` : '';
+            badgeEl.style.display = activeCount ? 'inline-block' : 'none';
+        }
+
+        // Completed today count
+        const todayStr = new Date().toDateString();
+        const completedToday = orders.filter(o => {
+            if (normalizeStatus(o.status) !== ORDER_STATUS.COMPLETED) return false;
+            const dt = o.completedAt || o.updatedAt;
+            return dt && new Date(dt).toDateString() === todayStr;
+        }).length;
+
+        let counterEl = $('#completedTodayCounter');
+        if (counterEl) {
+            counterEl.textContent = `✅ Completed Today: ${completedToday}`;
+            counterEl.style.display = completedToday ? 'inline-block' : 'none';
+        }
+    };
+
     _setupConfirm();
 
     return Object.freeze({
@@ -781,5 +841,6 @@ const AdminUI = (() => {
         drawBarChart, drawLineChart, renderTopItems,
         renderAnalyticsKPI, highlightTopSelling,
         playNotifSound, animateCounter, exportOrdersCSV,
+        updateOrderStats,
     });
 })();

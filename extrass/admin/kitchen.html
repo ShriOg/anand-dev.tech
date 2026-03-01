@@ -24,6 +24,30 @@
         .order-enter{opacity:0;transform:translateY(-20px);animation:slideFadeIn .4s ease forwards}
         @keyframes slideFadeIn{to{opacity:1;transform:translateY(0)}}
 
+        /* Smooth reorder */
+        .moved-to-bottom{animation:fadeSlide .3s ease}
+        @keyframes fadeSlide{from{opacity:.6;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+
+        /* Counters & badges */
+        .completed-counter{
+            background:rgba(0,200,120,.1);
+            border:1px solid rgba(0,200,120,.3);
+            padding:4px 10px;
+            border-radius:8px;
+            font-size:13px;
+            color:#00c878;
+            white-space:nowrap;
+        }
+        .active-badge{
+            background:#ff6b00;
+            color:#000;
+            padding:3px 8px;
+            border-radius:20px;
+            font-size:12px;
+            font-weight:700;
+            margin-left:8px;
+        }
+
         /* Fullscreen wakeLock banner */
         .kitchen-wakelock{
             position:fixed;bottom:var(--sp-4);left:50%;transform:translateX(-50%);
@@ -37,15 +61,41 @@
 </head>
 <body class="kitchen-page">
 
-    <button class="back-btn" onclick="goBack()">← Back</button>
+    <div id="app-loader" class="app-loader">
+        <div class="loader-card">
+            <div class="spinner"></div>
+            <p class="loader-text">Firing up kitchen mode...</p>
+        </div>
+    </div>
+    <script>
+    (function(){
+        var msgs=['Firing up kitchen mode...','Connecting to live orders...','Heating the tawa...','Prepping the station...'];
+        var el=document.querySelector('.loader-text');
+        if(el) el.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+        window.showLoader=function(t){
+            var l=document.getElementById('app-loader');
+            if(!l)return;
+            if(t){var p=l.querySelector('.loader-text');if(p)p.textContent=t;}
+            l.classList.remove('hidden');
+        };
+        window.hideLoader=function(){
+            var l=document.getElementById('app-loader');
+            if(l)l.classList.add('hidden');
+        };
+        setTimeout(function(){hideLoader();},15000);
+    })();
+    </script>
+
     <script>function goBack(){document.referrer?window.history.back():window.location.href='/extrass/admin/';}</script>
 
     <header class="kitchen-header">
         <div style="display:flex;align-items:center;gap:var(--sp-3)">
+            <button class="kitchen-header__sound" onclick="goBack()" title="Back">←</button>
             <a href="/extrass/admin/" style="text-decoration:none;font-size:28px">🥟</a>
-            <h1 class="kitchen-header__title">Kitchen</h1>
+            <h1 class="kitchen-header__title">Kitchen<span class="active-badge" id="kitchenActiveBadge" style="display:none"></span></h1>
         </div>
         <div class="kitchen-header__right">
+            <span class="completed-counter" id="kitchenCompletedCounter" style="display:none">✅ Completed Today: 0</span>
             <span class="kitchen-header__count" id="kitchenCount">0 orders</span>
             <span class="kitchen-header__time" id="kitchenClock">00:00</span>
             <button class="kitchen-header__sound" id="kitchenSoundToggle" title="Toggle sound">🔔</button>
@@ -75,8 +125,10 @@ const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
 
 let orders = [];
+let allTodayOrders = [];
 let soundEnabled = true;
 let socket = null;
+let refreshTimeout = null;
 
 // ═══ CLOCK ═══
 function updateClock() {
@@ -128,23 +180,67 @@ function playSound() {
     }
 }
 
-// ═══ FETCH ORDERS ═══
-async function fetchOrders() {
+// ═══ CENTRAL REFRESH (DB as source-of-truth) ═══
+async function refreshOrders() {
     try {
         const res = await fetch(`${API_BASE}/restaurant/orders/today`);
         if (!res.ok) throw new Error('Failed');
         const data = await res.json();
         const all = data?.data || data?.orders || (Array.isArray(data) ? data : []);
-        // Only show Pending and Preparing
+        // Store all orders for stats
+        allTodayOrders = all;
+        // Only show Pending and Preparing in kitchen
         orders = all.filter(o => {
             const s = (o.status || '').toLowerCase();
             return s === 'pending' || s === 'preparing';
         });
-        // Sort: newest first
-        orders.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        // Sort: Pending first (need attention), then Preparing, newest on top within each group
+        orders.sort((a, b) => {
+            const sa = (a.status || '').toLowerCase();
+            const sb = (b.status || '').toLowerCase();
+            if (sa === 'pending' && sb === 'preparing') return -1;
+            if (sa === 'preparing' && sb === 'pending') return 1;
+            return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+        });
         renderOrders();
+        updateKitchenStats();
+        if (typeof hideLoader === 'function') hideLoader();
     } catch (err) {
-        console.error('[Kitchen] Fetch error:', err);
+        console.error('Refresh failed:', err);
+        if (typeof hideLoader === 'function') hideLoader();
+    }
+}
+
+function scheduleRefresh() {
+    clearTimeout(refreshTimeout);
+    refreshTimeout = setTimeout(() => {
+        refreshOrders();
+    }, 200);
+}
+
+// ═══ KITCHEN STATS ═══
+function updateKitchenStats() {
+    // Active badge
+    const activeCount = orders.length;
+    const badgeEl = $('#kitchenActiveBadge');
+    if (badgeEl) {
+        badgeEl.textContent = activeCount ? `${activeCount} Active` : '';
+        badgeEl.style.display = activeCount ? 'inline-block' : 'none';
+    }
+
+    // Completed today counter
+    const todayStr = new Date().toDateString();
+    const completedToday = allTodayOrders.filter(o => {
+        const s = (o.status || '').toLowerCase();
+        if (s !== 'completed') return false;
+        const dt = o.completedAt || o.updatedAt;
+        return dt && new Date(dt).toDateString() === todayStr;
+    }).length;
+
+    const counterEl = $('#kitchenCompletedCounter');
+    if (counterEl) {
+        counterEl.textContent = `✅ Completed Today: ${completedToday}`;
+        counterEl.style.display = completedToday ? 'inline-block' : 'none';
     }
 }
 
@@ -228,13 +324,9 @@ async function updateStatus(mongoId, orderCode, newStatus) {
         if (!res.ok) throw new Error('Update failed');
         console.log('[Kitchen] Status updated:', mongoId, '→', newStatus);
 
-        // Remove from local list + re-render
-        orders = orders.filter(o => (o._id || o.orderId) !== mongoId);
-        renderOrders();
+        await refreshOrders();
     } catch (err) {
         console.error('[Kitchen] Status update error:', err);
-        // Re-render to reset card position
-        renderOrders();
     }
 }
 
@@ -323,7 +415,7 @@ function wireSwipe() {
 function connectSocket() {
     if (typeof io === 'undefined') {
         console.warn('[Kitchen] Socket.IO not available — falling back to polling');
-        setInterval(fetchOrders, 10000);
+        setInterval(refreshOrders, 10000);
         return;
     }
 
@@ -339,41 +431,17 @@ function connectSocket() {
         socket.emit('join:admin');
     });
 
-    socket.on('restaurant:new-order', (order) => {
-        console.log('[Kitchen] New order:', order);
-        const s = (order.status || 'Pending').toLowerCase();
-        if (s === 'pending' || s === 'preparing') {
-            // Check not already present
-            if (!orders.find(o => (o._id || o.orderId) === (order._id || order.orderId))) {
-                orders.unshift(order);
-                renderOrders();
-                // Animate the new card
-                const firstCard = $('#kitchenOrders').querySelector('.kitchen-card');
-                if (firstCard) firstCard.classList.add('order-enter');
-                playSound();
-                // Auto-scroll to top
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        }
+    socket.on('restaurant:new-order', () => {
+        playSound();
+        scheduleRefresh();
     });
 
-    socket.on('restaurant:order-updated', (data) => {
-        console.log('[Kitchen] Order updated:', data);
-        const id = data._id || data.orderId;
-        const s = (data.status || '').toLowerCase();
+    socket.on('restaurant:order-updated', () => {
+        scheduleRefresh();
+    });
 
-        if (s === 'completed' || s === 'cancelled') {
-            orders = orders.filter(o => (o._id || o.orderId) !== id);
-        } else {
-            const idx = orders.findIndex(o => (o._id || o.orderId) === id);
-            if (idx >= 0) {
-                orders[idx] = { ...orders[idx], ...data };
-            } else if (s === 'pending' || s === 'preparing') {
-                orders.unshift(data);
-                playSound();
-            }
-        }
-        renderOrders();
+    socket.on('restaurant:order-deleted', () => {
+        scheduleRefresh();
     });
 
     socket.on('disconnect', () => {
@@ -382,12 +450,12 @@ function connectSocket() {
 
     socket.on('reconnect', () => {
         console.log('[Kitchen] Reconnected — refreshing');
-        fetchOrders();
+        refreshOrders();
     });
 }
 
 // ═══ BOOT ═══
-fetchOrders();
+refreshOrders();
 connectSocket();
 </script>
 </body>

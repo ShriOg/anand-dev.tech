@@ -355,9 +355,73 @@
             background: var(--c-brand);
             color: #000;
         }
+
+        /* ── Loading Screen ── */
+        .app-loader {
+            position: fixed;
+            inset: 0;
+            background: #0f0f12;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+        .app-loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .loader-card {
+            background: #18181d;
+            padding: 40px 60px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(255,107,0,0.1);
+        }
+        .loader-card .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,107,0,0.2);
+            border-top: 4px solid #ff6b00;
+            border-radius: 50%;
+            animation: loaderSpin 0.9s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes loaderSpin { to { transform: rotate(360deg); } }
+        .loader-text {
+            color: #ff6b00;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+        }
     </style>
 </head>
 <body>
+
+<div id="app-loader" class="app-loader">
+    <div class="loader-card">
+        <div class="spinner"></div>
+        <p class="loader-text">Fetching your order...</p>
+    </div>
+</div>
+<script>
+(function(){
+    var msgs=['Fetching your order...','Checking order status...','Connecting to kitchen...','Loading your tracking info...'];
+    var el=document.querySelector('.loader-text');
+    if(el) el.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+    window.showLoader=function(t){
+        var l=document.getElementById('app-loader');
+        if(!l)return;
+        if(t){var p=l.querySelector('.loader-text');if(p)p.textContent=t;}
+        l.classList.remove('hidden');
+    };
+    window.hideLoader=function(){
+        var l=document.getElementById('app-loader');
+        if(l)l.classList.add('hidden');
+    };
+    setTimeout(function(){hideLoader();},15000);
+})();
+</script>
 
 <button class="back-btn" onclick="goBack()">← Back</button>
 <script>function goBack(){document.referrer?window.history.back():window.location.href='/extrass/pramod-fast-food/';}</script>
@@ -656,6 +720,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const orderId = getOrderId();
 
     if (!orderId) {
+        if (typeof hideLoader === 'function') hideLoader();
         $('#trackLoading').style.display = 'none';
         const errEl = $('#trackError');
         errEl.querySelector('.track-error__msg').textContent = 'No order ID provided';
@@ -667,11 +732,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const order = await fetchOrderById(orderId);
 
     if (!order) {
+        if (typeof hideLoader === 'function') hideLoader();
         $('#trackLoading').style.display = 'none';
         $('#trackError').classList.add('show');
         return;
     }
 
+    if (typeof hideLoader === 'function') hideLoader();
     renderOrder(order);
     connectSocket(order);
 });

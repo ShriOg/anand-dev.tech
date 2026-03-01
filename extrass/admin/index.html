@@ -17,6 +17,31 @@
 </head>
 <body>
 
+    <div id="app-loader" class="app-loader">
+        <div class="loader-card">
+            <div class="spinner"></div>
+            <p class="loader-text">Connecting to live kitchen...</p>
+        </div>
+    </div>
+    <script>
+    (function(){
+        var msgs=['Connecting to live kitchen...','Firing up the dashboard...','Loading order stream...','Syncing with the kitchen...'];
+        var el=document.querySelector('.loader-text');
+        if(el) el.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+        window.showLoader=function(t){
+            var l=document.getElementById('app-loader');
+            if(!l)return;
+            if(t){var p=l.querySelector('.loader-text');if(p)p.textContent=t;}
+            l.classList.remove('hidden');
+        };
+        window.hideLoader=function(){
+            var l=document.getElementById('app-loader');
+            if(l)l.classList.add('hidden');
+        };
+        setTimeout(function(){hideLoader();},15000);
+    })();
+    </script>
+
     <button class="back-btn" onclick="goBack()">← Back</button>
     <script>function goBack(){document.referrer?window.history.back():window.location.href='/';}</script>
 
@@ -83,8 +108,9 @@
 
         <header class="topbar">
             <button class="topbar__hamburger" id="sidebarToggle" aria-label="Toggle sidebar">☰</button>
-            <h1 class="topbar__title" id="pageTitle">Dashboard</h1>
+            <h1 class="topbar__title" id="pageTitle">Dashboard<span class="active-badge" id="activeOrdersBadge" style="display:none"></span></h1>
             <div class="topbar__right">
+                <span class="completed-counter" id="completedTodayCounter" style="display:none">✅ Completed Today: 0</span>
                 <span class="topbar__status" id="socketStatus" title="Realtime connection">🔴 Offline</span>
                 <span class="topbar__user" id="adminUser">Admin</span>
             </div>

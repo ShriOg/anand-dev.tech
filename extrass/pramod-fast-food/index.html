@@ -16,6 +16,31 @@
 </head>
 <body>
 
+    <div id="app-loader" class="app-loader">
+        <div class="loader-card">
+            <div class="spinner"></div>
+            <p class="loader-text">Waking up the kitchen...</p>
+        </div>
+    </div>
+    <script>
+    (function(){
+        var msgs=['Waking up the kitchen...','Heating the momos...','Sharpening the knives...','Preparing your experience...'];
+        var el=document.querySelector('.loader-text');
+        if(el) el.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+        window.showLoader=function(t){
+            var l=document.getElementById('app-loader');
+            if(!l)return;
+            if(t){var p=l.querySelector('.loader-text');if(p)p.textContent=t;}
+            l.classList.remove('hidden');
+        };
+        window.hideLoader=function(){
+            var l=document.getElementById('app-loader');
+            if(l)l.classList.add('hidden');
+        };
+        setTimeout(function(){hideLoader();},15000);
+    })();
+    </script>
+
     <button class="back-btn" onclick="goBack()">← Back</button>
     <script>function goBack(){document.referrer?window.history.back():window.location.href='/';}</script>
 
