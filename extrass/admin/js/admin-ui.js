@@ -1,5 +1,51 @@
 'use strict';
 
+/* ═══════════════════════════════════════════════
+ * ORDER STATUS — Single Source of Truth
+ * Title Case values matching backend contract.
+ * ═══════════════════════════════════════════════ */
+
+const ORDER_STATUS = Object.freeze({
+    PENDING:   'Pending',
+    PREPARING: 'Preparing',
+    COMPLETED: 'Completed',
+    CANCELLED: 'Cancelled',
+});
+
+const ALLOWED_TRANSITIONS = Object.freeze({
+    [ORDER_STATUS.PENDING]:   [ORDER_STATUS.PREPARING, ORDER_STATUS.CANCELLED],
+    [ORDER_STATUS.PREPARING]: [ORDER_STATUS.COMPLETED],
+    [ORDER_STATUS.COMPLETED]: [],
+    [ORDER_STATUS.CANCELLED]: [],
+});
+
+function normalizeStatus(raw) {
+    if (!raw) return ORDER_STATUS.PENDING;
+    const normalized = String(raw).trim().toLowerCase();
+    const map = {
+        pending:   ORDER_STATUS.PENDING,
+        preparing: ORDER_STATUS.PREPARING,
+        completed: ORDER_STATUS.COMPLETED,
+        cancelled: ORDER_STATUS.CANCELLED,
+    };
+    return map[normalized] || ORDER_STATUS.PENDING;
+}
+
+function isTransitionAllowed(currentStatus, newStatus) {
+    const allowed = ALLOWED_TRANSITIONS[currentStatus];
+    if (!allowed) {
+        console.warn('[OrderStatus] Unknown current status: "' + currentStatus + '"');
+        return false;
+    }
+    const ok = allowed.includes(newStatus);
+    if (!ok) {
+        console.warn('[OrderStatus] Transition "' + currentStatus + '" → "' + newStatus + '" is NOT allowed. Allowed: [' + allowed.join(', ') + ']');
+    }
+    return ok;
+}
+
+/* ═══════════════════════════════════════════════ */
+
 if (typeof window.__DEBUG__ === 'undefined') window.__DEBUG__ = true;
 if (typeof debug === 'undefined') {
     window.debug = function(label, data) {

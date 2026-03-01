@@ -488,55 +488,41 @@ const UI = (() => {
         btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
     };
 
-    const _buildTimeline = (status, order) => {
-        // ═══════════════════════════════════════════════
-        // 3-STAGE PROGRESS SYSTEM
-        // UI:   Pending → Accepted → Served
-        // Maps: Pending → Preparing → Completed
-        // Cancelled = terminal override
-        // Uses ORDER_STATUS constants (Title Case)
-        // ═══════════════════════════════════════════════
-        const normalized = normalizeStatus(status);
-        const STAGES = [
-            { key: ORDER_STATUS.PENDING,   label: STATUS_LABELS[ORDER_STATUS.PENDING],   icon: '⏳' },
-            { key: ORDER_STATUS.PREPARING, label: STATUS_LABELS[ORDER_STATUS.PREPARING], icon: '🔥' },
-            { key: ORDER_STATUS.COMPLETED, label: STATUS_LABELS[ORDER_STATUS.COMPLETED], icon: '✅' },
+    const _buildTimeline = (status) => {
+        const steps = [
+            { key: 'PENDING',   label: 'Pending',   icon: '⏳' },
+            { key: 'PREPARING', label: 'Preparing',  icon: '🔥' },
+            { key: 'READY',     label: 'Ready',      icon: '📦' },
+            { key: 'COMPLETED', label: 'Completed',  icon: '✅' },
         ];
-        const STAGE_INDEX = {};
-        STAGES.forEach((s, i) => { STAGE_INDEX[s.key] = i; });
-        STAGE_INDEX[ORDER_STATUS.CANCELLED] = -1;
+        const statusOrder = { PENDING: 0, PREPARING: 1, READY: 2, COMPLETED: 3, CANCELLED: -1 };
+        const current = statusOrder[status] ?? -1;
+        const isCancelled = status === 'CANCELLED';
+        const isCompleted = status === 'COMPLETED';
+        const totalSteps = steps.length - 1; // intervals between steps
 
-        const totalStages = STAGES.length;
-        const currentIdx = STAGE_INDEX[normalized] ?? -1;
-        const isCancelled = normalized === ORDER_STATUS.CANCELLED;
-        const isCompleted = normalized === ORDER_STATUS.COMPLETED;
-        const isPreparing = normalized === ORDER_STATUS.PREPARING;
-
-        // Dynamic percentage: (currentStageIndex / (totalStages - 1)) * 100
+        // Dynamic percentage calculation
         let progressPct = 0;
         if (isCancelled) {
-            progressPct = 100; // full red fill
-        } else if (currentIdx >= 0) {
-            progressPct = Math.round((currentIdx / (totalStages - 1)) * 100);
+            progressPct = 100; // fill fully red
+        } else if (current >= 0) {
+            progressPct = Math.round((current / totalSteps) * 100);
         }
 
-        // Determine fill modifier class
-        let fillModifier = '';
-        if (isCancelled)       fillModifier = ' order-progress__fill--cancelled';
-        else if (isCompleted)  fillModifier = ' order-progress__fill--done';
-        else if (isPreparing)  fillModifier = ' order-progress__fill--preparing';
-
-        // Determine card-level modifiers
-        const cardModifiers = isCancelled ? ' order-progress--cancelled' : '';
+        const fillModifier = isCancelled
+            ? ' order-progress__fill--cancelled'
+            : isCompleted
+                ? ' order-progress__fill--done'
+                : '';
 
         let html = '';
 
-        // ── Progress bar ──
-        html += `<div class="order-progress${cardModifiers}">
+        // Progress bar
+        html += `<div class="order-progress${isCancelled ? ' order-progress--cancelled' : ''}">
             <div class="order-progress__fill${fillModifier}" style="width:${progressPct}%" data-progress></div>
         </div>`;
 
-        // ── Cancelled terminal state ──
+        // Cancelled badge overlay
         if (isCancelled) {
             html += `<div class="order-cancelled-badge">
                 <span class="order-cancelled-badge__icon">✕</span>
@@ -545,150 +531,26 @@ const UI = (() => {
             return `<div class="order-timeline order-timeline--cancelled">${html}</div>`;
         }
 
-        // ── Completion time display ──
-        if (isCompleted && order) {
-            const completionInfo = _calcCompletionTime(order);
-            if (completionInfo) {
-                html += `<div class="order-completion-time">
-                    <span class="order-completion-time__icon">✅</span>
-                    <span class="order-completion-time__text">${completionInfo}</span>
-                </div>`;
-            }
-        }
-
-        // ── Countdown timer placeholder (for Pending / Preparing) ──
-        if (!isCompleted && order) {
-            const orderId = order._id || order.orderId || '';
-            html += `<div class="order-countdown" data-countdown-id="${orderId}"></div>`;
-        }
-
-        // ── Timeline steps ──
-        STAGES.forEach((stage, i) => {
-            const stageIdx = STAGE_INDEX[stage.key];
-            const isDone   = currentIdx > stageIdx;
-            const isActive = currentIdx === stageIdx;
-
-            let dotClass = '';
-            let labelClass = '';
-            if (isDone) {
-                dotClass = 'order-timeline__dot--done';
-                labelClass = 'order-timeline__label--done';
-            } else if (isActive) {
-                dotClass = 'order-timeline__dot--active';
-                labelClass = 'order-timeline__label--active';
-                // Pulse effect on Accepted stage
-                if (stage.key === ORDER_STATUS.PREPARING) {
-                    labelClass += ' order-timeline__label--pulse';
-                }
-            }
+        // Timeline steps
+        steps.forEach((step, i) => {
+            const stepIdx = statusOrder[step.key];
+            const isDone = current > stepIdx;
+            const isActive = current === stepIdx;
+            const dotClass = isDone ? 'order-timeline__dot--done' : isActive ? 'order-timeline__dot--active' : '';
+            const labelClass = isDone ? 'order-timeline__label--done' : isActive ? 'order-timeline__label--active' : '';
 
             html += `<div class="order-timeline__step">
-                <div class="order-timeline__dot ${dotClass}">${isDone ? '✓' : isActive ? stage.icon : ''}</div>
-                <span class="order-timeline__label ${labelClass}">${stage.label}</span>
+                <div class="order-timeline__dot ${dotClass}">${isDone ? '✓' : isActive ? step.icon : ''}</div>
+                <span class="order-timeline__label ${labelClass}">${step.label}</span>
             </div>`;
 
-            if (i < STAGES.length - 1) {
-                let lineClass = '';
-                if (isDone) lineClass = 'order-timeline__line--done';
-                else if (isActive) lineClass = 'order-timeline__line--active';
-                // Shimmer on active line when Preparing
-                if (isActive && stage.key === ORDER_STATUS.PREPARING) {
-                    lineClass += ' order-timeline__line--shimmer';
-                }
+            if (i < steps.length - 1) {
+                const lineClass = isDone ? 'order-timeline__line--done' : isActive ? 'order-timeline__line--active' : '';
                 html += `<div class="order-timeline__line ${lineClass}"></div>`;
             }
         });
 
         return `<div class="order-timeline">${html}</div>`;
-    };
-
-    // ═══════════════════════════════════════════════
-    // COMPLETION TIME CALCULATOR
-    // ═══════════════════════════════════════════════
-    const _calcCompletionTime = (order) => {
-        const start = order.date || order.createdAt;
-        const end   = order.updatedAt || order.completedAt;
-        if (!start) return null;
-
-        const startTime = new Date(start).getTime();
-        const endTime   = end ? new Date(end).getTime() : Date.now();
-        const diffMs    = endTime - startTime;
-
-        if (diffMs < 0 || isNaN(diffMs)) return null;
-
-        const totalMins = Math.round(diffMs / 60000);
-        if (totalMins < 1) return 'Completed in <1 min';
-        if (totalMins === 1) return 'Completed in 1 min';
-        return `Completed in ${totalMins} mins`;
-    };
-
-    // ═══════════════════════════════════════════════
-    // LIVE COUNTDOWN TIMER MANAGER
-    // ═══════════════════════════════════════════════
-    const _countdownTimers = new Map(); // orderId → intervalId
-    const DEFAULT_EST_MINUTES = 15;
-
-    const _startCountdown = (orderId, order) => {
-        // Prevent duplicate timers
-        _stopCountdown(orderId);
-
-        const status = normalizeStatus(order.status);
-        // Don't start for terminal states
-        if (status === ORDER_STATUS.COMPLETED || status === ORDER_STATUS.CANCELLED) return;
-
-        const el = document.querySelector(`[data-countdown-id="${orderId}"]`);
-        if (!el) return;
-
-        const createdAt = new Date(order.date || order.createdAt || Date.now()).getTime();
-        const estMinutes = order.estimatedMinutes || DEFAULT_EST_MINUTES;
-        const estimatedEnd = createdAt + (estMinutes * 60000);
-
-        const tick = () => {
-            const now = Date.now();
-            const remaining = estimatedEnd - now;
-
-            // Re-check if element still in DOM
-            if (!el.isConnected) {
-                _stopCountdown(orderId);
-                return;
-            }
-
-            if (remaining <= 0) {
-                // Timer expired but not completed yet
-                el.innerHTML = `<span class="order-countdown__icon">⏳</span>
-                    <span class="order-countdown__text order-countdown__text--finishing">Finishing up…</span>`;
-                _stopCountdown(orderId);
-                return;
-            }
-
-            const mins = Math.floor(remaining / 60000);
-            const secs = Math.floor((remaining % 60000) / 1000);
-            const display = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-            const isUrgent = remaining < 120000; // < 2 min
-
-            el.innerHTML = `<span class="order-countdown__icon">⏱</span>
-                <span class="order-countdown__text${isUrgent ? ' order-countdown__text--urgent' : ''}">~${display} remaining</span>`;
-        };
-
-        // Immediate first tick
-        tick();
-
-        // Tick every second
-        const intervalId = setInterval(tick, 1000);
-        _countdownTimers.set(orderId, intervalId);
-    };
-
-    const _stopCountdown = (orderId) => {
-        const timerId = _countdownTimers.get(orderId);
-        if (timerId) {
-            clearInterval(timerId);
-            _countdownTimers.delete(orderId);
-        }
-    };
-
-    const _stopAllCountdowns = () => {
-        _countdownTimers.forEach((timerId) => clearInterval(timerId));
-        _countdownTimers.clear();
     };
 
     const _formatOrderDate = (dateStr) => {
@@ -709,9 +571,6 @@ const UI = (() => {
         const body = $('#ordersList');
         if (!body) return;
 
-        // Stop all existing countdowns before re-rendering
-        _stopAllCountdowns();
-
         const orders = Customer.getOrders();
 
         if (!orders.length) {
@@ -725,11 +584,10 @@ const UI = (() => {
         }
 
         body.innerHTML = orders.map(order => {
-            const statusKey = normalizeStatus(order.status);
-            const displayLabel = STATUS_LABELS[statusKey] || statusKey;
-            const isPending   = statusKey === ORDER_STATUS.PENDING;
-            const isCancelled = statusKey === ORDER_STATUS.CANCELLED;
-            const isCompleted = statusKey === ORDER_STATUS.COMPLETED;
+            const statusKey = (order.status || 'PENDING').toUpperCase();
+            const isPending   = statusKey === 'PENDING';
+            const isCancelled = statusKey === 'CANCELLED';
+            const isCompleted = statusKey === 'COMPLETED';
             const items = order.items || [];
 
             let itemsHtml = items.slice(0, 4).map(i =>
@@ -741,13 +599,13 @@ const UI = (() => {
             if (items.length > 4) itemsHtml += `<div class="order-card__item"><span class="order-card__item-name" style="color:var(--c-text-lighter)">+${items.length - 4} more</span><span></span></div>`;
 
             return `
-            <div class="order-card${isCancelled ? ' order-card--cancelled' : ''}${isCompleted ? ' order-card--completed' : ''}" data-order-id="${order.orderId || ''}" data-id="${order._id || ''}" data-status="${statusKey}">
+            <div class="order-card${isCancelled ? ' order-card--cancelled' : ''}${isCompleted ? ' order-card--completed' : ''}" data-order-id="${order.orderId || ''}" data-id="${order._id || ''}">
                 <div class="order-card__head">
                     <span class="order-card__id">${order.orderId || '—'}</span>
                     <span class="order-card__date">${_formatOrderDate(order.date)}</span>
                 </div>
-                <span class="order-card__status order-status order-card__status--${statusKey.toLowerCase()}">${displayLabel}</span>
-                ${_buildTimeline(statusKey, order)}
+                <span class="order-card__status order-status order-card__status--${statusKey.toLowerCase()}">${statusKey}</span>
+                ${_buildTimeline(statusKey)}
                 <div class="order-card__items">${itemsHtml}</div>
                 <div class="order-card__foot">
                     <span class="order-card__total">₹${order.total || 0}</span>
@@ -759,17 +617,6 @@ const UI = (() => {
                 </div>
             </div>`;
         }).join('');
-
-        // Start countdowns for active orders after DOM renders
-        requestAnimationFrame(() => {
-            orders.forEach(order => {
-                const statusKey = normalizeStatus(order.status);
-                if (statusKey !== ORDER_STATUS.COMPLETED && statusKey !== ORDER_STATUS.CANCELLED) {
-                    const orderId = order._id || order.orderId;
-                    if (orderId) _startCountdown(orderId, order);
-                }
-            });
-        });
     };
 
     const toggleOrdersPanel = (force) => {
@@ -793,77 +640,53 @@ const UI = (() => {
         const card = document.querySelector(`[data-id="${id}"]`);
         if (!card) return;
 
-        const statusKey = normalizeStatus(order.status);
-        const isCancelled = statusKey === ORDER_STATUS.CANCELLED;
-        const isCompleted = statusKey === ORDER_STATUS.COMPLETED;
-        const isPreparing = statusKey === ORDER_STATUS.PREPARING;
+        const statusKey = (order.status || '').toUpperCase();
+        const isCancelled = statusKey === 'CANCELLED';
+        const isCompleted = statusKey === 'COMPLETED';
 
-        // ── 3-stage index mapping ──
-        const STAGE_INDEX = {
-            [ORDER_STATUS.PENDING]: 0,
-            [ORDER_STATUS.PREPARING]: 1,
-            [ORDER_STATUS.COMPLETED]: 2,
-            [ORDER_STATUS.CANCELLED]: -1,
-        };
-        const totalStages = 3;
-        const currentIdx = STAGE_INDEX[statusKey] ?? -1;
+        const statusOrder = { PENDING: 0, PREPARING: 1, READY: 2, COMPLETED: 3, CANCELLED: -1 };
+        const current = statusOrder[statusKey] ?? -1;
+        const totalSteps = 3;
 
-        // Update badge with display label
+        // Update badge
         const badge = card.querySelector('.order-status');
         if (badge) {
-            badge.textContent = STATUS_LABELS[statusKey] || statusKey;
+            badge.textContent = statusKey;
             badge.className = `order-card__status order-status order-card__status--${statusKey.toLowerCase()}`;
         }
 
-        // Update data-status attribute
-        card.dataset.status = statusKey;
-
-        // ── Update progress fill dynamically ──
+        // Update progress fill dynamically
         const progressFill = card.querySelector('[data-progress]');
         if (progressFill) {
             let pct = 0;
             if (isCancelled) {
                 pct = 100;
-                progressFill.className = 'order-progress__fill order-progress__fill--cancelled';
+                progressFill.classList.add('order-progress__fill--cancelled');
+                progressFill.classList.remove('order-progress__fill--done');
                 progressFill.closest('.order-progress')?.classList.add('order-progress--cancelled');
-            } else if (currentIdx >= 0) {
-                pct = Math.round((currentIdx / (totalStages - 1)) * 100);
+            } else if (current >= 0) {
+                pct = Math.round((current / totalSteps) * 100);
                 progressFill.classList.remove('order-progress__fill--cancelled');
+                progressFill.classList.toggle('order-progress__fill--done', isCompleted);
                 progressFill.closest('.order-progress')?.classList.remove('order-progress--cancelled');
-
-                if (isCompleted) {
-                    progressFill.className = 'order-progress__fill order-progress__fill--done';
-                } else if (isPreparing) {
-                    progressFill.className = 'order-progress__fill order-progress__fill--preparing';
-                } else {
-                    progressFill.className = 'order-progress__fill';
-                }
             }
             progressFill.style.width = `${pct}%`;
         }
 
-        // ── Replace full timeline (handles completion time, countdown, steps) ──
+        // Replace full timeline
         const timeline = card.querySelector('.order-timeline');
         if (timeline) {
-            // Stop countdown for this order before replacing DOM
-            _stopCountdown(id);
-
             const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = _buildTimeline(statusKey, order);
+            tempDiv.innerHTML = _buildTimeline(statusKey);
             const newTimeline = tempDiv.querySelector('.order-timeline');
             if (newTimeline) timeline.replaceWith(newTimeline);
-
-            // Start new countdown if still active
-            if (!isCompleted && !isCancelled) {
-                requestAnimationFrame(() => _startCountdown(id, order));
-            }
         }
 
-        // ── Update footer actions ──
+        // Update footer actions (show/hide cancel, reorder, delete)
         const footActions = card.querySelector('.order-card__foot-actions');
         if (footActions) {
             let actionsHtml = '';
-            if (statusKey === ORDER_STATUS.PENDING) {
+            if (statusKey === 'PENDING') {
                 actionsHtml = `<button class="cancel-order" data-id="${id}">✕ Cancel</button>`;
             } else if (isCompleted) {
                 const orderId = card.dataset.orderId || '';
@@ -874,20 +697,11 @@ const UI = (() => {
             footActions.innerHTML = actionsHtml;
         }
 
-        // ── Card-level class modifiers ──
-        card.classList.toggle('order-card--cancelled', isCancelled);
-        card.classList.toggle('order-card--completed', isCompleted);
-
-        // ── Stop countdown for terminal states ──
-        if (isCompleted || isCancelled) {
-            _stopCountdown(id);
-        }
-
-        // ── Pulse animation ──
         card.classList.add('pulse');
         setTimeout(() => card.classList.remove('pulse'), 600);
 
         if (isCompleted) {
+            card.classList.add('order-card--completed');
             setTimeout(() => {
                 if (card.parentNode) {
                     card.classList.add('order-card--collapsed');

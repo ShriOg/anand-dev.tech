@@ -211,10 +211,7 @@ const Customer = (() => {
         console.log('[Customer] Order removed:', id);
     };
 
-    const hasActiveOrders = () => _loadOrders().some(o => {
-        const s = normalizeStatus(o.status);
-        return s === ORDER_STATUS.PENDING || s === ORDER_STATUS.PREPARING;
-    });
+    const hasActiveOrders = () => _loadOrders().some(o => o.status === 'PENDING' || o.status === 'PREPARING' || o.status === 'READY');
 
     return Object.freeze({
         getProfile,

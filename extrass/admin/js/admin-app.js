@@ -419,6 +419,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             console.log('[Admin] Status change request:', { mongoId, orderCode, currentStatus, newStatus });
+            console.log('Sending status:', newStatus);
 
             // ── Cancel uses dedicated endpoint ──
             if (newStatus === ORDER_STATUS.CANCELLED) {
