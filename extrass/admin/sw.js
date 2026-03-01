@@ -1,4 +1,4 @@
-const CACHE_NAME = "pf-admin-v1";
+const CACHE_NAME = "pf-admin-v3";
 const BASE_PATH = "/extrass/admin/";
 
 const STATIC_FILES = [

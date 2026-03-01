@@ -1011,6 +1011,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const id = btn.dataset.id;
         if (!id || btn.disabled) return;
 
+        const card = btn.closest('.order-card');
+        const orderCode = card?.dataset.orderId || Customer.getOrder(id)?.orderId || id;
+
         // Set loading state
         btn.disabled = true;
         const originalText = btn.innerHTML;
@@ -1019,7 +1022,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const BASE_URL = 'https://anand-os-backend.onrender.com/api';
-            const res = await fetch(`${BASE_URL}/restaurant/orders/${id}/cancel`, { method: 'PATCH' });
+            const res = await fetch(`${BASE_URL}/restaurant/orders/${encodeURIComponent(orderCode)}/cancel`, { method: 'PATCH' });
 
             let json = null;
             const ct = res.headers.get('content-type') || '';

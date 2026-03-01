@@ -76,12 +76,12 @@ const isTransitionAllowed = (currentStatus, newStatus) => {
  */
 const normalizeStatus = (raw) => {
     if (!raw) return ORDER_STATUS.PENDING;
-    const upper = raw.toUpperCase();
+    const normalized = String(raw).trim().toLowerCase();
     const map = {
-        PENDING:   ORDER_STATUS.PENDING,
-        PREPARING: ORDER_STATUS.PREPARING,
-        COMPLETED: ORDER_STATUS.COMPLETED,
-        CANCELLED: ORDER_STATUS.CANCELLED,
+        pending:   ORDER_STATUS.PENDING,
+        preparing: ORDER_STATUS.PREPARING,
+        completed: ORDER_STATUS.COMPLETED,
+        cancelled: ORDER_STATUS.CANCELLED,
     };
-    return map[upper] || raw;
+    return map[normalized] || ORDER_STATUS.PENDING;
 };

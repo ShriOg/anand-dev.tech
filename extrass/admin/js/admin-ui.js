@@ -485,29 +485,22 @@ const AdminUI = (() => {
         return `${dt.getDate()} ${M[dt.getMonth()]}, ${hr}:${String(dt.getMinutes()).padStart(2,'0')} ${ap}`;
     };
 
-    const _statusBtn = (order, status) => {
-        const current = normalizeStatus(order.status);
-        const active = current === status ? 'active' : '';
-        return `<button class="status-btn ${active}" data-order-id="${order._id || order.orderId}" data-status="${status}" data-action="status-change">${status}</button>`;
-    };
-
     /**
      * Build action buttons based on ALLOWED_TRANSITIONS.
-     * Pending  → [Accept, Cancel]
-     * Preparing → [Complete]
+     * Pending  → [Preparing, Cancelled]
+     * Preparing → [Completed]
      * Completed / Cancelled → no action buttons
      */
     const _buildActionButtons = (order, status) => {
         const s = normalizeStatus(status);
-        const orderId = order._id || order.orderId;
+        const mongoId = order._id || order.orderId;
+        const orderCode = order.orderId || '';
 
-        if (s === ORDER_STATUS.PENDING) {
-            return `
-                <button class="status-btn status-btn--accept" data-order-id="${orderId}" data-status="${ORDER_STATUS.PREPARING}" data-action="status-change">✔ Accept</button>
-                <button class="status-btn status-btn--cancel" data-order-id="${orderId}" data-status="${ORDER_STATUS.CANCELLED}" data-action="status-change">✕ Cancel</button>`;
-        }
-        if (s === ORDER_STATUS.PREPARING) {
-            return `<button class="status-btn status-btn--complete" data-order-id="${orderId}" data-status="${ORDER_STATUS.COMPLETED}" data-action="status-change">✅ Complete</button>`;
+        const nextStatuses = ALLOWED_TRANSITIONS[s] || [];
+        if (nextStatuses.length) {
+            return nextStatuses.map(nextStatus =>
+                `<button class="status-btn" data-order-id="${mongoId}" data-order-code="${orderCode}" data-status="${nextStatus}" data-action="status-change">${nextStatus}</button>`
+            ).join('');
         }
         // Completed / Cancelled — no buttons
         return `<span class="status-badge status-badge--${s.toLowerCase()}">${s}</span>`;
@@ -523,7 +516,6 @@ const AdminUI = (() => {
             [ORDER_STATUS.CANCELLED]: '❌ Cancelled',
         };
         return `<span class="status-badge status-badge--${cls}">${labels[s] || s}</span>`;
-    };
     };
 
     const _emptyState = (icon, title, sub) => {

@@ -92,9 +92,9 @@ const AdminAPI = (() => {
         });
     };
 
-    const cancelOrder = (orderId) => {
-        console.log('[AdminAPI] cancelOrder — using dedicated cancel endpoint', { orderId });
-        return _fetch(`/restaurant/orders/${orderId}/cancel`, {
+    const cancelOrder = (orderCode) => {
+        console.log('[AdminAPI] cancelOrder — using dedicated cancel endpoint', { orderCode });
+        return _fetch(`/restaurant/orders/${encodeURIComponent(orderCode)}/cancel`, {
             method: 'PATCH',
         });
     };

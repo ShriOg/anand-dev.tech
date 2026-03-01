@@ -397,10 +397,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = e.target.closest('[data-action="status-change"]');
             if (!btn || !btn.classList.contains('status-btn')) return;
 
-            const orderId = btn.dataset.orderId;
+            const cardId = btn.dataset.orderId;
+            const orderCodeFromBtn = btn.dataset.orderCode;
             const newStatus = btn.dataset.status; // Already Title Case from ORDER_STATUS
 
-            const order = liveOrders.find(o => (o._id || o.orderId) === orderId);
+            const order = liveOrders.find(o =>
+                (o._id || o.orderId) === cardId ||
+                (orderCodeFromBtn && o.orderId === orderCodeFromBtn)
+            );
+            const mongoId = order?._id || cardId;
+            const orderCode = order?.orderId || orderCodeFromBtn || cardId;
             const currentStatus = normalizeStatus(order?.status);
 
             // Skip if already at this status
@@ -412,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            console.log('[Admin] Status change request:', { orderId, currentStatus, newStatus });
+            console.log('[Admin] Status change request:', { mongoId, orderCode, currentStatus, newStatus });
 
             // ── Cancel uses dedicated endpoint ──
             if (newStatus === ORDER_STATUS.CANCELLED) {
@@ -422,14 +428,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     btn.disabled = true;
                     btn.style.opacity = '.5';
-                    await AdminAPI.cancelOrder(orderId);
+                    await AdminAPI.cancelOrder(orderCode);
                     btn.disabled = false;
                     btn.style.opacity = '';
 
                     if (order) order.status = ORDER_STATUS.CANCELLED;
                     updatePendingBadge();
-                    if (order) updateOrderCard(orderId, order);
-                    debug('Order Cancelled', { orderId });
+                    if (order) updateOrderCard(mongoId, order);
+                    debug('Order Cancelled', { mongoId, orderCode });
                     showToast('Order cancelled', 'success');
                 } catch (err) {
                     btn.disabled = false;
@@ -445,15 +451,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.style.opacity = '.5';
 
                 console.log('[Admin] Sending PATCH /status with payload:', { status: newStatus });
-                await AdminAPI.updateOrderStatus(orderId, currentStatus, newStatus);
+                await AdminAPI.updateOrderStatus(mongoId, currentStatus, newStatus);
                 btn.disabled = false;
                 btn.style.opacity = '';
 
                 if (order) order.status = newStatus;
 
                 updatePendingBadge();
-                if (order) updateOrderCard(orderId, order);
-                debug('Order Status Updated', { orderId, currentStatus, newStatus });
+                if (order) updateOrderCard(mongoId, order);
+                debug('Order Status Updated', { mongoId, orderCode, currentStatus, newStatus });
                 showToast(`Order updated to ${newStatus}`, 'success');
             } catch (err) {
                 btn.disabled = false;
