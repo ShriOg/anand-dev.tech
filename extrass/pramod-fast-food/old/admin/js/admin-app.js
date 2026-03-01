@@ -254,7 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updatePendingBadge() {
-        pendingCount = liveOrders.filter(o => o.status === 'PENDING').length;
+        pendingCount = liveOrders.filter(o => normalizeStatus(o.status) === ORDER_STATUS.PENDING).length;
         const badge = $('#liveOrderBadge');
         if (badge) {
             badge.textContent = pendingCount;
@@ -275,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const orderId = select.dataset.orderId;
             const newStatus = select.value;
 
-            if (newStatus === 'CANCELLED') {
+            if (newStatus === ORDER_STATUS.CANCELLED) {
                 const confirmed = await showConfirm('Cancel this order? This cannot be undone.');
                 if (!confirmed) {
 

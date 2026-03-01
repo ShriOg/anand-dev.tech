@@ -359,10 +359,10 @@ body{
 .status-btn:hover{color:#fff;background:rgba(255,255,255,.08)}
 .status-btn.active{background:#ff6a00;color:#fff}
 .status-btn.active:hover{background:#e85d04}
-.status-btn[data-status="COMPLETED"].active{background:var(--c-green)}
-.status-btn[data-status="CANCELLED"].active{background:var(--c-red)}
-.status-btn[data-status="PREPARING"].active{background:var(--c-blue)}
-.status-btn[data-status="PENDING"].active{background:var(--c-yellow);color:#000}
+.status-btn[data-status="Completed"].active{background:var(--c-green)}
+.status-btn[data-status="Cancelled"].active{background:var(--c-red)}
+.status-btn[data-status="Preparing"].active{background:var(--c-blue)}
+.status-btn[data-status="Pending"].active{background:var(--c-yellow);color:#000}
 
 .order-card__actions{display:flex;align-items:center;gap:var(--sp-2)}
 

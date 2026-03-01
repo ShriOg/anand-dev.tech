@@ -117,7 +117,8 @@ const AdminUI = (() => {
     const _orderCardHTML = (o, isNew = false) => {
         const typeClass = (o.orderType || '').toLowerCase().includes('dine') ? 'dinein' : 'takeaway';
         const items = o.items || [];
-        const statusLower = (o.status || 'PENDING').toLowerCase();
+        const status = normalizeStatus(o.status);
+        const statusLower = status.toLowerCase();
 
         return `
         <div class="order-card${isNew ? ' order-card--new' : ''}" data-order-id="${o._id || o.orderId}">
@@ -143,10 +144,10 @@ const AdminUI = (() => {
             <div class="order-card__footer">
                 <span class="order-card__total">₹${o.total || 0}</span>
                 <select class="status-select status-select--${statusLower}" data-order-id="${o._id || o.orderId}" data-action="status-change">
-                    <option value="PENDING" ${o.status === 'PENDING' ? 'selected' : ''}>⏳ Pending</option>
-                    <option value="PREPARING" ${o.status === 'PREPARING' ? 'selected' : ''}>🔥 Preparing</option>
-                    <option value="COMPLETED" ${o.status === 'COMPLETED' ? 'selected' : ''}>✅ Completed</option>
-                    <option value="CANCELLED" ${o.status === 'CANCELLED' ? 'selected' : ''}>❌ Cancelled</option>
+                    <option value="${ORDER_STATUS.PENDING}" ${status === ORDER_STATUS.PENDING ? 'selected' : ''}>⏳ Pending</option>
+                    <option value="${ORDER_STATUS.PREPARING}" ${status === ORDER_STATUS.PREPARING ? 'selected' : ''}>🔥 Preparing</option>
+                    <option value="${ORDER_STATUS.COMPLETED}" ${status === ORDER_STATUS.COMPLETED ? 'selected' : ''}>✅ Completed</option>
+                    <option value="${ORDER_STATUS.CANCELLED}" ${status === ORDER_STATUS.CANCELLED ? 'selected' : ''}>❌ Cancelled</option>
                 </select>
             </div>
         </div>`;
@@ -384,9 +385,14 @@ const AdminUI = (() => {
     };
 
     const _statusBadge = (status) => {
-        const s = (status || 'PENDING').toUpperCase();
+        const s = normalizeStatus(status);
         const cls = s.toLowerCase();
-        const labels = { PENDING: '⏳ Pending', PREPARING: '🔥 Preparing', COMPLETED: '✅ Completed', CANCELLED: '❌ Cancelled' };
+        const labels = {
+            [ORDER_STATUS.PENDING]: '⏳ Pending',
+            [ORDER_STATUS.PREPARING]: '🔥 Preparing',
+            [ORDER_STATUS.COMPLETED]: '✅ Completed',
+            [ORDER_STATUS.CANCELLED]: '❌ Cancelled'
+        };
         return `<span class="status-badge status-badge--${cls}">${labels[s] || s}</span>`;
     };
 
