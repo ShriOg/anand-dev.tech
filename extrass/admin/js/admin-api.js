@@ -78,11 +78,26 @@ const AdminAPI = (() => {
         return _fetch(`/restaurant/orders/today${q ? '?' + q : ''}`);
     };
 
-    const updateOrderStatus = (orderId, status) =>
-        _fetch(`/restaurant/orders/${orderId}/status`, {
+    const updateOrderStatus = (orderId, currentStatus, newStatus) => {
+        // ── Validate transition before hitting backend ──
+        if (!isTransitionAllowed(currentStatus, newStatus)) {
+            return Promise.reject(new Error(`Transition "${currentStatus}" → "${newStatus}" not allowed`));
+        }
+
+        console.log('[AdminAPI] updateOrderStatus', { orderId, currentStatus, newStatus, payload: { status: newStatus } });
+
+        return _fetch(`/restaurant/orders/${orderId}/status`, {
             method: 'PATCH',
-            body: JSON.stringify({ status }),
+            body: JSON.stringify({ status: newStatus }),
         });
+    };
+
+    const cancelOrder = (orderId) => {
+        console.log('[AdminAPI] cancelOrder — using dedicated cancel endpoint', { orderId });
+        return _fetch(`/restaurant/orders/${orderId}/cancel`, {
+            method: 'PATCH',
+        });
+    };
 
     const deleteOrder = (orderId) =>
         _fetch(`/restaurant/orders/${orderId}`, {
@@ -101,7 +116,7 @@ const AdminAPI = (() => {
 
     return Object.freeze({
         getStats, getOrders, getRecentOrders, getTodayOrders,
-        updateOrderStatus, deleteOrder,
+        updateOrderStatus, cancelOrder, deleteOrder,
         getMenu, updateMenuItem,
         getAnalytics,
     });

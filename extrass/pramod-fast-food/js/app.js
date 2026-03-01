@@ -297,10 +297,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!data) return;
             console.log('[CustomerSocket] Order status update:', data);
             debug('Socket Status Update', data);
-            _showOrderNotification(data);
+
+            // Normalize status from backend
+            const normalized = { ...data, status: normalizeStatus(data.status) };
+            _showOrderNotification(normalized);
 
             if (typeof Customer !== 'undefined' && data.orderId) {
-                Customer.updateOrderStatus(data.orderId, data.status);
+                Customer.updateOrderStatus(data.orderId, normalized.status);
                 UI.renderGreeting();
                 UI.renderOrdersPanel();
             }
@@ -314,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.orderId) {
                     Customer.saveOrder({
                         orderId: data.orderId,
-                        status: data.status || 'PENDING',
+                        status: normalizeStatus(data.status),
                         total: data.total,
                         items: data.items || [],
                         date: data.date || new Date().toISOString(),
@@ -331,20 +334,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!order) return;
             console.log('[CustomerSocket] order-updated:', order._id, order.status);
 
-            UI.updateOrderCard(order);
+            // Normalize status from backend before passing to UI
+            const normalized = { ...order, status: normalizeStatus(order.status) };
+            UI.updateOrderCard(normalized);
 
             const id = order._id || order.orderId;
-            const status = (order.status || '').toUpperCase();
             if (typeof Customer !== 'undefined' && id) {
-                Customer.updateOrderStatus(id, status);
+                Customer.updateOrderStatus(id, normalized.status);
             }
 
-            if (_shouldNotify(id) && ['PREPARING', 'READY', 'COMPLETED'].includes(status)) {
+            if (_shouldNotify(id) && [ORDER_STATUS.PREPARING, ORDER_STATUS.COMPLETED].includes(normalized.status)) {
+                const displayStatus = STATUS_LABELS[normalized.status] || normalized.status;
                 _playNotifySound();
-                _sendPushNotification('Order Update', `Order is now ${status}`, '🥟');
+                _sendPushNotification('Order Update', `Order is now ${displayStatus}`, '🥟');
             }
 
-            _showOrderNotification({ orderId: id, status });
+            _showOrderNotification({ orderId: id, status: normalized.status });
             UI.renderGreeting();
         });
 
@@ -405,7 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     Customer.saveOrder({
                         orderId: order.orderId || order._id,
                         _id: order._id,
-                        status: (order.status || 'PENDING').toUpperCase(),
+                        status: normalizeStatus(order.status),
                         total: order.total,
                         items: order.items || [],
                         date: order.createdAt || order.date || new Date().toISOString(),
@@ -425,13 +430,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const _showOrderNotification = (data) => {
         const statusLabels = {
-            PENDING: { icon: '⏳', label: 'Order Received', desc: 'Your order has been received' },
-            PREPARING: { icon: '🔥', label: 'Preparing', desc: 'Your order is being prepared!' },
-            COMPLETED: { icon: '✅', label: 'Ready!', desc: 'Your order is ready for pickup/serving' },
-            CANCELLED: { icon: '❌', label: 'Cancelled', desc: 'Your order has been cancelled' },
+            [ORDER_STATUS.PENDING]:   { icon: '⏳', label: 'Order Received', desc: 'Your order has been received' },
+            [ORDER_STATUS.PREPARING]: { icon: '🔥', label: 'Accepted', desc: 'Your order has been accepted!' },
+            [ORDER_STATUS.COMPLETED]: { icon: '✅', label: 'Served', desc: 'Your order has been served — enjoy!' },
+            [ORDER_STATUS.CANCELLED]: { icon: '❌', label: 'Cancelled', desc: 'Your order has been cancelled' },
         };
 
-        const info = statusLabels[data.status] || { icon: '📦', label: data.status, desc: 'Order status updated' };
+        const normalized = normalizeStatus(data.status);
+        const info = statusLabels[normalized] || { icon: '📦', label: data.status, desc: 'Order status updated' };
         const customerName = (typeof Customer !== 'undefined' ? Customer.getName() : '') || 'Guest';
 
         const existing = document.getElementById('orderNotification');
@@ -764,7 +770,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 Customer.saveOrder({
                                     orderId: result.orderId,
                                     _id: result._id || null,
-                                    status: 'PENDING',
+                                    status: ORDER_STATUS.PENDING,
                                     total: result.total,
                                     items: Cart.snapshot(),
                                     date: new Date().toISOString(),
@@ -999,23 +1005,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.addEventListener('click', async (e) => {
-        if (!e.target.classList.contains('cancel-order')) return;
+        const btn = e.target.closest('.cancel-order');
+        if (!btn) return;
 
-        const id = e.target.dataset.id;
-        if (!id) return;
+        const id = btn.dataset.id;
+        if (!id || btn.disabled) return;
+
+        // Set loading state
+        btn.disabled = true;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<span class="cancel-order__spinner"></span> Cancelling…';
+        btn.classList.add('cancel-order--loading');
 
         try {
             const BASE_URL = 'https://anand-os-backend.onrender.com/api';
             const res = await fetch(`${BASE_URL}/restaurant/orders/${id}/cancel`, { method: 'PATCH' });
-            const json = await res.json();
+
+            let json = null;
+            const ct = res.headers.get('content-type') || '';
+            if (ct.includes('application/json')) {
+                json = await res.json();
+            }
 
             if (!res.ok) {
-                showToast(json.message || 'Cannot cancel this order', 'error');
+                const errMsg = (json && (json.message || json.error)) || `Error ${res.status}`;
+                showToast(errMsg, 'error');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                btn.classList.remove('cancel-order--loading');
                 return;
             }
 
             if (typeof Customer !== 'undefined') {
-                Customer.updateOrderStatus(id, 'CANCELLED');
+                Customer.updateOrderStatus(id, ORDER_STATUS.CANCELLED);
+            }
+
+            // Instant UI update on the card
+            const card = btn.closest('.order-card');
+            if (card) {
+                UI.updateOrderCard({ _id: id, status: ORDER_STATUS.CANCELLED });
             }
 
             UI.renderOrdersPanel();
@@ -1024,21 +1052,28 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Order cancelled', 'success');
         } catch (err) {
             console.error('[Cancel] Failed:', err);
-            showToast('Failed to cancel order', 'error');
+            showToast('Failed to cancel — check connection', 'error');
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            btn.classList.remove('cancel-order--loading');
         }
     });
 
     document.addEventListener('click', async (e) => {
-        if (!e.target.classList.contains('delete-cancelled')) return;
+        const btn = e.target.closest('.delete-cancelled');
+        if (!btn) return;
 
-        const id = e.target.dataset.id;
-        if (!id) return;
+        const id = btn.dataset.id;
+        if (!id || btn.disabled) return;
+
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Deleting…';
 
         try {
             const BASE_URL = 'https://anand-os-backend.onrender.com/api';
             await fetch(`${BASE_URL}/restaurant/orders/${id}`, { method: 'DELETE' });
 
-            const card = e.target.closest('.order-card');
+            const card = btn.closest('.order-card');
             if (card) {
                 card.style.transition = 'opacity .3s ease, transform .3s ease';
                 card.style.opacity = '0';
@@ -1053,6 +1088,8 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Cancelled order deleted', 'success');
         } catch (err) {
             console.error('[Delete] Failed:', err);
+            btn.disabled = false;
+            btn.innerHTML = '🗑 Delete';
             showToast('Failed to delete order');
         }
     });

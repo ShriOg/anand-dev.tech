@@ -186,10 +186,11 @@ const AdminUI = (() => {
     const _orderCardHTML = (o, isNew = false) => {
         const typeClass = (o.orderType || '').toLowerCase().includes('dine') ? 'dinein' : 'takeaway';
         const items = o.items || [];
-        const statusLower = (o.status || 'PENDING').toLowerCase();
+        const status = normalizeStatus(o.status);
+        const statusLower = status.toLowerCase();
 
         return `
-        <div class="order-card${isNew ? ' order-card--new' : ''}" data-order-id="${o._id || o.orderId}">
+        <div class="order-card${isNew ? ' order-card--new' : ''}" data-order-id="${o._id || o.orderId}" data-status="${status}">
             <div class="order-card__header">
                 <span class="order-card__id">${o.orderId || o._id?.slice(-6) || '—'}</span>
                 <span class="order-card__type order-card__type--${typeClass}">${o.orderType || '—'}</span>
@@ -213,10 +214,7 @@ const AdminUI = (() => {
                 <span class="order-card__total">₹${o.total || 0}</span>
                 <div class="order-card__actions">
                     <div class="status-buttons">
-                        ${_statusBtn(o, 'PENDING')}
-                        ${_statusBtn(o, 'PREPARING')}
-                        ${_statusBtn(o, 'COMPLETED')}
-                        ${_statusBtn(o, 'CANCELLED')}
+                        ${_buildActionButtons(o, status)}
                     </div>
                     <button class="btn-delete-order" data-action="delete-order" data-order-id="${o._id || o.orderId}">🗑 Delete</button>
                 </div>
@@ -488,15 +486,44 @@ const AdminUI = (() => {
     };
 
     const _statusBtn = (order, status) => {
-        const active = (order.status || 'PENDING').toUpperCase() === status ? 'active' : '';
+        const current = normalizeStatus(order.status);
+        const active = current === status ? 'active' : '';
         return `<button class="status-btn ${active}" data-order-id="${order._id || order.orderId}" data-status="${status}" data-action="status-change">${status}</button>`;
     };
 
+    /**
+     * Build action buttons based on ALLOWED_TRANSITIONS.
+     * Pending  → [Accept, Cancel]
+     * Preparing → [Complete]
+     * Completed / Cancelled → no action buttons
+     */
+    const _buildActionButtons = (order, status) => {
+        const s = normalizeStatus(status);
+        const orderId = order._id || order.orderId;
+
+        if (s === ORDER_STATUS.PENDING) {
+            return `
+                <button class="status-btn status-btn--accept" data-order-id="${orderId}" data-status="${ORDER_STATUS.PREPARING}" data-action="status-change">✔ Accept</button>
+                <button class="status-btn status-btn--cancel" data-order-id="${orderId}" data-status="${ORDER_STATUS.CANCELLED}" data-action="status-change">✕ Cancel</button>`;
+        }
+        if (s === ORDER_STATUS.PREPARING) {
+            return `<button class="status-btn status-btn--complete" data-order-id="${orderId}" data-status="${ORDER_STATUS.COMPLETED}" data-action="status-change">✅ Complete</button>`;
+        }
+        // Completed / Cancelled — no buttons
+        return `<span class="status-badge status-badge--${s.toLowerCase()}">${s}</span>`;
+    };
+
     const _statusBadge = (status) => {
-        const s = (status || 'PENDING').toUpperCase();
+        const s = normalizeStatus(status);
         const cls = s.toLowerCase();
-        const labels = { PENDING: '⏳ Pending', PREPARING: '🔥 Preparing', COMPLETED: '✅ Completed', CANCELLED: '❌ Cancelled' };
+        const labels = {
+            [ORDER_STATUS.PENDING]:   '⏳ Pending',
+            [ORDER_STATUS.PREPARING]: '🔥 Preparing',
+            [ORDER_STATUS.COMPLETED]: '✅ Completed',
+            [ORDER_STATUS.CANCELLED]: '❌ Cancelled',
+        };
         return `<span class="status-badge status-badge--${cls}">${labels[s] || s}</span>`;
+    };
     };
 
     const _emptyState = (icon, title, sub) => {
