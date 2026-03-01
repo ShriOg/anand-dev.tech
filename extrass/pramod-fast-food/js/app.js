@@ -117,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <p class="order-popup__total">Total: ₹${data.total || 0}</p>
                     <div class="order-popup__actions">
+                        <button class="track-btn order-popup__btn--track" onclick="window.location.href='/extrass/pramod-fast-food/track/?orderId=${encodeURIComponent(data.orderId || '')}'">📍 Track Your Order</button>
                         ${showWaBtn ? `<button class="order-popup__btn order-popup__btn--wa" data-wa-url="${data.url}">💬 Send via WhatsApp</button>` : ''}
                         <button class="order-popup__btn order-popup__btn--close">Close</button>
                     </div>

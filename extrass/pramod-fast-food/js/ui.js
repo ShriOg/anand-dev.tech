@@ -605,11 +605,11 @@ const UI = (() => {
                     <span class="order-card__date">${_formatOrderDate(order.date)}</span>
                 </div>
                 <span class="order-card__status order-status order-card__status--${statusKey.toLowerCase()}">${statusKey}</span>
-                ${_buildTimeline(statusKey)}
                 <div class="order-card__items">${itemsHtml}</div>
                 <div class="order-card__foot">
                     <span class="order-card__total">₹${order.total || 0}</span>
                     <div class="order-card__foot-actions">
+                        ${!isCancelled ? `<button class="track-btn" onclick="window.location.href='/extrass/pramod-fast-food/track/?orderId=${encodeURIComponent(order.orderId || order._id || '')}'">📍 Track</button>` : ''}
                         ${isPending ? `<button class="cancel-order" data-id="${order._id || order.orderId}">✕ Cancel</button>` : ''}
                         ${isCompleted ? `<button class="order-card__reorder" data-action="panel-reorder" data-order-id="${order.orderId}">🔁 Reorder</button>` : ''}
                         ${isCancelled ? `<button class="delete-cancelled" data-id="${order._id || order.orderId}">🗑 Delete</button>` : ''}
@@ -655,32 +655,7 @@ const UI = (() => {
             badge.className = `order-card__status order-status order-card__status--${statusKey.toLowerCase()}`;
         }
 
-        // Update progress fill dynamically
-        const progressFill = card.querySelector('[data-progress]');
-        if (progressFill) {
-            let pct = 0;
-            if (isCancelled) {
-                pct = 100;
-                progressFill.classList.add('order-progress__fill--cancelled');
-                progressFill.classList.remove('order-progress__fill--done');
-                progressFill.closest('.order-progress')?.classList.add('order-progress--cancelled');
-            } else if (current >= 0) {
-                pct = Math.round((current / totalSteps) * 100);
-                progressFill.classList.remove('order-progress__fill--cancelled');
-                progressFill.classList.toggle('order-progress__fill--done', isCompleted);
-                progressFill.closest('.order-progress')?.classList.remove('order-progress--cancelled');
-            }
-            progressFill.style.width = `${pct}%`;
-        }
-
-        // Replace full timeline
-        const timeline = card.querySelector('.order-timeline');
-        if (timeline) {
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = _buildTimeline(statusKey);
-            const newTimeline = tempDiv.querySelector('.order-timeline');
-            if (newTimeline) timeline.replaceWith(newTimeline);
-        }
+        // Timeline/progress removed — tracking is only in track page
 
         // Update footer actions (show/hide cancel, reorder, delete)
         const footActions = card.querySelector('.order-card__foot-actions');

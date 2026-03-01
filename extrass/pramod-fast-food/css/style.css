@@ -1276,3 +1276,60 @@ body.modal-open .cart-fab{
     background: rgba(255,255,255,0.05);
     cursor: not-allowed;
 }
+
+/* ── Universal Back Button ── */
+.back-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: transparent;
+    border: 1px solid var(--c-brand);
+    color: var(--c-brand);
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 50;
+    transition: background .3s ease, color .3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.back-btn:hover {
+    background: var(--c-brand);
+    color: #fff;
+}
+
+/* ── Track Button ── */
+.track-btn {
+    background: transparent;
+    border: 1px solid #ff6b00;
+    color: #ff6b00;
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background .3s ease, color .3s ease;
+}
+.track-btn:hover {
+    background: #ff6b00;
+    color: #000;
+}
+
+/* ── Animated Order Card Entry ── */
+.order-enter {
+    opacity: 0;
+    transform: translateY(-20px);
+    animation: slideFadeIn 0.4s ease forwards;
+}
+@keyframes slideFadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

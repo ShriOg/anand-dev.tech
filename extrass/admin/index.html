@@ -17,6 +17,9 @@
 </head>
 <body>
 
+    <button class="back-btn" onclick="goBack()">← Back</button>
+    <script>function goBack(){document.referrer?window.history.back():window.location.href='/';}</script>
+
     <div class="gate" id="gate">
         <div class="gate__card">
             <span class="gate__icon">🔐</span>
@@ -63,6 +66,10 @@
             <a class="nav-item" href="/extrass/pramod-fast-food/customers/" style="text-decoration:none">
                 <span class="nav-item__icon">👥</span>
                 <span class="nav-item__label">Customers</span>
+            </a>
+            <a class="nav-item" href="/extrass/admin/kitchen.html" style="text-decoration:none">
+                <span class="nav-item__icon">👨‍🍳</span>
+                <span class="nav-item__label">Kitchen Mode</span>
             </a>
         </nav>
         <div class="sidebar__footer">
@@ -219,6 +226,12 @@
             </section>
 
             <section class="page" id="pageAnalytics" data-page="analytics" hidden>
+                <div class="analytics-kpi-grid" id="analyticsKpiGrid">
+                    <div class="kpi-card kpi-card--growth"><div class="kpi-card__value kpi-card__value--green">—</div><div class="kpi-card__label">Weekly Growth</div></div>
+                    <div class="kpi-card kpi-card--repeat"><div class="kpi-card__value kpi-card__value--blue">—</div><div class="kpi-card__label">Repeat Customer Rate</div></div>
+                    <div class="kpi-card kpi-card--prep"><div class="kpi-card__value kpi-card__value--yellow">—</div><div class="kpi-card__label">Average Prep Time</div></div>
+                    <div class="kpi-card kpi-card--revenue"><div class="kpi-card__value kpi-card__value--brand">—</div><div class="kpi-card__label">Today's Revenue</div></div>
+                </div>
                 <div class="analytics-grid">
                     <div class="panel">
                         <div class="panel__head"><h2 class="panel__title">Orders — Last 7 Days</h2></div>
@@ -232,7 +245,13 @@
                             <canvas id="chartRevenue" width="600" height="260"></canvas>
                         </div>
                     </div>
-                    <div class="panel">
+                    <div class="panel" style="grid-column:1/-1">
+                        <div class="panel__head"><h2 class="panel__title">Revenue Trend — Last 30 Days</h2></div>
+                        <div class="panel__body revenue-chart-wrap">
+                            <canvas id="chartRevenueTrend" width="800" height="260"></canvas>
+                        </div>
+                    </div>
+                    <div class="panel" style="grid-column:1/-1">
                         <div class="panel__head"><h2 class="panel__title">Most Ordered Items</h2></div>
                         <div class="panel__body" id="topItemsContainer">
                             <div class="skeleton-rows">

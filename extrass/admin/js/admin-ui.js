@@ -213,7 +213,9 @@ const AdminUI = (() => {
 
         const div = document.createElement('div');
         div.innerHTML = _orderCardHTML(order, true);
-        target.prepend(div.firstElementChild);
+        const card = div.firstElementChild;
+        card.classList.add('order-enter');
+        target.prepend(card);
     };
 
     const updateOrderCard = (orderId, updatedOrder) => {
@@ -242,6 +244,7 @@ const AdminUI = (() => {
                 <span class="order-card__type order-card__type--${typeClass}">${o.orderType || '—'}</span>
                 <span class="order-card__time">${_fmtDate(o.createdAt)}</span>
             </div>
+            ${_buildTimeline(status)}
             <div class="order-card__customer">
                 <span>👤 ${_esc(o.customerName || o.customer?.name || '—')}</span>
                 <span>📞 ${o.customerPhone || o.customer?.phone || '—'}</span>
@@ -262,10 +265,51 @@ const AdminUI = (() => {
                     <div class="status-buttons">
                         ${_buildActionButtons(o, status)}
                     </div>
+                    <button class="track-btn" onclick="window.open('/extrass/pramod-fast-food/track/?orderId=${encodeURIComponent(o.orderId || o._id || '')}','_blank')">Track</button>
                     <button class="btn-delete-order" data-action="delete-order" data-order-id="${o._id || o.orderId}">🗑 Delete</button>
                 </div>
             </div>
         </div>`;
+    };
+
+    /** Build the horizontal timeline stepper for order cards */
+    const _buildTimeline = (status) => {
+        const steps = [ORDER_STATUS.PENDING, ORDER_STATUS.PREPARING, ORDER_STATUS.COMPLETED];
+        const isCancelled = status === ORDER_STATUS.CANCELLED;
+        const currentIdx = isCancelled ? -1 : steps.indexOf(status);
+
+        if (isCancelled) {
+            return `<div class="order-timeline">
+                <div class="order-timeline__step order-timeline__step--cancelled">
+                    <div class="order-timeline__circle">✕</div>
+                    <span class="order-timeline__label">Cancelled</span>
+                </div>
+            </div>`;
+        }
+
+        let html = '<div class="order-timeline">';
+        steps.forEach((step, i) => {
+            const isCompleted = i < currentIdx;
+            const isActive = i === currentIdx;
+            const cls = isCompleted ? 'order-timeline__step--completed' :
+                        isActive ? 'order-timeline__step--active' : '';
+            const icon = isCompleted ? '✓' : (i + 1);
+
+            html += `<div class="order-timeline__step ${cls}">
+                <div class="order-timeline__circle">${icon}</div>
+                <span class="order-timeline__label">${step}</span>
+            </div>`;
+
+            if (i < steps.length - 1) {
+                const lineFilled = i < currentIdx;
+                const lineActive = i === currentIdx - 1;
+                const lineCls = lineFilled ? 'order-timeline__line--filled' :
+                                lineActive ? 'order-timeline__line--active' : '';
+                html += `<div class="order-timeline__line ${lineCls}"><div class="order-timeline__line-fill"></div></div>`;
+            }
+        });
+        html += '</div>';
+        return html;
     };
 
     const renderHistoryTable = (orders) => {
@@ -442,9 +486,160 @@ const AdminUI = (() => {
         container.innerHTML = items.slice(0, 10).map((item, i) => `
             <div class="top-item">
                 <span class="top-item__rank">${i + 1}</span>
-                <span class="top-item__name">${_esc(item.name || item._id || '—')}</span>
+                <span class="top-item__name">${_esc(item.name || item._id || '—')}${i === 0 ? ' <span class="top-selling-badge">MOST ORDERED TODAY</span>' : ''}</span>
                 <span class="top-item__count">${item.count || item.totalQty || 0} orders</span>
             </div>`).join('');
+    };
+
+    /** Render analytics KPI cards (growth, repeat rate, prep time, revenue trend) */
+    const renderAnalyticsKPI = (data) => {
+        const container = $('#analyticsKpiGrid');
+        if (!container || !data) return;
+
+        const weeklyGrowth = data.weeklyGrowth ?? 0;
+        const repeatRate = data.repeatCustomerRate ?? 0;
+        const avgPrep = data.avgPrepTime ?? 0;
+        const todayRevenue = data.todayRevenue ?? 0;
+
+        container.innerHTML = `
+            <div class="kpi-card kpi-card--growth">
+                <div class="kpi-card__value kpi-card__value--green">${weeklyGrowth >= 0 ? '+' : ''}${weeklyGrowth.toFixed(1)}%</div>
+                <div class="kpi-card__label">Weekly Growth</div>
+                <div class="kpi-card__trend kpi-card__trend--${weeklyGrowth >= 0 ? 'up' : 'down'}">${weeklyGrowth >= 0 ? '↑' : '↓'} vs last week</div>
+            </div>
+            <div class="kpi-card kpi-card--repeat">
+                <div class="kpi-card__value kpi-card__value--blue">${repeatRate.toFixed(0)}%</div>
+                <div class="kpi-card__label">Repeat Customer Rate</div>
+                <div class="kpi-card__trend kpi-card__trend--up">📊 Returning</div>
+            </div>
+            <div class="kpi-card kpi-card--prep">
+                <div class="kpi-card__value kpi-card__value--yellow">${avgPrep.toFixed(0)} min</div>
+                <div class="kpi-card__label">Average Prep Time</div>
+                <div class="kpi-card__trend kpi-card__trend--${avgPrep <= 15 ? 'up' : 'down'}">⏱ ${avgPrep <= 15 ? 'Fast' : 'Needs attention'}</div>
+            </div>
+            <div class="kpi-card kpi-card--revenue">
+                <div class="kpi-card__value kpi-card__value--brand">₹${todayRevenue.toLocaleString('en-IN')}</div>
+                <div class="kpi-card__label">Today's Revenue</div>
+                <div class="kpi-card__trend kpi-card__trend--up">💰 Live</div>
+            </div>`;
+    };
+
+    /** Draw a smooth line chart (for 30-day revenue trend) */
+    const drawLineChart = (canvasId, labels, values, color = '#e85d04') => {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+
+        const W = canvas.parentElement.clientWidth || 600;
+        const H = 260;
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        canvas.style.width = W + 'px';
+        canvas.style.height = H + 'px';
+        ctx.scale(dpr, dpr);
+
+        const pad = { top: 20, right: 20, bottom: 40, left: 55 };
+        const chartW = W - pad.left - pad.right;
+        const chartH = H - pad.top - pad.bottom;
+        const maxVal = Math.max(...values, 1);
+
+        ctx.clearRect(0, 0, W, H);
+
+        // Grid
+        const textClr = getComputedStyle(document.documentElement).getPropertyValue('--c-text-soft').trim() || '#8a8a9e';
+        const borderClr = getComputedStyle(document.documentElement).getPropertyValue('--c-border').trim() || '#2a2a35';
+        ctx.strokeStyle = borderClr;
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i <= 4; i++) {
+            const y = pad.top + (chartH / 4) * i;
+            ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(W - pad.right, y); ctx.stroke();
+        }
+
+        // Y-axis labels
+        ctx.fillStyle = textClr;
+        ctx.font = '11px Inter, sans-serif';
+        ctx.textAlign = 'right';
+        for (let i = 0; i <= 4; i++) {
+            const y = pad.top + (chartH / 4) * i;
+            const val = Math.round(maxVal - (maxVal / 4) * i);
+            ctx.fillText('₹' + val.toLocaleString('en-IN'), pad.left - 8, y + 4);
+        }
+
+        if (values.length < 2) return;
+
+        // Compute points
+        const step = chartW / (values.length - 1);
+        const points = values.map((v, i) => ({
+            x: pad.left + i * step,
+            y: pad.top + chartH - (v / maxVal) * chartH,
+        }));
+
+        // Smooth curve (Catmull-Rom to Bezier)
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        for (let i = 0; i < points.length - 1; i++) {
+            const p0 = points[Math.max(i - 1, 0)];
+            const p1 = points[i];
+            const p2 = points[i + 1];
+            const p3 = points[Math.min(i + 2, points.length - 1)];
+            const cp1x = p1.x + (p2.x - p0.x) / 6;
+            const cp1y = p1.y + (p2.y - p0.y) / 6;
+            const cp2x = p2.x - (p3.x - p1.x) / 6;
+            const cp2y = p2.y - (p3.y - p1.y) / 6;
+            ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
+        }
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // Gradient fill
+        const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + chartH);
+        grad.addColorStop(0, color + '30');
+        grad.addColorStop(1, color + '00');
+        ctx.lineTo(points[points.length - 1].x, pad.top + chartH);
+        ctx.lineTo(points[0].x, pad.top + chartH);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Dots on each point
+        points.forEach((p, i) => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+        });
+
+        // X-axis labels (show every few)
+        ctx.fillStyle = textClr;
+        ctx.font = '10px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        const labelStep = Math.max(1, Math.floor(labels.length / 8));
+        labels.forEach((lbl, i) => {
+            if (i % labelStep === 0 || i === labels.length - 1) {
+                ctx.fillText(lbl, points[i].x, H - pad.bottom + 16);
+            }
+        });
+    };
+
+    /** Highlight a menu item card with 🔥 MOST ORDERED TODAY badge */
+    const highlightTopSelling = (itemName) => {
+        // Remove previous badges from menu cards
+        $$('.menu-mgmt-card .top-selling-badge').forEach(b => b.remove());
+        if (!itemName) return;
+        const cards = $$('.menu-mgmt-card');
+        cards.forEach(card => {
+            const nameEl = card.querySelector('.menu-mgmt-card__name');
+            if (nameEl && nameEl.textContent.trim().toLowerCase() === itemName.toLowerCase()) {
+                if (!nameEl.querySelector('.top-selling-badge')) {
+                    const badge = document.createElement('span');
+                    badge.className = 'top-selling-badge';
+                    badge.textContent = 'MOST ORDERED TODAY';
+                    nameEl.appendChild(badge);
+                }
+            }
+        });
     };
 
     const playNotifSound = () => {
@@ -583,7 +778,8 @@ const AdminUI = (() => {
         renderOrderCards, prependOrderCard, updateOrderCard,
         renderHistoryTable, renderPagination,
         renderMenuItems,
-        drawBarChart, renderTopItems,
+        drawBarChart, drawLineChart, renderTopItems,
+        renderAnalyticsKPI, highlightTopSelling,
         playNotifSound, animateCounter, exportOrdersCSV,
     });
 })();

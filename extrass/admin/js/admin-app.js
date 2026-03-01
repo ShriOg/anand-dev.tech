@@ -57,7 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const { $, $$, showToast, showConfirm,
             switchPage, updateSocketStatus, renderStats, renderRecentOrders,
             renderOrderCards, prependOrderCard, updateOrderCard, renderHistoryTable, renderPagination,
-            renderMenuItems, drawBarChart, renderTopItems, playNotifSound, animateCounter,
+            renderMenuItems, drawBarChart, drawLineChart, renderTopItems, renderAnalyticsKPI,
+            highlightTopSelling, playNotifSound, animateCounter,
             exportOrdersCSV } = AdminUI;
 
     let currentPage = 'dashboard';
@@ -515,6 +516,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (currentPage === 'orders') {
                 prependOrderCard(order);
+                // Auto-scroll newest order to top
+                const container = $('#liveOrdersContainer');
+                if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
             }
 
             const todayEl = $('#statTodayOrders');
@@ -558,6 +562,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('socket:status', (e) => {
             console.log('[Admin] Socket status:', e.detail?.connected);
             updateSocketStatus(e.detail?.connected);
+        });
+
+        // Live top-selling item update
+        document.addEventListener('admin:top-item-update', (e) => {
+            const data = e.detail;
+            if (data?.itemName) {
+                highlightTopSelling(data.itemName);
+            }
         });
     }
 
@@ -751,6 +763,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = res?.data || res;
             if (!data) return;
 
+            // KPI cards (weekly growth, repeat rate, avg prep, today revenue)
+            renderAnalyticsKPI({
+                weeklyGrowth: data.weeklyGrowth ?? data.growth ?? 0,
+                repeatCustomerRate: data.repeatCustomerRate ?? data.repeatRate ?? 0,
+                avgPrepTime: data.avgPrepTime ?? data.avgPrep ?? 0,
+                todayRevenue: data.todayRevenue ?? 0,
+            });
+
             if (data.ordersPerDay) {
                 const labels = data.ordersPerDay.map(d => d.label || d.date || '');
                 const values = data.ordersPerDay.map(d => d.count || d.value || 0);
@@ -763,8 +783,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 drawBarChart('chartRevenue', labels, values, '#10b981');
             }
 
+            // 30-day revenue trend line chart
+            if (data.revenueTrend || data.revenuePerDay) {
+                const trendData = data.revenueTrend || data.revenuePerDay || [];
+                const labels = trendData.map(d => d.label || d.date || '');
+                const values = trendData.map(d => d.total || d.value || 0);
+                drawLineChart('chartRevenueTrend', labels, values, '#e85d04');
+            }
+
             if (data.topItems) {
                 renderTopItems(data.topItems);
+                // Highlight top selling in menu if loaded
+                if (data.topItems[0]) {
+                    highlightTopSelling(data.topItems[0].name || data.topItems[0]._id || '');
+                }
             }
         } catch (err) {
             debug('Fatal Error', err);
@@ -774,26 +806,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function wireTheme() {
-        const saved = localStorage.getItem('pf_admin_theme');
-        if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        // Premium dark-only UI — no theme toggle needed
+        // Remove any stale light preference
+        localStorage.removeItem('pf_admin_theme');
         updateThemeIcon();
 
         $('#themeToggle')?.addEventListener('click', () => {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            if (isDark) {
-                document.documentElement.removeAttribute('data-theme');
-                localStorage.setItem('pf_admin_theme', 'light');
-            } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                localStorage.setItem('pf_admin_theme', 'dark');
-            }
-            updateThemeIcon();
+            // Easter egg: clicking the theme button just pops a toast
+            showToast('Premium dark mode — always on 🌙', 'info');
         });
     }
 
     function updateThemeIcon() {
         const btn = $('#themeToggle');
-        if (btn) btn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+        if (btn) btn.textContent = '🌙';
     }
 
     function wireSidebar() {

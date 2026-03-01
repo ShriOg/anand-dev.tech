@@ -16,6 +16,9 @@
 </head>
 <body>
 
+    <button class="back-btn" onclick="goBack()">← Back</button>
+    <script>function goBack(){document.referrer?window.history.back():window.location.href='/';}</script>
+
     <header class="hero" role="banner">
         <button class="hero__auth" id="heroAuthBtn" aria-label="Sign Up">✏️ Sign Up</button>
         <div class="hero__inner">
