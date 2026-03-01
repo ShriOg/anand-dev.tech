@@ -146,6 +146,26 @@
             margin-bottom: var(--sp-5);
         }
 
+        .time-badge {
+            background: rgba(255,107,0,0.1);
+            border: 1px solid rgba(255,107,0,0.3);
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #ff6b00;
+            margin-top: 12px;
+            margin-bottom: var(--sp-4);
+            transition: all 0.3s ease;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .completed-time {
+            color: #00c878;
+            border-color: rgba(0,200,120,0.3);
+            background: rgba(0,200,120,0.08);
+        }
+
         /* ── Countdown ── */
         .track-card__countdown {
             text-align: center;
@@ -455,6 +475,8 @@
             <div class="track-card__status-emoji" id="trackStatusEmoji"></div>
             <div class="track-card__status-label" id="trackStatusLabel"></div>
 
+            <div id="time-info"></div>
+
             <!-- Countdown timer -->
             <div class="track-card__countdown" id="trackCountdown">
                 <div class="track-card__countdown-value" id="trackCountdownValue">--:--</div>
@@ -502,6 +524,7 @@ const $ = (s) => document.querySelector(s);
 let _socket            = null;
 let _currentOrder      = null;
 let _countdownInterval = null;
+let countdownInterval  = null;
 
 /* ── Read orderId from URL ── */
 function getOrderId() {
@@ -569,6 +592,8 @@ function renderOrder(order) {
     $('#trackStatusLabel').style.color = isCancelled ? 'var(--c-red)' :
         (status === 'Completed' ? 'var(--c-green)' : 'var(--c-brand)');
 
+    renderTimeInfo(order);
+
     // Progress bar
     const pct = isCancelled ? 0 : ((stepIdx + 1) / ORDER_STEPS.length) * 100;
     $('#trackProgressFill').style.width = pct + '%';
@@ -588,12 +613,99 @@ function renderOrder(order) {
     // Total
     $('#trackTotal').textContent = '₹' + (order.total || 0);
 
-    // Countdown
-    startCountdown(order);
+    // Countdown (main card timer)
+    startPrimaryCountdown(order);
 
     // Show details, hide loading
     $('#trackLoading').style.display = 'none';
     $('#trackDetails').style.display = '';
+}
+
+function renderTimeInfo(order) {
+    const container = document.getElementById('time-info');
+    if (!container) return;
+
+    container.innerHTML = '';
+    clearInterval(countdownInterval);
+
+    const status = String(order?.status || '').toUpperCase();
+
+    if (status === 'PREPARING') {
+        renderEstimated(order);
+    }
+
+    if (status === 'COMPLETED') {
+        renderActual(order);
+    }
+}
+
+function renderEstimated(order) {
+    if (!order || !order.estimatedCompletionTime) return;
+
+    const expectedTime = new Date(order.estimatedCompletionTime);
+    if (isNaN(expectedTime.getTime())) return;
+
+    const container = document.getElementById('time-info');
+    if (!container) return;
+
+    const badge = document.createElement('div');
+    badge.className = 'time-badge';
+    badge.id = 'estimated-badge';
+
+    const formatted = expectedTime.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    const initialMins = Number.isFinite(Number(order.estimatedMinutes))
+        ? Number(order.estimatedMinutes)
+        : Math.max(0, Math.floor((expectedTime - new Date()) / 60000));
+
+    badge.innerHTML = `
+        ⏳ Estimated Ready In: <span id="countdown-mins">${Math.max(0, initialMins)}</span> mins<br>
+        Expected By: ${formatted}
+    `;
+
+    container.appendChild(badge);
+    startCountdown(order.estimatedCompletionTime);
+}
+
+function renderActual(order) {
+    if (!order || order.actualCompletionTimeMinutes == null) return;
+
+    const container = document.getElementById('time-info');
+    if (!container) return;
+
+    const badge = document.createElement('div');
+    badge.className = 'time-badge completed-time';
+    badge.innerHTML = `
+        ✅ Completed in ${order.actualCompletionTimeMinutes || 0} minutes
+    `;
+
+    container.appendChild(badge);
+}
+
+function startCountdown(targetTime) {
+    clearInterval(countdownInterval);
+
+    const target = new Date(targetTime);
+    if (isNaN(target.getTime())) return;
+
+    const tick = () => {
+        const remaining = target - new Date();
+
+        const mins = Math.max(0, Math.floor(remaining / 60000));
+
+        const el = document.getElementById('countdown-mins');
+        if (el) el.textContent = mins;
+
+        if (remaining <= 0) {
+            clearInterval(countdownInterval);
+        }
+    };
+
+    tick();
+    countdownInterval = setInterval(tick, 1000);
 }
 
 function buildTimeline(status, stepIdx, isCancelled) {
@@ -630,7 +742,7 @@ function buildTimeline(status, stepIdx, isCancelled) {
 }
 
 /* ── Countdown Timer ── */
-function startCountdown(order) {
+function startPrimaryCountdown(order) {
     clearInterval(_countdownInterval);
     const el     = $('#trackCountdownValue');
     const status = (order.status || 'Pending').toLowerCase();

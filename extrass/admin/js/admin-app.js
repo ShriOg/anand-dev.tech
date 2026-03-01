@@ -71,6 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let pendingCount = 0;
     let statsRefreshTimer = null;
     let refreshTimeout = null;
+    let autoRefreshInterval = null;
+
+    const FIVE_MINUTES = 5 * 60 * 1000;
 
     const HASH = '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4';
     const GATE_KEY = 'adminUnlocked';
@@ -394,6 +397,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 200);
     }
 
+    function startAutoRefresh() {
+        if (document.hidden) return;
+        stopAutoRefresh();
+        autoRefreshInterval = setInterval(async () => {
+            console.log('🔄 5-minute sync running...');
+            await refreshOrders();
+        }, FIVE_MINUTES);
+    }
+
+    function stopAutoRefresh() {
+        if (autoRefreshInterval) {
+            clearInterval(autoRefreshInterval);
+            autoRefreshInterval = null;
+        }
+    }
+
     function updatePendingBadge() {
         pendingCount = liveOrders.filter(o => normalizeStatus(o.status) === ORDER_STATUS.PENDING).length;
         const badge = $('#liveOrderBadge');
@@ -548,6 +567,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('socket:status', (e) => {
             console.log('[Admin] Socket status:', e.detail?.connected);
             updateSocketStatus(e.detail?.connected);
+            if (e.detail?.connected === false) {
+                console.log('⚠️ Socket disconnected — relying on polling.');
+            } else if (e.detail?.connected === true) {
+                console.log('✅ Socket reconnected.');
+            }
         });
 
         // Live top-selling item update
@@ -859,5 +883,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    refreshOrders();
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            stopAutoRefresh();
+        } else {
+            refreshOrders();
+            startAutoRefresh();
+        }
+    });
+
+    (async () => {
+        await refreshOrders();
+        startAutoRefresh();
+    })();
 });

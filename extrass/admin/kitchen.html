@@ -129,6 +129,9 @@ let allTodayOrders = [];
 let soundEnabled = true;
 let socket = null;
 let refreshTimeout = null;
+let autoRefreshInterval = null;
+
+const FIVE_MINUTES = 5 * 60 * 1000;
 
 // ═══ CLOCK ═══
 function updateClock() {
@@ -216,6 +219,22 @@ function scheduleRefresh() {
     refreshTimeout = setTimeout(() => {
         refreshOrders();
     }, 200);
+}
+
+function startAutoRefresh() {
+    if (document.hidden) return;
+    stopAutoRefresh();
+    autoRefreshInterval = setInterval(async () => {
+        console.log('🔄 5-minute sync running...');
+        await refreshOrders();
+    }, FIVE_MINUTES);
+}
+
+function stopAutoRefresh() {
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+    }
 }
 
 // ═══ KITCHEN STATS ═══
@@ -428,6 +447,7 @@ function connectSocket() {
 
     socket.on('connect', () => {
         console.log('[Kitchen] Socket connected');
+        console.log('✅ Socket reconnected.');
         socket.emit('join:admin');
     });
 
@@ -446,6 +466,7 @@ function connectSocket() {
 
     socket.on('disconnect', () => {
         console.log('[Kitchen] Socket disconnected');
+        console.log('⚠️ Socket disconnected — relying on polling.');
     });
 
     socket.on('reconnect', () => {
@@ -455,8 +476,20 @@ function connectSocket() {
 }
 
 // ═══ BOOT ═══
-refreshOrders();
-connectSocket();
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        stopAutoRefresh();
+    } else {
+        refreshOrders();
+        startAutoRefresh();
+    }
+});
+
+(async () => {
+    await refreshOrders();
+    startAutoRefresh();
+    connectSocket();
+})();
 </script>
 </body>
 </html>
