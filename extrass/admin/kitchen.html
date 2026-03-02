@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Kitchen — Pramod Fast Food</title>
     <meta name="robots" content="noindex, nofollow">
+    <meta name="restaurant" content="pramod">
     <meta name="theme-color" content="#0f0f12">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -117,10 +118,11 @@
     </audio>
 
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
+<script src="../shared/config.js"></script>
 <script>
 'use strict';
 
-const API_BASE = 'https://anand-os-backend.onrender.com/api';
+const API_BASE = RestaurantConfig.API_URL;
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
 
@@ -438,7 +440,7 @@ function connectSocket() {
         return;
     }
 
-    socket = io('https://anand-os-backend.onrender.com', {
+    socket = io(RestaurantConfig.SOCKET_URL, {
         transports: ['websocket', 'polling'],
         reconnection: true,
         reconnectionDelay: 2000,

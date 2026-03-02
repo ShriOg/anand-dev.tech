@@ -1,6 +1,6 @@
 'use strict';
 
-const BASE_URL = 'https://anand-os-backend.onrender.com/api';
+const BASE_URL = RestaurantConfig.API_URL;
 
 let customersData = [];
 

@@ -2,9 +2,7 @@
 
 const AdminAPI = (() => {
 
-    const BASE_URL = window.location.hostname === 'localhost'
-        ? 'https://anand-os-backend.onrender.com/api'
-        : 'https://anand-os-backend.onrender.com/api';
+    const BASE_URL = RestaurantConfig.API_URL;
 
     console.log('[AdminAPI] Using base:', BASE_URL);
 

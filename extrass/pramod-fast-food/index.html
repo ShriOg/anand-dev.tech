@@ -234,6 +234,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous" defer></script>
+    <script src="../shared/config.js"></script>
     <script src="js/order-status.js"></script>
     <script src="js/api.js"></script>
     <script src="js/menu-data.js"></script>
@@ -270,7 +271,7 @@
     window.userClosedTracking = false;
     window.confettiLaunched = false;
 
-    const TRACK_API = 'https://anand-os-backend.onrender.com/api';
+    const TRACK_API = RestaurantConfig.API_URL;
 
     /* ── Pop sound (tiny inline WAV) ── */
     const _popSound = new Audio('data:audio/wav;base64,UklGRl4GAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YToGAAD+/wIA/P8EAPv/BgD5/wgA9/8KAPb/CwD1/wwA9f8MAPT/DQD0/w0A9P8NAPX/DAD1/wwA9v8LAPX/DADz/w4A8P8RAPD/EQDx/xAA8v8PAPL/DwDy/w8A8P8RAPP/DgD4/wkA+/8GAP3/BAD+/wMA//8CAP//AgD//wIA//8CAP//AgD+/wMA/f8EAPz/BQD7/wYA+v8HAPn/CAD4/wkA+P8JAPj/CQD5/wgA+v8HAPv/BgD8/wUA/f8EAP7/AwD//wIA//8BAP//AQD//wEA//8BAP//AQD//wEAAAAAAAAAAAAA');

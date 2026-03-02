@@ -9,12 +9,7 @@ function debug(label, data = null) {
 
 const Api = (() => {
 
-    const _BASE = (() => {
-        const host = location.hostname;
-        if (host === 'localhost' || host === '127.0.0.1')
-            return 'https://anand-os-backend.onrender.com';
-        return 'https://anand-os-backend.onrender.com';
-    })();
+    const _BASE = RestaurantConfig.BASE_URL;
 
     console.log('[API] Using base:', _BASE);
 

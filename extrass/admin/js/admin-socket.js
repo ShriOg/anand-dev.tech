@@ -32,7 +32,7 @@ const AdminSocket = (() => {
 
         _emit('socket:status', { connected: 'connecting' });
 
-        const baseUrl = 'https://anand-os-backend.onrender.com';
+        const baseUrl = RestaurantConfig.SOCKET_URL;
 
         const token = typeof AdminAPI !== 'undefined' && AdminAPI.getToken ? AdminAPI.getToken() : null;
 

@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const _initCustomerSocket = () => {
         if (typeof io === 'undefined') return;
 
-        const socketUrl = 'https://anand-os-backend.onrender.com';
+        const socketUrl = RestaurantConfig.SOCKET_URL;
 
         _updateConnectionIndicator('connecting');
 
@@ -1039,8 +1039,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.classList.add('cancel-order--loading');
 
         try {
-            const BASE_URL = 'https://anand-os-backend.onrender.com/api';
-            const res = await fetch(`${BASE_URL}/restaurant/orders/${id}/cancel`, { method: 'PATCH' });
+            const res = await fetch(`${RestaurantConfig.API_URL}/restaurant/orders/${id}/cancel`, { method: 'PATCH' });
 
             let json = null;
             const ct = res.headers.get('content-type') || '';
@@ -1091,8 +1090,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.innerHTML = '⏳ Deleting…';
 
         try {
-            const BASE_URL = 'https://anand-os-backend.onrender.com/api';
-            await fetch(`${BASE_URL}/restaurant/orders/${id}`, { method: 'DELETE' });
+            await fetch(`${RestaurantConfig.API_URL}/restaurant/orders/${id}`, { method: 'DELETE' });
 
             const card = btn.closest('.order-card');
             if (card) {
