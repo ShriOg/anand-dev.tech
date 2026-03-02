@@ -13,6 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../shared/footer-effects.css">
 </head>
 <body>
 
@@ -45,7 +46,12 @@
     <script>function goBack(){document.referrer?window.history.back():window.location.href='/';}</script>
 
     <header class="hero" role="banner">
+      <div class="hero__actions">
         <button class="hero__auth" id="heroAuthBtn" aria-label="Sign Up">✏️ Sign Up</button>
+        <button id="installBtn" class="install-btn install-btn--hero hidden" data-install-enabled="true" aria-label="Install App">
+          📲 Install App
+        </button>
+      </div>
         <div class="hero__inner">
             <span class="hero__emoji" aria-hidden="true">🥟</span>
             <h1 class="hero__title">Pramod Fast Food</h1>
@@ -139,6 +145,12 @@
         </p>
     </footer>
 
+      <footer class="global-footer fade-section">
+        <p class="made-by">
+          Made with <span class="heart">💗</span> by Anand Shukla
+        </p>
+      </footer>
+
     <button class="btt" id="backToTop" aria-label="Back to top">↑</button>
 
     <button class="cart-fab" id="cartBtn" aria-label="Open cart">
@@ -226,6 +238,7 @@
     <script src="js/customer.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/app.js"></script>
+    <script src="../shared/footer-effects.js"></script>
     <script>
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker

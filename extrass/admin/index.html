@@ -14,6 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="../shared/footer-effects.css">
 </head>
 <body>
 
@@ -98,7 +99,6 @@
             </a>
         </nav>
         <div class="sidebar__footer">
-            <button class="sidebar__install-btn" id="adminInstallBtn" style="display:none" aria-label="Install Admin App">📲 Install App</button>
             <button class="sidebar__theme-btn" id="themeToggle" aria-label="Toggle dark mode">🌙</button>
             <button class="sidebar__logout-btn" id="logoutBtn">🚪 Lock & Exit</button>
         </div>
@@ -306,10 +306,17 @@
         <source src="data:audio/wav;base64,UklGRl4GAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YToGAAD+/wIA/P8EAPv/BgD5/wgA9/8KAPb/CwD1/wwA9f8MAPT/DQD0/w0A9P8NAPX/DAD1/wwA9v8LAPX/DADz/w4A8P8RAPD/EQDx/xAA8v8PAPL/DwDy/w8A8P8RAPP/DgD4/wkA+/8GAP3/BAD+/wMA//8CAP//AgD//wIA//8CAP//AgD+/wMA/f8EAPz/BQD7/wYA+v8HAPn/CAD4/wkA+P8JAPj/CQD5/wgA+v8HAPv/BgD8/wUA/f8EAP7/AwD//wIA//8BAP//AQD//wEA//8BAP//AQD//wEAAAAAAAAAAAAA" type="audio/wav">
     </audio>
 
+    <footer class="global-footer global-footer--admin fade-section">
+        <p class="made-by">
+            Made with <span class="heart">💗</span> by Anand Shukla
+        </p>
+    </footer>
+
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
     <script src="js/admin-ui.js"></script>
     <script src="js/admin-api.js"></script>
     <script src="js/admin-socket.js"></script>
     <script src="js/admin-app.js"></script>
+    <script src="../shared/footer-effects.js"></script>
 </body>
 </html>
