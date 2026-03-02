@@ -118,7 +118,7 @@ const UI = (() => {
                 </div>
                 <div class="menu-grid">
                     ${visible.map((item, i) => `
-                    <article class="card${item.special ? ' card--special' : ''}" style="animation-delay:${i * 0.04}s">
+                    <article class="card menu-card${item.special ? ' card--special' : ''}" style="animation-delay:${i * 0.04}s">
                         ${item.prices[0].value < 50 ? '<span class="badge-budget">Under ₹50</span>' : ''}
                         <div class="card__head">
                             <span class="veg-dot" aria-label="Vegetarian"></span>
@@ -126,9 +126,9 @@ const UI = (() => {
                             ${item.special ? '<span class="badge-special">★ Special</span>' : ''}
                         </div>
                         ${item.desc ? `<p class="card__desc">${item.desc}</p>` : ''}
-                        <div class="card__prices">
+                        <div class="card__prices price-options">
                             ${item.prices.map(p => `
-                            <div class="price-col">
+                            <div class="price-col price-card">
                                 <span class="price-label">${p.label}</span>
                                 <span class="price-val">₹${p.value}</span>
                                 ${_cartButton(item, p.label, p.value)}
