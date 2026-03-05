@@ -1,0 +1,123 @@
+/* MenuNova — Unified Admin Stylesheet
+ * Imports shared admin base + footer effects.
+ * Path: /css/admin.css
+ */
+@import url('/shared/css/admin.css');
+@import url('/shared/css/footer-effects.css');
+
+/* ── Restaurant-not-found fallback ── */
+.not-found{
+    position:fixed;inset:0;z-index:99999;
+    display:grid;place-items:center;
+    background:var(--c-bg,#0f0f12);
+    color:var(--c-text,#e8e8f0);font-family:'Inter',sans-serif;
+    text-align:center;padding:2rem;
+}
+.not-found__card{
+    max-width:420px;
+    background:var(--c-surface,#18181d);
+    border:1px solid var(--c-border,#2a2a35);
+    border-radius:18px;
+    padding:3rem 2rem;
+    box-shadow:0 12px 40px rgba(0,0,0,.45);
+}
+.not-found__icon{font-size:56px;display:block;margin-bottom:12px}
+.not-found__title{font-size:24px;font-weight:800;margin-bottom:6px}
+.not-found__sub{font-size:14px;color:var(--c-text-soft,#8a8a9e);margin-bottom:20px;line-height:1.5}
+.not-found__btn{
+    display:inline-block;
+    padding:12px 28px;border-radius:999px;
+    background:#e85d04;color:#fff;
+    font-weight:600;font-size:15px;
+    text-decoration:none;border:none;cursor:pointer;
+    transition:background .2s;
+}
+.not-found__btn:hover{background:#d63300}
+
+.demo-floating-badge{
+    position:fixed;
+    right:16px;
+    bottom:16px;
+    z-index:10001;
+    padding:10px 14px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.22);
+    background:linear-gradient(120deg,#ff6a00,#ff8a00);
+    color:#fff;
+    font-size:13px;
+    font-weight:700;
+    text-decoration:none;
+    box-shadow:0 8px 28px rgba(0,0,0,.28);
+}
+
+.demo-data-label{
+    display:inline-flex;
+    align-items:center;
+    margin-left:10px;
+    padding:4px 8px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:700;
+    color:#ff9b4a;
+    background:rgba(255,106,0,.12);
+    border:1px solid rgba(255,106,0,.35);
+}
+
+.demo-stats-hint{
+    margin:0 0 10px;
+    font-size:12px;
+    color:var(--c-text-soft,#999);
+}
+
+.status-flow-tip{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:20px;
+    height:20px;
+    margin-left:8px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.2);
+    font-size:12px;
+    color:var(--c-text-soft,#999);
+    cursor:help;
+}
+
+.topbar__status--pulse{animation:demoPulse 1s ease}
+.orders-grid--realtime{animation:demoPulse 1s ease}
+
+@keyframes demoPulse{
+    0%{box-shadow:0 0 0 0 rgba(255,106,0,.45)}
+    100%{box-shadow:0 0 0 12px rgba(255,106,0,0)}
+}
+
+.kitchen-demo-badge{
+    margin-left:10px;
+    padding:4px 9px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:700;
+    color:#ff9b4a;
+    background:rgba(255,106,0,.12);
+    border:1px solid rgba(255,106,0,.35);
+}
+
+.demo-kitchen .kitchen-card{
+    border-width:2px;
+    font-weight:700;
+}
+
+.demo-kitchen .kitchen-card__id,
+.demo-kitchen .kitchen-card__item,
+.demo-kitchen .kitchen-card__customer{
+    font-weight:700;
+}
+
+.kitchen-card--flash{
+    animation:kitchenFlash 1.1s ease;
+}
+
+@keyframes kitchenFlash{
+    0%{box-shadow:0 0 0 0 rgba(255,106,0,.8);transform:translateY(-4px)}
+    100%{box-shadow:0 0 0 16px rgba(255,106,0,0);transform:translateY(0)}
+}

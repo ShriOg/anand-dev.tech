@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customers — MenuNova</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="theme-color" content="#ff6a00">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/css/admin.css">
+    <link rel="stylesheet" href="/admin/customers/customers.css">
+    <link rel="stylesheet" href="/shared/css/footer-effects.css">
+</head>
+<body data-theme="dark">
+
+    <!-- ── Not-found fallback ── -->
+    <div id="notFoundPage" style="display:none;min-height:100dvh;display:none;align-items:center;justify-content:center;background:#111114;color:#fff;font-family:Inter,system-ui,sans-serif;text-align:center;padding:2rem;">
+        <div>
+            <p style="font-size:64px;margin:0 0 .5rem">🍽️</p>
+            <h1 style="font-size:28px;font-weight:800;margin:0 0 .5rem">Restaurant Not Found</h1>
+            <p style="color:#888;font-size:15px;margin:0 0 1.5rem">This subdomain is not linked to any restaurant.</p>
+            <a href="https://menunova.me" style="color:#ff6a00;font-weight:600;text-decoration:none;font-size:14px">← Back to MenuNova</a>
+        </div>
+    </div>
+
+    <div id="pageWrapper">
+        <header class="cust-topbar">
+            <a href="/admin/" class="cust-topbar__back" aria-label="Back to Admin">← Admin</a>
+            <h1 class="cust-topbar__title">👥 Customers</h1>
+            <span class="cust-topbar__count" id="headerCount">—</span>
+        </header>
+
+        <main class="cust-page">
+
+            <section class="cust-cards">
+                <div class="cust-card">
+                    <span class="cust-card__icon">👤</span>
+                    <div class="cust-card__body">
+                        <p class="cust-card__label">Total Customers</p>
+                        <p class="cust-card__value" id="totalCustomers">—</p>
+                    </div>
+                </div>
+                <div class="cust-card">
+                    <span class="cust-card__icon">💰</span>
+                    <div class="cust-card__body">
+                        <p class="cust-card__label">Total Revenue</p>
+                        <p class="cust-card__value" id="totalRevenue">—</p>
+                    </div>
+                </div>
+                <div class="cust-card">
+                    <span class="cust-card__icon">📦</span>
+                    <div class="cust-card__body">
+                        <p class="cust-card__label">Total Orders</p>
+                        <p class="cust-card__value" id="totalOrders">—</p>
+                    </div>
+                </div>
+                <div class="cust-card">
+                    <span class="cust-card__icon">⭐</span>
+                    <div class="cust-card__body">
+                        <p class="cust-card__label">Avg Spend / Customer</p>
+                        <p class="cust-card__value" id="avgSpend">—</p>
+                    </div>
+                </div>
+            </section>
+
+            <div class="cust-search">
+                <span class="cust-search__icon">🔍</span>
+                <input
+                    type="text"
+                    id="searchInput"
+                    class="cust-search__input"
+                    placeholder="Search by name or phone…"
+                    autocomplete="off"
+                >
+                <span class="cust-search__count" id="searchCount"></span>
+            </div>
+
+            <div class="cust-table-wrap">
+                <table class="cust-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Orders</th>
+                            <th>Total Spent</th>
+                            <th>Points</th>
+                            <th>Joined</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customersBody">
+                        <tr class="cust-table__loading">
+                            <td colspan="7">Loading customers…</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="cust-empty" id="emptyState" hidden>
+                <span class="cust-empty__icon">📭</span>
+                <p>No customers found.</p>
+            </div>
+
+        </main>
+
+        <footer class="global-footer fade-section">
+            <p class="made-by">
+                Made with <span class="heart">💗</span> by Anand Shukla
+            </p>
+        </footer>
+    </div>
+
+    <script src="/js/config.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/admin/customers/customers.js"></script>
+    <script src="/shared/js/footer-effects.js"></script>
+</body>
+</html>

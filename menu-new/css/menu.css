@@ -1,0 +1,225 @@
+/* MenuNova — Unified Menu Stylesheet
+ * Imports the shared base, adds any page-level overrides.
+ * Path: /css/menu.css
+ */
+@import url('/shared/css/global.css');
+@import url('/shared/css/menu.css');
+@import url('/shared/css/footer.css');
+@import url('/shared/css/footer-effects.css');
+
+/* ── Restaurant-not-found fallback ── */
+.not-found{
+    position:fixed;inset:0;z-index:99999;
+    display:grid;place-items:center;
+    background:linear-gradient(180deg,#fffaf5 0%,#f7f2ea 100%);
+    color:#1a1a1a;font-family:'Inter',sans-serif;
+    text-align:center;padding:2rem;
+}
+.not-found__card{
+    max-width:420px;
+    background:#fff;
+    border-radius:18px;
+    padding:3rem 2rem;
+    box-shadow:0 8px 28px rgba(0,0,0,.08);
+}
+.not-found__icon{font-size:56px;display:block;margin-bottom:12px}
+.not-found__title{font-size:24px;font-weight:800;margin-bottom:6px}
+.not-found__sub{font-size:14px;color:#6b705c;margin-bottom:20px;line-height:1.5}
+.not-found__btn{
+    display:inline-block;
+    padding:12px 28px;border-radius:999px;
+    background:#e85d04;color:#fff;
+    font-weight:600;font-size:15px;
+    text-decoration:none;border:none;cursor:pointer;
+    transition:background .2s;
+}
+.not-found__btn:hover{background:#d63300}
+
+.demo-floating-badge{
+    position:fixed;
+    right:16px;
+    bottom:16px;
+    z-index:10001;
+    padding:10px 14px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.22);
+    background:linear-gradient(120deg,#ff6a00,#ff8a00);
+    color:#fff;
+    font-size:13px;
+    font-weight:700;
+    text-decoration:none;
+    box-shadow:0 8px 28px rgba(0,0,0,.28);
+}
+
+.demo-intro{
+    position:fixed;
+    inset:0;
+    z-index:10002;
+    display:grid;
+    place-items:center;
+    background:rgba(10,14,24,.6);
+    backdrop-filter:blur(8px);
+    padding:16px;
+}
+
+.demo-intro__card{
+    width:min(100%,460px);
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,.18);
+    background:var(--c-surface,#16161d);
+    padding:22px;
+    text-align:center;
+}
+
+.demo-intro__title{margin:0 0 8px;font-size:22px;font-weight:800;color:var(--c-text,#fff)}
+.demo-intro__text{margin:0 0 14px;color:var(--c-text-soft,#b4b4c0);line-height:1.5}
+
+.demo-intro__btn{
+    border:0;
+    border-radius:999px;
+    padding:11px 18px;
+    font-size:14px;
+    font-weight:700;
+    color:#fff;
+    background:linear-gradient(120deg,#ff6a00,#ff8a00);
+    cursor:pointer;
+}
+
+.demo-checkout-note{
+    margin:0 0 10px;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1px solid rgba(255,136,0,.35);
+    background:rgba(255,136,0,.08);
+    color:var(--c-text-soft,#c6c6d2);
+    font-size:12px;
+}
+
+.demo-conversion{
+    margin:20px 16px;
+    padding:22px 18px;
+    border-radius:18px;
+    background:linear-gradient(140deg,#12111a,#1a1b25);
+    border:1px solid rgba(255,255,255,.1);
+    text-align:center;
+}
+
+.demo-conversion__title{margin:0 0 6px;font-size:24px;font-weight:800;color:var(--c-text,#fff)}
+.demo-conversion__sub{margin:0 0 14px;color:var(--c-text-soft,#bbb)}
+
+.demo-conversion__btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:11px 20px;
+    border-radius:999px;
+    text-decoration:none;
+    font-weight:700;
+    color:#fff;
+    background:linear-gradient(120deg,#ff6a00,#ff8a00);
+}
+
+/* ── Menu data presentation fixes (no margin changes) ── */
+.cat-title{
+    word-break:break-word;
+}
+
+.card__name{
+    word-break:break-word;
+}
+
+.price-options--single .price-col,
+.price-options--single .price-card{
+    flex:1 1 100%;
+    min-width:0;
+}
+
+.price-label,
+.price-val{
+    white-space:nowrap;
+}
+
+/* ── Menu-only premium footer overrides ── */
+.page-wrapper .menunova-footer{
+    margin-top:64px;
+    border-top:1px solid rgba(255,255,255,.10);
+    background:
+        radial-gradient(circle at top, rgba(255,122,24,.12), transparent 58%),
+        linear-gradient(180deg,#111625 0%, #0a0e18 100%);
+    position:relative;
+    overflow:hidden;
+}
+
+.page-wrapper .menunova-footer::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 12px,
+        rgba(255,122,24,.015) 12px,
+        rgba(255,122,24,.015) 24px
+    );
+}
+
+.page-wrapper .menunova-footer .footer-container{
+    position:relative;
+    z-index:1;
+}
+
+.page-wrapper .menunova-footer .footer-column{
+    background:rgba(255,255,255,.02);
+    border:1px solid rgba(255,255,255,.07);
+    border-radius:14px;
+    padding:18px;
+    box-shadow:0 10px 24px rgba(0,0,0,.28);
+    transition:border-color .22s ease, box-shadow .22s ease, transform .22s ease;
+}
+
+.page-wrapper .menunova-footer .footer-column:hover{
+    border-color:rgba(255,122,24,.25);
+    box-shadow:0 14px 28px rgba(0,0,0,.34),0 0 0 1px rgba(255,122,24,.14);
+    transform:translateY(-2px);
+}
+
+.page-wrapper .menunova-footer .footer-logo{
+    background:linear-gradient(135deg,#ff7a18 0%,#ffb067 100%);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+}
+
+.page-wrapper .menunova-footer .footer-link:hover{
+    color:#ff7a18;
+    text-shadow:0 0 12px rgba(255,122,24,.28);
+}
+
+.page-wrapper .menunova-footer .footer-social-link{
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.10);
+    background:rgba(255,255,255,.06);
+}
+
+.page-wrapper .menunova-footer .footer-social-link:hover{
+    background:rgba(255,122,24,.2);
+    border-color:rgba(255,122,24,.36);
+    box-shadow:0 8px 18px rgba(255,122,24,.22);
+}
+
+.page-wrapper .menunova-footer .footer-copyright{
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:999px;
+    padding:8px 14px;
+}
+
+@media (max-width: 640px){
+    .page-wrapper .menunova-footer{
+        margin-top:48px;
+    }
+    .page-wrapper .menunova-footer .footer-column{
+        padding:16px;
+    }
+}

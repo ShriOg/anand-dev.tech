@@ -1,0 +1,459 @@
+/* ============================================
+   MenuNova Premium Footer Component Styles
+   Universal footer for all domains
+   ============================================ */
+
+:root {
+    --footer-bg: #0a0a0a;
+    --footer-border: rgba(255, 255, 255, 0.08);
+    --footer-text: #9ca3af;
+    --footer-text-hover: #e5e7eb;
+    --footer-heading: #ffffff;
+    --footer-accent: #ff6a00;
+    --footer-accent-hover: #ff8533;
+    --footer-spacing: 16px;
+}
+
+/* ============================================
+   Main Footer Container
+   ============================================ */
+
+.menunova-footer {
+    background: var(--footer-bg);
+    border-top: 1px solid var(--footer-border);
+    padding: 64px 0 24px;
+    margin-top: 80px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* ============================================
+   Footer Grid Layout
+   ============================================ */
+
+.footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.2fr;
+    gap: 48px;
+    margin-bottom: 48px;
+}
+
+/* ============================================
+   Footer Columns
+   ============================================ */
+
+.footer-column {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Brand Column */
+.footer-brand {
+    max-width: 280px;
+}
+
+.footer-logo {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    background: linear-gradient(135deg, #ff6a00 0%, #ffa84d 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+}
+
+.footer-tagline {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--footer-heading);
+    margin: 0 0 8px 0;
+    line-height: 1.4;
+}
+
+.footer-description {
+    font-size: 14px;
+    color: var(--footer-text);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Column Headings */
+.footer-heading {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--footer-heading);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 12px 0;
+}
+
+/* ============================================
+   Footer Links
+   ============================================ */
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.footer-link {
+    color: var(--footer-text);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: fit-content;
+}
+
+.footer-link:hover {
+    color: var(--footer-accent);
+    transform: translateX(2px);
+}
+
+/* Email Link with Icon */
+.footer-email {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Static Text (non-link) */
+.footer-text {
+    color: var(--footer-text);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Icons */
+.footer-icon {
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
+    flex-shrink: 0;
+}
+
+.footer-link:hover .footer-icon {
+    opacity: 1;
+    color: var(--footer-accent);
+}
+
+/* ============================================
+   Social Links
+   ============================================ */
+
+.footer-social {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.footer-social-link {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    color: var(--footer-text);
+    text-decoration: none;
+    transition: all 0.25s ease;
+}
+
+.footer-social-link:hover {
+    background: rgba(255, 106, 0, 0.15);
+    color: var(--footer-accent);
+    transform: translateY(-2px);
+}
+
+.footer-social-link svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* ============================================
+   Footer Bottom / Copyright
+   ============================================ */
+
+.footer-bottom {
+    padding-top: 32px;
+    border-top: 1px solid var(--footer-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+/* Trust Badges */
+.footer-trust-badges {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.trust-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--footer-text);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    padding: 6px 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--footer-border);
+    border-radius: 6px;
+    transition: all 0.25s ease;
+}
+
+.trust-badge:hover {
+    background: rgba(255, 106, 0, 0.1);
+    border-color: rgba(255, 106, 0, 0.3);
+    color: var(--footer-accent);
+}
+
+.trust-icon {
+    width: 14px;
+    height: 14px;
+    opacity: 0.7;
+}
+
+.trust-badge:hover .trust-icon {
+    opacity: 1;
+}
+
+/* Copyright & Built With */
+.footer-bottom-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+}
+
+.footer-copyright {
+    font-size: 13px;
+    color: var(--footer-text);
+    margin: 0;
+    letter-spacing: 0.3px;
+}
+
+.footer-built-with {
+    font-size: 12px;
+    color: var(--footer-text);
+    margin: 0;
+    opacity: 0.8;
+}
+
+.footer-built-with .heart {
+    color: #ff6a00;
+    display: inline-block;
+    animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+    0%, 100% {
+        transform: scale(1);
+    }
+    10%, 30% {
+        transform: scale(1.1);
+    }
+    20%, 40% {
+        transform: scale(1);
+    }
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+
+/* Tablet */
+@media (max-width: 968px) {
+    .footer-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 40px 32px;
+    }
+
+    .footer-brand {
+        max-width: 100%;
+        grid-column: 1 / -1;
+    }
+
+    .menunova-footer {
+        padding: 48px 0 24px;
+        margin-top: 64px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+    .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+
+    .footer-brand {
+        grid-column: 1;
+    }
+
+    .menunova-footer {
+        padding: 40px 0 20px;
+        margin-top: 48px;
+    }
+
+    .footer-container {
+        padding: 0 20px;
+    }
+
+    .footer-grid {
+        margin-bottom: 32px;
+    }
+
+    .footer-bottom {
+        padding-top: 24px;
+        gap: 20px;
+    }
+
+    .footer-trust-badges {
+        gap: 16px;
+    }
+
+    .trust-badge {
+        font-size: 11px;
+        padding: 5px 10px;
+    }
+
+    .trust-icon {
+        width: 12px;
+        height: 12px;
+    }
+
+    .footer-logo {
+        font-size: 20px;
+    }
+
+    .footer-tagline {
+        font-size: 16px;
+    }
+
+    .footer-description {
+        font-size: 13px;
+    }
+
+    .footer-heading {
+        font-size: 13px;
+    }
+
+    .footer-link,
+    .footer-text {
+        font-size: 13px;
+    }
+
+    .footer-copyright {
+        font-size: 12px;
+    }
+}
+
+/* Ultra-wide screens */
+@media (min-width: 1440px) {
+    .footer-container {
+        max-width: 1400px;
+    }
+}
+
+/* ============================================
+   Dark Mode Enhancement
+   ============================================ */
+
+/* Already optimized for dark mode */
+
+/* ============================================
+   Print Styles
+   ============================================ */
+
+@media print {
+    .menunova-footer {
+        background: white;
+        color: black;
+        border-top: 1px solid #ccc;
+        padding: 24px 0;
+        margin-top: 32px;
+    }
+
+    .footer-logo,
+    .footer-heading,
+    .footer-link,
+    .footer-text,
+    .footer-copyright {
+        color: black;
+    }
+
+    .footer-social {
+        display: none;
+    }
+
+    .footer-grid {
+        gap: 24px;
+    }
+}
+
+/* ============================================
+   Accessibility Enhancements
+   ============================================ */
+
+.footer-link:focus-visible,
+.footer-social-link:focus-visible {
+    outline: 2px solid var(--footer-accent);
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .footer-link,
+    .footer-social-link {
+        transition: none;
+    }
+
+    .footer-link:hover,
+    .footer-social-link:hover {
+        transform: none;
+    }
+}
+
+/* ============================================
+   Animation on Scroll (Optional)
+   ============================================ */
+
+.menunova-footer.footer-reveal {
+    animation: footerFadeIn 0.6s ease-out;
+}
+
+@keyframes footerFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

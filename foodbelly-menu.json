@@ -1,0 +1,659 @@
+[
+	{
+		"name": "Cigar Roll",
+		"desc": "Crispy cigar rolls",
+		"category": "appetizer",
+		"prices": [{ "label": "Half", "value": 50 }, { "label": "Full", "value": 80 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Chilli Potato",
+		"desc": "Spicy chilli potato",
+		"category": "appetizer",
+		"prices": [{ "label": "Half", "value": 60 }, { "label": "Full", "value": 100 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Honey Chilli Potato",
+		"desc": "Sweet and spicy honey chilli potato",
+		"category": "appetizer",
+		"prices": [{ "label": "Half", "value": 70 }, { "label": "Full", "value": 110 }],
+		"special": true,
+		"active": true
+	},
+	{
+		"name": "French Fries",
+		"desc": "Crispy golden fries",
+		"category": "appetizer",
+		"prices": [{ "label": "Half", "value": 40 }, { "label": "Full", "value": 70 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Peri Peri French Fries",
+		"desc": "Fries tossed in peri peri seasoning",
+		"category": "appetizer",
+		"prices": [{ "label": "Half", "value": 50 }, { "label": "Full", "value": 80 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Veg Momos",
+		"desc": "Steamed vegetable momos",
+		"category": "steam",
+		"prices": [{ "label": "5 Pcs", "value": 40 }, { "label": "10 Pcs", "value": 60 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Nutrela Momos",
+		"desc": "Soya stuffed momos",
+		"category": "steam",
+		"prices": [{ "label": "5 Pcs", "value": 50 }, { "label": "10 Pcs", "value": 80 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Veg Fried Momos",
+		"desc": "Crispy fried vegetable momos",
+		"category": "fried",
+		"prices": [{ "label": "5 Pcs", "value": 50 }, { "label": "10 Pcs", "value": 80 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Veg Kurkure Momos",
+		"desc": "Extra crispy kurkure momos",
+		"category": "kurkure",
+		"prices": [{ "label": "5 Pcs", "value": 60 }, { "label": "10 Pcs", "value": 100 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Paneer Momos",
+		"desc": "Paneer stuffed momos",
+		"category": "steam",
+		"prices": [{ "label": "5 Pcs", "value": 50 }, { "label": "10 Pcs", "value": 80 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Paneer Fried Momos",
+		"desc": "Crispy paneer fried momos",
+		"category": "fried",
+		"prices": [{ "label": "5 Pcs", "value": 70 }, { "label": "10 Pcs", "value": 110 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Paneer Kurkure Momos",
+		"desc": "Crunchy paneer kurkure momos",
+		"category": "kurkure",
+		"prices": [{ "label": "5 Pcs", "value": 80 }, { "label": "10 Pcs", "value": 130 }],
+		"special": true,
+		"active": true
+	},
+	{
+		"name": "Veg Noodles",
+		"desc": "Classic veg noodles",
+		"category": "noodles",
+		"prices": [{ "label": "Half", "value": 50 }, { "label": "Full", "value": 80 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Veg Singapuri Noodles",
+		"desc": "Singapore style noodles",
+		"category": "noodles",
+		"prices": [{ "label": "Half", "value": 60 }, { "label": "Full", "value": 90 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Veg Schezwan Noodles",
+		"desc": "Hot schezwan noodles",
+		"category": "noodles",
+		"prices": [{ "label": "Half", "value": 70 }, { "label": "Full", "value": 120 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Veg Chilli Garlic Noodles",
+		"desc": "Chilli garlic noodles",
+		"category": "noodles",
+		"prices": [{ "label": "Half", "value": 70 }, { "label": "Full", "value": 120 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Veg Hakka Noodles",
+		"desc": "Authentic hakka noodles",
+		"category": "noodles",
+		"prices": [{ "label": "Half", "value": 60 }, { "label": "Full", "value": 100 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Paneer Singapuri Noodles",
+		"desc": "Paneer singapore noodles",
+		"category": "noodles",
+		"prices": [{ "label": "Half", "value": 70 }, { "label": "Full", "value": 120 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Veg Fried Rice",
+		"desc": "Classic veg fried rice",
+		"category": "rice",
+		"prices": [{ "label": "Half", "value": 60 }, { "label": "Full", "value": 100 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Chilly Garlic Fried Rice",
+		"desc": "Garlic flavored rice",
+		"category": "rice",
+		"prices": [{ "label": "Half", "value": 70 }, { "label": "Full", "value": 110 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Paneer Fried Rice",
+		"desc": "Paneer fried rice",
+		"category": "rice",
+		"prices": [{ "label": "Half", "value": 70 }, { "label": "Full", "value": 120 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Singapuri Fried Rice",
+		"desc": "Singapore style rice",
+		"category": "rice",
+		"prices": [{ "label": "Half", "value": 80 }, { "label": "Full", "value": 150 }],
+		"special": true,
+		"active": true
+	},
+	{
+		"name": "Veg Soup",
+		"desc": "Classic vegetable soup",
+		"category": "soup",
+		"prices": [{ "label": "Bowl", "value": 70 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Tomato Soup",
+		"desc": "Creamy tomato soup",
+		"category": "soup",
+		"prices": [{ "label": "Bowl", "value": 80 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Coriander Soup",
+		"desc": "Fresh coriander soup",
+		"category": "soup",
+		"prices": [{ "label": "Bowl", "value": 90 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Creamy Broccoli Soup",
+		"desc": "Rich broccoli soup",
+		"category": "soup",
+		"prices": [{ "label": "Bowl", "value": 100 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Veggie Penne Pasta",
+		"desc": "Italian style penne pasta",
+		"category": "pasta",
+		"prices": [{ "label": "Plate", "value": 90 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Red Sauce Pasta",
+		"desc": "Classic tomato pasta",
+		"category": "pasta",
+		"prices": [{ "label": "Plate", "value": 100 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "White Sauce Pasta",
+		"desc": "Creamy white sauce pasta",
+		"category": "pasta",
+		"prices": [{ "label": "Plate", "value": 120 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Alfredo Pasta",
+		"desc": "Rich alfredo pasta",
+		"category": "pasta",
+		"prices": [{ "label": "Plate", "value": 130 }],
+		"special": true,
+		"active": true
+	}
+	,
+	{
+		"name": "Chicken Momos",
+		"desc": "Steamed chicken momos",
+		"category": "steam",
+		"prices": [{ "label": "H Portion", "value": 50 }, { "label": "F Portion", "value": 80 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Chicken Fried Momos",
+		"desc": "Crispy fried chicken momos",
+		"category": "fried",
+		"prices": [{ "label": "H Portion", "value": 70 }, { "label": "F Portion", "value": 110 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Chicken Kurkure Momos",
+		"desc": "Crunchy kurkure chicken momos",
+		"category": "kurkure",
+		"prices": [{ "label": "H Portion", "value": 80 }, { "label": "F Portion", "value": 130 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Egg Fried Rice",
+		"desc": "Egg fried rice",
+		"category": "rice",
+		"prices": [{ "label": "Half", "value": 70 }, { "label": "Full", "value": 120 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Chicken Fried Rice",
+		"desc": "Chicken fried rice",
+		"category": "rice",
+		"prices": [{ "label": "Half", "value": 100 }, { "label": "Full", "value": 180 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Mushroom Soup",
+		"desc": "Creamy mushroom soup",
+		"category": "soup",
+		"prices": [{ "label": "Bowl", "value": 110 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Chicken Soup",
+		"desc": "Hot chicken soup",
+		"category": "soup",
+		"prices": [{ "label": "Bowl", "value": 120 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Mix Sauce Pasta",
+		"desc": "Pasta with mixed sauces",
+		"category": "pasta",
+		"prices": [{ "label": "Plate", "value": 110 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Extravaganza Penne",
+		"desc": "Loaded penne with veggies",
+		"category": "pasta",
+		"prices": [{ "label": "Plate", "value": 150 }],
+		"special": true,
+		"active": true
+	},
+	{
+		"name": "Gourmet Penne",
+		"desc": "Gourmet style penne",
+		"category": "pasta",
+		"prices": [{ "label": "Plate", "value": 150 }],
+		"special": true,
+		"active": true
+	},
+	{
+		"name": "Aglio e Olio",
+		"desc": "Classic garlic oil pasta",
+		"category": "pasta",
+		"prices": [{ "label": "Plate", "value": 160 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Veg Aloo Tikki Burger",
+		"desc": "Aloo tikki burger with chutney",
+		"category": "burger",
+		"prices": [{ "label": "Price", "value": 50 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Chicken Burger",
+		"desc": "Spicy chicken burger",
+		"category": "burger",
+		"prices": [{ "label": "Price", "value": 70 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Veg Grilled Sandwich",
+		"desc": "Grilled veg sandwich",
+		"category": "sandwich",
+		"prices": [{ "label": "Price", "value": 70 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Chicken Grilled Sandwich",
+		"desc": "Grilled chicken sandwich",
+		"category": "sandwich",
+		"prices": [{ "label": "Price", "value": 80 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Veg Cheesy Burger",
+		"desc": "Burger with cheesy patty",
+		"category": "burger",
+		"prices": [{ "label": "Price", "value": 60 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Veg Peri-Peri Burger",
+		"desc": "Peri-peri seasoned veg burger",
+		"category": "burger",
+		"prices": [{ "label": "Price", "value": 60 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "The Food Belly Special Burger",
+		"desc": "Signature special burger",
+		"category": "burger",
+		"prices": [{ "label": "Price", "value": 80 }],
+		"special": true,
+		"active": true
+	},
+	{
+		"name": "Tandoori",
+		"desc": "Tandoori chaap per stick",
+		"category": "tandoori",
+		"prices": [{ "label": "Per Stick", "value": 130 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Afghani",
+		"desc": "Afghani chaap per stick",
+		"category": "tandoori",
+		"prices": [{ "label": "Per Stick", "value": 140 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Achari",
+		"desc": "Achari chaap per stick",
+		"category": "tandoori",
+		"prices": [{ "label": "Per Stick", "value": 140 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Paneer Stuffed",
+		"desc": "Paneer stuffed chaap per stick",
+		"category": "tandoori",
+		"prices": [{ "label": "Per Stick", "value": 150 }],
+		"special": true,
+		"active": true
+	},
+	{
+		"name": "Mushroom Tikka",
+		"desc": "Mushroom tikka per stick",
+		"category": "tandoori",
+		"prices": [{ "label": "Per Stick", "value": 160 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Paneer Tikka (6pc)",
+		"desc": "Paneer tikka (6 pieces)",
+		"category": "tandoori",
+		"prices": [{ "label": "Per Stick", "value": 180 }],
+		"special": true,
+		"active": true
+	},
+	{
+		"name": "Veggie Roll",
+		"desc": "Veg roll",
+		"category": "rolls",
+		"prices": [{ "label": "Price", "value": 60 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Paneer Roll",
+		"desc": "Paneer roll",
+		"category": "rolls",
+		"prices": [{ "label": "Price", "value": 80 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Nutrela Roll",
+		"desc": "Soya (Nutrela) roll",
+		"category": "rolls",
+		"prices": [{ "label": "Price", "value": 70 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Kathi Roll",
+		"desc": "Kathi roll",
+		"category": "rolls",
+		"prices": [{ "label": "Price", "value": 70 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Chicken Stuffed Roll",
+		"desc": "Chicken stuffed roll",
+		"category": "rolls",
+		"prices": [{ "label": "Price", "value": 90 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Chicken with Egg Roll",
+		"desc": "Chicken roll with egg",
+		"category": "rolls",
+		"prices": [{ "label": "Price", "value": 110 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Single Egg Roll",
+		"desc": "Single egg roll",
+		"category": "rolls",
+		"prices": [{ "label": "Price", "value": 70 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Double Egg Roll",
+		"desc": "Double egg roll",
+		"category": "rolls",
+		"prices": [{ "label": "Price", "value": 80 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Veg Gravy Momo",
+		"desc": "Veg momos in gravy",
+		"category": "gravy",
+		"prices": [{ "label": "H Portion", "value": 60 }, { "label": "F Portion", "value": 100 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Veg Tandoori Momo",
+		"desc": "Tandoori style veg momos",
+		"category": "tandoori",
+		"prices": [{ "label": "H Portion", "value": 60 }, { "label": "F Portion", "value": 100 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Paneer Gravy Momo",
+		"desc": "Paneer momos in gravy",
+		"category": "gravy",
+		"prices": [{ "label": "H Portion", "value": 70 }, { "label": "F Portion", "value": 120 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Paneer Tandoori Momos",
+		"desc": "Paneer tandoori momos",
+		"category": "tandoori",
+		"prices": [{ "label": "H Portion", "value": 70 }, { "label": "F Portion", "value": 120 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Nutrela Tandoori Momos",
+		"desc": "Nutrela tandoori momos",
+		"category": "tandoori",
+		"prices": [{ "label": "H Portion", "value": 60 }, { "label": "F Portion", "value": 100 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Chicken Gravy Momos",
+		"desc": "Chicken momos in gravy",
+		"category": "gravy",
+		"prices": [{ "label": "H Portion", "value": 70 }, { "label": "F Portion", "value": 120 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Chicken Tandoori Momos",
+		"desc": "Chicken tandoori momos",
+		"category": "tandoori",
+		"prices": [{ "label": "H Portion", "value": 70 }, { "label": "F Portion", "value": 120 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Veg Manchurian",
+		"desc": "Veg manchurian bowl",
+		"category": "bowls",
+		"prices": [{ "label": "H Portion", "value": 70 }, { "label": "F Portion", "value": 120 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Veg Noodles + Manchurian",
+		"desc": "Veg noodles served with manchurian",
+		"category": "bowls",
+		"prices": [{ "label": "Price", "value": 150 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Veg Fried Rice + Manchurian",
+		"desc": "Veg fried rice with manchurian",
+		"category": "bowls",
+		"prices": [{ "label": "Price", "value": 140 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Chilli Paneer",
+		"desc": "Chilli paneer bowl",
+		"category": "bowls",
+		"prices": [{ "label": "H Portion", "value": 90 }, { "label": "F Portion", "value": 160 }],
+		"special": true,
+		"active": true
+	},
+	{
+		"name": "Chilli Mushroom",
+		"desc": "Chilli mushroom bowl",
+		"category": "bowls",
+		"prices": [{ "label": "H Portion", "value": 80 }, { "label": "F Portion", "value": 150 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Paneer Manchurian",
+		"desc": "Paneer manchurian bowl",
+		"category": "bowls",
+		"prices": [{ "label": "H Portion", "value": 90 }, { "label": "F Portion", "value": 160 }],
+		"special": true,
+		"active": true
+	},
+	{
+		"name": "Chilli Chicken",
+		"desc": "Chilli chicken bowl",
+		"category": "bowls",
+		"prices": [{ "label": "H Portion", "value": 100 }, { "label": "F Portion", "value": 180 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Lemonade",
+		"desc": "Fresh lemonade",
+		"category": "beverages",
+		"prices": [{ "label": "Price", "value": 49 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Virgin Mojito",
+		"desc": "Refreshing mojito (no alcohol)",
+		"category": "beverages",
+		"prices": [{ "label": "Price", "value": 59 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Blue Lagoon",
+		"desc": "Blue lagoon mocktail",
+		"category": "beverages",
+		"prices": [{ "label": "Price", "value": 69 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Cold Coffee",
+		"desc": "Iced cold coffee",
+		"category": "beverages",
+		"prices": [{ "label": "Price", "value": 59 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Tea",
+		"desc": "Hot tea",
+		"category": "beverages",
+		"prices": [{ "label": "Price", "value": 19 }],
+		"special": false,
+		"active": true
+	},
+	{
+		"name": "Kulhad Tea",
+		"desc": "Traditional kulhad tea",
+		"category": "beverages",
+		"prices": [{ "label": "Price", "value": 29 }],
+		"special": false,
+		"active": true
+	}
+]

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Restaurant | MenuNova</title>
+    <meta name="description" content="Create and launch a new restaurant on MenuNova in under 60 seconds.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/admin/create-restaurant/styles.css">
+</head>
+<body>
+    <main class="onboard">
+        <header class="hero">
+            <p class="hero__eyebrow">MenuNova Platform</p>
+            <h1>Create New Restaurant</h1>
+            <p class="hero__sub">Set up, upload menu, and go live instantly.</p>
+        </header>
+
+        <form id="creatorForm" class="card" novalidate>
+            <section class="section">
+                <h2>Section 1 - Restaurant Info</h2>
+                <div class="grid two">
+                    <label class="field">
+                        <span>Restaurant Name</span>
+                        <input id="restaurantName" name="restaurantName" type="text" placeholder="Pramod Fast Food" required>
+                    </label>
+                    <label class="field">
+                        <span>Slug</span>
+                        <input id="slug" name="slug" type="text" placeholder="pramod" required>
+                        <small>Lowercase letters, numbers, and hyphens only.</small>
+                    </label>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>Section 2 - Restaurant Details</h2>
+                <div class="grid two">
+                    <label class="field">
+                        <span>Phone Number</span>
+                        <input id="phone" name="phone" type="tel" placeholder="9876543210" required>
+                    </label>
+                    <label class="field">
+                        <span>City</span>
+                        <input id="city" name="city" type="text" placeholder="Delhi" required>
+                    </label>
+                </div>
+                <div class="grid two">
+                    <label class="field field--full">
+                        <span>Address</span>
+                        <textarea id="address" name="address" rows="2" placeholder="Shop no, area, landmark"></textarea>
+                    </label>
+                    <label class="field">
+                        <span>Restaurant Type</span>
+                        <select id="restaurantType" name="restaurantType">
+                            <option value="Street Food">Street Food</option>
+                            <option value="Cafe">Cafe</option>
+                            <option value="Restaurant">Restaurant</option>
+                            <option value="Cloud Kitchen">Cloud Kitchen</option>
+                        </select>
+                    </label>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>Section 3 - Admin Account</h2>
+                <div class="grid three">
+                    <label class="field">
+                        <span>Admin Name</span>
+                        <input id="adminName" name="adminName" type="text" placeholder="Pramod" required>
+                    </label>
+                    <label class="field">
+                        <span>Admin Phone</span>
+                        <input id="adminPhone" name="adminPhone" type="tel" placeholder="9876543210" required>
+                    </label>
+                    <label class="field">
+                        <span>Admin Password</span>
+                        <input id="adminPassword" name="adminPassword" type="password" placeholder="At least 6 characters" minlength="6" required>
+                    </label>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>Section 4 - Menu Upload</h2>
+                <div class="upload-toggle" role="radiogroup" aria-label="Menu upload type">
+                    <label>
+                        <input type="radio" name="menuMode" value="manual" checked>
+                        <span>Option A - Manual item entry</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="menuMode" value="json">
+                        <span>Option B - Bulk JSON upload</span>
+                    </label>
+                </div>
+
+                <div id="manualPanel" class="panel">
+                    <div class="panel__head">
+                        <h3>Manual Menu Items</h3>
+                        <button type="button" id="addMenuItemBtn" class="ghost-btn">Add Item</button>
+                    </div>
+                    <div id="manualItems" class="manual-items"></div>
+                </div>
+
+                <div id="jsonPanel" class="panel hidden">
+                    <div class="panel__head">
+                        <h3>Paste Menu JSON</h3>
+                    </div>
+                    <label class="field">
+                        <textarea id="menuJson" rows="9" spellcheck="false">[
+  {"name":"Steam Momos","price":60,"category":"Momos","veg":true},
+  {"name":"Fried Momos","price":70,"category":"Momos","veg":true}
+]</textarea>
+                    </label>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2>Section 5 - Preview</h2>
+                <div class="preview">
+                    <p><strong>Restaurant URL:</strong> <a id="previewRestaurantUrl" href="#" target="_blank" rel="noopener">https://your-slug.menunova.me</a></p>
+                    <p><strong>Admin panel:</strong> <a id="previewAdminUrl" href="#" target="_blank" rel="noopener">https://your-slug.menunova.me/admin</a></p>
+                    <p><strong>Kitchen screen:</strong> <a id="previewKitchenUrl" href="#" target="_blank" rel="noopener">https://your-slug.menunova.me/kitchen</a></p>
+                </div>
+            </section>
+
+            <div class="actions">
+                <button id="createRestaurantBtn" class="create-btn" type="button">Create Restaurant</button>
+                <p id="statusMsg" class="status-msg" aria-live="polite"></p>
+            </div>
+        </form>
+
+        <section id="successCard" class="success hidden" aria-live="polite">
+            <h2>Restaurant Created Successfully</h2>
+            <p><strong>Restaurant URL:</strong> <a id="successRestaurantUrl" href="#" target="_blank" rel="noopener"></a></p>
+            <p><strong>Admin Dashboard:</strong> <a id="successAdminUrl" href="#" target="_blank" rel="noopener"></a></p>
+            <p><strong>Kitchen Screen:</strong> <a id="successKitchenUrl" href="#" target="_blank" rel="noopener"></a></p>
+        </section>
+    </main>
+
+    <template id="menuItemTemplate">
+        <div class="menu-item-row">
+            <label class="field">
+                <span>Item Name</span>
+                <input type="text" data-key="name" placeholder="Steam Momos">
+            </label>
+            <label class="field">
+                <span>Price</span>
+                <input type="number" data-key="price" min="0" step="1" placeholder="60">
+            </label>
+            <label class="field">
+                <span>Category</span>
+                <input type="text" data-key="category" placeholder="Momos">
+            </label>
+            <label class="field">
+                <span>Type</span>
+                <select data-key="veg">
+                    <option value="veg">Veg</option>
+                    <option value="nonveg">Non Veg</option>
+                </select>
+            </label>
+            <button type="button" class="delete-item-btn" aria-label="Delete item">Remove</button>
+        </div>
+    </template>
+
+    <script src="/admin/create-restaurant/app.js"></script>
+</body>
+</html>

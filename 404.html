@@ -1,597 +1,309 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>404 | Nothing Found</title>
-  <meta name="description" content="Page not found.">
-  <meta name="theme-color" content="#0a0a0a">
-  <meta name="robots" content="noindex">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
-  <style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 — MenuNova</title>
+    <meta name="description" content="Premium 404 experience for MenuNova with quick actions to try demo or return home.">
+    <meta name="robots" content="noindex, follow">
+    <meta name="theme-color" content="#0b0a12">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-0: #09070f;
+            --bg-1: #12101d;
+            --bg-2: #1a1527;
+            --text: #f8f6ff;
+            --text-soft: #c2bed4;
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.16);
+            --accent-grad: linear-gradient(120deg, #ffb347 0%, #ff8a3d 45%, #ffd47a 100%);
+            --accent-plain: #ff9d46;
+            --card-shadow: 0 20px 64px rgba(0, 0, 0, 0.46), 0 0 0 1px rgba(255, 201, 122, 0.14) inset;
+        }
 
-    *, *::before, *::after {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+        * {
+            box-sizing: border-box;
+        }
 
-    :root {
-      --nothing-bg: #0a0a0a;
-      --nothing-text: #fafafa;
-      --nothing-muted: #525252;
-      --nothing-dim: #262626;
-      --nothing-font: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
-    }
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+        }
 
-    html, body {
-      height: 100%;
-      width: 100%;
-      overflow: hidden;
-    }
+        body {
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(900px 480px at -8% -10%, rgba(255, 163, 74, 0.14), transparent 60%),
+                radial-gradient(740px 380px at 108% 10%, rgba(185, 132, 255, 0.11), transparent 62%),
+                linear-gradient(160deg, var(--bg-0) 0%, var(--bg-1) 52%, var(--bg-2) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
+        }
 
-    body {
-      background: var(--nothing-bg);
-      color: var(--nothing-text);
-      font-family: var(--nothing-font);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      min-height: 100dvh;
-      padding: 2rem;
-      text-align: center;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
+        .fog {
+            position: absolute;
+            inset: -20%;
+            pointer-events: none;
+            filter: blur(34px);
+            opacity: 0.45;
+        }
 
-    .nothing-404 {
-      font-size: clamp(8rem, 30vw, 20rem);
-      font-weight: 300;
-      letter-spacing: -0.04em;
-      line-height: 1;
-      color: var(--nothing-text);
-      margin-bottom: 2rem;
-      user-select: none;
-      cursor: default;
-      position: relative;
-      font-variant-numeric: tabular-nums lining-nums;
-    }
+        .fog::before,
+        .fog::after {
+            content: "";
+            position: absolute;
+            width: 56vmax;
+            height: 56vmax;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(255, 170, 89, 0.16) 0%, rgba(255, 170, 89, 0.08) 26%, transparent 64%);
+            animation: steamFloatA 24s ease-in-out infinite alternate;
+            transform: translate3d(0, 0, 0);
+        }
 
-    .nothing-404::selection {
-      background: transparent;
-    }
+        .fog::before {
+            left: -12vmax;
+            top: 8vmax;
+        }
 
-    .nothing-message {
-      font-size: clamp(0.875rem, 2vw, 1.125rem);
-      font-weight: 400;
-      color: var(--nothing-muted);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      margin-bottom: 3rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0;
-      min-height: 1.5em;
-    }
+        .fog::after {
+            right: -16vmax;
+            bottom: -8vmax;
+            background: radial-gradient(circle at center, rgba(255, 225, 166, 0.12) 0%, rgba(255, 225, 166, 0.06) 30%, transparent 66%);
+            animation: steamFloatB 28s ease-in-out infinite alternate;
+        }
 
-    .nothing-message__text {
-      display: inline;
-    }
+        .pointer-glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            pointer-events: none;
+            background: radial-gradient(circle at center, rgba(255, 171, 90, 0.28), rgba(255, 171, 90, 0) 68%);
+            filter: blur(26px);
+            transform: translate(-50%, -50%);
+            opacity: 0;
+            transition: opacity 320ms ease;
+            z-index: 1;
+        }
 
-    .nothing-cursor {
-      display: inline-block;
-      width: 0.6em;
-      height: 1.2em;
-      background: var(--nothing-muted);
-      margin-left: 0.25em;
-      vertical-align: middle;
-      animation: blink 1s step-end infinite;
-    }
+        .wrap {
+            width: min(100%, 760px);
+            position: relative;
+            z-index: 2;
+            animation: cardIn 700ms cubic-bezier(.2, .8, .2, 1) both;
+        }
 
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0; }
-    }
+        .card {
+            border: 1px solid var(--glass-border);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+            border-radius: 28px;
+            padding: clamp(26px, 3.5vw, 42px);
+            backdrop-filter: blur(18px) saturate(130%);
+            -webkit-backdrop-filter: blur(18px) saturate(130%);
+            box-shadow: var(--card-shadow);
+            transition: transform 420ms cubic-bezier(.2, .8, .2, 1), box-shadow 420ms ease;
+            transform-style: preserve-3d;
+        }
 
-    @media (prefers-reduced-motion: reduce) {
-      .nothing-cursor {
-        animation: none;
-        opacity: 1;
-      }
-    }
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 30px 76px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 212, 144, 0.18) inset, 0 0 36px rgba(255, 166, 70, 0.22);
+        }
 
-    .nothing-nav {
-      display: flex;
-      gap: 2rem;
-    }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 211, 139, 0.45);
+            background: rgba(255, 177, 78, 0.08);
+            color: #ffe9c7;
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
 
-    .nothing-nav__link {
-      color: var(--nothing-dim);
-      text-decoration: none;
-      font-size: 0.875rem;
-      font-weight: 400;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 0.75rem 1rem;
-      transition: color 0.2s ease;
-      position: relative;
-      min-height: 44px;
-      min-width: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+        .title {
+            margin: 18px 0 0;
+            font-size: clamp(32px, 5.4vw, 56px);
+            line-height: 1.02;
+            letter-spacing: -0.03em;
+            font-weight: 900;
+            text-wrap: balance;
+            background: linear-gradient(115deg, #fff9ef 0%, #ffe4b2 38%, #ffbd6f 72%, #fff0d7 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-    .nothing-nav__link:hover,
-    .nothing-nav__link:focus {
-      color: var(--nothing-text);
-      outline: none;
-    }
+        .sub {
+            margin: 16px 0 0;
+            max-width: 62ch;
+            color: var(--text-soft);
+            font-size: clamp(15px, 1.8vw, 18px);
+            line-height: 1.7;
+            text-wrap: pretty;
+        }
 
-    .nothing-nav__link:focus-visible {
-      outline: 1px solid var(--nothing-dim);
-      outline-offset: 4px;
-    }
+        .actions {
+            margin-top: 28px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
 
-    .nothing-nav__link::after {
-      content: '';
-      position: absolute;
-      bottom: 0.5rem;
-      left: 50%;
-      width: 0;
-      height: 1px;
-      background: var(--nothing-text);
-      transition: width 0.2s ease, left 0.2s ease;
-    }
+        .btn {
+            min-height: 48px;
+            padding: 12px 22px;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: .01em;
+            transition: transform 240ms ease, box-shadow 280ms ease, border-color 240ms ease, background 280ms ease;
+        }
 
-    .nothing-nav__link:hover::after {
-      width: 100%;
-      left: 0;
-    }
+        .btn:hover {
+            transform: translateY(-2px) scale(1.03);
+        }
 
-    .nothing-easter-egg {
-      position: fixed;
-      bottom: 2rem;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 0.75rem;
-      color: var(--nothing-dim);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.5s ease, visibility 0.5s ease;
-      pointer-events: none;
-    }
+        .btn:active {
+            transform: translateY(0) scale(0.99);
+        }
 
-    .nothing-easter-egg--visible {
-      opacity: 1;
-      visibility: visible;
-    }
+        .btn-primary {
+            background: var(--accent-grad);
+            color: #2a1708;
+            border-color: rgba(255, 215, 160, 0.82);
+            box-shadow: 0 12px 28px rgba(255, 148, 57, 0.36);
+        }
 
-    @media (max-width: 480px) {
-      body {
-        padding: 1.5rem;
-      }
+        .btn-primary:hover {
+            box-shadow: 0 18px 34px rgba(255, 148, 57, 0.42), 0 0 28px rgba(255, 188, 115, 0.3);
+        }
 
-      .nothing-404 {
-        margin-bottom: 1.5rem;
-      }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: #f6f1ff;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
 
-      .nothing-message {
-        margin-bottom: 2.5rem;
-        flex-direction: column;
-        gap: 0;
-      }
+        .btn-secondary:hover {
+            border-color: rgba(255, 194, 121, 0.64);
+            background: rgba(255, 255, 255, 0.09);
+        }
 
-      .nothing-nav {
-        flex-direction: column;
-        gap: 0.5rem;
-      }
+        @keyframes steamFloatA {
+            0% { transform: translate(-3%, 2%) scale(1); }
+            50% { transform: translate(2%, -3%) scale(1.03); }
+            100% { transform: translate(6%, -7%) scale(1.07); }
+        }
 
-      .nothing-nav__link {
-        padding: 1rem 1.5rem;
-      }
-    }
+        @keyframes steamFloatB {
+            0% { transform: translate(2%, 4%) scale(1); }
+            50% { transform: translate(-3%, -2%) scale(1.04); }
+            100% { transform: translate(-8%, -6%) scale(1.08); }
+        }
 
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-      opacity: 0.02;
-      pointer-events: none;
-      z-index: 1;
-    }
+        @keyframes cardIn {
+            0% { opacity: 0; transform: translateY(20px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
 
-    #particles-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      pointer-events: none;
-    }
+        @media (max-width: 640px) {
+            body {
+                padding: 14px;
+            }
 
-    .ambient-glow {
-      position: fixed;
-      width: 600px;
-      height: 600px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.03) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-      transform: translate(-50%, -50%);
-      transition: opacity 0.5s ease;
-      will-change: transform;
-    }
+            .card {
+                border-radius: 22px;
+                padding: 22px 18px;
+            }
 
-    .ambient-glow--mouse {
-      width: 300px;
-      height: 300px;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 60%);
-    }
+            .actions {
+                flex-direction: column;
+            }
 
-    @media (prefers-reduced-motion: reduce) {
-      .ambient-glow {
-        display: none;
-      }
-      #particles-canvas {
-        display: none;
-      }
-    }
-  </style>
+            .btn {
+                width: 100%;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .fog::before,
+            .fog::after,
+            .wrap,
+            .btn,
+            .card {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
 </head>
 <body>
-
-  <canvas id="particles-canvas" aria-hidden="true"></canvas>
-
-  <div class="ambient-glow ambient-glow--mouse" id="ambient-glow" aria-hidden="true"></div>
-
-  <div class="nothing-404" id="nothing-404" role="img" aria-label="404 Error">404</div>
-
-  <div class="nothing-message">
-    <span class="nothing-message__text" id="nothing-message">This route returns nothing.</span>
-    <span class="nothing-cursor" aria-hidden="true"></span>
-  </div>
-
-  <nav class="nothing-nav" aria-label="Main navigation">
-    <a href="./" class="nothing-nav__link">Home</a>
-    <a href="pages/projects/" class="nothing-nav__link">Projects</a>
-  </nav>
-
-  <div class="nothing-easter-egg" id="nothing-easter-egg" aria-hidden="true">
-    You found the nothing.
-  </div>
-
-  <script>
-
-    (function() {
-      'use strict';
-
-      const messages = [
-        "This route returns nothing.",
-        "You're not supposed to be here.",
-        "Page not found. System idle.",
-        "Nothing exists at this address.",
-        "This endpoint does nothing.",
-        "404. That's all.",
-        "Looks empty here.",
-        "No data. No page.",
-        "This path leads nowhere.",
-        "Nothing to render.",
-        "Resource unavailable.",
-        "The void stares back.",
-        "Null reference detected.",
-        "Connection to nothing.",
-        "Empty response received."
-      ];
-
-      const easterEggMessages = [
-        "You found the nothing.",
-        "There was nothing here. Now there's less.",
-        "Okay. That was intentional.",
-        "Nothing special. Really.",
-        "You've discovered the absence.",
-        "// TODO: Add something here"
-      ];
-
-      let clickCount = 0;
-      let keySequence = [];
-      const secretCode = ['n', 'o', 't', 'h', 'i', 'n', 'g'];
-      let easterEggTriggered = false;
-
-      function setRandomMessage() {
-        const messageEl = document.getElementById('nothing-message');
-        if (messageEl) {
-          const randomIndex = Math.floor(Math.random() * messages.length);
-          messageEl.textContent = messages[randomIndex];
-        }
-      }
-
-      function triggerEasterEgg() {
-        if (easterEggTriggered) return;
-        easterEggTriggered = true;
-
-        const easterEggEl = document.getElementById('nothing-easter-egg');
-        if (easterEggEl) {
-
-          const randomIndex = Math.floor(Math.random() * easterEggMessages.length);
-          easterEggEl.textContent = easterEggMessages[randomIndex];
-          easterEggEl.classList.add('nothing-easter-egg--visible');
-
-          setTimeout(() => {
-            easterEggEl.classList.remove('nothing-easter-egg--visible');
-
-            setTimeout(() => {
-              easterEggTriggered = false;
-              clickCount = 0;
-              keySequence = [];
-            }, 500);
-          }, 5000);
-        }
-      }
-
-      function handleClick() {
-        clickCount++;
-
-        if (clickCount >= 5) {
-          triggerEasterEgg();
-        }
-
-        clearTimeout(window.clickResetTimeout);
-        window.clickResetTimeout = setTimeout(() => {
-          if (!easterEggTriggered) {
-            clickCount = 0;
-          }
-        }, 2000);
-      }
-
-      function handleKeyDown(e) {
-        const key = e.key.toLowerCase();
-
-        if (key.length !== 1 || !/[a-z]/.test(key)) {
-          keySequence = [];
-          return;
-        }
-
-        keySequence.push(key);
-
-        if (keySequence.length > secretCode.length) {
-          keySequence.shift();
-        }
-
-        if (keySequence.length === secretCode.length) {
-          const matches = keySequence.every((k, i) => k === secretCode[i]);
-          if (matches) {
-            triggerEasterEgg();
-          }
-        }
-      }
-
-      function init() {
-
-        setRandomMessage();
-
-        const el404 = document.getElementById('nothing-404');
-        if (el404) {
-          el404.addEventListener('click', handleClick);
-          el404.addEventListener('touchend', function(e) {
-            e.preventDefault();
-            handleClick();
-          });
-        }
-
-        document.addEventListener('keydown', handleKeyDown);
-
-        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (prefersReducedMotion) {
-          const cursor = document.querySelector('.nothing-cursor');
-          if (cursor) {
-            cursor.style.animation = 'none';
-            cursor.style.opacity = '1';
-          }
-        }
-      }
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-      } else {
-        init();
-      }
-    })();
-
-    (function() {
-      'use strict';
-
-      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (prefersReducedMotion) return;
-
-      const canvas = document.getElementById('particles-canvas');
-      if (!canvas) return;
-
-      const ctx = canvas.getContext('2d');
-
-      const config = {
-        particleCount: 80,
-        particleSize: { min: 1, max: 2.5 },
-        speed: { min: 0.1, max: 0.4 },
-        opacity: { min: 0.1, max: 0.4 },
-        mouseRadius: 150,
-        mouseForce: 0.08,
-        friction: 0.98,
-        connectionDistance: 120,
-        connectionOpacity: 0.08
-      };
-
-      let particles = [];
-      let mouse = { x: null, y: null };
-      let animationId = null;
-
-      class Particle {
-        constructor() {
-          this.reset();
-        }
-
-        reset() {
-          this.x = Math.random() * canvas.width;
-          this.y = Math.random() * canvas.height;
-          this.size = config.particleSize.min + Math.random() * (config.particleSize.max - config.particleSize.min);
-          this.speedX = (Math.random() - 0.5) * (config.speed.max - config.speed.min) + config.speed.min;
-          this.speedY = (Math.random() - 0.5) * (config.speed.max - config.speed.min) + config.speed.min;
-          this.velocityX = 0;
-          this.velocityY = 0;
-          this.opacity = config.opacity.min + Math.random() * (config.opacity.max - config.opacity.min);
-          this.baseOpacity = this.opacity;
-        }
-
-        update() {
-
-          if (mouse.x !== null && mouse.y !== null) {
-            const dx = mouse.x - this.x;
-            const dy = mouse.y - this.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance < config.mouseRadius) {
-              const force = (config.mouseRadius - distance) / config.mouseRadius;
-              const angle = Math.atan2(dy, dx);
-
-              this.velocityX -= Math.cos(angle) * force * config.mouseForce;
-              this.velocityY -= Math.sin(angle) * force * config.mouseForce;
-
-              this.opacity = Math.min(this.baseOpacity + force * 0.3, 0.6);
-            } else {
-              this.opacity += (this.baseOpacity - this.opacity) * 0.05;
-            }
-          }
-
-          this.velocityX *= config.friction;
-          this.velocityY *= config.friction;
-
-          this.x += this.speedX + this.velocityX;
-          this.y += this.speedY + this.velocityY;
-
-          if (this.x < -this.size) this.x = canvas.width + this.size;
-          if (this.x > canvas.width + this.size) this.x = -this.size;
-          if (this.y < -this.size) this.y = canvas.height + this.size;
-          if (this.y > canvas.height + this.size) this.y = -this.size;
-        }
-
-        draw() {
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(250, 250, 250, ${this.opacity})`;
-          ctx.fill();
-        }
-      }
-
-      function drawConnections() {
-        for (let i = 0; i < particles.length; i++) {
-          for (let j = i + 1; j < particles.length; j++) {
-            const dx = particles[i].x - particles[j].x;
-            const dy = particles[i].y - particles[j].y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance < config.connectionDistance) {
-              const opacity = config.connectionOpacity * (1 - distance / config.connectionDistance);
-              ctx.beginPath();
-              ctx.moveTo(particles[i].x, particles[i].y);
-              ctx.lineTo(particles[j].x, particles[j].y);
-              ctx.strokeStyle = `rgba(250, 250, 250, ${opacity})`;
-              ctx.lineWidth = 0.5;
-              ctx.stroke();
-            }
-          }
-        }
-      }
-
-      function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        particles.forEach(particle => {
-          particle.update();
-          particle.draw();
-        });
-
-        drawConnections();
-
-        animationId = requestAnimationFrame(animate);
-      }
-
-      function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
-
-      function handleMouseMove(e) {
-        mouse.x = e.clientX;
-        mouse.y = e.clientY;
-
-        const glow = document.getElementById('ambient-glow');
-        if (glow) {
-          glow.style.left = mouse.x + 'px';
-          glow.style.top = mouse.y + 'px';
-        }
-      }
-
-      function handleMouseLeave() {
-        mouse.x = null;
-        mouse.y = null;
-      }
-
-      function handleTouchMove(e) {
-        if (e.touches.length > 0) {
-          mouse.x = e.touches[0].clientX;
-          mouse.y = e.touches[0].clientY;
-
-          const glow = document.getElementById('ambient-glow');
-          if (glow) {
-            glow.style.left = mouse.x + 'px';
-            glow.style.top = mouse.y + 'px';
-          }
-        }
-      }
-
-      function handleTouchEnd() {
-        mouse.x = null;
-        mouse.y = null;
-      }
-
-      function initParticles() {
-        resize();
-
-        particles = [];
-        for (let i = 0; i < config.particleCount; i++) {
-          particles.push(new Particle());
-        }
-
-        animate();
-
-        window.addEventListener('resize', resize);
-        document.addEventListener('mousemove', handleMouseMove);
-        document.addEventListener('mouseleave', handleMouseLeave);
-        document.addEventListener('touchmove', handleTouchMove, { passive: true });
-        document.addEventListener('touchend', handleTouchEnd);
-
-        const glow = document.getElementById('ambient-glow');
-        if (glow) {
-          glow.style.left = window.innerWidth / 2 + 'px';
-          glow.style.top = window.innerHeight / 2 + 'px';
-        }
-      }
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initParticles);
-      } else {
-        initParticles();
-      }
-    })();
-  </script>
+    <div class="fog" aria-hidden="true"></div>
+    <div class="pointer-glow" id="pointerGlow" aria-hidden="true"></div>
+
+    <main class="wrap" role="main" aria-labelledby="nf-title">
+        <section class="card">
+            <span class="badge">🍽 MenuNova • ERROR 404</span>
+            <h1 class="title" id="nf-title">This page isn’t on the menu.</h1>
+            <p class="sub">The link may be outdated or incorrect. But don’t worry — your restaurant operations can still move forward.</p>
+
+            <div class="actions">
+                <a class="btn btn-primary" href="/demo">Wanna Try Demo?</a>
+                <a class="btn btn-secondary" href="https://menunova.me">Go Home</a>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            const glow = document.getElementById('pointerGlow');
+            if (!glow || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            let raf = null;
+            let targetX = window.innerWidth / 2;
+            let targetY = window.innerHeight / 2;
+            let x = targetX;
+            let y = targetY;
+
+            const tick = () => {
+                x += (targetX - x) * 0.08;
+                y += (targetY - y) * 0.08;
+                glow.style.left = x + 'px';
+                glow.style.top = y + 'px';
+                raf = requestAnimationFrame(tick);
+            };
+
+            window.addEventListener('mousemove', (e) => {
+                targetX = e.clientX;
+                targetY = e.clientY;
+                glow.style.opacity = '0.85';
+                if (!raf) raf = requestAnimationFrame(tick);
+            });
+
+            window.addEventListener('mouseleave', () => {
+                glow.style.opacity = '0';
+            });
+        })();
+    </script>
 </body>
 </html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Test Portal — MenuNova</title>
+    <meta name="description" content="MenuNova internal developer test environment.">
+    <meta name="theme-color" content="#0b0f15">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/test-portal.css">
+</head>
+<body>
+    <div class="portal-bg" aria-hidden="true"></div>
+
+    <main class="portal-shell">
+        <section id="lockView" class="view view--active" aria-labelledby="lockTitle">
+            <div class="lock-card" id="lockCard">
+                <div class="brand-mark">
+                    <img src="/favicon.ico" alt="MenuNova" class="brand-mark__logo">
+                    <span class="brand-mark__text">MenuNova</span>
+                </div>
+                <h1 id="lockTitle" class="lock-card__title">Developer Access Required</h1>
+                <p class="lock-card__sub">Internal testing environment</p>
+
+                <form id="unlockForm" class="unlock-form" autocomplete="off">
+                    <label for="portalPassword" class="sr-only">Developer password</label>
+                    <input
+                        id="portalPassword"
+                        class="unlock-form__input"
+                        type="password"
+                        name="password"
+                        placeholder="Enter developer password"
+                        required
+                    >
+                    <button type="submit" class="unlock-form__button">Unlock</button>
+                </form>
+                <p id="unlockError" class="unlock-error" role="alert" aria-live="polite"></p>
+            </div>
+        </section>
+
+        <section id="dashboardView" class="view dashboard" aria-labelledby="dashboardTitle">
+            <header class="dashboard__header">
+                <div>
+                    <div class="dashboard__title-row">
+                        <h2 id="dashboardTitle" class="dashboard__title">MenuNova Test Environment</h2>
+                        <span class="dev-badge">DEV MODE</span>
+                    </div>
+                    <p class="dashboard__sub">Debug • Inspect • Test flows</p>
+                </div>
+                <button id="lockAgainBtn" class="lock-again-btn" type="button">Lock Again</button>
+            </header>
+
+            <section class="debug-panel" aria-label="Debug information">
+                <h3 class="debug-panel__title">System Status</h3>
+                <div class="debug-grid">
+                    <div class="debug-item">
+                        <span class="debug-item__label">Current slug</span>
+                        <span id="debugSlug" class="debug-item__value">-</span>
+                    </div>
+                    <div class="debug-item">
+                        <span class="debug-item__label">Connected API base URL</span>
+                        <span id="debugApiBase" class="debug-item__value">-</span>
+                    </div>
+                    <div class="debug-item">
+                        <span class="debug-item__label">Environment</span>
+                        <span class="debug-item__value">Production API</span>
+                    </div>
+                    <div class="debug-item">
+                        <span class="debug-item__label">DB mapping</span>
+                        <span class="debug-item__value">restaurant_test</span>
+                    </div>
+                    <div class="debug-item">
+                        <span class="debug-item__label">Real-time status</span>
+                        <span id="debugRealtime" class="debug-item__value status-pill status-pill--off">Disconnected</span>
+                    </div>
+                    <div class="debug-item">
+                        <span class="debug-item__label">Current timestamp</span>
+                        <span id="debugTimestamp" class="debug-item__value">-</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="actions-grid" aria-label="Developer actions">
+                <article class="action-card">
+                    <div class="action-card__icon" aria-hidden="true">🍽</div>
+                    <h3 class="action-card__title">Menu View</h3>
+                    <p class="action-card__desc">Test customer ordering flow.</p>
+                    <a href="/menu" class="action-card__button">Open Menu</a>
+                </article>
+
+                <article class="action-card">
+                    <div class="action-card__icon" aria-hidden="true">⚙</div>
+                    <h3 class="action-card__title">Admin Panel</h3>
+                    <p class="action-card__desc">Manage orders, status &amp; analytics.</p>
+                    <a href="/admin" class="action-card__button">Open Admin</a>
+                </article>
+            </section>
+        </section>
+    </main>
+
+    <script src="/shared/js/config.js"></script>
+    <script src="/js/test-portal.js"></script>
+</body>
+</html>

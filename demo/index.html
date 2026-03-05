@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Demo - MenuNova</title>
+    <meta name="description" content="Experience MenuNova's digital restaurant management system in action">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/shared/css/global.css">
+    <link rel="stylesheet" href="/shared/css/menu.css">
+    <link rel="stylesheet" href="/demo/demo.css">
+    <link rel="stylesheet" href="/shared/css/footer.css">
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-demo">
+        <div class="container-demo">
+            <div class="hero-grid">
+                <div class="hero-content">
+                    <h1 class="hero-title">See MenuNova in Action.</h1>
+                    <p class="hero-subtitle">Experience a complete digital restaurant workflow — from customer orders to kitchen prep.</p>
+                    <button class="btn-demo-start" id="startDemoBtn">
+                        <span>Start Interactive Demo</span>
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M7.5 5L12.5 10L7.5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="hero-visual">
+                    <div class="animated-mockup">
+                        <div class="mockup-card mockup-1">
+                            <div class="mockup-header">Demo Bistro</div>
+                            <div class="mockup-item">🍕 Margherita Pizza</div>
+                            <div class="mockup-item">🍝 Pasta Carbonara</div>
+                            <div class="mockup-item">🥗 Caesar Salad</div>
+                        </div>
+                        <div class="mockup-card mockup-2">
+                            <div class="mockup-badge">New Order #1234</div>
+                            <div class="mockup-status">Preparing...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Interface -->
+    <section class="demo-interface" id="demoInterface">
+        <div class="container-demo">
+            <!-- Mode Toggle -->
+            <div class="mode-toggle">
+                <button class="mode-btn active" data-mode="menu">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <path d="M3 6h14M3 10h14M3 14h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span>Menu View</span>
+                </button>
+                <button class="mode-btn" data-mode="admin">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="2"/>
+                        <path d="M3 8h14" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <span>Admin View</span>
+                </button>
+            </div>
+
+            <!-- Menu Demo View -->
+            <div class="demo-view active" id="menuView">
+                <div class="demo-header">
+                    <div class="restaurant-info">
+                        <h2>🍽️ Demo Bistro</h2>
+                        <p>Your digital dining experience</p>
+                    </div>
+                    <div class="cart-indicator" id="cartIndicator">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M9 2L7 7M17 2L19 7M7 7H21L19 21H7L5 7H7Z" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <span class="cart-count">0</span>
+                    </div>
+                </div>
+
+                <div class="menu-categories" id="menuCategories">
+                    <!-- Populated by JS -->
+                </div>
+
+                <!-- Cart Modal -->
+                <div class="modal-overlay" id="cartModal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Your Order</h3>
+                            <button class="modal-close" id="closeCartBtn">×</button>
+                        </div>
+                        <div class="cart-items" id="cartItems">
+                            <!-- Populated by JS -->
+                        </div>
+                        <div class="cart-footer">
+                            <div class="cart-total">
+                                <span>Total</span>
+                                <span id="cartTotal">₹0</span>
+                            </div>
+                            <button class="btn-checkout" id="checkoutBtn">Place Order</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Success Modal -->
+                <div class="modal-overlay" id="orderSuccessModal">
+                    <div class="modal-content success-modal">
+                        <div class="success-animation">
+                            <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+                                <circle cx="40" cy="40" r="38" stroke="#52b788" stroke-width="4"/>
+                                <path d="M25 40L35 50L55 30" stroke="#52b788" stroke-width="4" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                        <h3>Order Placed!</h3>
+                        <p>Order ID: <strong id="orderId">#1234</strong></p>
+                        <div class="order-status-tracker">
+                            <div class="status-step active" data-status="placed">
+                                <div class="status-dot"></div>
+                                <span>Placed</span>
+                            </div>
+                            <div class="status-step" data-status="preparing">
+                                <div class="status-dot"></div>
+                                <span>Preparing</span>
+                            </div>
+                            <div class="status-step" data-status="ready">
+                                <div class="status-dot"></div>
+                                <span>Ready</span>
+                            </div>
+                        </div>
+                        <button class="btn-demo-close" id="closeSuccessBtn">Continue Exploring</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Demo View -->
+            <div class="demo-view" id="adminView">
+                <div class="admin-header">
+                    <h2>Admin Dashboard</h2>
+                    <div class="admin-stats-mini">
+                        <div class="stat-mini">
+                            <span class="stat-label">Today</span>
+                            <span class="stat-value">12</span>
+                        </div>
+                        <div class="stat-mini">
+                            <span class="stat-label">Revenue</span>
+                            <span class="stat-value">₹6,210</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-grid">
+                    <!-- Orders Panel -->
+                    <div class="admin-panel orders-panel">
+                        <h3>Live Orders</h3>
+                        <div class="orders-list" id="ordersList">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Analytics Panel -->
+                    <div class="admin-panel analytics-panel">
+                        <h3>Analytics</h3>
+                        <div class="analytics-cards">
+                            <div class="analytics-card">
+                                <div class="analytics-icon">📊</div>
+                                <div class="analytics-data">
+                                    <span class="analytics-label">Total Orders</span>
+                                    <span class="analytics-number" data-count="128">0</span>
+                                </div>
+                            </div>
+                            <div class="analytics-card">
+                                <div class="analytics-icon">💰</div>
+                                <div class="analytics-data">
+                                    <span class="analytics-label">Total Revenue</span>
+                                    <span class="analytics-number" data-count="48320">₹0</span>
+                                </div>
+                            </div>
+                            <div class="analytics-card">
+                                <div class="analytics-icon">⭐</div>
+                                <div class="analytics-data">
+                                    <span class="analytics-label">Top Item</span>
+                                    <span class="analytics-text">Margherita Pizza</span>
+                                </div>
+                            </div>
+                            <div class="analytics-card">
+                                <div class="analytics-icon">📈</div>
+                                <div class="analytics-data">
+                                    <span class="analytics-label">Avg Order Value</span>
+                                    <span class="analytics-number" data-count="377">₹0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Guided Tour Button -->
+    <button class="tour-trigger" id="tourTrigger">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
+            <path d="M10 14V10M10 6h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span>Play Guided Tour</span>
+    </button>
+
+    <!-- Tour Overlay -->
+    <div class="tour-overlay" id="tourOverlay">
+        <div class="tour-backdrop"></div>
+        <div class="tour-tooltip" id="tourTooltip">
+            <div class="tour-content">
+                <h4 id="tourTitle">Welcome</h4>
+                <p id="tourDescription">Let's explore MenuNova's features</p>
+            </div>
+            <div class="tour-controls">
+                <button class="tour-skip" id="tourSkip">Skip Tour</button>
+                <button class="tour-next" id="tourNext">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MenuNova Footer -->
+    <footer class="menunova-footer">
+        <div class="footer-container">
+            <!-- Top Section: Grid Layout -->
+            <div class="footer-grid">
+                <!-- Column 1: Brand -->
+                <div class="footer-column footer-brand">
+                    <h3 class="footer-logo">MenuNova</h3>
+                    <p class="footer-tagline">Run your restaurant digitally.</p>
+                    <p class="footer-description">
+                        QR menus, real-time orders, and powerful analytics.
+                    </p>
+                </div>
+
+                <!-- Column 2: Product -->
+                <div class="footer-column">
+                    <h4 class="footer-heading">Product</h4>
+                    <ul class="footer-links">
+                        <li><a href="https://menunova.me/features/" class="footer-link">Features</a></li>
+                        <li><a href="https://menunova.me/demo" class="footer-link">Demo</a></li>
+                        <li><a href="https://menunova.me/pricing/" class="footer-link">Pricing</a></li>
+                        <li><a href="https://menunova.me/admin/" class="footer-link">Admin Login</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 3: Legal -->
+                <div class="footer-column">
+                    <h4 class="footer-heading">Legal</h4>
+                    <ul class="footer-links">
+                        <li><a href="https://menunova.me/privacy-policy/" class="footer-link">Privacy Policy</a></li>
+                        <li><a href="https://menunova.me/terms-of-service/" class="footer-link">Terms of Service</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 4: Contact -->
+                <div class="footer-column">
+                    <h4 class="footer-heading">Contact</h4>
+                    <ul class="footer-links">
+                        <li>
+                            <a href="mailto:ceo@menunova.me" class="footer-link footer-email">
+                                <svg class="footer-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                    <polyline points="22,6 12,13 2,6"></polyline>
+                                </svg>
+                                ceo@menunova.me
+                            </a>
+                        </li>
+                        <li>
+                            <span class="footer-text">
+                                <svg class="footer-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                                India
+                            </span>
+                        </li>
+                    </ul>
+                    <!-- Social Links -->
+                    <div class="footer-social">
+                        <a href="#" class="footer-social-link" aria-label="Twitter">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="footer-social-link" aria-label="LinkedIn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"></path>
+                                <circle cx="4" cy="4" r="2"></circle>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Strip: Trust Badges & Copyright -->
+            <div class="footer-bottom">
+                <!-- Trust Badges -->
+                <div class="footer-trust-badges">
+                    <span class="trust-badge">
+                        <svg class="trust-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        Secure
+                    </span>
+                    <span class="trust-badge">
+                        <svg class="trust-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+                        </svg>
+                        Cloud Hosted
+                    </span>
+                    <span class="trust-badge">
+                        <svg class="trust-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                        Real-Time
+                    </span>
+                </div>
+                
+                <!-- Copyright & Built With -->
+                <div class="footer-bottom-text">
+                    <p class="footer-copyright">
+                        © 2026 MenuNova. All rights reserved.
+                    </p>
+                    <p class="footer-built-with">
+                        Built with <span class="heart">❤️</span> in India
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/demo/demo.js"></script>
+</body>
+</html>

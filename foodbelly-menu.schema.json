@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FoodBelly Menu Items",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "name": { "type": "string" },
+      "desc": { "type": "string" },
+      "category": {
+        "type": "string",
+        "enum": [
+          "appetizer",
+          "steam",
+          "fried",
+          "kurkure",
+          "noodles",
+          "rice",
+          "soup",
+          "pasta",
+          "burger",
+          "sandwich",
+          "tandoori",
+          "rolls",
+          "gravy",
+          "bowls",
+          "beverages"
+        ]
+      },
+      "prices": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "label": { "type": "string" },
+            "value": { "type": "number" }
+          },
+          "required": ["label","value"],
+          "additionalProperties": false
+        },
+        "minItems": 1
+      },
+      "special": { "type": "boolean" },
+      "active": { "type": "boolean" }
+    },
+    "required": ["name","desc","category","prices","special","active"],
+    "additionalProperties": false
+  }
+}
