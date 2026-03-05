@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>MenuNova — Demo</title>
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="hero">
+        <div class="hero-inner">
+          <h1 id="restaurant-name">Menu</h1>
+          <div id="veg-status" class="veg-status"></div>
+          <div id="menu-stats" class="menu-stats"></div>
+          <div class="search-row">
+            <input id="search" type="search" placeholder="Search dishes, descriptions..." />
+            <div id="quick-filters" class="quick-filters"></div>
+          </div>
+        </div>
+      </header>
+
+      <nav id="category-bar" class="category-bar"></nav>
+
+      <main id="menu-container" class="menu-container"></main>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
