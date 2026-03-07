@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anand Web OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="desktop" id="desktop">
+    <div class="desktop-wallpaper"></div>
+
+    <div class="desktop-icons" id="desktopIcons">
+      <div class="desktop-icon" data-app="notes" ondblclick="Desktop.openApp('notes')">
+        <div class="icon icon-notes">📝</div>
+        <span class="label">Notes</span>
+      </div>
+      <div class="desktop-icon" data-app="files" ondblclick="Desktop.openApp('files')">
+        <div class="icon icon-files">📁</div>
+        <span class="label">Files</span>
+      </div>
+      <div class="desktop-icon" data-app="ai" ondblclick="Desktop.openApp('ai')">
+        <div class="icon icon-ai">🤖</div>
+        <span class="label">AI Assistant</span>
+      </div>
+      <div class="desktop-icon hidden" data-app="admin" id="adminIcon" ondblclick="Desktop.openApp('admin')">
+        <div class="icon icon-admin">⚙️</div>
+        <span class="label">Admin</span>
+      </div>
+    </div>
+
+    <div id="windowsContainer"></div>
+
+    <div class="taskbar" id="taskbar">
+      <div class="taskbar-left">
+        <div class="taskbar-start" title="Anand Web OS">💠</div>
+        <div class="taskbar-apps" id="taskbarApps"></div>
+      </div>
+      <div class="taskbar-right">
+        <div class="taskbar-user" id="taskbarUser">
+          <div class="avatar" id="userAvatar"></div>
+          <span class="name" id="userName"></span>
+        </div>
+        <div class="taskbar-clock" id="taskbarClock">
+          <div class="time"></div>
+          <div class="date"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="user-menu" id="userMenu">
+      <div class="user-menu-item" onclick="Desktop.openApp('admin')" id="menuAdmin" style="display:none">
+        <span>⚙️</span> Admin Panel
+      </div>
+      <div class="user-menu-item danger" onclick="Auth.logout()">
+        <span>🚪</span> Sign Out
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <template id="tmplNotes">
+    <div class="notes-list-view" id="notesListView">
+      <div class="notes-toolbar">
+        <input type="text" class="notes-search" placeholder="Search notes..." id="notesSearch">
+        <button class="btn btn-primary btn-sm" onclick="Notes.showEditor()">+ New Note</button>
+      </div>
+      <div class="notes-grid" id="notesGrid"></div>
+      <div class="notes-pagination" id="notesPagination"></div>
+    </div>
+    <div class="note-editor" id="noteEditor">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <button class="btn btn-ghost btn-sm" onclick="Notes.hideEditor()">← Back</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-danger btn-sm hidden" id="noteDeleteBtn" onclick="Notes.deleteCurrent()">Delete</button>
+          <button class="btn btn-primary btn-sm" onclick="Notes.save()">Save</button>
+        </div>
+      </div>
+      <input type="text" class="note-editor-title" placeholder="Note title" id="noteTitle">
+      <textarea class="note-editor-content" placeholder="Start writing..." id="noteContent"></textarea>
+    </div>
+  </template>
+
+  <template id="tmplFiles">
+    <div class="files-toolbar">
+      <span style="font-size:13px;color:var(--text-secondary)" id="filesCount"></span>
+      <button class="btn btn-primary btn-sm" onclick="Files.toggleUpload()">+ Upload</button>
+    </div>
+    <div class="file-upload-zone" id="fileUploadZone" onclick="document.getElementById('fileInput').click()">
+      <div class="upload-icon">📤</div>
+      <p>Click or drag files here to upload</p>
+      <p class="upload-hint">Max 10MB per file</p>
+      <input type="file" id="fileInput" style="display:none" onchange="Files.upload(this.files)">
+    </div>
+    <div class="files-list" id="filesList"></div>
+  </template>
+
+  <template id="tmplAI">
+    <div class="chat-container">
+      <div class="chat-messages" id="chatMessages">
+        <div class="chat-message assistant">
+          <div class="chat-avatar">🤖</div>
+          <div class="chat-bubble">Hello! I'm your AI assistant. How can I help you today?</div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <textarea class="chat-input" id="chatInput" placeholder="Type a message..." rows="1" onkeydown="AI.handleKey(event)"></textarea>
+        <button class="chat-send" id="chatSend" onclick="AI.send()">➤</button>
+      </div>
+    </div>
+  </template>
+
+  <template id="tmplAdmin">
+    <div>
+      <div class="admin-grid" id="adminGrid">
+        <div class="admin-stat">
+          <div class="stat-icon">👥</div>
+          <div class="stat-value" id="statUsers">—</div>
+          <div class="stat-label">Total Users</div>
+        </div>
+        <div class="admin-stat">
+          <div class="stat-icon">📝</div>
+          <div class="stat-value" id="statNotes">—</div>
+          <div class="stat-label">Total Notes</div>
+        </div>
+        <div class="admin-stat">
+          <div class="stat-icon">📁</div>
+          <div class="stat-value" id="statFiles">—</div>
+          <div class="stat-label">Total Files</div>
+        </div>
+        <div class="admin-stat">
+          <div class="stat-icon">💾</div>
+          <div class="stat-value" id="statStorage">—</div>
+          <div class="stat-label">Storage Used</div>
+        </div>
+      </div>
+      <div class="admin-refresh">
+        <button class="btn btn-ghost btn-sm" onclick="Admin.load()">↻ Refresh</button>
+      </div>
+    </div>
+  </template>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/desktop.js"></script>
+  <script src="js/notes.js"></script>
+  <script src="js/files.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Kitchen — Pramod Fast Food</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="restaurant" content="pramod">
+    <meta name="theme-color" content="#0f0f12">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/admin.css">
+    <style>
+        body{background:var(--c-bg);margin:0;font-family:var(--ff);color:var(--c-text);overflow-x:hidden;-webkit-user-select:none;user-select:none}
+        /* Extra kitchen-specific overrides */
+        .kitchen-card{will-change:transform}
+        .kitchen-card--swiping{transition:none!important}
+        .kitchen-card--swipe-right{animation:swipeRight .4s var(--ease) forwards}
+        .kitchen-card--swipe-left{animation:swipeLeft .4s var(--ease) forwards}
+        @keyframes swipeRight{to{transform:translateX(120%);opacity:0}}
+        @keyframes swipeLeft{to{transform:translateX(-120%);opacity:0}}
+
+        /* Animated entry for new orders */
+        .order-enter{opacity:0;transform:translateY(-20px);animation:slideFadeIn .4s ease forwards}
+        @keyframes slideFadeIn{to{opacity:1;transform:translateY(0)}}
+
+        /* Smooth reorder */
+        .moved-to-bottom{animation:fadeSlide .3s ease}
+        @keyframes fadeSlide{from{opacity:.6;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+
+        /* Counters & badges */
+        .completed-counter{
+            background:rgba(0,200,120,.1);
+            border:1px solid rgba(0,200,120,.3);
+            padding:4px 10px;
+            border-radius:8px;
+            font-size:13px;
+            color:#00c878;
+            white-space:nowrap;
+        }
+        .active-badge{
+            background:#ff6b00;
+            color:#000;
+            padding:3px 8px;
+            border-radius:20px;
+            font-size:12px;
+            font-weight:700;
+            margin-left:8px;
+        }
+
+        /* Fullscreen wakeLock banner */
+        .kitchen-wakelock{
+            position:fixed;bottom:var(--sp-4);left:50%;transform:translateX(-50%);
+            padding:8px 20px;border-radius:var(--r-full);
+            background:var(--c-surface);border:1px solid var(--c-border);
+            font-size:12px;color:var(--c-text-soft);z-index:100;
+            opacity:0;transition:opacity .3s;pointer-events:none;
+        }
+        .kitchen-wakelock.show{opacity:1}
+    </style>
+</head>
+<body class="kitchen-page">
+
+    <div id="app-loader" class="app-loader">
+        <div class="loader-card">
+            <div class="spinner"></div>
+            <p class="loader-text">Firing up kitchen mode...</p>
+        </div>
+    </div>
+    <script>
+    (function(){
+        var msgs=['Firing up kitchen mode...','Connecting to live orders...','Heating the tawa...','Prepping the station...'];
+        var el=document.querySelector('.loader-text');
+        if(el) el.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+        window.showLoader=function(t){
+            var l=document.getElementById('app-loader');
+            if(!l)return;
+            if(t){var p=l.querySelector('.loader-text');if(p)p.textContent=t;}
+            l.classList.remove('hidden');
+        };
+        window.hideLoader=function(){
+            var l=document.getElementById('app-loader');
+            if(l)l.classList.add('hidden');
+        };
+        setTimeout(function(){hideLoader();},15000);
+    })();
+    </script>
+
+    <script>function goBack(){document.referrer?window.history.back():window.location.href='/extrass/admin/';}</script>
+
+    <header class="kitchen-header">
+        <div style="display:flex;align-items:center;gap:var(--sp-3)">
+            <button class="kitchen-header__sound" onclick="goBack()" title="Back">←</button>
+            <a href="/extrass/admin/" style="text-decoration:none;font-size:28px">🥟</a>
+            <h1 class="kitchen-header__title">Kitchen<span class="active-badge" id="kitchenActiveBadge" style="display:none"></span></h1>
+        </div>
+        <div class="kitchen-header__right">
+            <span class="completed-counter" id="kitchenCompletedCounter" style="display:none">✅ Completed Today: 0</span>
+            <span class="kitchen-header__count" id="kitchenCount">0 orders</span>
+            <span class="kitchen-header__time" id="kitchenClock">00:00</span>
+            <button class="kitchen-header__sound" id="kitchenSoundToggle" title="Toggle sound">🔔</button>
+            <button class="kitchen-header__fullscreen" id="kitchenFullscreen" title="Fullscreen">⛶</button>
+        </div>
+    </header>
+
+    <div class="kitchen-orders" id="kitchenOrders">
+        <div class="kitchen-empty">
+            <div class="kitchen-empty__icon">👨‍🍳</div>
+            <div class="kitchen-empty__text">No active orders</div>
+        </div>
+    </div>
+
+    <div class="kitchen-wakelock" id="kitchenWakelock">Screen will stay on</div>
+
+    <audio id="kitchenNotifSound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRl4GAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YToGAAD+/wIA/P8EAPv/BgD5/wgA9/8KAPb/CwD1/wwA9f8MAPT/DQD0/w0A9P8NAPX/DAD1/wwA9v8LAPX/DADz/w4A8P8RAPD/EQDx/xAA8v8PAPL/DwDy/w8A8P8RAPP/DgD4/wkA+/8GAP3/BAD+/wMA//8CAP//AgD//wIA//8CAP//AgD+/wMA/f8EAPz/BQD7/wYA+v8HAPn/CAD4/wkA+P8JAPj/CQD5/wgA+v8HAPv/BgD8/wUA/f8EAP7/AwD//wIA//8BAP//AQD//wEA//8BAP//AQD//wEAAAAAAAAAAAAA" type="audio/wav">
+    </audio>
+
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
+<script src="../shared/config.js"></script>
+<script>
+'use strict';
+
+const API_BASE = RestaurantConfig.API_URL;
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+
+let orders = [];
+let allTodayOrders = [];
+let soundEnabled = true;
+let socket = null;
+let refreshTimeout = null;
+let autoRefreshInterval = null;
+
+const FIVE_MINUTES = 5 * 60 * 1000;
+
+// ═══ CLOCK ═══
+function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    $('#kitchenClock').textContent = `${h}:${m}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ═══ FULLSCREEN ═══
+$('#kitchenFullscreen').addEventListener('click', () => {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+        document.exitFullscreen().catch(() => {});
+    }
+});
+
+// ═══ WAKE LOCK ═══
+async function requestWakeLock() {
+    if ('wakeLock' in navigator) {
+        try {
+            await navigator.wakeLock.request('screen');
+            const el = $('#kitchenWakelock');
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 2000);
+        } catch {}
+    }
+}
+requestWakeLock();
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') requestWakeLock();
+});
+
+// ═══ SOUND TOGGLE ═══
+$('#kitchenSoundToggle').addEventListener('click', () => {
+    soundEnabled = !soundEnabled;
+    $('#kitchenSoundToggle').textContent = soundEnabled ? '🔔' : '🔕';
+});
+
+function playSound() {
+    if (!soundEnabled) return;
+    const audio = $('#kitchenNotifSound');
+    if (audio) {
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+    }
+}
+
+// ═══ CENTRAL REFRESH (DB as source-of-truth) ═══
+async function refreshOrders() {
+    try {
+        const res = await fetch(`${API_BASE}/restaurant/orders/today`);
+        if (!res.ok) throw new Error('Failed');
+        const data = await res.json();
+        const all = data?.data || data?.orders || (Array.isArray(data) ? data : []);
+        // Store all orders for stats
+        allTodayOrders = all;
+        // Only show Pending and Preparing in kitchen
+        orders = all.filter(o => {
+            const s = (o.status || '').toLowerCase();
+            return s === 'pending' || s === 'preparing';
+        });
+        // Sort: Pending first (need attention), then Preparing, newest on top within each group
+        orders.sort((a, b) => {
+            const sa = (a.status || '').toLowerCase();
+            const sb = (b.status || '').toLowerCase();
+            if (sa === 'pending' && sb === 'preparing') return -1;
+            if (sa === 'preparing' && sb === 'pending') return 1;
+            return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+        });
+        renderOrders();
+        updateKitchenStats();
+        if (typeof hideLoader === 'function') hideLoader();
+    } catch (err) {
+        console.error('Refresh failed:', err);
+        if (typeof hideLoader === 'function') hideLoader();
+    }
+}
+
+function scheduleRefresh() {
+    clearTimeout(refreshTimeout);
+    refreshTimeout = setTimeout(() => {
+        refreshOrders();
+    }, 200);
+}
+
+function startAutoRefresh() {
+    if (document.hidden) return;
+    stopAutoRefresh();
+    autoRefreshInterval = setInterval(async () => {
+        console.log('🔄 5-minute sync running...');
+        await refreshOrders();
+    }, FIVE_MINUTES);
+}
+
+function stopAutoRefresh() {
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+    }
+}
+
+// ═══ KITCHEN STATS ═══
+function updateKitchenStats() {
+    // Active badge
+    const activeCount = orders.length;
+    const badgeEl = $('#kitchenActiveBadge');
+    if (badgeEl) {
+        badgeEl.textContent = activeCount ? `${activeCount} Active` : '';
+        badgeEl.style.display = activeCount ? 'inline-block' : 'none';
+    }
+
+    // Completed today counter
+    const todayStr = new Date().toDateString();
+    const completedToday = allTodayOrders.filter(o => {
+        const s = (o.status || '').toLowerCase();
+        if (s !== 'completed') return false;
+        const dt = o.completedAt || o.updatedAt;
+        return dt && new Date(dt).toDateString() === todayStr;
+    }).length;
+
+    const counterEl = $('#kitchenCompletedCounter');
+    if (counterEl) {
+        counterEl.textContent = `✅ Completed Today: ${completedToday}`;
+        counterEl.style.display = completedToday ? 'inline-block' : 'none';
+    }
+}
+
+// ═══ RENDER ═══
+function renderOrders() {
+    const container = $('#kitchenOrders');
+    $('#kitchenCount').textContent = `${orders.length} order${orders.length !== 1 ? 's' : ''}`;
+
+    if (!orders.length) {
+        container.innerHTML = `<div class="kitchen-empty">
+            <div class="kitchen-empty__icon">👨‍🍳</div>
+            <div class="kitchen-empty__text">No active orders</div>
+        </div>`;
+        return;
+    }
+
+    container.innerHTML = orders.map(o => buildCard(o)).join('');
+    wireSwipe();
+}
+
+function buildCard(o) {
+    const status = (o.status || 'Pending');
+    const statusLower = status.toLowerCase();
+    const typeClass = (o.orderType || '').toLowerCase().includes('dine') ? 'dinein' : 'takeaway';
+    const items = o.items || [];
+    const mongoId = o._id || o.orderId;
+    const orderCode = o.orderId || '';
+    const time = fmtTime(o.createdAt);
+
+    const isPending = statusLower === 'pending';
+    const isPreparing = statusLower === 'preparing';
+
+    return `
+    <div class="kitchen-card kitchen-card--${statusLower}" data-order-id="${mongoId}" data-order-code="${orderCode}" data-status="${status}">
+        <div class="kitchen-card__swipe-hint kitchen-card__swipe-hint--right">${isPending ? '→ Preparing' : ''}</div>
+        <div class="kitchen-card__swipe-hint kitchen-card__swipe-hint--left">${isPreparing ? '← Completed' : ''}</div>
+        <div class="kitchen-card__header">
+            <span class="kitchen-card__id">${orderCode || mongoId?.slice?.(-6) || '—'}</span>
+            <span class="kitchen-card__type kitchen-card__type--${typeClass}">${o.orderType || '—'}</span>
+        </div>
+        <div class="kitchen-card__time">🕐 ${time}</div>
+        <div class="kitchen-card__customer">👤 ${esc(o.customerName || o.customer?.name || '—')}${o.table ? ' · 🪑 Table ' + o.table : ''}</div>
+        ${o.note ? `<div class="kitchen-card__note">📝 ${esc(o.note)}</div>` : ''}
+        <div class="kitchen-card__items">
+            ${items.map(i => `
+            <div class="kitchen-card__item">
+                <span>${esc(i.name)}${i.size ? ' (' + i.size + ')' : ''}</span>
+                <span class="kitchen-card__item-qty">×${i.quantity || 1}</span>
+            </div>`).join('')}
+        </div>
+        <div class="kitchen-card__footer">
+            ${isPending ? `<button class="kitchen-btn kitchen-btn--preparing" data-action="preparing" data-order-id="${mongoId}" data-order-code="${orderCode}">🔥 Start Preparing</button>` : ''}
+            ${isPreparing ? `<button class="kitchen-btn kitchen-btn--completed" data-action="completed" data-order-id="${mongoId}" data-order-code="${orderCode}">✅ Mark Completed</button>` : ''}
+        </div>
+    </div>`;
+}
+
+function esc(s) {
+    if (!s) return '';
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+}
+
+function fmtTime(d) {
+    if (!d) return '—';
+    const dt = new Date(d);
+    if (isNaN(dt)) return '—';
+    const h = dt.getHours(), hr = h % 12 || 12, ap = h >= 12 ? 'PM' : 'AM';
+    return `${hr}:${String(dt.getMinutes()).padStart(2, '0')} ${ap}`;
+}
+
+// ═══ STATUS UPDATE ═══
+async function updateStatus(mongoId, orderCode, newStatus) {
+    try {
+        const res = await fetch(`${API_BASE}/restaurant/orders/${mongoId}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: newStatus }),
+        });
+        if (!res.ok) throw new Error('Update failed');
+        console.log('[Kitchen] Status updated:', mongoId, '→', newStatus);
+
+        await refreshOrders();
+    } catch (err) {
+        console.error('[Kitchen] Status update error:', err);
+    }
+}
+
+// Button click handler
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const mongoId = btn.dataset.orderId;
+    const orderCode = btn.dataset.orderCode;
+
+    if (action === 'preparing') {
+        updateStatus(mongoId, orderCode, 'Preparing');
+    } else if (action === 'completed') {
+        updateStatus(mongoId, orderCode, 'Completed');
+    }
+});
+
+// ═══ SWIPE GESTURES ═══
+function wireSwipe() {
+    const cards = $$('.kitchen-card');
+    cards.forEach(card => {
+        let startX = 0, currentX = 0, swiping = false;
+        const THRESHOLD = 100;
+
+        const onStart = (e) => {
+            const touch = e.touches ? e.touches[0] : e;
+            startX = touch.clientX;
+            currentX = startX;
+            swiping = true;
+            card.classList.add('kitchen-card--swiping');
+        };
+
+        const onMove = (e) => {
+            if (!swiping) return;
+            const touch = e.touches ? e.touches[0] : e;
+            currentX = touch.clientX;
+            const dx = currentX - startX;
+            card.style.transform = `translateX(${dx}px) rotate(${dx * 0.02}deg)`;
+            card.style.opacity = Math.max(0.3, 1 - Math.abs(dx) / 400);
+        };
+
+        const onEnd = () => {
+            if (!swiping) return;
+            swiping = false;
+            card.classList.remove('kitchen-card--swiping');
+            const dx = currentX - startX;
+            const status = card.dataset.status?.toLowerCase();
+            const mongoId = card.dataset.orderId;
+            const orderCode = card.dataset.orderCode;
+
+            if (dx > THRESHOLD && status === 'pending') {
+                // Swipe right → Preparing
+                card.classList.add('kitchen-card--swipe-right');
+                card.addEventListener('animationend', () => {
+                    updateStatus(mongoId, orderCode, 'Preparing');
+                }, { once: true });
+            } else if (dx < -THRESHOLD && status === 'preparing') {
+                // Swipe left → Completed
+                card.classList.add('kitchen-card--swipe-left');
+                card.addEventListener('animationend', () => {
+                    updateStatus(mongoId, orderCode, 'Completed');
+                }, { once: true });
+            } else {
+                // Snap back
+                card.style.transition = 'transform .3s ease, opacity .3s ease';
+                card.style.transform = '';
+                card.style.opacity = '';
+                setTimeout(() => { card.style.transition = ''; }, 300);
+            }
+        };
+
+        card.addEventListener('touchstart', onStart, { passive: true });
+        card.addEventListener('touchmove', onMove, { passive: true });
+        card.addEventListener('touchend', onEnd);
+        card.addEventListener('mousedown', onStart);
+        card.addEventListener('mousemove', onMove);
+        card.addEventListener('mouseup', onEnd);
+        card.addEventListener('mouseleave', () => {
+            if (swiping) onEnd();
+        });
+    });
+}
+
+// ═══ SOCKET ═══
+function connectSocket() {
+    if (typeof io === 'undefined') {
+        console.warn('[Kitchen] Socket.IO not available — falling back to polling');
+        setInterval(refreshOrders, 10000);
+        return;
+    }
+
+    socket = io(RestaurantConfig.SOCKET_URL, {
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionDelay: 2000,
+        reconnectionAttempts: 30,
+    });
+
+    socket.on('connect', () => {
+        console.log('[Kitchen] Socket connected');
+        console.log('✅ Socket reconnected.');
+        socket.emit('join:admin');
+    });
+
+    socket.on('restaurant:new-order', () => {
+        playSound();
+        scheduleRefresh();
+    });
+
+    socket.on('restaurant:order-updated', () => {
+        scheduleRefresh();
+    });
+
+    socket.on('restaurant:order-deleted', () => {
+        scheduleRefresh();
+    });
+
+    socket.on('disconnect', () => {
+        console.log('[Kitchen] Socket disconnected');
+        console.log('⚠️ Socket disconnected — relying on polling.');
+    });
+
+    socket.on('reconnect', () => {
+        console.log('[Kitchen] Reconnected — refreshing');
+        refreshOrders();
+    });
+}
+
+// ═══ BOOT ═══
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        stopAutoRefresh();
+    } else {
+        refreshOrders();
+        startAutoRefresh();
+    }
+});
+
+(async () => {
+    await refreshOrders();
+    startAutoRefresh();
+    connectSocket();
+})();
+</script>
+</body>
+</html>

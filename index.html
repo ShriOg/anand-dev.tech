@@ -1,30 +1,120 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>MenuNova — Demo</title>
-    <link rel="stylesheet" href="/src/styles/main.css" />
-  </head>
-  <body>
-    <div id="app">
-      <header class="hero">
-        <div class="hero-inner">
-          <h1 id="restaurant-name">Menu</h1>
-          <div id="veg-status" class="veg-status"></div>
-          <div id="menu-stats" class="menu-stats"></div>
-          <div class="search-row">
-            <input id="search" type="search" placeholder="Search dishes, descriptions..." />
-            <div id="quick-filters" class="quick-filters"></div>
-          </div>
-        </div>
-      </header>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>anand.dev — Building Systems. Not Just Websites.</title>
+    <meta name="description" content="Premium developer portfolio showcasing Web OS, Domain Battle, and innovative projects.">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
 
-      <nav id="category-bar" class="category-bar"></nav>
+    <div id="particleField" aria-hidden="true"></div>
 
-      <main id="menu-container" class="menu-container"></main>
+    <div class="env-light" aria-hidden="true">
+        <div class="env-light__halo" id="envHalo"></div>
+        <div class="env-light__glow" id="envGlow"></div>
+        <div class="env-light__core" id="envCore"></div>
     </div>
 
-    <script type="module" src="/src/main.js"></script>
-  </body>
+    <div class="atmosphere" aria-hidden="true">
+        <div class="atmosphere__gradient" id="atmGradient"></div>
+        <div class="atmosphere__ambient atmosphere__ambient--1"></div>
+        <div class="atmosphere__ambient atmosphere__ambient--2"></div>
+        <div class="atmosphere__ambient atmosphere__ambient--3"></div>
+        <canvas class="atmosphere__grain" id="atmGrain"></canvas>
+    </div>
+
+    <main class="container">
+
+        <section class="hero-section">
+            <h1 class="hero-title">
+                <span class="title-line">Welcome to</span>
+                <span class="title-brand">anand.dev</span>
+            </h1>
+            <p class="hero-subtitle">Building Systems. Not Just Websites.</p>
+        </section>
+
+        <section class="cards-section">
+            <div class="cards-container">
+
+                <a href="webos/" class="feature-card" data-card="webos">
+                    <div class="card-glow"></div>
+                    <div class="card-content">
+                        <div class="card-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                <line x1="8" y1="21" x2="16" y2="21"></line>
+                                <line x1="12" y1="17" x2="12" y2="21"></line>
+                            </svg>
+                        </div>
+                        <h2 class="card-title">Web OS</h2>
+                        <p class="card-description">A complete operating system in your browser. Files, apps, AI integration.</p>
+                        <div class="card-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="DomainBattle/" class="feature-card" data-card="battle">
+                    <div class="card-glow"></div>
+                    <div class="card-content">
+                        <div class="card-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                                <path d="M2 12h20"></path>
+                            </svg>
+                        </div>
+                        <h2 class="card-title">Domain Battle</h2>
+                        <p class="card-description">Real-time multiplayer territory conquest game. Strategy meets speed.</p>
+                        <div class="card-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="Portfolio/" class="feature-card" data-card="portfolio">
+                    <div class="card-glow"></div>
+                    <div class="card-content">
+                        <div class="card-icon">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="card-title">Portfolio</h2>
+                        <p class="card-description">Deep dive into projects, case studies, and experimental work.</p>
+                        <div class="card-arrow">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="script.js"></script>
+    <script>
+      document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.shiftKey && e.key === 'P') {
+          e.preventDefault();
+          window.location.href = 'private/';
+        }
+      });
+    </script>
+</body>
 </html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Domain Battle</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div id="auth-gate" class="screen hidden">
+    <div class="auth-box">
+      <h1>DOMAIN BATTLE</h1>
+      <p class="auth-msg">You must login first.</p>
+      <p class="auth-sub">No access token found in localStorage.</p>
+    </div>
+  </div>
+
+  <div id="lobby" class="screen hidden">
+    <div class="lobby-container">
+      <h1 class="title">DOMAIN BATTLE</h1>
+      <p class="subtitle">Real-time multiplayer arena</p>
+
+      <div class="lobby-actions">
+        <button id="btn-create" class="btn btn--primary">Create Room</button>
+
+        <div class="join-group">
+          <input id="input-room" type="text" placeholder="Room ID" autocomplete="off">
+          <button id="btn-join" class="btn btn--secondary">Join</button>
+        </div>
+      </div>
+
+      <div id="room-info" class="room-info hidden">
+        <p>Room: <span id="room-id"></span></p>
+        <p id="waiting-msg">Waiting for opponent…</p>
+        <button id="btn-start" class="btn btn--accent hidden">Start Battle</button>
+      </div>
+
+      <div id="lobby-error" class="error-msg hidden"></div>
+    </div>
+  </div>
+
+  <div id="battle" class="screen hidden">
+    <div class="battle-container">
+
+      <div class="phase-banner">
+        <span id="phase-label">LOBBY</span>
+      </div>
+
+      <div class="arena">
+
+        <div class="player-col player-col--left">
+          <h2 class="player-name" id="p1-name">Player 1</h2>
+          <div class="energy-bar-wrap">
+            <div class="energy-bar" id="p1-energy" style="width:100%"></div>
+          </div>
+          <span class="energy-value" id="p1-energy-val">100</span>
+        </div>
+
+        <div class="dominance-col">
+          <p class="dominance-label">DOMINANCE</p>
+          <div class="dominance-track">
+            <div class="dominance-fill" id="dominance-fill" style="width:50%"></div>
+            <div class="dominance-marker" id="dominance-marker"></div>
+          </div>
+          <div class="dominance-values">
+            <span id="dom-p1">50</span>
+            <span id="dom-p2">50</span>
+          </div>
+        </div>
+
+        <div class="player-col player-col--right">
+          <h2 class="player-name" id="p2-name">Player 2</h2>
+          <div class="energy-bar-wrap">
+            <div class="energy-bar energy-bar--p2" id="p2-energy" style="width:100%"></div>
+          </div>
+          <span class="energy-value" id="p2-energy-val">100</span>
+        </div>
+
+      </div>
+
+      <div class="actions" id="actions">
+        <button class="btn btn--attack" data-action="attack">⚔ Attack</button>
+        <button class="btn btn--defend" data-action="defend">🛡 Defend</button>
+        <button class="btn btn--burst"  data-action="burst">💥 Burst</button>
+        <button class="btn btn--focus"  data-action="focus">🎯 Focus</button>
+      </div>
+
+      <div id="result-overlay" class="result-overlay hidden">
+        <div class="result-box">
+          <h2 id="result-title"></h2>
+          <p id="result-reason"></p>
+          <button id="btn-back-lobby" class="btn btn--primary">Back to Lobby</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="battle.js"></script>
+</body>
+</html>
