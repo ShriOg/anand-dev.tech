@@ -4,6 +4,7 @@
   const introScreen = document.getElementById('intro-screen');
   const chatScreen = document.getElementById('chat-screen');
   const openButton = document.getElementById('open-chat');
+  const musicToggle = document.getElementById('music-toggle');
   const introLines = Array.from(document.querySelectorAll('.intro-line'));
   const chatBody = document.getElementById('chat-body');
   const finalLine = document.getElementById('final-line');
@@ -11,24 +12,29 @@
   const confettiLayer = document.getElementById('confetti-layer');
   const bgm = document.getElementById('bgm');
 
+  let isPlaying = false;
+
   const MESSAGE_FLOW = [
     { type: 'message', text: 'Hey Abhilasha' },
     { type: 'message', text: 'I wanted to wish you in a special way today' },
     { type: 'message', text: 'A normal message felt too ordinary' },
     { type: 'message', text: 'So I made this little page instead' },
     { type: 'message', text: 'Just to say...' },
-    { type: 'pause', duration: 1400 },
+    { type: 'pause', duration: 1600 },
     { type: 'message', text: 'Happy Birthday 🎂' },
-    { type: 'pause', duration: 1050 },
+    { type: 'pause', duration: 1200 },
     { type: 'message', text: 'I hope today brings you lots of smiles' },
     { type: 'message', text: 'Because you deserve a really beautiful year' },
-    { type: 'pause', duration: 1350 },
+    { type: 'pause', duration: 1400 },
     { type: 'message', text: 'And honestly...' },
-    { type: 'pause', duration: 980 },
+    { type: 'pause', duration: 1200 },
     { type: 'message', text: 'Your name always makes me smile' },
     { type: 'photo', caption: 'This moment deserved a little picture too' },
     { type: 'message', text: 'I hope this year gives you countless reasons to smile' },
     { type: 'message', text: '— Anand' },
+    { type: 'pause', duration: 1800 },
+    { type: 'message', text: 'one more thing…' },
+    { type: 'pause', duration: 2200 },
     { type: 'ending' }
   ];
 
@@ -71,8 +77,10 @@
 
     try {
       await bgm.play();
-      const target = 0.34;
-      const step = 0.02;
+      isPlaying = true;
+      updateMusicIcon();
+      const target = 0.38;
+      const step = 0.024;
       const interval = window.setInterval(() => {
         if (bgm.volume >= target) {
           bgm.volume = target;
@@ -80,10 +88,32 @@
           return;
         }
         bgm.volume = Math.min(target, bgm.volume + step);
-      }, 120);
+      }, 100);
     } catch (error) {
-      // Autoplay policies may block playback if user gesture context is lost.
       console.warn('Music playback was blocked:', error);
+    }
+  }
+
+  function toggleMusic() {
+    if (!bgm) {
+      return;
+    }
+
+    if (isPlaying) {
+      bgm.pause();
+      isPlaying = false;
+    } else {
+      bgm.play().catch(() => {
+        console.warn('Could not play music');
+      });
+      isPlaying = true;
+    }
+    updateMusicIcon();
+  }
+
+  function updateMusicIcon() {
+    if (musicToggle) {
+      musicToggle.querySelector('.music-toggle__icon').textContent = isPlaying ? '🔊' : '🔇';
     }
   }
 
@@ -137,7 +167,6 @@
       image.replaceWith(createPhotoFallback());
     }, { once: true });
 
-    bubble.appendChild(image);
     chatBody.appendChild(bubble);
     smoothScrollToEnd();
 
@@ -164,13 +193,13 @@
     heart.textContent = '❤';
 
     const x = Math.random() * 100;
-    const size = strongMode ? (16 + Math.random() * 18) : (10 + Math.random() * 12);
-    const duration = strongMode ? (3.8 + Math.random() * 2.8) : (8 + Math.random() * 4.2);
+    const size = strongMode ? (18 + Math.random() * 22) : (8 + Math.random() * 14);
+    const duration = strongMode ? (3.2 + Math.random() * 2.2) : (7 + Math.random() * 5);
 
     heart.style.left = x + '%';
     heart.style.fontSize = size + 'px';
     heart.style.animationDuration = duration + 's';
-    heart.style.opacity = strongMode ? (0.52 + Math.random() * 0.4).toFixed(2) : (0.2 + Math.random() * 0.3).toFixed(2);
+    heart.style.opacity = strongMode ? (0.62 + Math.random() * 0.35).toFixed(2) : (0.12 + Math.random() * 0.25).toFixed(2);
 
     heartsLayer.appendChild(heart);
 
@@ -186,7 +215,7 @@
 
     ambientHeartTimer = window.setInterval(() => {
       spawnHeart(false);
-    }, 980);
+    }, 1200);
   }
 
   function launchConfetti() {
@@ -213,12 +242,12 @@
   async function playEndingSequence() {
     document.body.classList.add('ending');
 
-    for (let i = 0; i < 28; i += 1) {
-      window.setTimeout(() => spawnHeart(true), i * 130);
+    for (let i = 0; i < 42; i += 1) {
+      window.setTimeout(() => spawnHeart(true), i * 90);
     }
 
     launchConfetti();
-    await wait(900);
+    await wait(1200);
     finalLine.classList.add('is-visible');
   }
 
@@ -259,7 +288,11 @@
   }
 
   openButton.addEventListener('click', openBirthdayChat);
+  if (musicToggle) {
+    musicToggle.addEventListener('click', toggleMusic);
+  }
 
   ensureAudioSource();
+  updateMusicIcon();
   revealIntro();
 })();
