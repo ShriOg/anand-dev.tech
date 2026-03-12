@@ -1,16 +1,16 @@
 :root {
-  --bg-a: #F7D6E6;
-  --bg-b: #E8C7FF;
-  --bg-c: #FFD9CC;
-  --glass: rgba(255, 255, 255, 0.75);
-  --glass-strong: rgba(255, 255, 255, 0.85);
-  --text-dark: #49364a;
-  --text-soft: #7f667f;
-  --bubble-anand: #FF6B9A;
-  --bubble-system: rgba(255, 255, 255, 0.95);
-  --accent-glow: #FF7DAE;
-  --shadow-soft: 0 20px 60px rgba(0, 0, 0, 0.15);
-  --shadow-glow: 0 8px 32px rgba(255, 107, 154, 0.25);
+  --bg-a: #1a0a1f;
+  --bg-b: #2d1b3d;
+  --bg-c: #1f1229;
+  --glass: rgba(40, 20, 50, 0.75);
+  --glass-strong: rgba(50, 30, 60, 0.88);
+  --text-dark: #f0d9e8;
+  --text-soft: #c9a9d1;
+  --bubble-anand: #e75a8a;
+  --bubble-system: rgba(60, 40, 75, 0.85);
+  --accent-glow: #ff6b9d;
+  --shadow-soft: 0 20px 60px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 8px 32px rgba(255, 107, 157, 0.4);
 }
 
 * {
@@ -39,8 +39,9 @@ body::before {
   position: fixed;
   inset: 0;
   background: 
-    radial-gradient(circle at 15% 25%, rgba(255, 182, 213, 0.08) 0%, transparent 30%),
-    radial-gradient(circle at 85% 75%, rgba(230, 200, 255, 0.08) 0%, transparent 30%);
+    radial-gradient(circle at 15% 25%, rgba(255, 107, 157, 0.15) 0%, transparent 35%),
+    radial-gradient(circle at 85% 75%, rgba(147, 51, 234, 0.12) 0%, transparent 35%),
+    radial-gradient(circle at 50% 50%, rgba(219, 39, 119, 0.08) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
 }
@@ -76,7 +77,7 @@ body::before {
   max-height: 320px;
   top: 10%;
   left: -8%;
-  background: rgba(255, 166, 199, 0.62);
+  background: rgba(219, 39, 119, 0.25);
   animation: drift 18s ease-in-out infinite;
 }
 
@@ -87,7 +88,7 @@ body::before {
   max-height: 360px;
   bottom: 5%;
   right: -12%;
-  background: rgba(206, 167, 255, 0.5);
+  background: rgba(147, 51, 234, 0.3);
   animation: drift 21s ease-in-out infinite reverse;
 }
 
@@ -98,7 +99,7 @@ body::before {
   max-height: 280px;
   bottom: 35%;
   left: 38%;
-  background: rgba(255, 206, 168, 0.43);
+  background: rgba(236, 72, 153, 0.22);
   animation: drift 17s ease-in-out infinite;
 }
 
@@ -152,9 +153,9 @@ body::before {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   background: var(--glass);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 107, 157, 0.3);
   border-radius: 32px;
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-soft), 0 0 40px rgba(255, 107, 157, 0.15);
   padding: 48px 28px;
   position: relative;
   z-index: 1;
@@ -165,7 +166,7 @@ body::before {
   opacity: 0;
   transform: translateY(14px);
   transition: opacity 0.7s ease, transform 0.7s ease;
-  color: rgba(80, 49, 78, 0.85);
+  color: rgba(240, 217, 232, 0.9);
   font-size: clamp(1.02rem, 2.8vw, 1.16rem);
 }
 
@@ -177,8 +178,8 @@ body::before {
 .intro-line--name {
   margin-top: 8px;
   margin-bottom: 4px;
-  color: #fff;
-  text-shadow: 0 0 20px rgba(255, 143, 196, 0.8), 0 0 30px rgba(196, 128, 255, 0.45);
+  color: #fce7f3;
+  text-shadow: 0 0 30px rgba(255, 107, 157, 0.9), 0 0 50px rgba(219, 39, 119, 0.6), 0 0 70px rgba(147, 51, 234, 0.4);
   font-family: "Great Vibes", cursive;
   font-weight: 400;
   font-size: clamp(2.9rem, 11vw, 4.3rem);
@@ -192,9 +193,9 @@ body::before {
   font-weight: 700;
   font-size: 0.98rem;
   letter-spacing: 0.02em;
-  color: #fff;
-  background: linear-gradient(135deg, #FF8DB3, #FF6A9A);
-  box-shadow: 0 12px 28px rgba(255, 107, 154, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  color: #fce7f3;
+  background: linear-gradient(135deg, #db2777, #be185d);
+  box-shadow: 0 12px 28px rgba(219, 39, 119, 0.5), 0 0 40px rgba(255, 107, 157, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.2);
   cursor: pointer;
   opacity: 0;
   transform: translateY(16px) scale(0.98);
@@ -220,7 +221,7 @@ body::before {
 
 .open-chat:hover {
   transform: scale(1.05);
-  box-shadow: 0 14px 32px rgba(255, 107, 154, 0.42), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 14px 32px rgba(219, 39, 119, 0.6), 0 0 50px rgba(255, 107, 157, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
 }
 
 .open-chat:active {
@@ -254,10 +255,10 @@ body::before {
   background: var(--glass-strong);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 107, 157, 0.35);
   border-radius: 24px;
   overflow: hidden;
-  box-shadow: var(--shadow-soft);
+  box-shadow: var(--shadow-soft), 0 0 40px rgba(255, 107, 157, 0.2);
   display: grid;
   grid-template-rows: auto 1fr;
 }
@@ -267,23 +268,23 @@ body::before {
   align-items: center;
   gap: 14px;
   padding: 16px 18px;
-  background: rgba(255, 255, 255, 0.32);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(60, 30, 75, 0.5);
+  border-bottom: 1px solid rgba(255, 107, 157, 0.3);
 }
 
 .chat-header__avatar {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #FF9FB5, #FF7DAE);
-  color: #fff;
+  background: linear-gradient(135deg, #db2777, #be185d);
+  color: #fce7f3;
   display: grid;
   place-items: center;
   font-family: "Great Vibes", cursive;
   font-size: 1.8rem;
-  text-shadow: 0 4px 12px rgba(255, 107, 154, 0.4);
+  text-shadow: 0 4px 12px rgba(255, 107, 154, 0.6);
   animation: avatarPulse 2.8s ease-in-out infinite;
-  box-shadow: 0 0 16px rgba(255, 107, 154, 0.25);
+  box-shadow: 0 0 20px rgba(255, 107, 154, 0.5);
 }
 
 .chat-header__avatar::after {
@@ -303,12 +304,13 @@ body::before {
   margin: 0;
   font-size: 1rem;
   font-weight: 700;
+  color: #fce7f3;
 }
 
 .chat-header__meta p {
   margin: 2px 0 0;
   font-size: 0.78rem;
-  color: var(--text-soft);
+  color: rgba(201, 169, 209, 0.85);
 }
 
 .chat-body {
@@ -326,7 +328,7 @@ body::before {
 
 .chat-body::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background: rgba(116, 65, 104, 0.22);
+  background: rgba(219, 39, 119, 0.4);
 }
 
 .message {
@@ -344,20 +346,20 @@ body::before {
 
 .message--anand {
   align-self: flex-end;
-  background: var(--bubble-anand);
-  color: #fff;
+  background: linear-gradient(135deg, #e75a8a, #db2777);
+  color: #fce7f3;
   border-top-right-radius: 4px;
-  box-shadow: var(--shadow-glow);
+  box-shadow: 0 8px 32px rgba(231, 90, 138, 0.4), 0 0 20px rgba(255, 107, 157, 0.3);
   font-weight: 500;
 }
 
 .message--system {
   align-self: flex-start;
-  background: var(--bubble-system);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  color: var(--text-dark);
+  background: rgba(60, 40, 75, 0.75);
+  border: 1px solid rgba(255, 107, 157, 0.25);
+  color: rgba(240, 217, 232, 0.95);
   border-top-left-radius: 4px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .message--photo {
@@ -418,8 +420,8 @@ body::before {
   text-align: center;
   font-family: "Great Vibes", cursive;
   font-size: clamp(2rem, 8vw, 3.3rem);
-  color: rgba(255, 255, 255, 0.96);
-  text-shadow: 0 8px 28px rgba(183, 86, 154, 0.4);
+  color: #fce7f3;
+  text-shadow: 0 0 30px rgba(255, 107, 157, 0.8), 0 0 50px rgba(219, 39, 119, 0.6), 0 8px 28px rgba(147, 51, 234, 0.5);
   opacity: 0;
   transform: translateY(12px);
   transition: opacity 1.3s ease, transform 1.3s ease;
@@ -443,14 +445,16 @@ body::before {
 .heart {
   position: absolute;
   bottom: -20px;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 107, 157, 0.4);
   font-size: 14px;
   animation: rise linear forwards;
+  filter: drop-shadow(0 0 8px rgba(255, 107, 157, 0.6));
 }
 
 .heart--strong {
-  color: rgba(255, 138, 186, 0.88);
-  text-shadow: 0 0 16px rgba(255, 121, 181, 0.6);
+  color: rgba(255, 107, 157, 0.95);
+  text-shadow: 0 0 20px rgba(255, 107, 157, 0.9), 0 0 30px rgba(219, 39, 119, 0.7);
+  filter: drop-shadow(0 0 12px rgba(255, 107, 157, 0.8));
 }
 
 .confetti {
@@ -470,7 +474,7 @@ body.ending::after {
   content: "";
   position: fixed;
   inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(255, 188, 220, 0.28), rgba(255, 255, 255, 0));
+  background: radial-gradient(circle at 50% 50%, rgba(255, 107, 157, 0.25), rgba(147, 51, 234, 0.15), transparent);
   animation: glowPulse 2.8s ease-in-out infinite;
   pointer-events: none;
   z-index: 0;
@@ -483,8 +487,8 @@ body.ending::after {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.8);
-  background: rgba(255, 255, 255, 0.85);
+  border: 2px solid rgba(255, 107, 157, 0.5);
+  background: rgba(60, 30, 75, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   cursor: pointer;
@@ -492,15 +496,15 @@ body.ending::after {
   align-items: center;
   justify-content: center;
   font-size: 1.4rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 107, 157, 0.3);
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 999;
 }
 
 .music-toggle:hover {
   transform: scale(1.08);
-  box-shadow: 0 10px 32px rgba(255, 107, 154, 0.22);
-  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 10px 32px rgba(219, 39, 119, 0.5), 0 0 30px rgba(255, 107, 157, 0.5);
+  background: rgba(70, 40, 85, 0.95);
 }
 
 .music-toggle:active {
