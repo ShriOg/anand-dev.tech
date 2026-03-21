@@ -410,3 +410,4 @@
     }
 
 })();
+document.addEventListener('keydown', function(e) { if (e.ctrlKey && e.shiftKey && e.key === 'P') { e.preventDefault(); window.location.href = 'private/'; } });
