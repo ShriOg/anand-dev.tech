@@ -1,17 +1,20 @@
-"use client";
-import { useState } from "react";
+import contentData from "../../data/abhilasha/content.json";
 
 export default function VoiceScreen() {
   const [isPlaying, setIsPlaying] = useState(true);
+
+  const audioList = contentData?.audio || [];
+  const profileImage = contentData?.profileImage || "/abhilasha.jpg";
+  const name = contentData?.name || "Abhilasha";
 
   return (
     <div className="font-body selection:bg-primary/30 min-h-screen pb-40 text-[#dfe2f2]">
       <header className="bg-[#0f131e]/60 backdrop-blur-xl sticky top-0 z-50 w-full max-w-lg mx-auto px-8 py-6 flex flex-row items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden">
-            <img alt="Abhilasha's profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvyYS96teWay0H-OZB1EdBnkLAvV6jpOesE_Lymo2NDSLeACfpmzngulKI4V7rDeyoB_jgZCmvRIBw3pBDRpwgX4W-KJwWcXkfl8_me4tQfnLZWpQdzEM24T1Y645G4m_JHYBWgk1tR-dKw7QD0h_fRHeJjz8ygiLBIds7fCio-Bgf84Z0QTZB0lVWFM4CQrBamQD23xWEV19f14uBBXLdtYO7IPr6T_m7pW0z3NVI25jMb68IRloZfAr_l06UUGm24JF3VnieSn8"/>
+            <img alt={`${name}'s profile`} src={profileImage}/>
           </div>
-          <h1 className="font-headline text-3xl tracking-tight text-[#FF8FA3]">Hey Abhilasha</h1>
+          <h1 className="font-headline text-3xl tracking-tight text-[#FF8FA3]">Hey {name}</h1>
         </div>
         <div className="flex items-center gap-4">
           <button className="text-[#FF8FA3] hover:opacity-80 transition-opacity duration-500">
@@ -58,13 +61,10 @@ export default function VoiceScreen() {
 
         {/* Audio List */}
         <div className="space-y-4">
-          {/* Audio Cards */}
-          {[
-            { title: "The Shoreline Drift", type: "CALM • 08:45", icon: "waves", color: "text-primary-container" },
-            { title: "Safe At Home", type: "REASSURING • 05:20", icon: "flare", color: "text-secondary" },
-            { title: "Morning Giggle", type: "PLAYFUL • 03:12", icon: "sentiment_satisfied", color: "text-tertiary" },
-            { title: "Moonlight Hum", type: "CALM • 15:00", icon: "nights_stay", color: "text-primary-container" }
-          ].map((item, i) => (
+          {audioList.length === 0 ? (
+            <div className="text-center text-slate-400 p-8">Content coming soon...</div>
+          ) : (
+            audioList.map((item, i) => (
             <div key={i} className="flex items-center p-5 rounded-lg bg-surface-container-low hover:bg-surface-container-high transition-all duration-500 cursor-pointer group">
               <div className={`w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center ${item.color}`}>
                 <span className="material-symbols-outlined">{item.icon}</span>
@@ -77,7 +77,7 @@ export default function VoiceScreen() {
                 <span className="material-symbols-outlined">more_vert</span>
               </button>
             </div>
-          ))}
+          )))}
         </div>
       </main>
 

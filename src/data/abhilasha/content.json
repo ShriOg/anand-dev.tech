@@ -1,0 +1,214 @@
+{
+  "profileImage": "/abhilasha.jpg",
+  "name": "Abhilasha",
+  "home": {
+    "greeting": "Hey Abhilasha",
+    "subtitle": "Take your time… everything here is for you.",
+    "moods": ["I feel low", "I miss you", "I’m okay"],
+    "cards": [
+      {
+        "id": "letters",
+        "title": "For You",
+        "subtitle": "A curated collection of digital love.",
+        "icon": "favorite",
+        "colSpan": 2,
+        "aspect": "aspect-[16/9]",
+        "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuDUOoEnUjQd1pUva_cw5hz8aieoLeGgGY3nE4qlZaAAXls9KFoKkKS3xV7AwqqXO-ko7meZsVkJ95m42v3L0_3_Glv0SHlbclwcK1R8v4aoUEg3M0Jbv5ipwCSJTrI0zLzMyWz7XF1hTP8gBK4zu2-Deor55xQmr1tmkIUyARPmatUqlEBBdY3-kGBaSUz7d2NxuYYlL07StgBVpBaqq23Qkic_bHZGnWTjPzcmERNuaWZ6DrjKfA8we4GKxlK38EGP5X3_XaqqwBw"
+      },
+      {
+        "id": "memories",
+        "title": "Memories",
+        "subtitle": "",
+        "icon": "collections",
+        "colSpan": 1,
+        "aspect": "aspect-square",
+        "iconColor": "text-secondary",
+        "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuAQxR4bx7gU_ci5s7sPO0StxJAaWS_i4jlt6F0hLS3glFPh8Bt4H-kVnBO1df_kKtNYEQtofZrJbhXpwtHGM5lxNHYR-N4V72mbEJp1YXQbAdrjDyWkaViLMZJOKHnj6GyCmJdgAjrm9UmPdADoRf12TJB77Vbr0iSOVEBS6A0G0coAd_uGMh7Ft9s-4H2zMo731BERBZqAt5DT2SVrejzD5rWtz4xGkNlGuqOez5qhGb_q0JAitNeSxjQ3qDhWGQ2Xib3YNSoGZgg"
+      },
+      {
+        "id": "voice",
+        "title": "Hear Me",
+        "subtitle": "",
+        "icon": "mic",
+        "colSpan": 1,
+        "aspect": "aspect-square",
+        "iconColor": "text-tertiary",
+        "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuDDotGgkAigZvJtl70QmCW-rDJmMWqNKSsqlDlgdbOUYhAheaCBUtkbSWrfiXPYalk29oC-_c8Vfa3NvarIF7KbUb7xKOTp1yU-ophVVzAuF_fbSID44x9782lkwxbKL_qEiC5TaFvwCgKe6UhqvJ6zmbNv1n8MGOgRJ88vPCcb7wzF0I4a-RQe1ZEF1faD-0-0Qx4c9B3nyOKncj6Uehp1sePrvoQf-D4Z195-5YDupsH2_Y-FHCa7I-YWoqafEqVlOVjY-MQeh6k"
+      },
+      {
+        "id": "mind",
+        "title": "What I Feel But Don’t Say",
+        "subtitle": "Unspoken whispers kept for midnight.",
+        "icon": "auto_awesome",
+        "colSpan": 2,
+        "aspect": "",
+        "gradient": "bg-gradient-to-br from-surface-container-low to-surface-container-high"
+      },
+      {
+        "id": "constellation",
+        "title": "Our Sky",
+        "subtitle": "Connecting us, always",
+        "icon": "",
+        "colSpan": 2,
+        "aspect": "aspect-[21/9]",
+        "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuDlYhdnqTPLqsOxfrihRMtzSl9bVwhbO7oFe0kJqNqs_s_h_Pw5cNp8izNIrJZAjhpT_BbIWonbul0E1AhPlaWtRF3Qq2SJZtelYcQlf1BJThPwiZZ0WHmn9nz3H90O6JYZL6_5GsFiuoqoaq6CFxT8s4mLGtFuAnokldKbwp1xVZVE8A1nq2gJpOhlknqOhmHpyHBnxt_a1LzIHoFQeWq8hov-9poedKhKGb4vrb1dsYAecjDEPd9fY1EidZ7TQAnoazaEcY3lJyY"
+      }
+    ]
+  },
+  "letters": [
+    {
+      "id": 1,
+      "title": "The way you held your coffee today...",
+      "date": "Oct 12",
+      "status": "Opened",
+      "preview": "\"I saw you looking at the steam rising from your mug, and for a second, the world just went quiet. You looked so peaceful, Abhilasha. Like the noise of the city couldn't touch you...\"",
+      "fullText": [
+        "Abhilasha, I watched you looking at the steam rising from your mug today, and for a second, the world just went quiet.",
+        "You looked so peaceful. Like the noise of the city, the emails, and the worries couldn't touch you. It’s in these tiny, unspoken gaps of the day that I find myself most in love with you.",
+        "You don't need to be doing anything \"big\" to be remarkable. You just being there, breathing, and existing is enough to make the sanctuary feel complete."
+      ],
+      "isLocked": false
+    },
+    {
+      "id": 2,
+      "title": "Remember the rain in Shimla?",
+      "date": "2 days ago",
+      "status": "Read",
+      "preview": "It started pouring just as we reached the ridge. Most people ran for cover, but you just tilted your head back and laughed...",
+      "fullText": [
+        "It started pouring just as we reached the ridge. Most people ran for cover, but you just tilted your head back and laughed.",
+        "That laugh, Abhilasha. It echod through the rain. I just stood there, forgetting about getting wet, entirely captivated by you.",
+        "I want to preserve that moment forever."
+      ],
+      "isLocked": false
+    },
+    {
+      "id": 3,
+      "title": "A little secret for later",
+      "date": "Oct 24",
+      "status": "Unlocks tomorrow",
+      "preview": "There's something I've been meaning to tell you about that night under the stars. I never told you because...",
+      "fullText": [],
+      "isLocked": true
+    },
+    {
+      "id": 4,
+      "title": "Your strength is quiet",
+      "date": "Oct 10",
+      "status": "Read",
+      "preview": "I watched you handle that tough call today. You don't realize how much grace you carry even when things are falling apart...",
+      "fullText": [
+        "I watched you handle that tough call today. You don't realize how much grace you carry even when things are falling apart.",
+        "You are the calm in the storm. Never doubt your own strength, my love."
+      ],
+      "isLocked": false
+    },
+    {
+      "id": 5,
+      "title": "The biggest adventure yet",
+      "date": "Wait for your birthday",
+      "status": "Wait for your birthday",
+      "preview": "I've been planning this for months. I can't believe it's almost time to show you. It starts with a ticket to...",
+      "fullText": [],
+      "isLocked": true,
+      "lockedText": "Wait for your birthday"
+    }
+  ],
+  "memories": [
+    {
+      "id": 1,
+      "date": "November 12, 2023",
+      "title": "Rainy cafe date",
+      "description": "The way the rain sounded against the window while we hid in that tiny cafe.",
+      "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuC991OKKp6qvGBZdmom3CvuadHWcl36WV22eozhIlRBGZB9UCCszEqEXjA_PP5W0VwmlV1i_l8bqfolFJYJUc-3s-gp4K4UUSBAilUeDyi_X0RdQieIxW2vcVzoLL1VZM2PaoRLt46FB11MY8l-drZj0YMzzu0K7nTPYd6Qz57cZK-tQKQyMfnuomDHAcMnyRG-ZwWog19sGUToXUtXbdWz7vTQU5axLAYmqqDyDgxbKd6wjQguvS7m0uVNic5K_U2xIgNewA6hTaE",
+      "align": "left",
+      "colorClass": "border-primary-container",
+      "hasAudio": true
+    },
+    {
+      "id": 2,
+      "date": "October 04, 2023",
+      "title": "Sunset walk",
+      "description": "Golden hour looked better on you than it did on the horizon.",
+      "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuCl6QW3M2-uWueDPiKCfx_djzMdSe6euCLfGnPrXY0_3aHwRjDYjRJM6MIkqHwDpoxLvs1hbZhRbs1xgxcEIA7LBJf52gOKR7UGoLKfgaPJOzdHcte1bRe_DwpBq47KDnCQZooOEmDxDjOdklZ6u6dccNMtiX_PRaXeUdlEISA2NAMb69hpo1oPIjDhnt5rFF-zs0OSY7WTYcooZMNg7EkNV1cGBZ_nmbMvEPOGcxbeJWQVfsdZ-Qce2qlhnkcb03H_ggtA8vn3_hQ",
+      "align": "right",
+      "colorClass": "border-secondary-fixed-dim",
+      "hasAudio": false
+    },
+    {
+      "id": "featured",
+      "date": "SEPTEMBER 21",
+      "title": "The Midnight Letter",
+      "description": "I found this note tucked away. It reminded me of the night we sat by the water and talked until the stars began to fade into the dawn. You said you felt at peace for the first time in years. I hope you still feel that way whenever you think of us.",
+      "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuDP60BJglDSJqx1ZSNtnQn7P_vmKhXzQ1RM58v8D5_PzjGCsHkP7DRsZ8ROyXCos1eCUoipx7frLtMOJvhlzy7kzK2SzCIKHCnhcBQXR1gFxixzzKqLaUyIQK4wqgdt5KzNnprFX1A9Oyekf6txbEq6ZhTjc0fcx6UaAJXCxpFhcPMOyVtAbseY-fgQQlCiY3nvQlvSKTQF-Lcb2uSUya4sUmX2Nut0YUUfGL6h614TEq-0ABEcQ4y_vgEnFgKbkf1nF92Qy5GpPu0",
+      "align": "center",
+      "isFeatured": true
+    },
+    {
+      "id": 3,
+      "date": "August 15, 2023",
+      "title": "Flower fields",
+      "description": "The day the world smelled like wildflowers and possibilities.",
+      "image": "https://lh3.googleusercontent.com/aida-public/AB6AXuCr0oVGapFNcTNCzVCfSwXYaQevTVLaVziFAFmxcoa0r54F3dsM0yv0lhiXfPKqpCYiq0YMssWAD5e5vzMyrHGWZP5nUqlYv5f4ttFZJNE0dZpRf3z3DfVhXL4TYaZXks48g9HL18IFr5mov4t7fcM6hXWkSd2JQrH_I5slf13PHpUu3JSYg8eMJ7eqKX5AjziHi6Ay9IX50ga1VeEoOvmpHE2O33J7Zl_XQkIAaIvvT-gqRzevIcEUVc_SsXGHmx2v2sHYlwb6Cbs",
+      "align": "left",
+      "colorClass": "border-tertiary",
+      "hasAudio": false
+    }
+  ],
+  "audio": [
+    { "title": "The Shoreline Drift", "type": "CALM • 08:45", "icon": "waves", "color": "text-primary-container" },
+    { "title": "Safe At Home", "type": "REASSURING • 05:20", "icon": "flare", "color": "text-secondary" },
+    { "title": "Morning Giggle", "type": "PLAYFUL • 03:12", "icon": "sentiment_satisfied", "color": "text-tertiary" },
+    { "title": "Moonlight Hum", "type": "CALM • 15:00", "icon": "nights_stay", "color": "text-primary-container" }
+  ],
+  "thoughts": [
+    {
+      "id": 1,
+      "preview": "I don’t say this enough, but your presence is the quietest comfort I’ve ever known.",
+      "highlight": "quietest comfort",
+      "fullText": "There is a chaos in the world that never seems to stop. But when I am around you, even if we aren't speaking, the noise settles. It's the most profound peace I have ever experienced. I don't know how you do it, but you make my heart feel safe.",
+      "top": "0",
+      "left": "4%",
+      "width": "85%",
+      "zIndex": 10,
+      "animationClasses": "floating-1",
+      "hoverClass": "hover:border-primary/20",
+      "icon": "format_quote",
+      "iconColor": "text-primary/40",
+      "delay": 0
+    },
+    {
+      "id": 2,
+      "preview": "You matter more than you think. In the spaces between our words, I’m always choosing you.",
+      "highlight": "spaces between",
+      "fullText": "Sometimes I wonder if you know how deeply you are loved. Even when I am quiet, or when distance separates us, every silent thought is gravitating towards you. You are my constant choice.",
+      "top": "32%",
+      "right": "0",
+      "width": "80%",
+      "zIndex": 20,
+      "animationClasses": "floating-2",
+      "hoverClass": "hover:border-secondary/20",
+      "icon": "favorite",
+      "iconColor": "text-secondary",
+      "delay": 0.2
+    },
+    {
+      "id": 3,
+      "preview": "I notice things about you that you haven’t forgiven in yourself yet. And I love them all.",
+      "highlight": "forgiven",
+      "fullText": "You are harder on yourself than anyone else. I see the little flaws you try to hide, the moments you doubt yourself, the parts you think are unlovable. And Abhilasha, those are exactly the parts I fall in love with the hardest.",
+      "top": "60%",
+      "left": "0",
+      "width": "90%",
+      "zIndex": 10,
+      "animationClasses": "floating-1",
+      "hoverClass": "hover:border-tertiary/20",
+      "icon": "arrow_forward_ios",
+      "iconColor": "text-on-surface-variant",
+      "delay": 0.4
+    }
+  ],
+  "randomMessages": [
+    "I feel low", "I miss you", "I'm okay"
+  ]
+}

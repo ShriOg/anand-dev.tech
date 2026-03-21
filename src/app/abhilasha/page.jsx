@@ -1,6 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+
+import contentData from "../../data/abhilasha/content.json";
 
 import EntryScreen from "../../components/abhilasha/EntryScreen";
 import HomeScreen from "../../components/abhilasha/HomeScreen";
@@ -17,6 +19,11 @@ import SpecialScreen from "../../components/abhilasha/SpecialScreen";
 export default function AbhilashaApp() {
   const [currentScreen, setCurrentScreen] = useState("entry");
   const [isSpecialUnlocked, setIsSpecialUnlocked] = useState(false);
+
+  useEffect(() => {
+    console.log("== ABHILASHA SANCTUARY DEBUG ==");
+    console.log("Loading data from content.json:", contentData);
+  }, []);
 
   const navigateTo = (screen) => {
     setCurrentScreen(screen);

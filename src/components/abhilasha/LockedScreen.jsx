@@ -1,10 +1,14 @@
 "use client";
 import { useState } from "react";
+import contentData from "../../data/abhilasha/content.json";
 
 export default function LockedScreen({ unlockSpecial }) {
   // Option A implementation: a long press or specific tap sequence. 
   // We'll use a double-click / multiple clicks on a "hidden" element or a long press via touch/mouse events.
   const [tapCount, setTapCount] = useState(0);
+
+  const profileImage = contentData?.profileImage || "/abhilasha.jpg";
+  const name = contentData?.name || "Abhilasha";
 
   const handleSecretTap = () => {
     setTapCount(prev => {
@@ -26,10 +30,10 @@ export default function LockedScreen({ unlockSpecial }) {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant/20">
-                <img alt="Abhilasha" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBt1HFHm0yo_PPY5V2uABbGhFtMfjBLEhMbIzAvQ8Vbe4eXeq2IJuyQRCPIp_fk7JKHTXj_YVxuGigZDSUbpHgqpc0Wvb8RNhbweAG-Jza0BoogdXPOj2cIqfFnOq3o1rUVrHz36tS2V141bifniuvcH-OETcWPPuaCvu6Ew6PgSE7QgPrkG0yeDwMRWt5tJS9HqlH2726U8Ekr_83imTAkWaFO-L3iNOzf4N0mFJm2Boor63zvIH-BRKl47Iysy8r1OfHSgRiSR_Q"/>
+                <img alt={`${name}`} className="w-full h-full object-cover" src={profileImage}/>
               </div>
               <div>
-                <h1 className="font-headline text-3xl tracking-tight text-[#FF8FA3]">Hey Abhilasha</h1>
+                <h1 className="font-headline text-3xl tracking-tight text-[#FF8FA3]">Hey {name}</h1>
                 <p className="font-body text-sm opacity-60">Patience is a quiet beauty</p>
               </div>
             </div>

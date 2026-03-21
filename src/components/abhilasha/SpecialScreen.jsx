@@ -1,7 +1,10 @@
 "use client";
 import { motion } from "framer-motion";
+import contentData from "../../data/abhilasha/content.json";
 
 export default function SpecialScreen() {
+  const name = contentData?.name || "Abhilasha";
+
   return (
     <div className="bg-surface-container-lowest text-on-surface font-body min-h-[100dvh] overflow-hidden selection:bg-primary-container/30">
       {/* Background Ambience */}
@@ -47,7 +50,7 @@ export default function SpecialScreen() {
                 <h2 className="font-headline text-5xl leading-tight text-transparent bg-clip-text bg-gradient-to-r from-primary-container to-secondary">
                   Happy <br/>Birthday
                 </h2>
-                <h3 className="font-headline text-2xl mt-2 text-white italic">Abhilasha</h3>
+                <h3 className="font-headline text-2xl mt-2 text-white italic">{name}</h3>
               </motion.div>
 
               <motion.div

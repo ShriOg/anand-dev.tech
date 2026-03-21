@@ -2,56 +2,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+import contentData from "../../data/abhilasha/content.json";
+
 export default function MindScreen() {
   const [expandedCard, setExpandedCard] = useState(null);
 
-  const thoughts = [
-    {
-      id: 1,
-      preview: "I don’t say this enough, but your presence is the quietest comfort I’ve ever known.",
-      highlight: "quietest comfort",
-      fullText: "There is a chaos in the world that never seems to stop. But when I am around you, even if we aren't speaking, the noise settles. It's the most profound peace I have ever experienced. I don't know how you do it, but you make my heart feel safe.",
-      top: "0",
-      left: "4%",
-      width: "85%",
-      zIndex: 10,
-      animationClasses: "floating-1",
-      hoverClass: "hover:border-primary/20",
-      icon: "format_quote",
-      iconColor: "text-primary/40",
-      delay: 0
-    },
-    {
-      id: 2,
-      preview: "You matter more than you think. In the spaces between our words, I’m always choosing you.",
-      highlight: "spaces between",
-      fullText: "Sometimes I wonder if you know how deeply you are loved. Even when I am quiet, or when distance separates us, every silent thought is gravitating towards you. You are my constant choice.",
-      top: "32%",
-      right: "0",
-      width: "80%",
-      zIndex: 20,
-      animationClasses: "floating-2",
-      hoverClass: "hover:border-secondary/20",
-      icon: "favorite",
-      iconColor: "text-secondary",
-      delay: 0.2
-    },
-    {
-      id: 3,
-      preview: "I notice things about you that you haven’t forgiven in yourself yet. And I love them all.",
-      highlight: "forgiven",
-      fullText: "You are harder on yourself than anyone else. I see the little flaws you try to hide, the moments you doubt yourself, the parts you think are unlovable. And Abhilasha, those are exactly the parts I fall in love with the hardest.",
-      top: "60%",
-      left: "0",
-      width: "90%",
-      zIndex: 10,
-      animationClasses: "floating-1",
-      hoverClass: "hover:border-tertiary/20",
-      icon: "arrow_forward_ios",
-      iconColor: "text-on-surface-variant",
-      delay: 0.4
-    }
-  ];
+  const thoughts = contentData?.thoughts || [];
+  const profileImage = contentData?.profileImage || "/abhilasha.jpg";
+  const name = contentData?.name || "Abhilasha";
 
   return (
     <div className="bg-surface text-on-surface font-body min-h-[100dvh] overflow-x-hidden selection:bg-primary-container/30">
@@ -67,9 +25,9 @@ export default function MindScreen() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant/20">
-                <img alt="Abhilasha's profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBB3PK1RkR2yuri4pTfKBtkobaf_HQGfRQMhekQExMieKbliuzcqMzdRZHjHlEqOtseWjF3erGPPzGLCerph9stcJwB1EdIZtaZSfGveq9aUjDDvrbIyHItKYFzGoJ45lLUg_R0npHf3jpRX-HpJfdNIptR5UAVw4hVlSFfZKsHmDG0PV1uAKyeNPAOf5K2tshzzT2_E6lAMTuQLps9hs2aFD5H3Q8Q1yu3ClD1P8ygAuruPsj-LEyLwGW3QznIoRmKiAPub3KfNQ8"/>
+                <img alt={`${name}'s profile`} className="w-full h-full object-cover" src={profileImage}/>
               </div>
-              <h1 className="text-[#FF8FA3] font-headline text-3xl tracking-tight">Hey Abhilasha</h1>
+              <h1 className="text-[#FF8FA3] font-headline text-3xl tracking-tight">Hey {name}</h1>
             </div>
             <button className="text-[#FF8FA3] hover:opacity-80 transition-opacity duration-500">
               <span className="material-symbols-outlined text-3xl">music_note</span>

@@ -2,68 +2,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+import contentData from "../../data/abhilasha/content.json";
+
 export default function LettersScreen() {
   const [activeLetter, setActiveLetter] = useState(null);
 
-  const letters = [
-    {
-      id: 1,
-      title: "The way you held your coffee today...",
-      date: "Oct 12",
-      status: "Opened",
-      preview: `"I saw you looking at the steam rising from your mug, and for a second, the world just went quiet. You looked so peaceful, Abhilasha. Like the noise of the city couldn't touch you..."`,
-      fullText: [
-        `Abhilasha, I watched you looking at the steam rising from your mug today, and for a second, the world just went quiet.`,
-        `You looked so peaceful. Like the noise of the city, the emails, and the worries couldn't touch you. It’s in these tiny, unspoken gaps of the day that I find myself most in love with you.`,
-        `You don't need to be doing anything "big" to be remarkable. You just being there, breathing, and existing is enough to make the sanctuary feel complete.`
-      ],
-      isLocked: false
-    },
-    {
-      id: 2,
-      title: "Remember the rain in Shimla?",
-      date: "2 days ago",
-      status: "Read",
-      preview: `It started pouring just as we reached the ridge. Most people ran for cover, but you just tilted your head back and laughed...`,
-      fullText: [
-        `It started pouring just as we reached the ridge. Most people ran for cover, but you just tilted your head back and laughed.`,
-        `That laugh, Abhilasha. It echod through the rain. I just stood there, forgetting about getting wet, entirely captivated by you.`,
-        `I want to preserve that moment forever.`
-      ],
-      isLocked: false
-    },
-    {
-      id: 3,
-      title: "A little secret for later",
-      date: "Oct 24",
-      status: "Unlocks tomorrow",
-      preview: `There's something I've been meaning to tell you about that night under the stars. I never told you because...`,
-      fullText: [],
-      isLocked: true
-    },
-    {
-      id: 4,
-      title: "Your strength is quiet",
-      date: "Oct 10",
-      status: "Read",
-      preview: `I watched you handle that tough call today. You don't realize how much grace you carry even when things are falling apart...`,
-      fullText: [
-        `I watched you handle that tough call today. You don't realize how much grace you carry even when things are falling apart.`,
-        `You are the calm in the storm. Never doubt your own strength, my love.`
-      ],
-      isLocked: false
-    },
-    {
-      id: 5,
-      title: "The biggest adventure yet",
-      date: "Wait for your birthday",
-      status: "Wait for your birthday",
-      preview: `I've been planning this for months. I can't believe it's almost time to show you. It starts with a ticket to...`,
-      fullText: [],
-      isLocked: true,
-      lockedText: "Wait for your birthday"
-    }
-  ];
+  const letters = contentData?.letters || [];
+  const profileImage = contentData?.profileImage || "/abhilasha.jpg";
+  const name = contentData?.name || "Abhilasha";
 
   return (
     <div className="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container min-h-[100dvh]">
@@ -74,12 +20,12 @@ export default function LettersScreen() {
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden">
                 <img 
-                  alt="Abhilasha's profile" 
+                  alt={`${name}'s profile`} 
                   className="w-full h-full object-cover" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDF4xbj2QDj1g_FjrANK58S0V-uLTNv6AILyKC3Rh4HP6N5v41ly1jXtzPkQofFIIMDRn0-6COGhJKpk51T4D9Qz2R6j-RnzSV7wE1gJN7yNDe-sJnNz9okykPMnj9s8TaRePbudqy4pFcuJRTzeW_iumIMwYnHem7xRRrL1qN3-gNhOCOnT5ZFbJVQW01yAFPirVw4iGBMkU-2lMtg6ZaUYPfrXmeHM6bis0V96ilM29NqwqwvkIQjzLYfXJ98khkChF38Te8HOOE"
+                  src={profileImage}
                 />
               </div>
-              <h1 className="font-headline text-3xl tracking-tight text-[#FF8FA3]">Hey Abhilasha</h1>
+              <h1 className="font-headline text-3xl tracking-tight text-[#FF8FA3]">Hey {name}</h1>
             </div>
             <div className="text-[#FF8FA3] hover:opacity-80 transition-opacity duration-500 cursor-pointer">
               <span className="material-symbols-outlined text-2xl">music_note</span>

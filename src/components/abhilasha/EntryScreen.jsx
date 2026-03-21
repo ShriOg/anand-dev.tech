@@ -1,4 +1,8 @@
+import contentData from "../../data/abhilasha/content.json";
+
 export default function EntryScreen({ onEnter }) {
+  const name = contentData?.name || "Abhilasha";
+
   return (
     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-8 text-center bg-[#0f131e]">
       {/* Atmospheric Layer: Light Leaks & Stars */}
@@ -33,7 +37,7 @@ export default function EntryScreen({ onEnter }) {
               This space exists because <span className="text-primary italic">you</span> do.
             </h1>
             <p className="font-body text-lg md:text-xl opacity-60 max-w-md mx-auto leading-relaxed">
-              And because you mean more than you think, Abhilasha.
+              And because you mean more than you think, {name}.
             </p>
           </div>
 

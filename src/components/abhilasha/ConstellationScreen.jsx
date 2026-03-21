@@ -1,8 +1,13 @@
 "use client";
 import { useState } from "react";
 
+import contentData from "../../data/abhilasha/content.json";
+
 export default function ConstellationScreen() {
   const [activeStar, setActiveStar] = useState(null);
+
+  const profileImage = contentData?.profileImage || "/abhilasha.jpg";
+  const name = contentData?.name || "Abhilasha";
 
   const stars = [
     {
@@ -73,10 +78,10 @@ export default function ConstellationScreen() {
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-full bg-surface-variant overflow-hidden flex items-center justify-center">
-                <img alt="Abhilasha's profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuArQDQ1UKCNqimJTr63Fw5rDdJFBeQFQzQ5g2mrTQ5xLwupqfjiomWDZion_QEkX83Vj7b03316NoGj-7Fzc93lek1e0Kjp9lq9l-klgqJxPZSW3GzAA9FMeLavtkCO8DR6aCS5z4e7ylm38jAa2K2EIJajcq976F1bC7Y1dOO3ws8WSE_qBz1_5QDAs4rETjK21nB7wnG16GbwmJkg3FqC8EA417PXdWDaDs3pugS2O8d9x0ImzOcOd1Y7fcYpsG_jUiaveSUITXU"/>
+                <img alt={`${name}'s profile`} className="w-full h-full object-cover" src={profileImage}/>
               </div>
               <div>
-                <h1 className="font-headline text-3xl tracking-tight text-[#FF8FA3]">Hey Abhilasha</h1>
+                <h1 className="font-headline text-3xl tracking-tight text-[#FF8FA3]">Hey {name}</h1>
                 <p className="font-body text-sm opacity-80 text-slate-400">Under our shared sky</p>
               </div>
             </div>

@@ -2,50 +2,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+import contentData from "../../data/abhilasha/content.json";
+
 export default function MemoriesScreen() {
   const [expandedMemoryId, setExpandedMemoryId] = useState(null);
 
-  const memories = [
-    {
-      id: 1,
-      date: "November 12, 2023",
-      title: "Rainy cafe date",
-      description: "The way the rain sounded against the window while we hid in that tiny cafe.",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuC991OKKp6qvGBZdmom3CvuadHWcl36WV22eozhIlRBGZB9UCCszEqEXjA_PP5W0VwmlV1i_l8bqfolFJYJUc-3s-gp4K4UUSBAilUeDyi_X0RdQieIxW2vcVzoLL1VZM2PaoRLt46FB11MY8l-drZj0YMzzu0K7nTPYd6Qz57cZK-tQKQyMfnuomDHAcMnyRG-ZwWog19sGUToXUtXbdWz7vTQU5axLAYmqqDyDgxbKd6wjQguvS7m0uVNic5K_U2xIgNewA6hTaE",
-      align: "left",
-      colorClass: "border-primary-container",
-      hasAudio: true
-    },
-    {
-      id: 2,
-      date: "October 04, 2023",
-      title: "Sunset walk",
-      description: "Golden hour looked better on you than it did on the horizon.",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCl6QW3M2-uWueDPiKCfx_djzMdSe6euCLfGnPrXY0_3aHwRjDYjRJM6MIkqHwDpoxLvs1hbZhRbs1xgxcEIA7LBJf52gOKR7UGoLKfgaPJOzdHcte1bRe_DwpBq47KDnCQZooOEmDxDjOdklZ6u6dccNMtiX_PRaXeUdlEISA2NAMb69hpo1oPIjDhnt5rFF-zs0OSY7WTYcooZMNg7EkNV1cGBZ_nmbMvEPOGcxbeJWQVfsdZ-Qce2qlhnkcb03H_ggtA8vn3_hQ",
-      align: "right",
-      colorClass: "border-secondary-fixed-dim",
-      hasAudio: false
-    },
-    {
-      id: "featured",
-      date: "SEPTEMBER 21",
-      title: "The Midnight Letter",
-      description: "I found this note tucked away. It reminded me of the night we sat by the water and talked until the stars began to fade into the dawn. You said you felt at peace for the first time in years. I hope you still feel that way whenever you think of us.",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDP60BJglDSJqx1ZSNtnQn7P_vmKhXzQ1RM58v8D5_PzjGCsHkP7DRsZ8ROyXCos1eCUoipx7frLtMOJvhlzy7kzK2SzCIKHCnhcBQXR1gFxixzzKqLaUyIQK4wqgdt5KzNnprFX1A9Oyekf6txbEq6ZhTjc0fcx6UaAJXCxpFhcPMOyVtAbseY-fgQQlCiY3nvQlvSKTQF-Lcb2uSUya4sUmX2Nut0YUUfGL6h614TEq-0ABEcQ4y_vgEnFgKbkf1nF92Qy5GpPu0",
-      align: "center",
-      isFeatured: true
-    },
-    {
-      id: 3,
-      date: "August 15, 2023",
-      title: "Flower fields",
-      description: "The day the world smelled like wildflowers and possibilities.",
-      image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCr0oVGapFNcTNCzVCfSwXYaQevTVLaVziFAFmxcoa0r54F3dsM0yv0lhiXfPKqpCYiq0YMssWAD5e5vzMyrHGWZP5nUqlYv5f4ttFZJNE0dZpRf3z3DfVhXL4TYaZXks48g9HL18IFr5mov4t7fcM6hXWkSd2JQrH_I5slf13PHpUu3JSYg8eMJ7eqKX5AjziHi6Ay9IX50ga1VeEoOvmpHE2O33J7Zl_XQkIAaIvvT-gqRzevIcEUVc_SsXGHmx2v2sHYlwb6Cbs",
-      align: "left",
-      colorClass: "border-tertiary",
-      hasAudio: false
-    }
-  ];
+  const memories = contentData?.memories || [];
+  const profileImage = contentData?.profileImage || "/abhilasha.jpg";
+  const name = contentData?.name || "Abhilasha";
 
   return (
     <div className="bg-surface text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container min-h-[100dvh]">
@@ -65,9 +29,9 @@ export default function MemoriesScreen() {
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant/20">
-              <img alt="Abhilasha's profile" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBqqRYe8aTbGej1pbj8Mca9ZzjZtAH5xUByuyPakLfvQLKmFZru-UExKaJbQI9x77hKpkQFrj8sV982qLUgh3EORzM2EftuGzz-mjhori2TJ3-AGRGYdIBG7IGwqKdtQZYjkq12OU1H26Ziz7_BPVBQbYay6bjE4MGYoKESHai-xOjsDz9C_O_88J6cwVm0YClOR3YwV_gr-MH4BNgS6g7EdUVaoUwkP_rCgW8Kyw6C6ww3B2zyt-utFyQurzlXdtU7oGzEwkiXyw"/>
+              <img alt={`${name}'s profile`} className="w-full h-full object-cover" src={profileImage}/>
             </div>
-            <h1 className="font-headline text-3xl tracking-tight text-[#FF8FA3]">Hey Abhilasha</h1>
+            <h1 className="font-headline text-3xl tracking-tight text-[#FF8FA3]">Hey {name}</h1>
           </div>
           <div className="text-[#FF8FA3] transition-opacity duration-500 hover:opacity-80 cursor-pointer">
             <span className="material-symbols-outlined text-2xl">music_note</span>
@@ -85,7 +49,10 @@ export default function MemoriesScreen() {
           {/* Central Timeline Path */}
           <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-outline-variant/30 to-transparent transform -translate-x-1/2"></div>
           
-          {memories.map((m) => {
+          {memories.length === 0 ? (
+            <div className="text-center text-slate-400 p-8 pt-16 font-body w-full">Content coming soon...</div>
+          ) : (
+            memories.map((m) => {
             if (m.isFeatured) {
               const isExpanded = expandedMemoryId === m.id;
               return (
@@ -171,7 +138,7 @@ export default function MemoriesScreen() {
                 </div>
               </div>
             );
-          })}
+          }))}
         </div>
 
         <div className="py-20 text-center opacity-30 flex flex-col items-center gap-4">
