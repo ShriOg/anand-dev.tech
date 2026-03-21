@@ -6,20 +6,13 @@ import EntryScreen from "../../components/abhilasha/EntryScreen";
 import HomeScreen from "../../components/abhilasha/HomeScreen";
 import Navigation from "../../components/abhilasha/Navigation";
 
-// Shells for other screens will be imported here
-// For now, we stub them to prevent errors during early build
-const LettersScreen = () => <div className="text-white pt-32 text-center">Letters Screen</div>;
-const MemoriesScreen = () => <div className="text-white pt-32 text-center">Memories Screen</div>;
-const VoiceScreen = () => <div className="text-white pt-32 text-center">Voice Screen</div>;
-const MindScreen = () => <div className="text-white pt-32 text-center">Mind Screen</div>;
-const ConstellationScreen = () => <div className="text-white pt-32 text-center">Constellation Screen</div>;
-const LockedScreen = ({ unlockSpecial }) => (
-  <div className="text-white pt-32 text-center">
-     Locked Screen 
-     <button onClick={unlockSpecial} className="mt-4 p-2 bg-white/10 rounded">Secret Unlock</button>
-  </div>
-);
-const SpecialScreen = () => <div className="text-white pt-32 text-center">Special Screen! Happy Birthday!</div>;
+import LettersScreen from "../../components/abhilasha/LettersScreen";
+import MemoriesScreen from "../../components/abhilasha/MemoriesScreen";
+import VoiceScreen from "../../components/abhilasha/VoiceScreen";
+import MindScreen from "../../components/abhilasha/MindScreen";
+import ConstellationScreen from "../../components/abhilasha/ConstellationScreen";
+import LockedScreen from "../../components/abhilasha/LockedScreen";
+import SpecialScreen from "../../components/abhilasha/SpecialScreen";
 
 export default function AbhilashaApp() {
   const [currentScreen, setCurrentScreen] = useState("entry");
