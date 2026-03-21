@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-lowest": "#0a0e19",
+              "surface-container": "#1b1f2b",
+              "primary-container": "#ff8fa3",
+              "outline-variant": "#544244",
+              "on-error-container": "#ffdad6",
+              "primary": "#ffbac3",
+              "secondary-fixed-dim": "#c9bfff",
+              "primary-fixed": "#ffd9dd",
+              "surface-container-low": "#171b27",
+              "primary-fixed-dim": "#ffb2bd",
+              "surface-container-high": "#262a36",
+              "on-tertiary-fixed": "#2e014b",
+              "on-primary": "#5f1127",
+              "surface-bright": "#353945",
+              "inverse-primary": "#9b4053",
+              "outline": "#a28b8e",
+              "on-secondary-container": "#b7aaff",
+              "on-primary-fixed-variant": "#7d283c",
+              "on-secondary-fixed": "#1a0063",
+              "on-secondary-fixed-variant": "#4632a2",
+              "error-container": "#93000a",
+              "surface-dim": "#0f131e",
+              "on-error": "#690005",
+              "surface": "#0f131e",
+              "surface-tint": "#ffb2bd",
+              "secondary": "#c9bfff",
+              "inverse-surface": "#dfe2f2",
+              "on-background": "#dfe2f2",
+              "on-surface": "#dfe2f2",
+              "surface-variant": "#313441",
+              "secondary-fixed": "#e5deff",
+              "tertiary": "#e6bcff",
+              "tertiary-fixed": "#f3daff",
+              "secondary-container": "#4632a2",
+              "inverse-on-surface": "#2c303c",
+              "on-secondary": "#2f148c",
+              "on-primary-container": "#782539",
+              "surface-container-highest": "#313441",
+              "tertiary-fixed-dim": "#e2b5ff",
+              "on-surface-variant": "#dac0c3",
+              "background": "#0f131e",
+              "on-tertiary": "#451d61",
+              "on-primary-fixed": "#400014",
+              "on-tertiary-fixed-variant": "#5d357a",
+              "tertiary-container": "#cd9eec",
+              "on-tertiary-container": "#593176",
+              "error": "#ffb4ab"
+            },
+            fontFamily: {
+              "headline": ["Noto Serif"],
+              "body": ["Manrope"],
+              "label": ["Manrope"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-card {
+        backdrop-filter: blur(24px);
+        background: rgba(49, 52, 65, 0.4);
+      }
+      .soft-glow {
+        box-shadow: 0 0 30px rgba(255, 143, 163, 0.15);
+      }
+      body {
+        background-color: #0f131e;
+        color: #dfe2f2;
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body selection:bg-primary/30 min-h-screen pb-40">
+<!-- Top App Bar -->
+<header class="bg-[#0f131e]/60 backdrop-blur-xl sticky top-0 z-50 w-full max-w-lg mx-auto px-8 py-6 flex flex-row items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden">
+<img alt="Abhilasha's profile" data-alt="Abhilasha's profile portrait silhouette" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvyYS96teWay0H-OZB1EdBnkLAvV6jpOesE_Lymo2NDSLeACfpmzngulKI4V7rDeyoB_jgZCmvRIBw3pBDRpwgX4W-KJwWcXkfl8_me4tQfnLZWpQdzEM24T1Y645G4m_JHYBWgk1tR-dKw7QD0h_fRHeJjz8ygiLBIds7fCio-Bgf84Z0QTZB0lVWFM4CQrBamQD23xWEV19f14uBBXLdtYO7IPr6T_m7pW0z3NVI25jMb68IRloZfAr_l06UUGm24JF3VnieSn8"/>
+</div>
+<h1 class="font-headline text-3xl tracking-tight text-[#FF8FA3]">Hey Abhilasha</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-[#FF8FA3] hover:opacity-80 transition-opacity duration-500">
+<span class="material-symbols-outlined">music_note</span>
+</button>
+</div>
+</header>
+<main class="max-w-lg mx-auto px-6 pt-4">
+<!-- Category Selection -->
+<div class="flex gap-4 mb-10 overflow-x-auto pb-2 no-scrollbar">
+<button class="px-6 py-2 rounded-full glass-card border border-primary/20 text-primary text-sm font-medium transition-all duration-500 hover:bg-primary/10">
+                Calm
+            </button>
+<button class="px-6 py-2 rounded-full bg-surface-container-low text-on-surface/60 text-sm font-medium transition-all duration-500 hover:text-primary">
+                Reassuring
+            </button>
+<button class="px-6 py-2 rounded-full bg-surface-container-low text-on-surface/60 text-sm font-medium transition-all duration-500 hover:text-primary">
+                Playful
+            </button>
+</div>
+<!-- Featured Section (Asymmetry) -->
+<section class="mb-12">
+<div class="relative group cursor-pointer">
+<div class="absolute -inset-1 bg-gradient-to-r from-primary-container/20 to-tertiary-container/20 rounded-lg blur-2xl opacity-50 group-hover:opacity-100 transition duration-1000"></div>
+<div class="relative glass-card rounded-lg p-8 flex flex-col gap-6">
+<span class="text-xs uppercase tracking-[0.2em] text-tertiary-container font-semibold">Tonight's Focus</span>
+<h2 class="font-headline text-4xl text-on-surface leading-tight italic">Whispers of the <br/>Rain Forest</h2>
+<div class="flex items-center justify-between">
+<p class="text-sm text-on-surface/70 font-light max-w-[200px]">A 12-minute deep immersion into soft evening showers.</p>
+<button class="w-14 h-14 rounded-full bg-primary flex items-center justify-center text-on-primary soft-glow transition-transform hover:scale-110 active:scale-95 duration-500">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Audio List -->
+<div class="space-y-4">
+<!-- Audio Card 1 -->
+<div class="flex items-center p-5 rounded-lg bg-surface-container-low hover:bg-surface-container-high transition-all duration-500 cursor-pointer group">
+<div class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined">waves</span>
+</div>
+<div class="ml-4 flex-1">
+<h3 class="font-headline text-lg text-on-surface">The Shoreline Drift</h3>
+<p class="text-xs text-on-surface/50 font-medium tracking-wide">CALM • 08:45</p>
+</div>
+<button class="text-on-surface/30 group-hover:text-primary transition-colors duration-300">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<!-- Audio Card 2 -->
+<div class="flex items-center p-5 rounded-lg bg-surface-container-low hover:bg-surface-container-high transition-all duration-500 cursor-pointer group">
+<div class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">flare</span>
+</div>
+<div class="ml-4 flex-1">
+<h3 class="font-headline text-lg text-on-surface">Safe At Home</h3>
+<p class="text-xs text-on-surface/50 font-medium tracking-wide">REASSURING • 05:20</p>
+</div>
+<button class="text-on-surface/30 group-hover:text-primary transition-colors duration-300">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<!-- Audio Card 3 -->
+<div class="flex items-center p-5 rounded-lg bg-surface-container-low hover:bg-surface-container-high transition-all duration-500 cursor-pointer group">
+<div class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined">sentiment_satisfied</span>
+</div>
+<div class="ml-4 flex-1">
+<h3 class="font-headline text-lg text-on-surface">Morning Giggle</h3>
+<p class="text-xs text-on-surface/50 font-medium tracking-wide">PLAYFUL • 03:12</p>
+</div>
+<button class="text-on-surface/30 group-hover:text-primary transition-colors duration-300">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<!-- Audio Card 4 -->
+<div class="flex items-center p-5 rounded-lg bg-surface-container-low hover:bg-surface-container-high transition-all duration-500 cursor-pointer group">
+<div class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined">nights_stay</span>
+</div>
+<div class="ml-4 flex-1">
+<h3 class="font-headline text-lg text-on-surface">Moonlight Hum</h3>
+<p class="text-xs text-on-surface/50 font-medium tracking-wide">CALM • 15:00</p>
+</div>
+<button class="text-on-surface/30 group-hover:text-primary transition-colors duration-300">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Minimal Player UI (Floating above Bottom Nav) -->
+<div class="fixed bottom-28 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-md z-40">
+<div class="glass-card rounded-xl p-4 flex flex-col gap-3 shadow-2xl border border-white/5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center relative overflow-hidden">
+<img class="absolute inset-0 object-cover opacity-60" data-alt="Abstract dark blue and pink gradient flow" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpYAauAIZrHKasZXjIgVMltVLCjyPTJNSMVxgtxvIzXORTo742W8RoeNauvS4Zx2MVf6ieTtI1jj7R3GTg4vXTLHgcv_c-MhGVt-1p2DeM14CFD5DZ7vbcYJIoxV1tBQv_Z2jgrQHRJET-9htC5mEm8DTxb-n1TMk54rZ-O_AXrEY4qW3_C1lYzoR1fDmECn0fFJMNqPbM-DBQ0FqLtNetuHwrNIw4QvemqUz9OBSKTKOlVRajG_m31TOjRXWgqQspiW4iTACWvx8"/>
+<span class="material-symbols-outlined text-primary text-sm relative z-10" style="font-variation-settings: 'FILL' 1;">volume_up</span>
+</div>
+<div>
+<h4 class="font-headline text-sm text-on-surface">Whispers of the Rain Forest</h4>
+<p class="text-[10px] uppercase tracking-widest text-primary font-bold">Now Playing</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface hover:text-primary transition-colors">
+<span class="material-symbols-outlined">skip_previous</span>
+</button>
+<button class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">pause</span>
+</button>
+<button class="text-on-surface hover:text-primary transition-colors">
+<span class="material-symbols-outlined">skip_next</span>
+</button>
+</div>
+</div>
+<!-- Progress Bar -->
+<div class="relative w-full h-1 bg-white/10 rounded-full overflow-hidden">
+<div class="absolute top-0 left-0 h-full w-1/3 bg-primary rounded-full"></div>
+</div>
+<div class="flex justify-between text-[8px] text-on-surface/40 font-mono">
+<span>04:12</span>
+<span>12:00</span>
+</div>
+</div>
+</div>
+<!-- Bottom Nav Bar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-6 pb-8 pt-4 bg-[#0f131e]/80 backdrop-blur-2xl rounded-t-[3rem] shadow-[0_-10px_40px_rgba(15,19,30,0.5)]">
+<a class="flex flex-col items-center justify-center text-slate-500 opacity-60 hover:text-[#c9bfff] transition-colors duration-500" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-['manrope'] text-[10px] tracking-widest uppercase mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 opacity-60 hover:text-[#c9bfff] transition-colors duration-500" href="#">
+<span class="material-symbols-outlined">favorite</span>
+<span class="font-['manrope'] text-[10px] tracking-widest uppercase mt-1">For You</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 opacity-60 hover:text-[#c9bfff] transition-colors duration-500" href="#">
+<span class="material-symbols-outlined">collections</span>
+<span class="font-['manrope'] text-[10px] tracking-widest uppercase mt-1">Memories</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#FF8FA3] scale-110 transition-transform duration-700" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">mic</span>
+<span class="font-['manrope'] text-[10px] tracking-widest uppercase mt-1">Hear Me</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 opacity-60 hover:text-[#c9bfff] transition-colors duration-500" href="#">
+<span class="material-symbols-outlined">more_horiz</span>
+<span class="font-['manrope'] text-[10px] tracking-widest uppercase mt-1">More</span>
+</a>
+</nav>
+</body></html>

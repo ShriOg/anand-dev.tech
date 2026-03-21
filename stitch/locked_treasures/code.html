@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-container-lowest": "#0a0e19",
+              "surface-container": "#1b1f2b",
+              "primary-container": "#ff8fa3",
+              "outline-variant": "#544244",
+              "on-error-container": "#ffdad6",
+              "primary": "#ffbac3",
+              "secondary-fixed-dim": "#c9bfff",
+              "primary-fixed": "#ffd9dd",
+              "surface-container-low": "#171b27",
+              "primary-fixed-dim": "#ffb2bd",
+              "surface-container-high": "#262a36",
+              "on-tertiary-fixed": "#2e014b",
+              "on-primary": "#5f1127",
+              "surface-bright": "#353945",
+              "inverse-primary": "#9b4053",
+              "outline": "#a28b8e",
+              "on-secondary-container": "#b7aaff",
+              "on-primary-fixed-variant": "#7d283c",
+              "on-secondary-fixed": "#1a0063",
+              "on-secondary-fixed-variant": "#4632a2",
+              "error-container": "#93000a",
+              "surface-dim": "#0f131e",
+              "on-error": "#690005",
+              "surface": "#0f131e",
+              "surface-tint": "#ffb2bd",
+              "secondary": "#c9bfff",
+              "inverse-surface": "#dfe2f2",
+              "on-background": "#dfe2f2",
+              "on-surface": "#dfe2f2",
+              "surface-variant": "#313441",
+              "secondary-fixed": "#e5deff",
+              "tertiary": "#e6bcff",
+              "tertiary-fixed": "#f3daff",
+              "secondary-container": "#4632a2",
+              "inverse-on-surface": "#2c303c",
+              "on-secondary": "#2f148c",
+              "on-primary-container": "#782539",
+              "surface-container-highest": "#313441",
+              "tertiary-fixed-dim": "#e2b5ff",
+              "on-surface-variant": "#dac0c3",
+              "background": "#0f131e",
+              "on-tertiary": "#451d61",
+              "on-primary-fixed": "#400014",
+              "on-tertiary-fixed-variant": "#5d357a",
+              "tertiary-container": "#cd9eec",
+              "on-tertiary-container": "#593176",
+              "error": "#ffb4ab"
+            },
+            fontFamily: {
+              "headline": ["Noto Serif"],
+              "body": ["Manrope"],
+              "label": ["Manrope"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(49, 52, 65, 0.4);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+        .light-leak {
+            background: radial-gradient(circle at center, rgba(230, 188, 255, 0.08) 0%, transparent 70%);
+        }
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255, 143, 163, 0.05), transparent);
+            background-size: 200% 100%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body min-h-screen selection:bg-primary-container/30">
+<!-- Top Navigation -->
+<header class="fixed top-0 left-0 w-full z-50 bg-[#0f131e]/60 backdrop-blur-xl">
+<div class="flex flex-col justify-center px-8 py-6 w-full max-w-lg mx-auto">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant/20">
+<img alt="Abhilasha" class="w-full h-full object-cover" data-alt="Close up portrait of a smiling woman" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBt1HFHm0yo_PPY5V2uABbGhFtMfjBLEhMbIzAvQ8Vbe4eXeq2IJuyQRCPIp_fk7JKHTXj_YVxuGigZDSUbpHgqpc0Wvb8RNhbweAG-Jza0BoogdXPOj2cIqfFnOq3o1rUVrHz36tS2V141bifniuvcH-OETcWPPuaCvu6Ew6PgSE7QgPrkG0yeDwMRWt5tJS9HqlH2726U8Ekr_83imTAkWaFO-L3iNOzf4N0mFJm2Boor63zvIH-BRKl47Iysy8r1OfHSgRiSR_Q"/>
+</div>
+<div>
+<h1 class="font-headline text-3xl tracking-tight text-[#FF8FA3]">Hey Abhilasha</h1>
+<p class="font-body text-sm opacity-60">Patience is a quiet beauty</p>
+</div>
+</div>
+<button class="text-[#FF8FA3] hover:opacity-80 transition-opacity duration-500">
+<span class="material-symbols-outlined text-2xl">music_note</span>
+</button>
+</div>
+</div>
+</header>
+<main class="pt-32 pb-32 px-6 max-w-lg mx-auto relative min-h-screen">
+<!-- Ambient Light Leaks -->
+<div class="fixed top-20 -left-20 w-80 h-80 light-leak pointer-events-none"></div>
+<div class="fixed bottom-40 -right-20 w-96 h-96 light-leak pointer-events-none" style="background: radial-gradient(circle at center, rgba(255, 143, 163, 0.05) 0%, transparent 70%);"></div>
+<!-- Section Header -->
+<div class="mb-10 animate-fade-in">
+<h2 class="font-headline text-4xl mb-3 leading-tight italic">Locked Treasures</h2>
+<p class="text-on-surface-variant font-body leading-relaxed max-w-[80%] opacity-80">
+                The most beautiful stories are the ones that take their time to unfold. 
+            </p>
+</div>
+<!-- Bento Grid of Locked Treasures -->
+<div class="grid grid-cols-2 gap-4">
+<!-- Card 1: Anticipation -->
+<div class="glass-card rounded-lg p-6 flex flex-col justify-between aspect-square border border-outline-variant/10">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-outline">lock</span>
+<span class="text-[10px] uppercase tracking-widest text-outline">Day 12</span>
+</div>
+<div>
+<p class="font-headline text-xl mb-2 italic">Not yet…</p>
+<div class="flex items-center gap-2">
+<div class="h-1 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-container/20 w-2/3"></div>
+</div>
+<span class="text-[10px] text-outline">64%</span>
+</div>
+</div>
+</div>
+<!-- Card 2: Wide Editorial -->
+<div class="col-span-1 glass-card rounded-lg p-6 flex flex-col border border-outline-variant/5">
+<span class="material-symbols-outlined text-outline/40 mb-4">hourglass_top</span>
+<p class="font-body text-sm leading-relaxed opacity-60">Wait for the right time…</p>
+<div class="mt-auto pt-6">
+<span class="text-2xl font-headline tracking-tighter">04:12:08</span>
+<p class="text-[10px] uppercase tracking-widest text-outline mt-1">Until release</p>
+</div>
+</div>
+<!-- Card 3: Deep Sentiment -->
+<div class="col-span-2 glass-card rounded-lg p-8 flex items-center gap-6 border border-outline-variant/10 overflow-hidden relative">
+<div class="absolute inset-0 shimmer opacity-10"></div>
+<div class="relative z-10 w-16 h-16 rounded-full bg-surface-container flex items-center justify-center border border-outline-variant/20">
+<span class="material-symbols-outlined text-primary text-3xl">sentiment_satisfied</span>
+</div>
+<div class="relative z-10">
+<p class="font-headline text-lg leading-snug">Some things arrive when they’re meant to…</p>
+<p class="text-xs text-outline mt-2 italic font-body">A whisper from the future</p>
+</div>
+</div>
+<!-- Card 4: Highlighted Birthday Card -->
+<div class="col-span-2 relative group">
+<div class="absolute -inset-1 bg-gradient-to-r from-primary/30 to-secondary/30 rounded-lg blur opacity-40 group-hover:opacity-60 transition duration-1000"></div>
+<div class="relative glass-card rounded-lg p-8 border border-primary/20 bg-surface-container-low/80 flex flex-col md:flex-row md:items-center justify-between gap-6 overflow-hidden">
+<div class="absolute top-0 right-0 p-4">
+<span class="material-symbols-outlined text-primary-container animate-pulse" style="font-variation-settings: 'FILL' 1;">cake</span>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="px-2 py-0.5 rounded-full bg-primary-container/20 text-primary text-[10px] uppercase font-bold tracking-widest">Priority</span>
+<span class="text-xs text-on-surface-variant">November 24</span>
+</div>
+<h3 class="font-headline text-3xl text-primary mb-2">🎂 Birthday</h3>
+<p class="font-body text-sm text-on-surface-variant leading-relaxed opacity-80">
+                            The ultimate treasure. A day of celebration, laughter, and a gift that carries the weight of a thousand words.
+                        </p>
+</div>
+<div class="flex flex-col items-center justify-center p-4 bg-surface-container-highest/40 rounded-xl border border-outline-variant/10 min-w-[120px]">
+<span class="text-3xl font-headline tracking-tighter text-secondary">28</span>
+<span class="text-[10px] uppercase tracking-[0.2em] text-outline">Days Left</span>
+</div>
+</div>
+</div>
+<!-- Card 5: Small Square Mystery -->
+<div class="glass-card rounded-lg p-6 flex flex-col justify-center items-center aspect-square border border-outline-variant/5">
+<span class="material-symbols-outlined text-outline/30 text-4xl mb-2">fingerprint</span>
+<p class="text-[10px] uppercase tracking-widest text-outline text-center">Identity Lock</p>
+</div>
+<!-- Card 6: Small Square Mystery 2 -->
+<div class="glass-card rounded-lg p-6 flex flex-col justify-between aspect-square border border-outline-variant/5">
+<div class="w-8 h-8 rounded bg-surface-container-high border border-outline-variant/20"></div>
+<p class="font-body text-xs opacity-40 italic">Coming soon to your heart.</p>
+</div>
+</div>
+<!-- Footer Note -->
+<div class="mt-12 text-center">
+<div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-low border border-outline-variant/10">
+<div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+<span class="text-[10px] uppercase tracking-widest text-outline">6 Treasures Remaining</span>
+</div>
+</div>
+</main>
+<!-- Navigation Shell -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-[#0f131e]/80 backdrop-blur-2xl px-6 pb-8 pt-4 flex justify-around items-center rounded-t-[3rem] shadow-[0_-10px_40px_rgba(15,19,30,0.5)]">
+<a class="flex flex-col items-center justify-center text-slate-500 opacity-60 hover:text-[#c9bfff] transition-colors duration-500" href="#">
+<span class="material-symbols-outlined mb-1">home</span>
+<span class="font-['manrope'] text-[10px] tracking-widest uppercase">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 opacity-60 hover:text-[#c9bfff] transition-colors duration-500" href="#">
+<span class="material-symbols-outlined mb-1">favorite</span>
+<span class="font-['manrope'] text-[10px] tracking-widest uppercase">For You</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#FF8FA3] scale-110 transition-transform duration-700" href="#">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">collections</span>
+<span class="font-['manrope'] text-[10px] tracking-widest uppercase">Memories</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 opacity-60 hover:text-[#c9bfff] transition-colors duration-500" href="#">
+<span class="material-symbols-outlined mb-1">mic</span>
+<span class="font-['manrope'] text-[10px] tracking-widest uppercase">Hear Me</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-500 opacity-60 hover:text-[#c9bfff] transition-colors duration-500" href="#">
+<span class="material-symbols-outlined mb-1">more_horiz</span>
+<span class="font-['manrope'] text-[10px] tracking-widest uppercase">More</span>
+</a>
+</nav>
+</body></html>
