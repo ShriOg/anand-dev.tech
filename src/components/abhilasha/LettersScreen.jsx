@@ -134,7 +134,7 @@ export default function LettersScreen() {
                 <article className="relative z-10">
                   <header className="mb-10 text-center">
                     <h2 className="font-headline text-3xl text-primary mb-2">{activeLetter.title}</h2>
-                    <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500">October 12, 2023</p>
+                    <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500">{activeLetter.date}</p>
                   </header>
 
                   <div className="font-headline text-xl leading-[2] text-on-surface/90 space-y-8 italic text-center max-w-sm mx-auto">

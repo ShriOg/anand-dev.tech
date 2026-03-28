@@ -1,3 +1,4 @@
+import { useState } from "react";
 import contentData from "../../data/abhilasha/content.json";
 
 export default function VoiceScreen() {

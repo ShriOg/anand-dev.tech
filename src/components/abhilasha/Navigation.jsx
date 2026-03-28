@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-export default function Navigation({ currentScreen, navigateTo, isSpecialUnlocked }) {
+export default function Navigation({ currentScreen, navigateTo }) {
   const navItems = [
     { id: 'home', label: 'Home', icon: 'home' },
     { id: 'letters', label: 'For You', icon: 'favorite' },

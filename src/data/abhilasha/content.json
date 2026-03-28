@@ -4,7 +4,7 @@
   "home": {
     "greeting": "Hey Abhilasha",
     "subtitle": "Take your time… everything here is for you.",
-    "moods": ["I feel low", "I miss you", "I’m okay"],
+    "moods": ["I feel low", "I miss you", "I'm okay"],
     "cards": [
       {
         "id": "letters",
