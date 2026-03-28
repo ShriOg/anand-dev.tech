@@ -8,7 +8,7 @@ export default function LettersScreen() {
   const [activeLetter, setActiveLetter] = useState(null);
 
   const letters = contentData?.letters || [];
-  const profileImage = contentData?.profileImage || "/abhilasha.jpg";
+  const profileImage = contentData?.profileImage || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Ccircle cx='100' cy='100' r='100' fill='%23e8a4b8'/%3E%3C/svg%3E";
   const name = contentData?.name || "Abhilasha";
 
   return (

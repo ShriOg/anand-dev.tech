@@ -36,7 +36,6 @@ export default function RootLayout({ children }) {
         </main>
 
         <Script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" strategy="beforeInteractive" />
-        <Script src="/script.js" strategy="afterInteractive" />
       </body>
     </html>
   );

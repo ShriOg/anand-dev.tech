@@ -7,7 +7,7 @@ export default function LockedScreen({ unlockSpecial }) {
   // We'll use a double-click / multiple clicks on a "hidden" element or a long press via touch/mouse events.
   const [tapCount, setTapCount] = useState(0);
 
-  const profileImage = contentData?.profileImage || "/abhilasha.jpg";
+  const profileImage = contentData?.profileImage || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Ccircle cx='100' cy='100' r='100' fill='%23e8a4b8'/%3E%3C/svg%3E";
   const name = contentData?.name || "Abhilasha";
 
   const handleSecretTap = () => {
