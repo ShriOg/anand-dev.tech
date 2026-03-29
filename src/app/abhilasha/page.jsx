@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 import contentData from "../../data/abhilasha/content.json";
 
+import BirthdayScreen from "../../components/abhilasha/BirthdayScreen";
 import EntryScreen from "../../components/abhilasha/EntryScreen";
 import HomeScreen from "../../components/abhilasha/HomeScreen";
 import Navigation from "../../components/abhilasha/Navigation";
@@ -17,7 +18,7 @@ import LockedScreen from "../../components/abhilasha/LockedScreen";
 import SpecialScreen from "../../components/abhilasha/SpecialScreen";
 
 export default function AbhilashaApp() {
-  const [currentScreen, setCurrentScreen] = useState("entry");
+  const [currentScreen, setCurrentScreen] = useState("birthday");
   const [isSpecialUnlocked, setIsSpecialUnlocked] = useState(false);
 
   const navigateTo = (screen) => {
@@ -53,6 +54,7 @@ export default function AbhilashaApp() {
            transition={pageTransition}
            className="w-full h-full absolute inset-0"
         >
+          {currentScreen === "birthday" && <BirthdayScreen onComplete={() => navigateTo("entry")} />}
           {currentScreen === "entry" && <EntryScreen onEnter={() => navigateTo("home")} />}
           {currentScreen === "home" && <HomeScreen navigateTo={navigateTo} />}
           {currentScreen === "letters" && <LettersScreen />}
@@ -65,7 +67,7 @@ export default function AbhilashaApp() {
         </motion.div>
       </AnimatePresence>
       
-      {currentScreen !== "entry" && (
+      {currentScreen !== "birthday" && currentScreen !== "entry" && (
         <Navigation 
            currentScreen={currentScreen} 
            navigateTo={navigateTo} 
