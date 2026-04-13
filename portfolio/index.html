@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio | anand.dev</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="portfolio-header">
+        <div class="header-inner">
+            <a href="../" class="back-link">← Back to Hub</a>
+            <h1>Selected Works</h1>
+        </div>
+    </header>
+
+    <main class="content-wrapper">
+        <div class="filters" id="filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="web">Web Experiments</button>
+            <button class="filter-btn" data-filter="systems">Systems</button>
+            <button class="filter-btn" data-filter="design">Design</button>
+        </div>
+
+        <div class="projects-grid" id="projects-grid">
+            <!-- Rendered via JS -->
+        </div>
+    </main>
+
+    <!-- Modal -->
+    <div id="project-modal" class="modal hidden">
+        <div class="modal-backdrop" onclick="portfolio.closeModal()"></div>
+        <div class="modal-content">
+            <button class="modal-close" onclick="portfolio.closeModal()">✕</button>
+            <img src="" alt="" id="modal-img" class="modal-img">
+            <div class="modal-body">
+                <div class="modal-tag" id="modal-tag">Tag</div>
+                <h2 id="modal-title">Project Title</h2>
+                <p id="modal-desc">Project description goes here.</p>
+                <div id="modal-tech" class="modal-tech"></div>
+                <a href="#" class="modal-link">View Project</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="portfolio.js"></script>
+</body>
+</html>

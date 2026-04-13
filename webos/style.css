@@ -1,0 +1,117 @@
+:root {
+    --os-bg: #0f1115;
+    --taskbar-bg: rgba(20, 22, 28, 0.85);
+    --window-bg: rgba(30, 32, 40, 0.95);
+    --window-border: rgba(255, 255, 255, 0.1);
+    --text: #ffffff;
+    --accent: #6366f1;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+body {
+    background: radial-gradient(circle at top right, #2a2a35, var(--os-bg)), url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop') center/cover;
+    height: 100vh;
+    overflow: hidden;
+    color: var(--text);
+}
+
+#desktop {
+    height: calc(100vh - 48px);
+    position: relative;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: flex-start;
+}
+
+.desktop-icon {
+    width: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 0.5rem;
+    transition: background 0.2s;
+}
+
+.desktop-icon:hover { background: rgba(255, 255, 255, 0.1); }
+.desktop-icon .icon { font-size: 2.5rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+.desktop-icon span { font-size: 0.85rem; text-shadow: 0 1px 2px rgba(0,0,0,0.8); text-align: center; }
+
+/* Windows */
+.os-window {
+    position: absolute;
+    width: 500px;
+    background: var(--window-bg);
+    border: 1px solid var(--window-border);
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(20px);
+    overflow: hidden;
+}
+
+.window-header {
+    background: rgba(255,255,255,0.05);
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: grab;
+    border-bottom: 1px solid var(--window-border);
+    user-select: none;
+}
+.window-header:active { cursor: grabbing; }
+
+.window-title { font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
+
+.window-controls { display: flex; gap: 0.5rem; }
+.win-btn {
+    width: 12px; height: 12px; border-radius: 50%; border: none; cursor: pointer;
+}
+.win-close { background: #ef4444; }
+.win-min { background: #eab308; }
+.win-max { background: #22c55e; }
+
+.window-body {
+    padding: 1rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* App: Notepad */
+.notepad-textarea {
+    width: 100%; height: 300px; background: transparent; color: var(--text); border: none; resize: none; outline: none; font-size: 1rem; line-height: 1.5;
+}
+
+/* App: Calc */
+.calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+.calc-display { grid-column: span 4; background: rgba(0,0,0,0.3); padding: 1rem; text-align: right; font-size: 2rem; border-radius: 4px; margin-bottom: 0.5rem; }
+.calc-btn { background: rgba(255,255,255,0.1); border: none; color: white; padding: 1rem; border-radius: 4px; cursor: pointer; font-size: 1.2rem; transition: background 0.2s; }
+.calc-btn:hover { background: rgba(255,255,255,0.2); }
+.calc-btn.op { background: var(--accent); }
+
+/* Taskbar */
+#taskbar {
+    height: 48px; background: var(--taskbar-bg); border-top: 1px solid var(--window-border); backdrop-filter: blur(10px); display: flex; align-items: center; padding: 0 1rem; justify-content: space-between; position: relative; z-index: 1000;
+}
+
+.start-btn { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; cursor: pointer; padding: 0.5rem 1rem; border-radius: 6px; transition: background 0.2s; }
+.start-btn:hover { background: rgba(255,255,255,0.1); }
+
+#open-apps-tray { display: flex; gap: 0.5rem; margin-left: 1rem; flex-grow: 1; }
+.tray-item { padding: 0.4rem 1rem; background: rgba(255,255,255,0.1); border-radius: 4px; font-size: 0.85rem; cursor: pointer; }
+.tray-item.active { background: rgba(255,255,255,0.2); border-bottom: 2px solid var(--accent); }
+
+/* Start Menu */
+#start-menu { position: absolute; bottom: 56px; left: 1rem; width: 300px; background: var(--window-bg); border: 1px solid var(--window-border); border-radius: 12px; padding: 0.5rem; box-shadow: 0 10px 40px rgba(0,0,0,0.5); backdrop-filter: blur(20px); z-index: 1000; }
+.hidden { display: none !important; }
+.start-header { padding: 1rem; font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+.start-item { padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 1rem; transition: background 0.2s; }
+.start-item:hover { background: rgba(255,255,255,0.1); }

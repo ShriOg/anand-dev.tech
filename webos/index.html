@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web OS | anand.dev</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="desktop">
+        <!-- Apps Icons -->
+        <div class="desktop-icon" onclick="os.openApp('notepad')">
+            <div class="icon">📝</div>
+            <span>Notepad</span>
+        </div>
+        <div class="desktop-icon" onclick="os.openApp('calculator')">
+            <div class="icon">🧮</div>
+            <span>Calculator</span>
+        </div>
+        
+        <!-- Windows Area -->
+        <div id="window-container"></div>
+    </div>
+
+    <!-- Taskbar -->
+    <div id="taskbar">
+        <div class="start-btn" onclick="os.toggleStartMenu()">anand.os</div>
+        <div id="open-apps-tray"></div>
+        <div class="taskbar-right">
+            <div id="clock">12:00 PM</div>
+        </div>
+    </div>
+
+    <!-- Start Menu -->
+    <div id="start-menu" class="hidden">
+        <div class="start-header">System Applications</div>
+        <div class="start-item" onclick="os.openApp('notepad')">📝 Notepad</div>
+        <div class="start-item" onclick="os.openApp('calculator')">🧮 Calculator</div>
+        <div class="start-item" onclick="window.location.href='../'">🏠 Back to Hub</div>
+    </div>
+
+    <script src="os.js"></script>
+</body>
+</html>

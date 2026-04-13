@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domain Battle</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-wrapper">
+        <header class="game-header">
+            <button class="back-btn" onclick="window.location.href='../'">← Hub</button>
+            <h1>DOMAIN BATTLE</h1>
+            <div class="score-board">
+                <div class="player-score">Player: <span id="p-score" style="color: var(--p-color)">0</span></div>
+                <div class="player-score">Bot: <span id="b-score" style="color: var(--b-color)">0</span></div>
+            </div>
+        </header>
+
+        <div class="status-bar">
+            <span>Dominance Tracker</span>
+            <div class="dominance-track">
+                <div class="dominance-fill" id="dom-fill"></div>
+            </div>
+        </div>
+
+        <div id="game-grid"></div>
+
+        <div id="overlay" class="hidden">
+            <h2 id="result-msg"></h2>
+            <button onclick="game.init()">Play Again</button>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
