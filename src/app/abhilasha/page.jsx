@@ -7,61 +7,73 @@ import "./style.css";
 // 🎂 EDIT EVERYTHING IN THIS BLOCK BELOW
 // ==========================================
 export const CONTENT_CONFIG = {
-  // Password MUST be exactly as spelled here (lowercase)
   password: "abhilasha",
-  
-  // Dates (Used for the live counter)
-  anniversaryDate: "2023-01-01T00:00:00",
 
-  // Typewriter intro messages (Array of strings)
+  anniversaryDate: "2025-04-21T00:00:00",
+
   typewriterLines: [
-    "Loading our memories...",
-    "Finding the perfect words...",
-    "Welcome to your special place, Abhilasha."
+    "Decrypting something special...",
+    "Replaying our best moments...",
+    "This isn't just a page… it's us.",
+    "Welcome, Abhilasha ❤️"
   ],
 
-  // Envelope Lock Screen
-  envelopeHeader: "You have a message...",
-  envelopeTitle: "For Abhilasha",
-  envelopeSubtitle: "A secret birthday wish.",
+  envelopeHeader: "Someone left you a letter…",
+  envelopeTitle: "Only for Abhilasha",
+  envelopeSubtitle: "Open it with your heart.",
 
-  // Hero Section
   heroTitle: "Happy Birthday ❤️",
-  heroSubtitle: "To the most special person in my life.",
-  heroButtonText: "Start the Journey",
+  heroSubtitle: "Today is about you… but somehow, you made my whole life better.",
+  heroButtonText: "Start Your Story",
 
-  // Personal Message Section
-  personalMessage: "You came into my life and made everything entirely better... \n\nI don’t say it as often as I should, but you mean the whole world to me. Thank you for simply being you.",
+  personalMessage:
+    "I don’t think you fully realize what you’ve done to my life.\n\n" +
+    "Before you, things were normal… predictable.\n" +
+    "After you… everything started feeling meaningful.\n\n" +
+    "You didn’t just enter my life — you changed how I see everything.\n" +
+    "The way I smile, the way I think, the way small moments suddenly matter.\n\n" +
+    "And I know I don’t always say it perfectly…\n" +
+    "but you mean more to me than I can ever put into words.\n\n" +
+    "You’re not just special.\n" +
+    "You’re *my* special.",
 
-  // Memories Section (Interactive Polaroids)
-  memoriesTitle: "Our Memories",
-  memoriesSubtitle: "(Tap to flip the photos)",
+  memoriesTitle: "Our Story So Far",
+  memoriesSubtitle: "(Every moment matters more than you think)",
+
   flipCards: [
     {
       img: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-      caption: "Our first trip",
-      note: "I'll never forget the way you laughed when we got lost that day. You make any detour an adventure."
+      caption: "That Day We Got Lost",
+      note: "We had no plan, no direction… and somehow it became one of my favorite days ever. Because with you, even being lost feels right."
     },
     {
       img: "https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-      caption: "Random dates",
-      note: "Even the most ordinary coffee dates feel like a movie scene when I'm sitting across from you."
+      caption: "Simple Moments",
+      note: "It’s funny how something as small as sitting together can feel so big. You turn ordinary into something unforgettable."
     },
     {
       img: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-      caption: "You & Me",
-      note: "Just a reminder that you are the most beautiful person I know, inside and out. I'm so lucky."
+      caption: "Just You",
+      note: "If I had to choose one thing I’m grateful for… it would always be you. Exactly as you are."
     }
   ],
 
-  // Surprise Section
-  surpriseHeadline: "Surprise! 🎉",
-  surpriseMessage: "I love you more than words can explain. Here is to a hundred more birthdays together 💖",
-  surpriseButton: "Tap to unwrap surprise 🎁",
+  surpriseHeadline: "Wait… one more thing 🎉",
+  surpriseMessage:
+    "I don’t just love you for who you are today…\n" +
+    "I love you for every version of you I’ll get to see in the future.\n\n" +
+    "Your dreams, your growth, your smile, your chaos…\n" +
+    "I want all of it.\n\n" +
+    "And if life gives me one constant —\n" +
+    "I hope it’s you.",
 
-  // Final Screen
-  finalHeadline: "Once again… Happy Birthday ❤️",
-  finalSubtitle: "Stay with me forever?"
+  surpriseButton: "Open your surprise 🎁",
+
+  finalHeadline: "Happy Birthday, Abhilasha ❤️",
+  finalSubtitle:
+    "Not just today.\n" +
+    "Not just this moment.\n\n" +
+    "I want you… always."
 };
 // ==========================================
 // END OF EDITABLE BLOCK
@@ -111,7 +123,8 @@ const Confetti = ({ active }) => {
           }}
         />
       ))}
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes fall {
           to {
             transform: translateY(110vh) rotate(720deg);
@@ -134,7 +147,7 @@ const FadeInSection = ({ children }) => {
         }
       });
     }, { threshold: 0.2 });
-    
+
     if (domRef.current) observer.observe(domRef.current);
     return () => { if (domRef.current) observer.unobserve(domRef.current); };
   }, []);
@@ -171,10 +184,10 @@ const TypewriterIntro = ({ lines, onComplete }) => {
       }, 1500);
       return;
     }
-    
+
     const currentLine = lines[lineIdx];
     let charIdx = 0;
-    
+
     const typeInterval = setInterval(() => {
       if (charIdx <= currentLine.length) {
         setText(currentLine.substring(0, charIdx));
@@ -184,7 +197,7 @@ const TypewriterIntro = ({ lines, onComplete }) => {
         setTimeout(() => setLineIdx(p => p + 1), 1200);
       }
     }, 60);
-    
+
     return () => clearInterval(typeInterval);
   }, [lineIdx, lines, onComplete]);
 
@@ -253,44 +266,46 @@ export default function AbhilashaBirthday() {
       {/* STEP 0: The Magic Envelope */}
       {step === 0 && (
         <div className={`envelope-container ${envelopeOpen ? 'envelope-opened flash' : ''}`}>
-          <div style={{ marginBottom: '3rem', color: '#fff', fontSize: '1.2rem', fontWeight: 300, letterSpacing: '4px', opacity: envelopeOpen ? 0 : 1, transition: 'opacity 0.5s' }}>
+          <div style={{ marginBottom: '3rem', color: '#fff', fontSize: '1.2rem', fontWeight: 300, letterSpacing: '4px', opacity: envelopeOpen ? 0 : 1, transition: 'opacity 0.5s', textAlign: 'center', padding: '0 1rem' }}>
             {CONTENT_CONFIG.envelopeHeader}
           </div>
           
-          <div className="envelope-wrapper">
-            <div className="envelope-flap"></div>
-            <div className="envelope-back"></div>
-            <div className="envelope-letter">
-              <h3>{CONTENT_CONFIG.envelopeTitle}</h3>
-              <p style={{ fontSize: '0.9rem', color: '#666', fontFamily: 'sans-serif' }}>{CONTENT_CONFIG.envelopeSubtitle}</p>
+          <div className="envelope-scaler">
+            <div className="envelope-wrapper">
+              <div className="envelope-flap"></div>
+              <div className="envelope-back"></div>
+              <div className="envelope-letter">
+                <h3>{CONTENT_CONFIG.envelopeTitle}</h3>
+                <p style={{ fontSize: '0.9rem', color: '#666', fontFamily: 'sans-serif', textAlign: 'center' }}>{CONTENT_CONFIG.envelopeSubtitle}</p>
+              </div>
+              <div className="envelope-front-left"></div>
+              <div className="envelope-front-right"></div>
+              
+              {!envelopeOpen && (
+                <form onSubmit={handlePasswordSubmit} style={{ position: 'absolute', bottom: '-80px', width: '100%', display: 'flex', gap: '10px' }}>
+                  <input
+                    type="password"
+                    value={passwordInput}
+                    onChange={(e) => setPasswordInput(e.target.value)}
+                    placeholder="Enter password..."
+                    style={{
+                      flex: 1,
+                      padding: '14px 20px',
+                      borderRadius: '30px',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      background: 'rgba(255,255,255,0.05)',
+                      color: '#fff',
+                      outline: 'none',
+                      fontFamily: 'inherit',
+                      letterSpacing: '1px'
+                    }}
+                  />
+                  <button type="submit" className="elegant-btn" style={{ padding: '10px 25px' }}>
+                    Open
+                  </button>
+                </form>
+              )}
             </div>
-            <div className="envelope-front-left"></div>
-            <div className="envelope-front-right"></div>
-            
-            {!envelopeOpen && (
-              <form onSubmit={handlePasswordSubmit} style={{ position: 'absolute', bottom: '-80px', width: '100%', display: 'flex', gap: '10px' }}>
-                <input 
-                  type="password"
-                  value={passwordInput}
-                  onChange={(e) => setPasswordInput(e.target.value)}
-                  placeholder="Enter password..."
-                  style={{
-                    flex: 1,
-                    padding: '14px 20px',
-                    borderRadius: '30px',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    background: 'rgba(255,255,255,0.05)',
-                    color: '#fff',
-                    outline: 'none',
-                    fontFamily: 'inherit',
-                    letterSpacing: '1px'
-                  }}
-                />
-                <button type="submit" className="elegant-btn" style={{ padding: '10px 25px' }}>
-                  Open
-                </button>
-              </form>
-            )}
           </div>
         </div>
       )}
@@ -307,8 +322,8 @@ export default function AbhilashaBirthday() {
           {/* Ultra subtle particles for elegant float effect */}
           <div className="particles-container">
             {[...Array(15)].map((_, i) => (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 className="particle"
                 style={{
                   left: `${Math.random() * 100}vw`,
@@ -361,13 +376,13 @@ export default function AbhilashaBirthday() {
                 <p className="bday-subtitle" style={{ marginBottom: '4rem', opacity: 0.5 }}>
                   {CONTENT_CONFIG.memoriesSubtitle}
                 </p>
-                
+
                 <div className="memories-grid">
                   {CONTENT_CONFIG.flipCards.map((card, i) => (
                     <div className="flip-card" key={i} onClick={(e) => e.currentTarget.classList.toggle('flipped')}>
                       <div className="flip-card-inner">
                         <div className="flip-card-front">
-                          <img src={card.img} alt={`Memory ${i+1}`} />
+                          <img src={card.img} alt={`Memory ${i + 1}`} />
                           <span>{card.caption}</span>
                         </div>
                         <div className="flip-card-back">
@@ -437,11 +452,11 @@ export default function AbhilashaBirthday() {
                 <p className="bday-subtitle" style={{ fontSize: '1.4rem', marginTop: '1.5rem', color: '#fff', letterSpacing: '1px' }}>
                   {CONTENT_CONFIG.finalSubtitle}
                 </p>
-                
+
                 {/* Visual bottom hearts float */}
                 <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100vw', height: '40vh', pointerEvents: 'none' }}>
                   {[...Array(12)].map((_, i) => (
-                    <div 
+                    <div
                       key={i}
                       style={{
                         position: 'absolute',
