@@ -1,40 +1,84 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import contentData from "../../data/abhilasha/content.json";
 
 export default function AbhilashaPage() {
   const [isForgiven, setIsForgiven] = useState(false);
-  const [noButtonStyle, setNoButtonStyle] = useState({});
-  const noBtnRef = useRef(null);
+  const [noCount, setNoCount] = useState(0);
 
-  // Parse content data
-  const { title, subtitle, message, question, yesLabel, noLabel, successMessage } = contentData;
+  // Parse original content data for the base or success states
+  const { successMessage } = contentData;
 
-  const handleNoHover = () => {
-    // Calculate random position within viewport boundaries
-    if (typeof window === "undefined") return;
-    
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    
-    // Keep button somewhat within safe bounds so it doesn't leave the screen completely
-    const safeZoneX = viewportWidth - 150; 
-    const safeZoneY = viewportHeight - 60;
-    
-    const randomX = Math.max(10, Math.floor(Math.random() * safeZoneX));
-    const randomY = Math.max(10, Math.floor(Math.random() * safeZoneY));
+  const noStages = [
+    {
+      icon: "🥺💔",
+      title: contentData.title,
+      subtitle: contentData.subtitle,
+      message: contentData.message,
+      yesLabel: contentData.yesLabel,
+      noLabel: contentData.noLabel,
+    },
+    {
+      icon: "🤔",
+      title: "Really?",
+      subtitle: "Are you absolutely sure?",
+      message: "I promise I'll make it up to you! Just give me a chance.",
+      yesLabel: "Yes, I forgive you",
+      noLabel: "Still No",
+    },
+    {
+      icon: "😭",
+      title: "Please think again!",
+      subtitle: "Give me one more chance",
+      message: "I'll do anything! I'll buy you your favorite food, I'll watch whatever you want...",
+      yesLabel: "Okay, fine 😒",
+      noLabel: "Nope",
+    },
+    {
+      icon: "💔💔",
+      title: "You're breaking my heart...",
+      subtitle: "Actually in pieces",
+      message: "Have some mercy on me! Please? 🥺",
+      yesLabel: "Fine, yes!",
+      noLabel: "Never",
+    },
+    {
+      icon: "😤",
+      title: "I won't give up!",
+      subtitle: "I am going to keep asking!",
+      message: "You can't say no forever! See, your 'yes' button is getting bigger!",
+      yesLabel: "YES!",
+      noLabel: "No...",
+    },
+    {
+      icon: "🥺✨",
+      title: "You have no choice now!",
+      subtitle: "Accept my apology",
+      message: "Just click the giant button. You know you want to.",
+      yesLabel: "YES YES YES!",
+      noLabel: "no",
+    }
+  ];
 
-    setNoButtonStyle({
-      position: "fixed",
-      left: `${randomX}px`,
-      top: `${randomY}px`,
-    });
+  const currentStageIndex = Math.min(noCount, noStages.length - 1);
+  const currentStage = noStages[currentStageIndex];
+
+  const handleNoClick = () => {
+    setNoCount((prev) => prev + 1);
   };
 
   const handleYesClick = () => {
     setIsForgiven(true);
   };
+
+  // Dynamically calculate sizes
+  // Yes button grows dramatically with each "No" click.
+  const yesButtonScale = 1 + (noCount * 0.3); 
+  const yesButtonBaseWidth = 120 + (noCount * 30);
+  
+  // No button shrinks and gets faint
+  const noButtonScale = Math.max(0.3, 1 - (noCount * 0.15));
 
   return (
     <>
@@ -57,41 +101,59 @@ export default function AbhilashaPage() {
       </div>
 
       <div className="abhilasha-container">
-        <div className={`abhilasha-card ${isForgiven ? "success-view" : ""}`}>
+        <div className={`abhilasha-card ${isForgiven ? "success-view" : ""}`} style={{ overflow: "hidden" }}>
           <div className="abhilasha-icon-container">
-            {isForgiven ? "🥺💖" : "🥺💔"}
+            {isForgiven ? "🥺💖" : currentStage.icon}
           </div>
           
-          <h1 className="abhilasha-title">
-            {isForgiven ? "YAY!" : title}
+          <h1 className="abhilasha-title" style={{ transition: "color 0.4s ease" }}>
+            {isForgiven ? "YAY!" : currentStage.title}
           </h1>
           
           {!isForgiven && (
-            <h2 className="abhilasha-subtitle">{subtitle}</h2>
+            <h2 className="abhilasha-subtitle">{currentStage.subtitle}</h2>
           )}
 
-          <p className="abhilasha-message">
-            {isForgiven ? successMessage : message}
+          <p className="abhilasha-message" style={{ minHeight: "60px" }}>
+            {isForgiven ? successMessage : currentStage.message}
           </p>
 
           {!isForgiven && (
             <>
-              <h3 className="abhilasha-question">{question}</h3>
-              <div className="abhilasha-actions">
+              <div className="abhilasha-actions" style={{ 
+                flexDirection: noCount > 3 ? "column" : "row",
+                marginTop: noCount > 3 ? "2rem" : "0"
+              }}>
                 <button 
                   className="abhilasha-btn abhilasha-btn-yes"
                   onClick={handleYesClick}
+                  style={{
+                    transform: `scale(${yesButtonScale})`,
+                    minWidth: `${yesButtonBaseWidth}px`,
+                    zIndex: 10, // Ensure it overlaps other things if it gets huge
+                    transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                    position: noCount > 5 ? "absolute" : "relative",
+                    width: noCount > 5 ? "200%" : "auto",
+                    height: noCount > 5 ? "200%" : "auto",
+                    fontSize: noCount > 5 ? "2rem" : "1.1rem",
+                  }}
                 >
-                  {yesLabel}
+                  {currentStage.yesLabel}
                 </button>
                 <button 
-                  ref={noBtnRef}
                   className="abhilasha-btn abhilasha-btn-no"
-                  onMouseEnter={handleNoHover}
-                  onClick={handleNoHover} // For mobile taps
-                  style={noButtonStyle}
+                  onClick={handleNoClick} 
+                  style={{
+                    transform: `scale(${noButtonScale})`,
+                    opacity: Math.max(0.2, 1 - (noCount * 0.15)),
+                    position: "relative", // Revert to relative from previous hover dodge
+                    left: 0,
+                    top: 0,
+                    zIndex: 5,
+                    pointerEvents: noCount >= noStages.length - 1 ? "none" : "auto",
+                  }}
                 >
-                  {noLabel}
+                  {currentStage.noLabel}
                 </button>
               </div>
             </>
