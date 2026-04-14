@@ -7,7 +7,6 @@ export default function AbhilashaPage() {
   const [isForgiven, setIsForgiven] = useState(false);
   const [noCount, setNoCount] = useState(0);
 
-  // Parse original content data for the base or success states
   const { successMessage } = contentData;
 
   const noStages = [
@@ -61,8 +60,10 @@ export default function AbhilashaPage() {
     }
   ];
 
-  const currentStageIndex = Math.min(noCount, noStages.length - 1);
+  const maxStageIndex = noStages.length - 1;
+  const currentStageIndex = Math.min(noCount, maxStageIndex);
   const currentStage = noStages[currentStageIndex];
+  const isFinalStage = noCount >= maxStageIndex;
 
   const handleNoClick = () => {
     setNoCount((prev) => prev + 1);
@@ -72,18 +73,13 @@ export default function AbhilashaPage() {
     setIsForgiven(true);
   };
 
-  // Dynamically calculate sizes
-  // Yes button grows dramatically with each "No" click.
-  const yesButtonScale = 1 + (noCount * 0.3); 
-  const yesButtonBaseWidth = 120 + (noCount * 30);
-  
-  // No button shrinks and gets faint
-  const noButtonScale = Math.max(0.3, 1 - (noCount * 0.15));
+  // Mobile-first dynamic calculations
+  const yesButtonScale = 1 + (noCount * 0.2); 
+  const noButtonScale = Math.max(0.4, 1 - (noCount * 0.15));
 
   return (
     <>
       <div className="floating-hearts-bg">
-        {/* Generate some background floating hearts */}
         {[...Array(15)].map((_, i) => (
           <div 
             key={i} 
@@ -91,8 +87,8 @@ export default function AbhilashaPage() {
             style={{
               left: `${Math.random() * 100}%`,
               animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${5 + Math.random() * 5}s`,
-              fontSize: `${1 + Math.random()}rem`
+              animationDuration: `${5 + Math.random() * 4}s`,
+              fontSize: `${1 + Math.random() * 1.5}rem`
             }}
           >
             {isForgiven ? "💖" : "✨"}
@@ -101,12 +97,12 @@ export default function AbhilashaPage() {
       </div>
 
       <div className="abhilasha-container">
-        <div className={`abhilasha-card ${isForgiven ? "success-view" : ""}`} style={{ overflow: "hidden" }}>
+        <div className={`abhilasha-card ${isForgiven ? "success-view" : ""}`}>
           <div className="abhilasha-icon-container">
             {isForgiven ? "🥺💖" : currentStage.icon}
           </div>
           
-          <h1 className="abhilasha-title" style={{ transition: "color 0.4s ease" }}>
+          <h1 className="abhilasha-title" style={{ transition: "all 0.4s ease" }}>
             {isForgiven ? "YAY!" : currentStage.title}
           </h1>
           
@@ -114,49 +110,48 @@ export default function AbhilashaPage() {
             <h2 className="abhilasha-subtitle">{currentStage.subtitle}</h2>
           )}
 
-          <p className="abhilasha-message" style={{ minHeight: "60px" }}>
+          <p className="abhilasha-message" style={{ minHeight: "clamp(60px, 15vw, 80px)" }}>
             {isForgiven ? successMessage : currentStage.message}
           </p>
 
           {!isForgiven && (
-            <>
-              <div className="abhilasha-actions" style={{ 
-                flexDirection: noCount > 3 ? "column" : "row",
-                marginTop: noCount > 3 ? "2rem" : "0"
-              }}>
-                <button 
-                  className="abhilasha-btn abhilasha-btn-yes"
-                  onClick={handleYesClick}
-                  style={{
-                    transform: `scale(${yesButtonScale})`,
-                    minWidth: `${yesButtonBaseWidth}px`,
-                    zIndex: 10, // Ensure it overlaps other things if it gets huge
-                    transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-                    position: noCount > 5 ? "absolute" : "relative",
-                    width: noCount > 5 ? "200%" : "auto",
-                    height: noCount > 5 ? "200%" : "auto",
-                    fontSize: noCount > 5 ? "2rem" : "1.1rem",
-                  }}
-                >
-                  {currentStage.yesLabel}
-                </button>
-                <button 
-                  className="abhilasha-btn abhilasha-btn-no"
-                  onClick={handleNoClick} 
-                  style={{
-                    transform: `scale(${noButtonScale})`,
-                    opacity: Math.max(0.2, 1 - (noCount * 0.15)),
-                    position: "relative", // Revert to relative from previous hover dodge
-                    left: 0,
-                    top: 0,
-                    zIndex: 5,
-                    pointerEvents: noCount >= noStages.length - 1 ? "none" : "auto",
-                  }}
-                >
-                  {currentStage.noLabel}
-                </button>
-              </div>
-            </>
+            <div className="abhilasha-actions" style={{ 
+              flexDirection: noCount > 3 ? "column" : "row",
+            }}>
+              <button 
+                className="abhilasha-btn abhilasha-btn-yes"
+                onClick={handleYesClick}
+                style={{
+                  transform: isFinalStage ? "scale(1)" : `scale(${yesButtonScale})`,
+                  transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                  position: isFinalStage ? "fixed" : "relative",
+                  width: isFinalStage ? "100vw" : "auto",
+                  height: isFinalStage ? "100dvh" : "auto",
+                  top: isFinalStage ? 0 : "auto",
+                  left: isFinalStage ? 0 : "auto",
+                  borderRadius: isFinalStage ? 0 : "999px",
+                  fontSize: isFinalStage ? "clamp(2rem, 8vw, 4rem)" : "auto",
+                  margin: 0,
+                }}
+              >
+                {currentStage.yesLabel}
+              </button>
+
+              <button 
+                className="abhilasha-btn abhilasha-btn-no"
+                onClick={handleNoClick} 
+                style={{
+                  transform: `scale(${noButtonScale})`,
+                  opacity: isFinalStage ? 0 : Math.max(0.3, 1 - (noCount * 0.2)),
+                  pointerEvents: isFinalStage ? "none" : "auto",
+                  position: "relative",
+                  marginTop: noCount > 3 ? "1rem" : "0",
+                  visibility: isFinalStage ? "hidden" : "visible" // remove from a11y completely in final
+                }}
+              >
+                {currentStage.noLabel}
+              </button>
+            </div>
           )}
         </div>
       </div>
