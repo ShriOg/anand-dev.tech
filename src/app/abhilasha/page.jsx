@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
+import { motion, useAnimation } from "framer-motion";
 import "./style.css";
 
 // ==========================================
@@ -8,7 +9,6 @@ import "./style.css";
 // ==========================================
 export const CONTENT_CONFIG = {
   password: "abhilasha",
-
   anniversaryDate: "2025-04-21T00:00:00",
 
   typewriterLines: [
@@ -75,409 +75,528 @@ export const CONTENT_CONFIG = {
     "Not just this moment.\n\n" +
     "I want you… always."
 };
+
 // ==========================================
-// END OF EDITABLE BLOCK
+// GLOBALS & AUDIO
+// ==========================================
+const AUDIO_SOURCES = {
+  ambient: "https://cdn.pixabay.com/audio/2022/10/25/audio_51744cb5fb.mp3",
+  flip: "https://cdn.pixabay.com/audio/2021/08/04/audio_3aa65ec588.mp3",
+  burst: "https://cdn.pixabay.com/audio/2022/03/10/audio_525a6e8749.mp3",
+};
+
+let globalAudio = { ambient: null, flip: null, burst: null };
+
+function playSfx(type) {
+  if (globalAudio[type]) {
+    globalAudio[type].currentTime = 0;
+    globalAudio[type].play().catch(() => {});
+  }
+}
+
+// ==========================================
+// REUSABLE CINEMATIC COMPONENTS
 // ==========================================
 
-/* --- REUSABLE COMPONENTS (Not inside the main render so they don't reset) --- */
+const MagneticButton = ({ children, onClick, className, style }) => {
+  const ref = useRef(null);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
 
-const Confetti = ({ active }) => {
-  const [pieces, setPieces] = useState([]);
+  const handleMouse = (e) => {
+    const { clientX, clientY } = e;
+    const { height, width, left, top } = ref.current.getBoundingClientRect();
+    const middleX = clientX - (left + width / 2);
+    const middleY = clientY - (top + height / 2);
+    setPosition({ x: middleX * 0.2, y: middleY * 0.2 });
+  };
 
-  useEffect(() => {
-    if (active) {
-      const colors = ['#f8bbd0', '#f48fb1', '#f06292', '#e91e63', '#c2185b', '#fff'];
-      const newPieces = Array.from({ length: 100 }).map((_, i) => ({
-        id: i,
-        x: Math.random() * 100,
-        y: -10,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        shape: Math.random() > 0.5 ? 'circle' : 'square',
-        delay: Math.random() * 0.5,
-        duration: Math.random() * 2.5 + 2,
-        rotation: Math.random() * 360,
-      }));
-      setPieces(newPieces);
-    } else {
-      setPieces([]);
-    }
-  }, [active]);
-
-  if (!active) return null;
+  const reset = () => {
+    setPosition({ x: 0, y: 0 });
+  };
 
   return (
-    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', pointerEvents: 'none', zIndex: 9999, overflow: 'hidden' }}>
-      {pieces.map(p => (
-        <div
-          key={p.id}
-          style={{
-            position: 'absolute',
-            left: `${p.x}vw`,
-            top: `${p.y}vh`,
-            width: '10px',
-            height: '10px',
-            backgroundColor: p.color,
-            borderRadius: p.shape === 'circle' ? '50%' : '2px',
-            animation: `fall ${p.duration}s ${p.delay}s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94)`,
-            transform: `rotate(${p.rotation}deg)`
-          }}
-        />
-      ))}
-      <style dangerouslySetInnerHTML={{
-        __html: `
-        @keyframes fall {
-          to {
-            transform: translateY(110vh) rotate(720deg);
-          }
-        }
-      `}} />
-    </div>
+    <motion.button
+      ref={ref}
+      className={className}
+      onClick={onClick}
+      onMouseMove={handleMouse}
+      onMouseLeave={reset}
+      animate={{ x: position.x, y: position.y }}
+      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
+      style={style}
+    >
+      {children}
+    </motion.button>
   );
 };
 
-const FadeInSection = ({ children }) => {
-  const [isVisible, setVisible] = useState(false);
-  const domRef = useRef();
+const CustomCursor = () => {
+  const [mousePos, setMousePos] = useState({ x: -100, y: -100 });
+  const [isHovering, setIsHovering] = useState(false);
 
   useEffect(() => {
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-        }
-      });
-    }, { threshold: 0.2 });
-
-    if (domRef.current) observer.observe(domRef.current);
-    return () => { if (domRef.current) observer.unobserve(domRef.current); };
+    const updateMouse = (e) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+      const target = e.target;
+      if (target.tagName.toLowerCase() === 'button' || target.closest('.flip-card') || target.closest('.wax-seal')) {
+        setIsHovering(true);
+      } else {
+        setIsHovering(false);
+      }
+    };
+    window.addEventListener('mousemove', updateMouse);
+    return () => window.removeEventListener('mousemove', updateMouse);
   }, []);
 
   return (
-    <div
-      className={`fade-in-section ${isVisible ? 'is-visible' : ''}`}
-      ref={domRef}
-      style={{ width: '100%', display: 'flex', justifyContent: 'center' }}
-    >
-      {children}
-    </div>
+    <div 
+      className={`custom-cursor ${isHovering ? 'active' : ''}`} 
+      style={{ left: `${mousePos.x}px`, top: `${mousePos.y}px` }} 
+    />
   );
 };
 
-const AudioVisualizer = () => (
-  <div className="audio-visualizer">
-    <div className="audio-bar"></div>
-    <div className="audio-bar"></div>
-    <div className="audio-bar"></div>
-    <div className="audio-bar"></div>
-  </div>
-);
+const ParticleSwarm = () => {
+  const canvasRef = useRef(null);
 
-// Extracted Typewriter to prevent re-rendering restarts
-const TypewriterIntro = ({ lines, onComplete }) => {
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let animationFrameId;
+    let mouse = { x: null, y: null };
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    window.addEventListener('resize', resize);
+    resize();
+
+    window.addEventListener('mousemove', (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 0.5;
+        this.baseX = this.x;
+        this.baseY = this.y;
+        this.density = (Math.random() * 30) + 1;
+        this.angle = Math.random() * 360;
+        this.speed = Math.random() * 0.2 + 0.1;
+      }
+      
+      update() {
+        this.angle += this.speed * 0.05;
+        this.x += Math.cos(this.angle) * this.speed;
+        this.y += Math.sin(this.angle) * this.speed;
+
+        if (mouse.x != null) {
+          let dx = mouse.x - this.x;
+          let dy = mouse.y - this.y;
+          let distance = Math.sqrt(dx * dx + dy * dy);
+          let forceDirectionX = dx / distance;
+          let forceDirectionY = dy / distance;
+          let maxDistance = 150;
+          let force = (maxDistance - distance) / maxDistance;
+          let directionX = forceDirectionX * force * this.density * 0.2;
+          let directionY = forceDirectionY * force * this.density * 0.2;
+
+          if (distance < maxDistance) {
+            this.x -= directionX;
+            this.y -= directionY;
+          } else {
+            if (this.x !== this.baseX) this.x -= (this.x - this.baseX)/50;
+            if (this.y !== this.baseY) this.y -= (this.y - this.baseY)/50;
+          }
+        }
+      }
+
+      draw() {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    const init = () => {
+      particles = [];
+      for (let i = 0; i < 60; i++) particles.push(new Particle());
+    };
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < particles.length; i++) {
+        particles[i].update();
+        particles[i].draw();
+      }
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    init();
+    animate();
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} style={{ position: 'fixed', top: 0, left: 0, zIndex: 1, pointerEvents: 'none' }} />;
+};
+
+const TypewriterIntro = ({ lines, onComplete, onCharType }) => {
   const [text, setText] = useState("");
   const [lineIdx, setLineIdx] = useState(0);
 
   useEffect(() => {
     if (lineIdx >= lines.length) {
-      setTimeout(() => {
-        onComplete();
-      }, 1500);
+      setTimeout(() => onComplete(), 2000);
       return;
     }
-
     const currentLine = lines[lineIdx];
     let charIdx = 0;
-
     const typeInterval = setInterval(() => {
       if (charIdx <= currentLine.length) {
         setText(currentLine.substring(0, charIdx));
+        onCharType();
         charIdx++;
       } else {
         clearInterval(typeInterval);
-        setTimeout(() => setLineIdx(p => p + 1), 1200);
+        setTimeout(() => setLineIdx(p => p + 1), 1500);
       }
     }, 60);
-
     return () => clearInterval(typeInterval);
-  }, [lineIdx, lines, onComplete]);
+  }, [lineIdx, lines, onComplete, onCharType]);
 
   return (
-    <div className="typewriter-container">
-      <div className="typewriter-text">
-        {text}<span className="cursor-blink">_</span>
-      </div>
-    </div>
+    <motion.div 
+      className="typewriter-container"
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, filter: 'blur(10px)' }} transition={{ duration: 1.5 }}
+    >
+      <div className="typewriter-text">{text}<span className="cursor-blink">|</span></div>
+    </motion.div>
   );
 };
 
-
-/* --- MAIN PAGE COMPONENT --- */
-
-export default function AbhilashaBirthday() {
-  const [step, setStep] = useState(0); // 0: Envelope, 1: Typewriter, 2: Main
+// ==========================================
+// MAIN APP COMPONENT
+// ==========================================
+export default function CinematicBirthday() {
+  const [step, setStep] = useState(0);
   const [passwordInput, setPasswordInput] = useState("");
+  const [hint, setHint] = useState("");
   const [envelopeOpen, setEnvelopeOpen] = useState(false);
+  const [bgPulse, setBgPulse] = useState(0);
   const [timeTogether, setTimeTogether] = useState({ days: 0, hours: 0, minutes: 0 });
   const [showSurprise, setShowSurprise] = useState(false);
+  const [showIdleMessage, setShowIdleMessage] = useState(false);
+  const controls = useAnimation();
 
-  // Time Tracker Initialization
+  useEffect(() => {
+    if (step !== 2) return;
+    let timeout;
+    const resetIdle = () => {
+      setShowIdleMessage(false);
+      clearTimeout(timeout);
+      timeout = setTimeout(() => setShowIdleMessage(true), 15000);
+    };
+    window.addEventListener("mousemove", resetIdle);
+    resetIdle();
+    return () => {
+      window.removeEventListener("mousemove", resetIdle);
+      clearTimeout(timeout);
+    };
+  }, [step]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      globalAudio.ambient = new Audio(AUDIO_SOURCES.ambient);
+      globalAudio.ambient.loop = true;
+      globalAudio.ambient.volume = 0;
+      globalAudio.flip = new Audio(AUDIO_SOURCES.flip);
+      globalAudio.flip.volume = 0.6;
+      globalAudio.burst = new Audio(AUDIO_SOURCES.burst);
+      globalAudio.burst.volume = 0.8;
+    }
+  }, []);
+
   useEffect(() => {
     const annDate = new Date(CONTENT_CONFIG.anniversaryDate);
     const calculateTime = () => {
       const now = new Date();
       const difference = now.getTime() - annDate.getTime();
-      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((difference / 1000 / 60) % 60);
-      setTimeTogether({ days, hours, minutes });
+      setTimeTogether({
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60)
+      });
     };
-
     calculateTime();
-    const timer = setInterval(calculateTime, 60000);
-    return () => clearInterval(timer);
+    const t = setInterval(calculateTime, 60000);
+    return () => clearInterval(t);
   }, []);
+
+  const handleWaxTarget = () => {
+    document.getElementById("passInput")?.focus();
+  };
 
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
     if (passwordInput.toLowerCase() === CONTENT_CONFIG.password) {
+      setHint("");
       setEnvelopeOpen(true);
-      setTimeout(() => setStep(1), 2500); // Wait for letter popup to read, then fade to typewriter
+      playSfx('flip');
+      if (globalAudio.ambient) {
+        globalAudio.ambient.play().catch(() => {});
+        let vol = 0;
+        const fade = setInterval(() => {
+          if (vol < 0.5) { vol += 0.05; globalAudio.ambient.volume = vol; }
+          else { clearInterval(fade); }
+        }, 200);
+      }
+      setTimeout(() => setStep(1), 3000);
     } else {
-      alert("Incorrect magic word");
+      setHint("Hint: The most special girl in the world.");
       setPasswordInput("");
     }
   };
 
-  const scrollToSection = (id) => {
+  const scrollToNext = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleTypewriterComplete = () => {
-    setStep(2);
-    // Auto-scroll slightly into hero after typewriter to immerse
-    setTimeout(() => {
-      scrollToSection('hero');
-    }, 100);
+  const triggerSurprise = async () => {
+    setShowSurprise(true);
+    playSfx('burst');
+    await controls.start({ x: [0, -10, 10, -5, 5, 0], transition: { duration: 0.5 } });
   };
 
   return (
-    <div className="bday-container">
+    <motion.div 
+      className="bday-container" 
+      animate={controls}
+      style={{ backgroundColor: showSurprise ? "#0a0005" : "#000" }}
+    >
+      <CustomCursor />
+      {step === 2 && <ParticleSwarm />}
+      
+      <div 
+        className="ambient-bg" 
+        style={{ 
+          opacity: 0.3 + (bgPulse * 0.5), 
+          transition: 'opacity 0.2s',
+          background: showSurprise ? 'radial-gradient(circle at center, rgba(255, 77, 109, 0.15) 0%, rgba(0,0,0,1) 80%)' : undefined
+        }} 
+      />
 
-      {/* STEP 0: The Magic Envelope */}
       {step === 0 && (
-        <div className={`envelope-container ${envelopeOpen ? 'envelope-opened flash' : ''}`}>
-          <div style={{ marginBottom: '3rem', color: '#fff', fontSize: '1.2rem', fontWeight: 300, letterSpacing: '4px', opacity: envelopeOpen ? 0 : 1, transition: 'opacity 0.5s', textAlign: 'center', padding: '0 1rem' }}>
+        <motion.div 
+          className="envelope-container"
+          animate={{ opacity: envelopeOpen ? 0 : 1, filter: envelopeOpen ? "blur(20px)" : "blur(0px)" }}
+          transition={{ duration: 1.5, delay: 1 }}
+        >
+          <div style={{ marginBottom: '4rem', color: '#fff', fontSize: '1.2rem', fontWeight: 300, letterSpacing: '4px', textAlign: 'center' }}>
             {CONTENT_CONFIG.envelopeHeader}
           </div>
           
           <div className="envelope-scaler">
-            <div className="envelope-wrapper">
+            <div className={`envelope-wrapper ${envelopeOpen ? 'envelope-opened' : ''}`}>
               <div className="envelope-flap"></div>
               <div className="envelope-back"></div>
-              <div className="envelope-letter">
+              <div className="envelope-letter" style={{ transform: envelopeOpen ? `translateY(-200px)` : `` }}>
                 <h3>{CONTENT_CONFIG.envelopeTitle}</h3>
-                <p style={{ fontSize: '0.9rem', color: '#666', fontFamily: 'sans-serif', textAlign: 'center' }}>{CONTENT_CONFIG.envelopeSubtitle}</p>
+                <p style={{ fontSize: '0.9rem', color: '#666', textAlign: 'center' }}>{CONTENT_CONFIG.envelopeSubtitle}</p>
               </div>
               <div className="envelope-front-left"></div>
               <div className="envelope-front-right"></div>
               
+              {!envelopeOpen && <div className="wax-seal" onClick={handleWaxTarget} />}
+              
               {!envelopeOpen && (
-                <form onSubmit={handlePasswordSubmit} style={{ position: 'absolute', bottom: '-80px', width: '100%', display: 'flex', gap: '10px' }}>
-                  <input
-                    type="password"
-                    value={passwordInput}
-                    onChange={(e) => setPasswordInput(e.target.value)}
-                    placeholder="Enter password..."
-                    style={{
-                      flex: 1,
-                      padding: '14px 20px',
-                      borderRadius: '30px',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      background: 'rgba(255,255,255,0.05)',
-                      color: '#fff',
-                      outline: 'none',
-                      fontFamily: 'inherit',
-                      letterSpacing: '1px'
-                    }}
-                  />
-                  <button type="submit" className="elegant-btn" style={{ padding: '10px 25px' }}>
-                    Open
-                  </button>
+                <form onSubmit={handlePasswordSubmit} className="password-form">
+                  <input id="passInput" type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} placeholder="Enter password..." className="password-input" />
+                  <div className="password-hint">{hint}</div>
                 </form>
               )}
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
 
-      {/* STEP 1: Cinematic Typewriter sequence */}
-      {step === 1 && <TypewriterIntro lines={CONTENT_CONFIG.typewriterLines} onComplete={handleTypewriterComplete} />}
+      {step === 1 && (
+        <TypewriterIntro 
+          lines={CONTENT_CONFIG.typewriterLines} 
+          onCharType={() => { setBgPulse(1); setTimeout(() => setBgPulse(0), 100); }}
+          onComplete={() => { setStep(2); setTimeout(() => scrollToNext('hero'), 100); }} 
+        />
+      )}
 
-      {/* STEP 2: Main Emotional Experience */}
       {step === 2 && (
         <>
-          <AudioVisualizer />
-          <Confetti active={showSurprise} />
+          <motion.section 
+            id="hero" className="bday-section"
+            initial={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
+            whileInView={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+            transition={{ duration: 1.5, ease: "easeOut" }}
+            viewport={{ once: true, margin: "-10%" }}
+          >
+            <h1 className="bday-title">{CONTENT_CONFIG.heroTitle}</h1>
+            <p className="bday-subtitle">{CONTENT_CONFIG.heroSubtitle}</p>
+            <div className="heart-icon" style={{ animation: "heartbeat 1.5s infinite ease-in-out" }}>❤️</div>
+            <MagneticButton className="elegant-btn" onClick={() => scrollToNext('message')}>
+              {CONTENT_CONFIG.heroButtonText}
+            </MagneticButton>
+            <div className="scroll-indicator" onClick={() => scrollToNext('message')}>↓</div>
+          </motion.section>
 
-          {/* Ultra subtle particles for elegant float effect */}
-          <div className="particles-container">
-            {[...Array(15)].map((_, i) => (
-              <div
-                key={i}
-                className="particle"
-                style={{
-                  left: `${Math.random() * 100}vw`,
-                  width: `${Math.random() * 4 + 2}px`,
-                  height: `${Math.random() * 4 + 2}px`,
-                  animationDelay: `${Math.random() * 10}s`,
-                  animationDuration: `${Math.random() * 15 + 15}s`,
-                  background: 'rgba(255,255,255,0.1)'
-                }}
-              />
-            ))}
-          </div>
+          <motion.section 
+            id="message" className="bday-section"
+            initial={{ opacity: 0, y: 50, filter: 'blur(10px)' }}
+            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            transition={{ duration: 1.2 }}
+            viewport={{ once: true, margin: "-20%" }}
+          >
+            <div className="glass-card">
+              <p className="bday-subtitle" style={{ color: '#fff', fontSize: '1.15rem', lineHeight: 2.2, whiteSpace: 'pre-wrap' }}>
+                {CONTENT_CONFIG.personalMessage}
+              </p>
+            </div>
+            <div className="scroll-indicator" onClick={() => scrollToNext('photos')}>↓</div>
+          </motion.section>
 
-          {/* Section 1: Hero */}
-          <section id="hero" className="bday-section">
-            <FadeInSection>
-              <div style={{ zIndex: 10, position: 'relative' }}>
-                <h1 className="bday-title">{CONTENT_CONFIG.heroTitle}</h1>
-                <p className="bday-subtitle">{CONTENT_CONFIG.heroSubtitle}</p>
-                <div className="heart-icon">❤️</div>
-                <div style={{ marginTop: '2rem' }}>
-                  <button className="elegant-btn" onClick={() => scrollToSection('message')}>
-                    {CONTENT_CONFIG.heroButtonText}
-                  </button>
-                </div>
-              </div>
-            </FadeInSection>
-            <div className="scroll-indicator" onClick={() => scrollToSection('message')}>↓</div>
-          </section>
-
-          {/* Section 2: Personal Message */}
-          <section id="message" className="bday-section">
-            <FadeInSection>
-              <div className="glass-card">
-                <p className="bday-subtitle" style={{ color: '#fff', fontSize: '1.1rem', lineHeight: 2, whiteSpace: 'pre-wrap' }}>
-                  "{CONTENT_CONFIG.personalMessage}"
-                </p>
-              </div>
-            </FadeInSection>
-            <div className="scroll-indicator" onClick={() => scrollToSection('photos')}>↓</div>
-          </section>
-
-          {/* Section 3: Floating Polaroids */}
-          <section id="photos" className="bday-section">
-            <FadeInSection>
-              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <h2 className="bday-title" style={{ fontSize: 'clamp(2rem, 6vw, 3rem)', marginBottom: '0.5rem' }}>
-                  {CONTENT_CONFIG.memoriesTitle}
-                </h2>
-                <p className="bday-subtitle" style={{ marginBottom: '4rem', opacity: 0.5 }}>
-                  {CONTENT_CONFIG.memoriesSubtitle}
-                </p>
-
-                <div className="memories-grid">
-                  {CONTENT_CONFIG.flipCards.map((card, i) => (
-                    <div className="flip-card" key={i} onClick={(e) => e.currentTarget.classList.toggle('flipped')}>
-                      <div className="flip-card-inner">
-                        <div className="flip-card-front">
-                          <img src={card.img} alt={`Memory ${i + 1}`} />
-                          <span>{card.caption}</span>
-                        </div>
-                        <div className="flip-card-back">
-                          <p>{card.note}</p>
-                        </div>
-                      </div>
+          <motion.section 
+            id="photos" className="bday-section"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 1 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="bday-title" style={{ fontSize: 'clamp(2rem, 6vw, 3rem)' }}>{CONTENT_CONFIG.memoriesTitle}</h2>
+            <p className="bday-subtitle" style={{ marginBottom: '2rem', opacity: 0.5 }}>{CONTENT_CONFIG.memoriesSubtitle}</p>
+            <div className="memories-grid">
+              {CONTENT_CONFIG.flipCards.map((card, i) => (
+                <motion.div 
+                  className="flip-card" key={i} 
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: i * 0.2 }}
+                  viewport={{ once: true, margin: "-10%" }}
+                  onClick={(e) => { e.currentTarget.classList.toggle('flipped'); playSfx('flip'); }}
+                  whileHover={{ scale: 1.05, rotate: Math.random() * 4 - 2 }}
+                >
+                  <div className="flip-card-inner">
+                    <div className="flip-card-front">
+                      <img src={card.img} alt={`Memory ${i+1}`} />
+                      <span>{card.caption}</span>
                     </div>
+                    <div className="flip-card-back">
+                      <p>{card.note}</p>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+            <div className="scroll-indicator" onClick={() => scrollToNext('counter')}>↓</div>
+          </motion.section>
+
+          <motion.section 
+            id="counter" className="bday-section"
+            initial={{ opacity: 0, y: 50, filter: 'blur(10px)' }}
+            whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            transition={{ duration: 1 }}
+            viewport={{ once: true, margin: "-20%" }}
+          >
+            <div className="glass-card" style={{ padding: '4rem 2rem' }}>
+              <h2 className="bday-subtitle" style={{ fontWeight: 300, color: '#fff' }}>We've lived this for:</h2>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '3rem', flexWrap: 'wrap', marginTop: '3rem' }}>
+                <div className="counter-item"><div className="counter-value">{timeTogether.days}</div><div className="counter-label">Days</div></div>
+                <div className="counter-item"><div className="counter-value">{timeTogether.hours}</div><div className="counter-label">Hours</div></div>
+                <div className="counter-item"><div className="counter-value">{timeTogether.minutes}</div><div className="counter-label">Mins</div></div>
+              </div>
+              <p style={{ marginTop: '3rem', color: 'rgba(255,255,255,0.5)', fontStyle: 'italic' }}>And somehow… it still feels like it just started.</p>
+            </div>
+            <div className="scroll-indicator" onClick={() => scrollToNext('surprise')}>↓</div>
+          </motion.section>
+
+          <motion.section 
+            id="surprise" className="bday-section"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            {!showSurprise ? (
+              <MagneticButton className="elegant-btn" onClick={triggerSurprise}>
+                {CONTENT_CONFIG.surpriseButton}
+              </MagneticButton>
+            ) : (
+              <motion.div 
+                className="glass-card" 
+                style={{ border: '1px solid rgba(255, 77, 109, 0.4)' }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 1, type: "spring" }}
+              >
+                <h2 className="bday-title">{CONTENT_CONFIG.surpriseHeadline}</h2>
+                <p className="bday-subtitle" style={{ color: '#fff', whiteSpace: 'pre-wrap' }}>{CONTENT_CONFIG.surpriseMessage}</p>
+                
+                <div style={{ position:'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', pointerEvents:'none' }}>
+                  {[...Array(40)].map((_, i) => (
+                    <motion.div 
+                      key={i} 
+                      style={{ position: 'absolute', width: '8px', height: '8px', background: ['#ff4d6d','#fff','#f06292'][i%3], borderRadius: '50%' }}
+                      initial={{ x: 0, y: 0, opacity: 1 }}
+                      animate={{ x: (Math.random()-0.5)*1000, y: (Math.random()-0.5)*1000, opacity: 0, rotate: Math.random()*360 }}
+                      transition={{ duration: 2.5, ease: "easeOut" }}
+                    />
                   ))}
                 </div>
-              </div>
-            </FadeInSection>
-            <div className="scroll-indicator" onClick={() => scrollToSection('counter')}>↓</div>
-          </section>
+              </motion.div>
+            )}
+            {showSurprise && <div className="scroll-indicator" onClick={() => scrollToNext('final')}>↓</div>}
+          </motion.section>
 
-          {/* Section 4: Live Counter */}
-          <section id="counter" className="bday-section">
-            <FadeInSection>
-              <div className="glass-card" style={{ width: '100%', maxWidth: '800px', padding: '4rem' }}>
-                <h2 className="bday-subtitle" style={{ margin: 0, fontWeight: 300, color: '#fff', letterSpacing: '1px' }}>
-                  We've been sharing moments for:
-                </h2>
-                <div className="counter-box" style={{ display: 'flex', justifyContent: 'center', gap: '3rem', flexWrap: 'wrap', marginTop: '3rem' }}>
-                  <div className="counter-item">
-                    <div className="counter-value">{timeTogether.days}</div>
-                    <div className="counter-label">Days</div>
-                  </div>
-                  <div className="counter-item">
-                    <div className="counter-value">{timeTogether.hours}</div>
-                    <div className="counter-label">Hours</div>
-                  </div>
-                  <div className="counter-item">
-                    <div className="counter-value">{timeTogether.minutes}</div>
-                    <div className="counter-label">Mins</div>
-                  </div>
-                </div>
-              </div>
-            </FadeInSection>
-            <div className="scroll-indicator" onClick={() => scrollToSection('surprise')}>↓</div>
-          </section>
+          <motion.section 
+            id="final" className="bday-section"
+            initial={{ opacity: 0, filter: 'blur(10px)' }}
+            whileInView={{ opacity: 1, filter: 'blur(0px)' }}
+            transition={{ duration: 2 }}
+          >
+            <h2 className="bday-title">{CONTENT_CONFIG.finalHeadline}</h2>
+            <p className="bday-subtitle" style={{ whiteSpace: 'pre-wrap', color: '#fff' }}>{CONTENT_CONFIG.finalSubtitle}</p>
+            
+            <div className="dual-btn-container">
+              <MagneticButton className="elegant-btn" onClick={() => { playSfx('burst'); }}>Yes ❤️</MagneticButton>
+              <MagneticButton className="elegant-btn" onClick={() => { playSfx('burst'); }} style={{ background: 'rgba(255, 77, 109, 0.2)' }}>Obviously Yes</MagneticButton>
+            </div>
 
-          {/* Section 5: Surprise Finish */}
-          <section id="surprise" className="bday-section">
-            <FadeInSection>
-              {!showSurprise ? (
-                <button className="elegant-btn" onClick={() => setShowSurprise(true)}>
-                  {CONTENT_CONFIG.surpriseButton}
-                </button>
-              ) : (
-                <div className="glass-card" style={{ border: '1px solid rgba(255, 77, 109, 0.3)', background: 'radial-gradient(circle, rgba(255,77,109,0.1) 0%, transparent 80%)' }}>
-                  <h2 className="bday-title" style={{ fontSize: '2.5rem', background: '#fff', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-1px' }}>
-                    {CONTENT_CONFIG.surpriseHeadline}
-                  </h2>
-                  <p className="bday-subtitle" style={{ color: 'rgba(255,255,255,0.8)', fontSize: '1.1rem', marginTop: '1.5rem', fontWeight: 300 }}>
-                    {CONTENT_CONFIG.surpriseMessage}
-                  </p>
-                </div>
-              )}
-            </FadeInSection>
-            {showSurprise && <div className="scroll-indicator" onClick={() => scrollToSection('final')}>↓</div>}
-          </section>
-
-          {/* Section 6: Outro */}
-          <section id="final" className="bday-section" style={{ overflow: 'hidden' }}>
-            <FadeInSection>
-              <div style={{ paddingBottom: '10vh' }}>
-                <h2 className="bday-title" style={{ fontSize: '2.5rem' }}>{CONTENT_CONFIG.finalHeadline}</h2>
-                <p className="bday-subtitle" style={{ fontSize: '1.4rem', marginTop: '1.5rem', color: '#fff', letterSpacing: '1px' }}>
-                  {CONTENT_CONFIG.finalSubtitle}
-                </p>
-
-                {/* Visual bottom hearts float */}
-                <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100vw', height: '40vh', pointerEvents: 'none' }}>
-                  {[...Array(12)].map((_, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        position: 'absolute',
-                        left: `${Math.random() * 100}%`,
-                        bottom: `-20%`,
-                        fontSize: `${Math.random() * 2 + 1}rem`,
-                        animation: `floatParticle ${Math.random() * 6 + 4}s infinite linear`,
-                        animationDelay: `${Math.random() * 4}s`,
-                        opacity: 0.4,
-                        willChange: 'transform'
-                      }}
-                    >
-                      ❤️
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </FadeInSection>
-          </section>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100vw', height: '100vh', pointerEvents: 'none', zIndex: -1, overflow: 'hidden' }}>
+              {[...Array(15)].map((_, i) => (
+                <motion.div 
+                  key={i}
+                  style={{ position: 'absolute', bottom: '-10%', left: `${Math.random()*100}%`, fontSize: `${Math.random()*2+1}rem`, opacity: 0.3 }}
+                  animate={{ y: ['0vh', '-120vh'], rotate: [0, Math.random()*360] }}
+                  transition={{ duration: Math.random()*10 + 10, repeat: Infinity, ease: "linear", delay: Math.random()*5 }}
+                >
+                  ❤️
+                </motion.div>
+              ))}
+            </div>
+            
+            <motion.div 
+              style={{ position: 'absolute', bottom: '20px', fontSize: '0.9rem', color: 'rgba(255,255,255,0.4)', fontStyle: 'italic' }}
+              animate={{ opacity: showIdleMessage ? 1 : 0 }}
+              transition={{ duration: 2 }}
+            >
+              "I meant every word."
+            </motion.div>
+          </motion.section>
         </>
       )}
-    </div>
-  );
 }
