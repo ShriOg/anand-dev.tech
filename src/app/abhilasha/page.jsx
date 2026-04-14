@@ -12,91 +12,121 @@ export const CONTENT_CONFIG = {
   anniversaryDate: "2025-04-21T00:00:00",
 
   typewriterLines: [
-    "Decrypting something special...",
-    "Replaying our best moments...",
-    "This isn't just a page… it's us.",
+    "Kuch khaas hai yahan...",
+    "Hamare sabse pyaare pal...",
+    "This isn't just a page… yeh hum hain.",
     "Welcome, Abhilasha ❤️"
   ],
 
-  envelopeHeader: "Someone left you a letter…",
+  envelopeHeader: "Tumhare liye kuch hai…",
   envelopeTitle: "Only for Abhilasha",
-  envelopeSubtitle: "Open it with your heart.",
+  envelopeSubtitle: "Ek chhota sa surprise.",
 
   heroTitle: "Happy Birthday ❤️",
-  heroSubtitle: "Today is about you… but somehow, you made my whole life better.",
-  heroButtonText: "Start Your Story",
+  heroSubtitle: "Meri zindagi ko itna khoobsurat banane ke liye thank you.",
+  heroButtonText: "Dekhna shuru karein?",
 
   personalMessage:
-    "I don’t think you fully realize what you’ve done to my life.\n\n" +
-    "Before you, things were normal… predictable.\n" +
-    "After you… everything started feeling meaningful.\n\n" +
-    "You didn’t just enter my life — you changed how I see everything.\n" +
-    "The way I smile, the way I think, the way small moments suddenly matter.\n\n" +
-    "And I know I don’t always say it perfectly…\n" +
-    "but you mean more to me than I can ever put into words.\n\n" +
+    "You didn't just enter my life... you quietly changed everything.\n\n" +
+    "Kuch baatein main sayad utni achhi tarah bol nahi paata...\n" +
+    "Par sach yahi hai ki meri har smile ka reason tum ho.\n\n" +
+    "Tum meri aadat banti jaa rahi ho, aur main ise khona nahi chahta.\n\n" +
     "You’re not just special.\n" +
-    "You’re *my* special.",
+    "You’re *my* everything.",
 
-  memoriesTitle: "Our Story So Far",
-  memoriesSubtitle: "(Every moment matters more than you think)",
+  memoriesTitle: "Kuch Pyaare Pal",
+  memoriesSubtitle: "(Jo hamesha yaad rahenge)",
 
   flipCards: [
     {
       img: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-      caption: "That Day We Got Lost",
-      note: "We had no plan, no direction… and somehow it became one of my favorite days ever. Because with you, even being lost feels right."
+      caption: "Our Moments",
+      note: "Pata hi nahi chala kab waqt itna khaas ban gaya tumhare saath. Har din naya sa lagta hai."
     },
     {
       img: "https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-      caption: "Simple Moments",
-      note: "It’s funny how something as small as sitting together can feel so big. You turn ordinary into something unforgettable."
+      caption: "Chhoti Baatein",
+      note: "Tumhari wo chhoti chhoti baatein aur muskurahat hi toh mera poora din bana deti hain."
     },
     {
       img: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-      caption: "Just You",
-      note: "If I had to choose one thing I’m grateful for… it would always be you. Exactly as you are."
+      caption: "Sirf Tum",
+      note: "Agar future mein kuch sach me chahta hoon, toh wo sirf ek cheez hai... tum."
     }
   ],
 
-  surpriseHeadline: "Wait… one more thing 🎉",
+  surpriseHeadline: "Ruko… Ek aur baat 🎉",
   surpriseMessage:
-    "I don’t just love you for who you are today…\n" +
-    "I love you for every version of you I’ll get to see in the future.\n\n" +
-    "Your dreams, your growth, your smile, your chaos…\n" +
-    "I want all of it.\n\n" +
-    "And if life gives me one constant —\n" +
-    "I hope it’s you.",
+    "Chahe waqt kaisa bhi ho, I want to see every version of you.\n\n" +
+    "Tumhari hansi, tumhare sapne, tumhara gussa... mujhe sab manzoor hai.\n\n" +
+    "Just stay with me.",
 
-  surpriseButton: "Open your surprise 🎁",
+  surpriseButton: "Open the surprise 🎁",
 
   finalHeadline: "Happy Birthday, Abhilasha ❤️",
   finalSubtitle:
-    "Not just today.\n" +
-    "Not just this moment.\n\n" +
-    "I want you… always."
+    "Toh phir batao...\n" +
+    "Hamesha ke liye aise hi tang karne do?"
 };
+// ==========================================
+// END OF EDITABLE BLOCK
+// ==========================================
 
-// ==========================================
-// GLOBALS & AUDIO
-// ==========================================
-const AUDIO_SOURCES = {
-  ambient: "https://actions.google.com/sounds/v1/water/rain_on_roof.ogg", // Public domain ambient
-  flip: "https://actions.google.com/sounds/v1/foley/bone_crackle.ogg", // Public domain flip-ish
-  burst: "https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg", // Public domain burst
+/* --- REUSABLE CINEMATIC COMPONENTS --- */
+
+const Confetti = ({ active }) => {
+  const [pieces, setPieces] = useState([]);
+
+  useEffect(() => {
+    if (active) {
+      const colors = ['#f8bbd0', '#f48fb1', '#f06292', '#e91e63', '#c2185b', '#fff'];
+      const newPieces = Array.from({ length: 100 }).map((_, i) => ({
+        id: i,
+        x: Math.random() * 100,
+        y: -10,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        shape: Math.random() > 0.5 ? 'circle' : 'square',
+        delay: Math.random() * 0.5,
+        duration: Math.random() * 2.5 + 2,
+        rotation: Math.random() * 360,
+      }));
+      setPieces(newPieces);
+    } else {
+      setPieces([]);
+    }
+  }, [active]);
+
+  if (!active) return null;
+
+  return (
+    <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', pointerEvents: 'none', zIndex: 9999, overflow: 'hidden' }}>
+      {pieces.map(p => (
+        <div
+          key={p.id}
+          style={{
+            position: 'absolute',
+            left: `${p.x}vw`,
+            top: `${p.y}vh`,
+            width: '10px',
+            height: '10px',
+            backgroundColor: p.color,
+            borderRadius: p.shape === 'circle' ? '50%' : '2px',
+            animation: `fall ${p.duration}s ${p.delay}s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94)`,
+            transform: `rotate(${p.rotation}deg)`
+          }}
+        />
+      ))}
+      <style dangerouslySetInnerHTML={{
+        __html: `
+        @keyframes fall {
+          to {
+            transform: translateY(110vh) rotate(720deg);
+          }
+        }
+      `}} />
+    </div>
+  );
 };
-
-let globalAudio = { ambient: null, flip: null, burst: null };
-
-function playSfx(type) {
-  if (globalAudio[type]) {
-    globalAudio[type].currentTime = 0;
-    globalAudio[type].play().catch(() => {});
-  }
-}
-
-// ==========================================
-// REUSABLE CINEMATIC COMPONENTS
-// ==========================================
 
 const MagneticButton = ({ children, onClick, className, style }) => {
   const ref = useRef(null);
@@ -163,6 +193,7 @@ const ParticleSwarm = () => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     let particles = [];
+    let stardust = [];
     let animationFrameId;
     let mouse = { x: null, y: null };
 
@@ -174,6 +205,16 @@ const ParticleSwarm = () => {
     resize();
 
     window.addEventListener('mousemove', (e) => {
+      if (mouse.x && Math.random() > 0.4) {
+        stardust.push({
+          x: e.clientX,
+          y: e.clientY,
+          radius: Math.random() * 2 + 1,
+          opacity: 1,
+          vx: (Math.random() - 0.5) * 2,
+          vy: (Math.random() - 0.5) * 2 - 1
+        });
+      }
       mouse.x = e.clientX;
       mouse.y = e.clientY;
     });
@@ -232,10 +273,30 @@ const ParticleSwarm = () => {
 
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Base swarm
       for (let i = 0; i < particles.length; i++) {
         particles[i].update();
         particles[i].draw();
       }
+
+      // Stardust interactive trail
+      for (let i = 0; i < stardust.length; i++) {
+        let p = stardust[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.opacity -= 0.02; // fade out over 50 frames
+        
+        ctx.fillStyle = `rgba(255, 77, 109, ${p.opacity})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.fill();
+      }
+      
+      // Clean up dead stardust
+      stardust = stardust.filter(p => p.opacity > 0);
+      
       animationFrameId = requestAnimationFrame(animate);
     };
 
@@ -303,6 +364,7 @@ export default function CinematicBirthday() {
   const [timeTogether, setTimeTogether] = useState({ days: 0, hours: 0, minutes: 0 });
   const [showSurprise, setShowSurprise] = useState(false);
   const [showIdleMessage, setShowIdleMessage] = useState(false);
+  const [heartExplosion, setHeartExplosion] = useState(false);
   const controls = useAnimation();
 
   useEffect(() => {
@@ -320,18 +382,6 @@ export default function CinematicBirthday() {
       clearTimeout(timeout);
     };
   }, [step]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      globalAudio.ambient = new Audio(AUDIO_SOURCES.ambient);
-      globalAudio.ambient.loop = true;
-      globalAudio.ambient.volume = 0;
-      globalAudio.flip = new Audio(AUDIO_SOURCES.flip);
-      globalAudio.flip.volume = 0.6;
-      globalAudio.burst = new Audio(AUDIO_SOURCES.burst);
-      globalAudio.burst.volume = 0.8;
-    }
-  }, []);
 
   useEffect(() => {
     const annDate = new Date(CONTENT_CONFIG.anniversaryDate);
@@ -358,15 +408,6 @@ export default function CinematicBirthday() {
     if (passwordInput.toLowerCase() === CONTENT_CONFIG.password) {
       setHint("");
       setEnvelopeOpen(true);
-      playSfx('flip');
-      if (globalAudio.ambient) {
-        globalAudio.ambient.play().catch(() => {});
-        let vol = 0;
-        const fade = setInterval(() => {
-          if (vol < 0.5) { vol += 0.05; globalAudio.ambient.volume = vol; }
-          else { clearInterval(fade); }
-        }, 200);
-      }
       setTimeout(() => setStep(1), 3000);
     } else {
       setHint("Hint: The most special girl in the world.");
@@ -380,7 +421,6 @@ export default function CinematicBirthday() {
 
   const triggerSurprise = async () => {
     setShowSurprise(true);
-    playSfx('burst');
     await controls.start({ x: [0, -10, 10, -5, 5, 0], transition: { duration: 0.5 } });
   };
 
@@ -427,7 +467,7 @@ export default function CinematicBirthday() {
               
               {!envelopeOpen && (
                 <form onSubmit={handlePasswordSubmit} className="password-form">
-                  <input id="passInput" type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} placeholder="Enter password..." className="password-input" />
+                  <input id="passInput" type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} placeholder="Secret unlock word..." className="password-input" />
                   <div className="password-hint">{hint}</div>
                 </form>
               )}
@@ -494,7 +534,7 @@ export default function CinematicBirthday() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: i * 0.2 }}
                   viewport={{ once: true, margin: "-10%" }}
-                  onClick={(e) => { e.currentTarget.classList.toggle('flipped'); playSfx('flip'); }}
+                  onClick={(e) => { e.currentTarget.classList.toggle('flipped'); }}
                   whileHover={{ scale: 1.05, rotate: Math.random() * 4 - 2 }}
                 >
                   <div className="flip-card-inner">
@@ -578,8 +618,8 @@ export default function CinematicBirthday() {
             <p className="bday-subtitle" style={{ whiteSpace: 'pre-wrap', color: '#fff' }}>{CONTENT_CONFIG.finalSubtitle}</p>
             
             <div className="dual-btn-container">
-              <MagneticButton className="elegant-btn" onClick={() => { playSfx('burst'); }}>Yes ❤️</MagneticButton>
-              <MagneticButton className="elegant-btn" onClick={() => { playSfx('burst'); }} style={{ background: 'rgba(255, 77, 109, 0.2)' }}>Obviously Yes</MagneticButton>
+              <MagneticButton className="elegant-btn" onClick={() => setHeartExplosion(true)}>Haan ❤️</MagneticButton>
+              <MagneticButton className="elegant-btn" onClick={() => setHeartExplosion(true)} style={{ background: 'rgba(255, 77, 109, 0.2)' }}>Obviously Haan</MagneticButton>
             </div>
 
             <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100vw', height: '100vh', pointerEvents: 'none', zIndex: -1, overflow: 'hidden' }}>
@@ -591,6 +631,25 @@ export default function CinematicBirthday() {
                   transition={{ duration: Math.random()*10 + 10, repeat: Infinity, ease: "linear", delay: Math.random()*5 }}
                 >
                   ❤️
+                </motion.div>
+              ))}
+              
+              {/* Massive Interactive Heart Explosion for "Obviously Yes" click */}
+              {heartExplosion && [...Array(30)].map((_, i) => (
+                <motion.div 
+                  key={`burst-${i}`}
+                  style={{ position: 'absolute', left: '50%', top: '80%', fontSize: `${Math.random()*3+1}rem` }}
+                  initial={{ x: '-50%', y: '-50%', opacity: 1, scale: 0 }}
+                  animate={{ 
+                    x: `calc(-50% + ${(Math.random()-0.5)*1000}px)`, 
+                    y: `calc(-50% + ${(Math.random()-1)*800}px)`, 
+                    opacity: 0, 
+                    scale: Math.random() * 2 + 1,
+                    rotate: Math.random() * 360
+                  }}
+                  transition={{ duration: Math.random()*1.5 + 1.5, type: "spring" }}
+                >
+                  💝
                 </motion.div>
               ))}
             </div>
