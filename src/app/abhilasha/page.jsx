@@ -599,4 +599,6 @@ export default function CinematicBirthday() {
           </motion.section>
         </>
       )}
+    </motion.div>
+  );
 }
