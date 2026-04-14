@@ -12,61 +12,92 @@ export const CONTENT_CONFIG = {
   anniversaryDate: "2025-04-21T00:00:00",
 
   typewriterLines: [
-    "Kuch khaas hai yahan...",
-    "Hamare sabse pyaare pal...",
-    "This isn't just a page… yeh hum hain.",
-    "Welcome, Abhilasha ❤️"
+    "Toh aa hi gayi aap…",
+    "Ms. Sleeping Beauty 👀",
+    "Thoda wait karna padega… sab kuch instantly nahi milta.",
+    "This isn't just a page… thodi mehnat lagi hai isme.",
+    "Welcome, Abhilasha Jii ❤️"
   ],
 
-  envelopeHeader: "Tumhare liye kuch hai…",
+  envelopeHeader: "Tumhare liye kuch khaas hai…",
   envelopeTitle: "Only for Abhilasha",
-  envelopeSubtitle: "Ek chhota sa surprise.",
+  envelopeSubtitle: "Kholo… par dhyaan se.",
 
   heroTitle: "Happy Birthday ❤️",
-  heroSubtitle: "Meri zindagi ko itna khoobsurat banane ke liye thank you.",
-  heroButtonText: "Dekhna shuru karein?",
+  heroSubtitle:
+    "Sach bolun… tumne meri zindagi ko bas better nahi, beautiful bana diya hai.",
+  heroButtonText: "Chalein…? 👀",
 
   personalMessage:
-    "You didn't just enter my life... you quietly changed everything.\n\n" +
-    "Kuch baatein main sayad utni achhi tarah bol nahi paata...\n" +
-    "Par sach yahi hai ki meri har smile ka reason tum ho.\n\n" +
-    "Tum meri aadat banti jaa rahi ho, aur main ise khona nahi chahta.\n\n" +
-    "You’re not just special.\n" +
-    "You’re *my* everything.",
+    "You didn’t just enter my life...\n" +
+    "you slowly became a part of everything.\n\n" +
 
-  memoriesTitle: "Kuch Pyaare Pal",
-  memoriesSubtitle: "(Jo hamesha yaad rahenge)",
+    "Pehle sab normal tha…\n" +
+    "phir tum aayi… aur sab special lagne laga.\n\n" +
+
+    "Kuch baatein main shayad kabhi perfect tareeke se bol nahi paunga…\n" +
+    "par tum samajh leti ho na?\n\n" +
+
+    "Meri har smile ke peeche tum ho.\n" +
+    "Aur shayad meri har tension ke peeche bhi… but woh alag baat hai 😭\n\n" +
+
+    "Tum sirf important nahi ho.\n" +
+    "Tum meri aadat ban chuki ho.\n\n" +
+
+    "And honestly…\n" +
+    "I don’t want to lose this.\n\n" +
+
+    "You’re not just special.\n" +
+    "You’re *my everything.*",
+
+  memoriesTitle: "Kuch Pyaare Pyaare Pal",
+  memoriesSubtitle: "(Jo kabhi purane nahi honge)",
 
   flipCards: [
     {
       img: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-      caption: "Our Moments",
-      note: "Pata hi nahi chala kab waqt itna khaas ban gaya tumhare saath. Har din naya sa lagta hai."
+      caption: "Woh Moments",
+      note:
+        "Sach bolun toh mujhe exact yaad bhi nahi ki kab sab itna khaas ban gaya.\n\n" +
+        "Bas itna pata hai… tumhare saath har din alag lagta hai."
     },
     {
       img: "https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
       caption: "Chhoti Baatein",
-      note: "Tumhari wo chhoti chhoti baatein aur muskurahat hi toh mera poora din bana deti hain."
+      note:
+        "Tumhari chhoti chhoti baatein… random texts… wo hasi…\n\n" +
+        "Pata nahi kaise, par mera poora din bana deti hain."
     },
     {
       img: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
       caption: "Sirf Tum",
-      note: "Agar future mein kuch sach me chahta hoon, toh wo sirf ek cheez hai... tum."
+      note:
+        "Future ke baare mein zyada sochta nahi hoon…\n\n" +
+        "Par agar kuch sach mein chahta hoon…\n" +
+        "toh wo sirf ek cheez hai — tum."
     }
   ],
 
-  surpriseHeadline: "Ruko… Ek aur baat 🎉",
+  surpriseHeadline: "Ruko… ek aur baat 🎉",
   surpriseMessage:
-    "Chahe waqt kaisa bhi ho, I want to see every version of you.\n\n" +
-    "Tumhari hansi, tumhare sapne, tumhara gussa... mujhe sab manzoor hai.\n\n" +
-    "Just stay with me.",
+    "Main tumhe sirf aaj ke liye nahi chahta.\n\n" +
 
-  surpriseButton: "Open the surprise 🎁",
+    "Main tumhe har version mein dekhna chahta hoon —\n" +
+    "happy, sad, overthinking, angry… sab.\n\n" +
+
+    "Tumhari hansi, tumhare sapne, tumhara gussa…\n" +
+    "mujhe sab accept hai.\n\n" +
+
+    "Bas ek cheez chahiye…\n" +
+    "stay with me.",
+
+  surpriseButton: "Open karo… dekhte hain 👀",
 
   finalHeadline: "Happy Birthday, Abhilasha ❤️",
   finalSubtitle:
-    "Toh phir batao...\n" +
-    "Hamesha ke liye aise hi tang karne do?"
+    "Toh phir batao…\n\n" +
+    "Hamesha ke liye aise hi tang karne do?\n\n" +
+    "Ya officially haan bolna padega? 😌"
 };
 // ==========================================
 // END OF EDITABLE BLOCK
@@ -179,9 +210,9 @@ const CustomCursor = () => {
   }, []);
 
   return (
-    <div 
-      className={`custom-cursor ${isHovering ? 'active' : ''}`} 
-      style={{ left: `${mousePos.x}px`, top: `${mousePos.y}px` }} 
+    <div
+      className={`custom-cursor ${isHovering ? 'active' : ''}`}
+      style={{ left: `${mousePos.x}px`, top: `${mousePos.y}px` }}
     />
   );
 };
@@ -230,7 +261,7 @@ const ParticleSwarm = () => {
         this.angle = Math.random() * 360;
         this.speed = Math.random() * 0.2 + 0.1;
       }
-      
+
       update() {
         this.angle += this.speed * 0.05;
         this.x += Math.cos(this.angle) * this.speed;
@@ -251,8 +282,8 @@ const ParticleSwarm = () => {
             this.x -= directionX;
             this.y -= directionY;
           } else {
-            if (this.x !== this.baseX) this.x -= (this.x - this.baseX)/50;
-            if (this.y !== this.baseY) this.y -= (this.y - this.baseY)/50;
+            if (this.x !== this.baseX) this.x -= (this.x - this.baseX) / 50;
+            if (this.y !== this.baseY) this.y -= (this.y - this.baseY) / 50;
           }
         }
       }
@@ -273,7 +304,7 @@ const ParticleSwarm = () => {
 
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
+
       // Base swarm
       for (let i = 0; i < particles.length; i++) {
         particles[i].update();
@@ -286,17 +317,17 @@ const ParticleSwarm = () => {
         p.x += p.vx;
         p.y += p.vy;
         p.opacity -= 0.02; // fade out over 50 frames
-        
+
         ctx.fillStyle = `rgba(255, 77, 109, ${p.opacity})`;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
         ctx.closePath();
         ctx.fill();
       }
-      
+
       // Clean up dead stardust
       stardust = stardust.filter(p => p.opacity > 0);
-      
+
       animationFrameId = requestAnimationFrame(animate);
     };
 
@@ -315,7 +346,7 @@ const ParticleSwarm = () => {
 const TypewriterIntro = ({ lines, onComplete, onCharType }) => {
   const [text, setText] = useState("");
   const [lineIdx, setLineIdx] = useState(0);
-  
+
   // Store callbacks in refs to prevent infinite re-render looping from inline functions
   const cbRefs = useRef({ onComplete, onCharType });
   useEffect(() => {
@@ -343,7 +374,7 @@ const TypewriterIntro = ({ lines, onComplete, onCharType }) => {
   }, [lineIdx, lines]);
 
   return (
-    <motion.div 
+    <motion.div
       className="typewriter-container"
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, filter: 'blur(10px)' }} transition={{ duration: 1.5 }}
     >
@@ -425,25 +456,25 @@ export default function CinematicBirthday() {
   };
 
   return (
-    <motion.div 
-      className="bday-container" 
+    <motion.div
+      className="bday-container"
       animate={controls}
       style={{ backgroundColor: showSurprise ? "#0a0005" : "#000" }}
     >
       <CustomCursor />
       {step === 2 && <ParticleSwarm />}
-      
-      <div 
-        className="ambient-bg" 
-        style={{ 
-          opacity: 0.3 + (bgPulse * 0.5), 
+
+      <div
+        className="ambient-bg"
+        style={{
+          opacity: 0.3 + (bgPulse * 0.5),
           transition: 'opacity 0.2s',
           background: showSurprise ? 'radial-gradient(circle at center, rgba(255, 77, 109, 0.15) 0%, rgba(0,0,0,1) 80%)' : undefined
-        }} 
+        }}
       />
 
       {step === 0 && (
-        <motion.div 
+        <motion.div
           className="envelope-container"
           animate={{ opacity: envelopeOpen ? 0 : 1, filter: envelopeOpen ? "blur(20px)" : "blur(0px)" }}
           transition={{ duration: 1.5, delay: 1 }}
@@ -451,7 +482,7 @@ export default function CinematicBirthday() {
           <div style={{ marginBottom: '4rem', color: '#fff', fontSize: '1.2rem', fontWeight: 300, letterSpacing: '4px', textAlign: 'center' }}>
             {CONTENT_CONFIG.envelopeHeader}
           </div>
-          
+
           <div className="envelope-scaler">
             <div className={`envelope-wrapper ${envelopeOpen ? 'envelope-opened' : ''}`}>
               <div className="envelope-flap"></div>
@@ -462,9 +493,9 @@ export default function CinematicBirthday() {
               </div>
               <div className="envelope-front-left"></div>
               <div className="envelope-front-right"></div>
-              
+
               {!envelopeOpen && <div className="wax-seal" onClick={handleWaxTarget} />}
-              
+
               {!envelopeOpen && (
                 <form onSubmit={handlePasswordSubmit} className="password-form">
                   <input id="passInput" type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} placeholder="Secret unlock word..." className="password-input" />
@@ -477,16 +508,16 @@ export default function CinematicBirthday() {
       )}
 
       {step === 1 && (
-        <TypewriterIntro 
-          lines={CONTENT_CONFIG.typewriterLines} 
+        <TypewriterIntro
+          lines={CONTENT_CONFIG.typewriterLines}
           onCharType={() => { setBgPulse(1); setTimeout(() => setBgPulse(0), 100); }}
-          onComplete={() => { setStep(2); setTimeout(() => scrollToNext('hero'), 100); }} 
+          onComplete={() => { setStep(2); setTimeout(() => scrollToNext('hero'), 100); }}
         />
       )}
 
       {step === 2 && (
         <>
-          <motion.section 
+          <motion.section
             id="hero" className="bday-section"
             initial={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
             whileInView={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
@@ -502,7 +533,7 @@ export default function CinematicBirthday() {
             <div className="scroll-indicator" onClick={() => scrollToNext('message')}>↓</div>
           </motion.section>
 
-          <motion.section 
+          <motion.section
             id="message" className="bday-section"
             initial={{ opacity: 0, y: 50, filter: 'blur(10px)' }}
             whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
@@ -517,7 +548,7 @@ export default function CinematicBirthday() {
             <div className="scroll-indicator" onClick={() => scrollToNext('photos')}>↓</div>
           </motion.section>
 
-          <motion.section 
+          <motion.section
             id="photos" className="bday-section"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -528,8 +559,8 @@ export default function CinematicBirthday() {
             <p className="bday-subtitle" style={{ marginBottom: '2rem', opacity: 0.5 }}>{CONTENT_CONFIG.memoriesSubtitle}</p>
             <div className="memories-grid">
               {CONTENT_CONFIG.flipCards.map((card, i) => (
-                <motion.div 
-                  className="flip-card" key={i} 
+                <motion.div
+                  className="flip-card" key={i}
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: i * 0.2 }}
@@ -539,7 +570,7 @@ export default function CinematicBirthday() {
                 >
                   <div className="flip-card-inner">
                     <div className="flip-card-front">
-                      <img src={card.img} alt={`Memory ${i+1}`} />
+                      <img src={card.img} alt={`Memory ${i + 1}`} />
                       <span>{card.caption}</span>
                     </div>
                     <div className="flip-card-back">
@@ -552,7 +583,7 @@ export default function CinematicBirthday() {
             <div className="scroll-indicator" onClick={() => scrollToNext('counter')}>↓</div>
           </motion.section>
 
-          <motion.section 
+          <motion.section
             id="counter" className="bday-section"
             initial={{ opacity: 0, y: 50, filter: 'blur(10px)' }}
             whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
@@ -571,7 +602,7 @@ export default function CinematicBirthday() {
             <div className="scroll-indicator" onClick={() => scrollToNext('surprise')}>↓</div>
           </motion.section>
 
-          <motion.section 
+          <motion.section
             id="surprise" className="bday-section"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -582,8 +613,8 @@ export default function CinematicBirthday() {
                 {CONTENT_CONFIG.surpriseButton}
               </MagneticButton>
             ) : (
-              <motion.div 
-                className="glass-card" 
+              <motion.div
+                className="glass-card"
                 style={{ border: '1px solid rgba(255, 77, 109, 0.4)' }}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -591,14 +622,14 @@ export default function CinematicBirthday() {
               >
                 <h2 className="bday-title">{CONTENT_CONFIG.surpriseHeadline}</h2>
                 <p className="bday-subtitle" style={{ color: '#fff', whiteSpace: 'pre-wrap' }}>{CONTENT_CONFIG.surpriseMessage}</p>
-                
-                <div style={{ position:'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', pointerEvents:'none' }}>
+
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', pointerEvents: 'none' }}>
                   {[...Array(40)].map((_, i) => (
-                    <motion.div 
-                      key={i} 
-                      style={{ position: 'absolute', width: '8px', height: '8px', background: ['#ff4d6d','#fff','#f06292'][i%3], borderRadius: '50%' }}
+                    <motion.div
+                      key={i}
+                      style={{ position: 'absolute', width: '8px', height: '8px', background: ['#ff4d6d', '#fff', '#f06292'][i % 3], borderRadius: '50%' }}
                       initial={{ x: 0, y: 0, opacity: 1 }}
-                      animate={{ x: (Math.random()-0.5)*1000, y: (Math.random()-0.5)*1000, opacity: 0, rotate: Math.random()*360 }}
+                      animate={{ x: (Math.random() - 0.5) * 1000, y: (Math.random() - 0.5) * 1000, opacity: 0, rotate: Math.random() * 360 }}
                       transition={{ duration: 2.5, ease: "easeOut" }}
                     />
                   ))}
@@ -608,7 +639,7 @@ export default function CinematicBirthday() {
             {showSurprise && <div className="scroll-indicator" onClick={() => scrollToNext('final')}>↓</div>}
           </motion.section>
 
-          <motion.section 
+          <motion.section
             id="final" className="bday-section"
             initial={{ opacity: 0, filter: 'blur(10px)' }}
             whileInView={{ opacity: 1, filter: 'blur(0px)' }}
@@ -616,7 +647,7 @@ export default function CinematicBirthday() {
           >
             <h2 className="bday-title">{CONTENT_CONFIG.finalHeadline}</h2>
             <p className="bday-subtitle" style={{ whiteSpace: 'pre-wrap', color: '#fff' }}>{CONTENT_CONFIG.finalSubtitle}</p>
-            
+
             <div className="dual-btn-container">
               <MagneticButton className="elegant-btn" onClick={() => setHeartExplosion(true)}>Haan ❤️</MagneticButton>
               <MagneticButton className="elegant-btn" onClick={() => setHeartExplosion(true)} style={{ background: 'rgba(255, 77, 109, 0.2)' }}>Obviously Haan</MagneticButton>
@@ -624,37 +655,37 @@ export default function CinematicBirthday() {
 
             <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100vw', height: '100vh', pointerEvents: 'none', zIndex: -1, overflow: 'hidden' }}>
               {[...Array(15)].map((_, i) => (
-                <motion.div 
+                <motion.div
                   key={i}
-                  style={{ position: 'absolute', bottom: '-10%', left: `${Math.random()*100}%`, fontSize: `${Math.random()*2+1}rem`, opacity: 0.3 }}
-                  animate={{ y: ['0vh', '-120vh'], rotate: [0, Math.random()*360] }}
-                  transition={{ duration: Math.random()*10 + 10, repeat: Infinity, ease: "linear", delay: Math.random()*5 }}
+                  style={{ position: 'absolute', bottom: '-10%', left: `${Math.random() * 100}%`, fontSize: `${Math.random() * 2 + 1}rem`, opacity: 0.3 }}
+                  animate={{ y: ['0vh', '-120vh'], rotate: [0, Math.random() * 360] }}
+                  transition={{ duration: Math.random() * 10 + 10, repeat: Infinity, ease: "linear", delay: Math.random() * 5 }}
                 >
                   ❤️
                 </motion.div>
               ))}
-              
+
               {/* Massive Interactive Heart Explosion for "Obviously Yes" click */}
               {heartExplosion && [...Array(30)].map((_, i) => (
-                <motion.div 
+                <motion.div
                   key={`burst-${i}`}
-                  style={{ position: 'absolute', left: '50%', top: '80%', fontSize: `${Math.random()*3+1}rem` }}
+                  style={{ position: 'absolute', left: '50%', top: '80%', fontSize: `${Math.random() * 3 + 1}rem` }}
                   initial={{ x: '-50%', y: '-50%', opacity: 1, scale: 0 }}
-                  animate={{ 
-                    x: `calc(-50% + ${(Math.random()-0.5)*1000}px)`, 
-                    y: `calc(-50% + ${(Math.random()-1)*800}px)`, 
-                    opacity: 0, 
+                  animate={{
+                    x: `calc(-50% + ${(Math.random() - 0.5) * 1000}px)`,
+                    y: `calc(-50% + ${(Math.random() - 1) * 800}px)`,
+                    opacity: 0,
                     scale: Math.random() * 2 + 1,
                     rotate: Math.random() * 360
                   }}
-                  transition={{ duration: Math.random()*1.5 + 1.5, type: "spring" }}
+                  transition={{ duration: Math.random() * 1.5 + 1.5, type: "spring" }}
                 >
                   💝
                 </motion.div>
               ))}
             </div>
-            
-            <motion.div 
+
+            <motion.div
               style={{ position: 'absolute', bottom: '20px', fontSize: '0.9rem', color: 'rgba(255,255,255,0.4)', fontStyle: 'italic' }}
               animate={{ opacity: showIdleMessage ? 1 : 0 }}
               transition={{ duration: 2 }}
