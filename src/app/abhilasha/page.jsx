@@ -80,9 +80,9 @@ export const CONTENT_CONFIG = {
 // GLOBALS & AUDIO
 // ==========================================
 const AUDIO_SOURCES = {
-  ambient: "https://cdn.pixabay.com/audio/2022/10/25/audio_51744cb5fb.mp3",
-  flip: "https://cdn.pixabay.com/audio/2021/08/04/audio_3aa65ec588.mp3",
-  burst: "https://cdn.pixabay.com/audio/2022/03/10/audio_525a6e8749.mp3",
+  ambient: "https://actions.google.com/sounds/v1/water/rain_on_roof.ogg", // Public domain ambient
+  flip: "https://actions.google.com/sounds/v1/foley/bone_crackle.ogg", // Public domain flip-ish
+  burst: "https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg", // Public domain burst
 };
 
 let globalAudio = { ambient: null, flip: null, burst: null };
@@ -254,10 +254,16 @@ const ParticleSwarm = () => {
 const TypewriterIntro = ({ lines, onComplete, onCharType }) => {
   const [text, setText] = useState("");
   const [lineIdx, setLineIdx] = useState(0);
+  
+  // Store callbacks in refs to prevent infinite re-render looping from inline functions
+  const cbRefs = useRef({ onComplete, onCharType });
+  useEffect(() => {
+    cbRefs.current = { onComplete, onCharType };
+  });
 
   useEffect(() => {
     if (lineIdx >= lines.length) {
-      setTimeout(() => onComplete(), 2000);
+      setTimeout(() => cbRefs.current.onComplete(), 2000);
       return;
     }
     const currentLine = lines[lineIdx];
@@ -265,7 +271,7 @@ const TypewriterIntro = ({ lines, onComplete, onCharType }) => {
     const typeInterval = setInterval(() => {
       if (charIdx <= currentLine.length) {
         setText(currentLine.substring(0, charIdx));
-        onCharType();
+        cbRefs.current.onCharType();
         charIdx++;
       } else {
         clearInterval(typeInterval);
@@ -273,7 +279,7 @@ const TypewriterIntro = ({ lines, onComplete, onCharType }) => {
       }
     }, 60);
     return () => clearInterval(typeInterval);
-  }, [lineIdx, lines, onComplete, onCharType]);
+  }, [lineIdx, lines]);
 
   return (
     <motion.div 
