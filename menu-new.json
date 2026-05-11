@@ -1,0 +1,989 @@
+db.menuitems.bulkWrite([
+  {
+    updateOne: {
+      filter: { name: "Cigar Roll" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 50 },
+            { label: "F Portion", value: 80 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Chilli Potato" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 60 },
+            { label: "F Portion", value: 100 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Honey Chilli Potato" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 70 },
+            { label: "F Portion", value: 110 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "French Fries" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 40 },
+            { label: "F Portion", value: 70 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Peri Peri French Fries" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 50 },
+            { label: "F Portion", value: 80 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veg Momos" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 40 },
+            { label: "F Portion", value: 60 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Nutrela Momos" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 50 },
+            { label: "F Portion", value: 80 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veg Fried Momos" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 50 },
+            { label: "F Portion", value: 80 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veg Kurkure Momos" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 60 },
+            { label: "F Portion", value: 100 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Paneer Momos" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 50 },
+            { label: "F Portion", value: 80 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Paneer Fried Momos" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 70 },
+            { label: "F Portion", value: 110 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Paneer Kurkure Momos" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 80 },
+            { label: "F Portion", value: 130 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Chicken Momos" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 50 },
+            { label: "F Portion", value: 80 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Chicken Fried Momos" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 70 },
+            { label: "F Portion", value: 110 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Chicken Kurkure Momos" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 80 },
+            { label: "F Portion", value: 130 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veg Noodles" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 50 },
+            { label: "F Portion", value: 80 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veg Singapuri Noodles" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 60 },
+            { label: "F Portion", value: 90 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veg Schezwan Noodles" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 70 },
+            { label: "F Portion", value: 120 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veg Chilli Garlic Noodles" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 70 },
+            { label: "F Portion", value: 120 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veg Hakka Noodles" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 60 },
+            { label: "F Portion", value: 100 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Paneer Singapuri Noodles" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 70 },
+            { label: "F Portion", value: 120 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Egg Noodles" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 70 },
+            { label: "F Portion", value: 120 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Chicken Noodles" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 70 },
+            { label: "F Portion", value: 120 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Chicken Hakka Noodles" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 60 },
+            { label: "F Portion", value: 100 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Chicken Chilli Garlic Noodles" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 70 },
+            { label: "F Portion", value: 120 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Chicken Singapuri Noodles" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 70 },
+            { label: "F Portion", value: 120 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veg Fried Rice" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 60 },
+            { label: "F Portion", value: 100 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Chilly Garlic Fried Rice" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 70 },
+            { label: "F Portion", value: 110 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Egg Fried Rice" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 70 },
+            { label: "F Portion", value: 120 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Paneer Fried Rice" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 70 },
+            { label: "F Portion", value: 120 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Singapuri Fried Rice" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 80 },
+            { label: "F Portion", value: 150 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Chicken Fried Rice" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 100 },
+            { label: "F Portion", value: 180 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veg Soup" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 70 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Tomato Soup" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 80 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Coriander Soup" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 90 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Creamy Broccoli Soup" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 100 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Mushroom Soup" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 110 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Chicken Soup" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 120 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veggie Penne Pasta" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 90 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Red Sauce Pasta" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 100 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Mix Sauce Pasta" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 110 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "White Sauce Pasta" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 120 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Alfredo Pasta" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 130 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Extravaganza Penne" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 150 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Gourmet Penne" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 150 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Aglio e Olio" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 160 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veg Aloo Tikki Burger" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 50 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Chicken Burger" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 70 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veg Grilled Sandwich" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 70 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Chicken Grilled Sandwich" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 80 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veg Cheesy Burger" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 60 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veg Peri-Peri Burger" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 60 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "The Food Belly Special Burger" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 80 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Tandoori" },
+      update: {
+        $set: {
+          prices: [{ label: "Per Stick", value: 130 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Afghani" },
+      update: {
+        $set: {
+          prices: [{ label: "Per Stick", value: 140 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Achari" },
+      update: {
+        $set: {
+          prices: [{ label: "Per Stick", value: 140 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Paneer Stuffed" },
+      update: {
+        $set: {
+          prices: [{ label: "Per Stick", value: 150 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Mushroom Tikka" },
+      update: {
+        $set: {
+          prices: [{ label: "Per Stick", value: 160 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Paneer Tikka (6pc)" },
+      update: {
+        $set: {
+          prices: [{ label: "Per Stick", value: 180 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veggie Roll" },
+      update: {
+        $set: {
+          prices: [{ label: "Price", value: 60 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Paneer Roll" },
+      update: {
+        $set: {
+          prices: [{ label: "Price", value: 80 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Nutrela Roll" },
+      update: {
+        $set: {
+          prices: [{ label: "Price", value: 70 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Kathi Roll" },
+      update: {
+        $set: {
+          prices: [{ label: "Price", value: 70 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Chicken Stuffed Roll" },
+      update: {
+        $set: {
+          prices: [{ label: "Price", value: 90 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Chicken with Egg Roll" },
+      update: {
+        $set: {
+          prices: [{ label: "Price", value: 110 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Single Egg Roll" },
+      update: {
+        $set: {
+          prices: [{ label: "Price", value: 70 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Double Egg Roll" },
+      update: {
+        $set: {
+          prices: [{ label: "Price", value: 80 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veg Gravy Momo" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 60 },
+            { label: "F Portion", value: 100 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veg Tandoori Momo" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 60 },
+            { label: "F Portion", value: 100 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Paneer Gravy Momo" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 70 },
+            { label: "F Portion", value: 120 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Paneer Tandoori Momos" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 70 },
+            { label: "F Portion", value: 120 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Nutrela Tandoori Momos" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 60 },
+            { label: "F Portion", value: 100 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Chicken Gravy Momos" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 70 },
+            { label: "F Portion", value: 120 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Chicken Tandoori Momos" },
+      update: {
+        $set: {
+          prices: [
+            { label: "H Portion", value: 70 },
+            { label: "F Portion", value: 120 }
+          ]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veg Manchurian" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 70 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veg Noodles + Manchurian" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 150 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Veg Fried Rice + Manchurian" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 140 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Chilli Paneer" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 90 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Chilli Mushroom" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 80 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Paneer Manchurian" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 90 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Chilli Chicken" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 100 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Lemonade" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 49 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Virgin Mojito" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 59 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Blue Lagoon" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 69 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Cold Coffee" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 59 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Tea" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 19 }]
+        }
+      }
+    }
+  },
+  {
+    updateOne: {
+      filter: { name: "Kulhad Tea" },
+      update: {
+        $set: {
+          prices: [{ label: "Regular", value: 29 }]
+        }
+      }
+    }
+  }
+]);
