@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "c06fe146e60dd384",
+        "id": "36f7e4cd482243af",
         "type": "tabs",
         "children": [
           {
-            "id": "74c723a097dd6859",
+            "id": "44cec4b755f5f940",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Confidential/April — The Story I Still Carry.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "April — The Story I Still Carry"
+              "title": "New tab"
             }
           }
         ]
@@ -183,22 +179,23 @@
       "bases:Create new base": false
     }
   },
-  "active": "74c723a097dd6859",
+  "active": "44cec4b755f5f940",
   "lastOpenFiles": [
+    "Confidential/Abhilasha,.md",
     "Confidential/The Things I Never Really Said.md",
-    "Confidential/March Conversations — “Tum Jaisi Ho, Waise Hi Theek Ho”.md",
-    "Confidential/October — The Goodbye I Never Wanted.md",
     "Confidential/The Story I Never Really Told Anyone.md",
-    "Project Overview.md",
     "Confidential/The Night I Realized How Deep Her Fear Goes.md",
     "Confidential/The Night I Lost Her — Ya Shayad Khudko.md",
     "Confidential/The Fear Of Being Replaced.md",
     "Confidential/The Comfort Zone I Never Expected.md",
+    "Confidential/October — The Goodbye I Never Wanted.md",
+    "Confidential/March Conversations — “Tum Jaisi Ho, Waise Hi Theek Ho”.md",
     "Confidential/April — Woh Raat Jo Sirf Chat Nahi Thi.md",
-    "Confidential/Abhilasha — The Birthday Project.md",
-    "Confidential/Quotes.md",
     "Confidential/April — The Story I Still Carry.md",
     "Confidential/April — The Line I Still Remember.md",
+    "Confidential/Abhilasha — The Birthday Project.md",
+    "Project Overview.md",
+    "Confidential/Quotes.md",
     "JEE/Answers Milestone Practice.md",
     "Confidential",
     "JEE",
