@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { FlipClock } from "@/components/ui/flip-clock";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Maximize, Minimize, MoveLeft } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export default function ClockPage() {
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -31,16 +32,15 @@ export default function ClockPage() {
     <div className="relative flex h-screen w-screen flex-col items-center justify-center bg-black text-white overflow-hidden">
       {/* Back button (hidden in actual fullscreen mode) */}
       {!isFullscreen && (
-        <Button 
-          variant="outline" 
-          size="icon" 
-          asChild
-          className="absolute top-6 left-6 z-10 border-neutral-800 bg-neutral-950 text-neutral-400 hover:bg-neutral-900 hover:text-white"
+        <Link 
+          href="/"
+          className={cn(
+            buttonVariants({ variant: "outline", size: "icon" }),
+            "absolute top-6 left-6 z-10 border-neutral-800 bg-neutral-950 text-neutral-400 hover:bg-neutral-900 hover:text-white"
+          )}
         >
-          <Link href="/">
-            <MoveLeft className="h-4 w-4" />
-          </Link>
-        </Button>
+          <MoveLeft className="h-4 w-4" />
+        </Link>
       )}
 
       {/* The Clock - scaled up nicely */}
