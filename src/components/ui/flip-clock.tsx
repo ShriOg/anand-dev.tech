@@ -37,17 +37,14 @@ function FlipNumber({ digit }: FlipNumberProps) {
   );
 }
 
-export function FlipClock({ className }: { className?: string }) {
-  const [time, setTime] = useState<Date | null>(null);
+export function FlipDisplay({ hours, minutes, seconds, className }: { hours: number, minutes: number, seconds: number, className?: string }) {
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setTime(new Date());
-    const interval = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(interval);
+    setMounted(true);
   }, []);
 
-  // Avoid hydration mismatch by not rendering server-side
-  if (!time) {
+  if (!mounted) {
     return (
       <div className={cn("flex items-center gap-2 md:gap-4", className)}>
         <div className="h-20 w-16 md:h-32 md:w-24 rounded-lg md:rounded-xl bg-neutral-900 animate-pulse" />
@@ -61,11 +58,30 @@ export function FlipClock({ className }: { className?: string }) {
 
   return (
     <div className={cn("flex items-center gap-2 md:gap-4", className)}>
-      <FlipNumber digit={time.getHours()} />
-      <span className="text-3xl md:text-5xl font-bold text-neutral-400 mb-1 animate-pulse">:</span>
-      <FlipNumber digit={time.getMinutes()} />
-      <span className="text-3xl md:text-5xl font-bold text-neutral-400 mb-1 animate-pulse">:</span>
-      <FlipNumber digit={time.getSeconds()} />
+      <FlipNumber digit={hours} />
+      <span className="text-3xl md:text-5xl font-bold text-neutral-400 mb-1 lg:mb-2 animate-pulse">:</span>
+      <FlipNumber digit={minutes} />
+      <span className="text-3xl md:text-5xl font-bold text-neutral-400 mb-1 lg:mb-2 animate-pulse">:</span>
+      <FlipNumber digit={seconds} />
     </div>
   );
+}
+
+export function FlipClock({ className }: { className?: string }) {
+  const [time, setTime] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setTime(new Date());
+    const interval = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  if (!time) return <FlipDisplay hours={0} minutes={0} seconds={0} className={className} />;
+
+  let hours = time.getHours();
+  // Convert to 12-hour format
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+
+  return <FlipDisplay hours={hours} minutes={time.getMinutes()} seconds={time.getSeconds()} className={className} />;
 }
