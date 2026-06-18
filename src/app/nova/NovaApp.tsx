@@ -532,42 +532,124 @@ export default function NovaApp() {
 
   if (!isMounted) return null;
 
-  // Auth gate — show login/register screen if not logged in
+  // Auth gate — premium inline-styled login screen
   if (!loggedInUser) return (
-    <div className="auth-gate">
-      <div className="auth-card">
-        <div className="auth-logo">🩷</div>
-        <h1 className="auth-title">Nova</h1>
-        <p className="auth-sub">your AI companion — sign in to continue</p>
-        <div className="auth-tabs">
-          <button className={`auth-tab ${authMode === "login" ? "active" : ""}`} onClick={() => { setAuthMode("login"); setAuthError(""); }}>Sign in</button>
-          <button className={`auth-tab ${authMode === "register" ? "active" : ""}`} onClick={() => { setAuthMode("register"); setAuthError(""); }}>Create account</button>
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 9999,
+      background: "#07071a",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: "24px", fontFamily: "'Inter', sans-serif",
+    }}>
+      {/* Ambient glow blobs */}
+      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
+        <div style={{ position: "absolute", width: 600, height: 500, borderRadius: "50%", background: "rgba(255,61,139,0.12)", filter: "blur(90px)", top: "-10%", left: "-8%", animation: "drift 22s ease-in-out infinite alternate" }} />
+        <div style={{ position: "absolute", width: 480, height: 420, borderRadius: "50%", background: "rgba(255,140,200,0.09)", filter: "blur(80px)", bottom: "-12%", right: "-8%", animation: "drift 18s ease-in-out infinite alternate-reverse" }} />
+      </div>
+
+      {/* Card */}
+      <div style={{
+        position: "relative", zIndex: 1,
+        background: "rgba(13,13,35,0.82)",
+        border: "1px solid rgba(255,110,180,0.16)",
+        borderRadius: 28, padding: "48px 44px 44px",
+        maxWidth: 420, width: "100%",
+        backdropFilter: "blur(40px)", WebkitBackdropFilter: "blur(40px)",
+        boxShadow: "0 0 80px rgba(255,61,139,0.07), 0 32px 80px rgba(0,0,0,0.55)",
+        display: "flex", flexDirection: "column", alignItems: "center",
+        animation: "fadeUp .45s cubic-bezier(.22,1,.36,1) both",
+      }}>
+        {/* Logo & heading */}
+        <div style={{ fontSize: 38, marginBottom: 16, lineHeight: 1 }}>🩷</div>
+        <h1 style={{
+          fontSize: 32, fontWeight: 800, letterSpacing: "-0.8px", margin: "0 0 8px",
+          background: "linear-gradient(135deg,#ff3d8b,#ff85bf)",
+          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
+        }}>Nova</h1>
+        <p style={{ fontSize: 13.5, color: "rgba(240,240,250,0.5)", margin: "0 0 30px", textAlign: "center" }}>
+          your AI companion — sign in to continue
+        </p>
+
+        {/* Tab switcher */}
+        <div style={{
+          display: "flex", width: "100%", background: "rgba(255,255,255,0.04)",
+          border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: 3, marginBottom: 26,
+        }}>
+          {(["login", "register"] as const).map(mode => (
+            <button key={mode} onClick={() => { setAuthMode(mode); setAuthError(""); }} style={{
+              flex: 1, padding: "9px 0", borderRadius: 9, border: "none", cursor: "pointer",
+              fontSize: 13, fontWeight: 600, fontFamily: "inherit",
+              transition: "all .2s",
+              background: authMode === mode ? "linear-gradient(135deg,#ff3d8b,#ff80be)" : "transparent",
+              color: authMode === mode ? "#fff" : "rgba(240,240,250,0.45)",
+              boxShadow: authMode === mode ? "0 2px 14px rgba(255,61,139,0.35)" : "none",
+            }}>
+              {mode === "login" ? "Sign in" : "Create account"}
+            </button>
+          ))}
         </div>
-        <form className="auth-form" onSubmit={handleAuth}>
-          <div className="auth-field">
-            <label>Username</label>
-            <input
-              type="text" autoComplete="username" autoCapitalize="none"
-              placeholder="e.g. luna_user" maxLength={30}
-              value={authUsername} onChange={e => setAuthUsername(e.target.value)}
-            />
-          </div>
-          <div className="auth-field">
-            <label>Password</label>
-            <input
-              type="password" autoComplete={authMode === "login" ? "current-password" : "new-password"}
-              placeholder={authMode === "register" ? "at least 6 characters" : "your password"}
-              value={authPassword} onChange={e => setAuthPassword(e.target.value)}
-            />
-          </div>
-          {authError && <div className="auth-error">{authError}</div>}
-          <button className="auth-submit" type="submit" disabled={authLoading || !authUsername.trim() || !authPassword.trim()}>
-            {authLoading ? "..." : authMode === "login" ? "Sign in 🩷" : "Create account ✨"}
+
+        {/* Form */}
+        <form onSubmit={handleAuth} style={{ width: "100%", display: "flex", flexDirection: "column", gap: 14 }}>
+          {[
+            { label: "Username", type: "text", key: "username" as const, auto: "username", ph: "e.g. luna_user" },
+            { label: "Password", type: "password", key: "password" as const, auto: authMode === "login" ? "current-password" : "new-password", ph: authMode === "register" ? "at least 6 characters" : "your password" },
+          ].map(({ label, type, key, auto, ph }) => (
+            <div key={key} style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+              <label style={{ fontSize: 11.5, fontWeight: 600, color: "rgba(240,240,250,0.4)", letterSpacing: "0.5px", textTransform: "uppercase" }}>{label}</label>
+              <input
+                type={type}
+                autoComplete={auto}
+                autoCapitalize="none"
+                placeholder={ph}
+                maxLength={key === "username" ? 30 : 128}
+                value={key === "username" ? authUsername : authPassword}
+                onChange={e => key === "username" ? setAuthUsername(e.target.value) : setAuthPassword(e.target.value)}
+                style={{
+                  width: "100%", padding: "13px 16px", boxSizing: "border-box",
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1.5px solid rgba(255,255,255,0.09)",
+                  borderRadius: 12, color: "#f0f0fa",
+                  fontFamily: "inherit", fontSize: 14.5, outline: "none",
+                  transition: "border-color .2s, box-shadow .2s",
+                }}
+                onFocus={e => { e.target.style.borderColor = "rgba(255,61,139,0.5)"; e.target.style.boxShadow = "0 0 0 4px rgba(255,61,139,0.1)"; }}
+                onBlur={e => { e.target.style.borderColor = "rgba(255,255,255,0.09)"; e.target.style.boxShadow = "none"; }}
+              />
+            </div>
+          ))}
+
+          {authError && (
+            <div style={{
+              background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.22)",
+              color: "#f87171", borderRadius: 10, padding: "10px 14px",
+              fontSize: 13, fontWeight: 500, textAlign: "center",
+            }}>{authError}</div>
+          )}
+
+          <button type="submit" disabled={authLoading || !authUsername.trim() || !authPassword.trim()} style={{
+            marginTop: 6, width: "100%", padding: "15px 0",
+            background: "linear-gradient(135deg,#ff3d8b,#ff80be)",
+            border: "none", borderRadius: 14,
+            color: "#fff", fontFamily: "inherit", fontSize: 15, fontWeight: 700,
+            cursor: authLoading || !authUsername.trim() || !authPassword.trim() ? "not-allowed" : "pointer",
+            opacity: authLoading || !authUsername.trim() || !authPassword.trim() ? 0.38 : 1,
+            boxShadow: "0 6px 28px rgba(255,61,139,0.35)",
+            transition: "opacity .2s, transform .15s, box-shadow .2s",
+          }}
+            onMouseEnter={e => { if (!authLoading) { (e.target as HTMLButtonElement).style.transform = "translateY(-1px)"; (e.target as HTMLButtonElement).style.boxShadow = "0 8px 36px rgba(255,61,139,0.5)"; } }}
+            onMouseLeave={e => { (e.target as HTMLButtonElement).style.transform = ""; (e.target as HTMLButtonElement).style.boxShadow = "0 6px 28px rgba(255,61,139,0.35)"; }}
+          >
+            {authLoading ? "Please wait…" : authMode === "login" ? "Sign in" : "Create account"}
           </button>
         </form>
+
+        <p style={{ marginTop: 22, fontSize: 12, color: "rgba(240,240,250,0.25)", textAlign: "center", lineHeight: 1.6 }}>
+          Powered by Groq · llama-3.3-70b
+        </p>
       </div>
     </div>
   );
+
 
   return (
     <>
@@ -702,6 +784,7 @@ export default function NovaApp() {
                 localStorage.removeItem("companion-image");
                 window.location.reload();
               }}>👤 Reset companion setup</button>
+              <button className="danger-btn" onClick={() => { setSettingsOpen(false); handleLogout(); }}>🚪 Sign out{loggedInUser ? ` (${loggedInUser})` : ""}</button>
             </div>
           </div>
           <div style={{ textAlign: "center", padding: "8px 0" }}>
