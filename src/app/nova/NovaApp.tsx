@@ -818,12 +818,12 @@ export default function NovaApp() {
                   <div style={{ display: "flex", gap: 10 }}>
                     <button 
                       className={`lang-pill ${userGender === "male" ? "active" : ""}`} 
-                      style={{ flex: 1, padding: "12px", borderRadius: "12px", border: "1px solid var(--border)", background: userGender === "male" ? "var(--bg-3)" : "transparent", color: "var(--text-1)", cursor: "pointer" }}
+                      style={{ flex: 1, padding: "12px", borderRadius: "12px", border: userGender === "male" ? "1px solid #ff3d8b" : "1px solid var(--border)", background: userGender === "male" ? "rgba(255,61,139,0.1)" : "transparent", color: userGender === "male" ? "#ff3d8b" : "var(--text-1)", cursor: "pointer", transition: "0.2s" }}
                       onClick={() => setUserGender("male")}
                     >Male</button>
                     <button 
                       className={`lang-pill ${userGender === "female" ? "active" : ""}`} 
-                      style={{ flex: 1, padding: "12px", borderRadius: "12px", border: "1px solid var(--border)", background: userGender === "female" ? "var(--bg-3)" : "transparent", color: "var(--text-1)", cursor: "pointer" }}
+                      style={{ flex: 1, padding: "12px", borderRadius: "12px", border: userGender === "female" ? "1px solid #ff3d8b" : "1px solid var(--border)", background: userGender === "female" ? "rgba(255,61,139,0.1)" : "transparent", color: userGender === "female" ? "#ff3d8b" : "var(--text-1)", cursor: "pointer", transition: "0.2s" }}
                       onClick={() => setUserGender("female")}
                     >Female</button>
                   </div>
@@ -837,7 +837,15 @@ export default function NovaApp() {
           ) : (
             <>
               <div className="ob-sparkle">🩷</div>
-              <div className="ob-heading">
+              <div className="ob-heading" style={{ position: "relative" }}>
+                {onboardingMode === "companion" && (
+                  <button 
+                    onClick={() => setOnboardingMode("user")}
+                    style={{ position: "absolute", left: -10, top: 0, background: "transparent", border: "none", color: "var(--text-2)", fontSize: 24, cursor: "pointer", padding: "4px 8px" }}
+                  >
+                    ←
+                  </button>
+                )}
                 <h2>{onboardingMode === "edit" ? "edit" : "create"} your <span>companion</span> 🩷</h2>
                 <p>setup your perfect ai companion</p>
               </div>
@@ -881,7 +889,7 @@ export default function NovaApp() {
                       { id: "situationship", icon: "🌙", name: "Situationship" }
                     ].map(r => (
                       <button key={r.id} className={`lang-pill ${relationship === r.id ? "active" : ""}`}
-                        style={{ padding: "8px 12px", borderRadius: "12px", border: "1px solid var(--border)", background: relationship === r.id ? "var(--bg-3)" : "transparent", color: "var(--text-1)", cursor: "pointer", fontSize: 13 }}
+                        style={{ padding: "8px 12px", borderRadius: "12px", border: relationship === r.id ? "1px solid #ff3d8b" : "1px solid var(--border)", background: relationship === r.id ? "rgba(255,61,139,0.1)" : "transparent", color: relationship === r.id ? "#ff3d8b" : "var(--text-1)", cursor: "pointer", fontSize: 13, transition: "0.2s" }}
                         onClick={() => setRelationship(r.id)}
                       >{r.icon} {r.name}</button>
                     ))}
@@ -890,7 +898,7 @@ export default function NovaApp() {
                       { id: "classmate", icon: "📚", name: "Classmate" },
                     ].map(r => (
                       <button key={r.id} className={`lang-pill ${relationship === r.id ? "active" : ""}`}
-                        style={{ padding: "8px 12px", borderRadius: "12px", border: "1px solid var(--border)", background: relationship === r.id ? "var(--bg-3)" : "transparent", color: "var(--text-1)", cursor: "pointer", fontSize: 13 }}
+                        style={{ padding: "8px 12px", borderRadius: "12px", border: relationship === r.id ? "1px solid #ff3d8b" : "1px solid var(--border)", background: relationship === r.id ? "rgba(255,61,139,0.1)" : "transparent", color: relationship === r.id ? "#ff3d8b" : "var(--text-1)", cursor: "pointer", fontSize: 13, transition: "0.2s" }}
                         onClick={() => setRelationship(r.id)}
                       >{r.icon} {r.name}</button>
                     ))}
@@ -903,12 +911,12 @@ export default function NovaApp() {
                   <div style={{ display: "flex", gap: 10 }}>
                     <button 
                       className={`lang-pill ${language === "english" ? "active" : ""}`} 
-                      style={{ flex: 1, padding: "10px", borderRadius: "12px", border: "1px solid var(--border)", background: language === "english" ? "var(--bg-3)" : "transparent", color: "var(--text-1)", cursor: "pointer" }}
+                      style={{ flex: 1, padding: "10px", borderRadius: "12px", border: language === "english" ? "1px solid #ff3d8b" : "1px solid var(--border)", background: language === "english" ? "rgba(255,61,139,0.1)" : "transparent", color: language === "english" ? "#ff3d8b" : "var(--text-1)", cursor: "pointer", transition: "0.2s" }}
                       onClick={() => setLanguage("english")}
                     >English 🇺🇸</button>
                     <button 
                       className={`lang-pill ${language === "hinglish" ? "active" : ""}`} 
-                      style={{ flex: 1, padding: "10px", borderRadius: "12px", border: "1px solid var(--border)", background: language === "hinglish" ? "var(--bg-3)" : "transparent", color: "var(--text-1)", cursor: "pointer" }}
+                      style={{ flex: 1, padding: "10px", borderRadius: "12px", border: language === "hinglish" ? "1px solid #ff3d8b" : "1px solid var(--border)", background: language === "hinglish" ? "rgba(255,61,139,0.1)" : "transparent", color: language === "hinglish" ? "#ff3d8b" : "var(--text-1)", cursor: "pointer", transition: "0.2s" }}
                       onClick={() => setLanguage("hinglish")}
                     >Hinglish 🇮🇳</button>
                   </div>
