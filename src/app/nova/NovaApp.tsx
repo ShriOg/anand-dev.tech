@@ -338,7 +338,7 @@ export default function NovaApp() {
               return;
             }
             
-            const chunkText = obj.choices?.[0]?.delta?.content || obj.text || "";
+            const chunkText = obj.text || obj.choices?.[0]?.delta?.content || "";
             if (chunkText) {
               fullText += chunkText;
               setStreamedText(fullText);
@@ -406,7 +406,7 @@ export default function NovaApp() {
             const obj = JSON.parse(data);
             if (obj.error) throw new Error(obj.error);
             
-            const chunkText = obj.choices?.[0]?.delta?.content || obj.text || "";
+            const chunkText = obj.text || obj.choices?.[0]?.delta?.content || "";
             if (chunkText) {
               fullText += chunkText;
               setStreamedText(fullText);

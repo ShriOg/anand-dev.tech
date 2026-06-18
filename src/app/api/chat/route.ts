@@ -73,8 +73,52 @@ export async function POST(req: Request) {
       throw new Error("No response body from Groq API");
     }
 
-    // Return the stream directly to the client
-    return new Response(response.body, {
+    // Transform the raw Groq SSE stream into a normalised { text } format
+    // so the frontend doesn't need to know about Groq's delta structure.
+    const { readable, writable } = new TransformStream();
+    const writer = writable.getWriter();
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
+
+    (async () => {
+      const reader = response.body!.getReader();
+      let buf = "";
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buf += decoder.decode(value, { stream: true });
+          const lines = buf.split("\n");
+          buf = lines.pop() ?? "";
+
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            const payload = line.slice(6).trim();
+            if (payload === "[DONE]") {
+              await writer.write(encoder.encode("data: [DONE]\n\n"));
+              return;
+            }
+            try {
+              const obj = JSON.parse(payload);
+              const text = obj.choices?.[0]?.delta?.content;
+              if (text) {
+                await writer.write(
+                  encoder.encode(`data: ${JSON.stringify({ text })}\n\n`)
+                );
+              }
+            } catch {
+              // malformed chunk — skip
+            }
+          }
+        }
+      } finally {
+        await writer.close();
+      }
+    })();
+
+    return new Response(readable, {
       headers: {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
