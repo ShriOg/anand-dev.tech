@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import "./nova.css";
+import PracticeMode from "./PracticeMode";
 
 declare global {
   interface Window {
@@ -45,6 +46,7 @@ export default function NovaApp() {
   const [messages, setMessages] = useState<any[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamedText, setStreamedText] = useState("");
+  const [practiceModeOpen, setPracticeModeOpen] = useState(false);
   
   // App UI state
   const [inputValue, setInputValue] = useState("");
@@ -278,7 +280,7 @@ export default function NovaApp() {
     
     setAuthLoading(true);
     try {
-      const res = await fetch(`/api/user/${authMode}`, {
+      const res = await fetch(`/api/auth/${authMode}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: u, password: authPassword })
@@ -683,6 +685,7 @@ export default function NovaApp() {
                 </div>
               </div>
               <div className="topbar-btns">
+                <button className="tbtn" style={{ fontSize: 13, padding: '4px 8px', border: '1px solid var(--border)', borderRadius: 12, marginRight: 8 }} onClick={() => setPracticeModeOpen(true)}>🎯 Practice</button>
                 <button className="tbtn" onClick={() => setSettingsOpen(true)}>⚙️</button>
               </div>
             </div>
@@ -774,6 +777,15 @@ export default function NovaApp() {
           <button ref={scrollFabRef} className="scroll-fab" onClick={() => scrollToBottom(true)}>↓</button>
         </div>
       </div>
+      
+      {practiceModeOpen && activePerson && (
+        <PracticeMode 
+          personId={activePerson.id} 
+          userId={userIdRef.current} 
+          activePerson={activePerson}
+          onClose={() => setPracticeModeOpen(false)} 
+        />
+      )}
     </>
   );
 }
