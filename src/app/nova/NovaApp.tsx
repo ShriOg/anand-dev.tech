@@ -1011,10 +1011,15 @@ export default function NovaApp() {
           </div>
           <div>
             <div className="sp-label">Language</div>
-            <div className="language-grid" style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
+            <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
               <button
                 className={`lang-pill ${language === "english" ? "active" : ""}`}
-                style={{ flex: 1, padding: "8px", borderRadius: "16px", border: "1px solid var(--border)", background: language === "english" ? "var(--bg-3)" : "transparent", color: "var(--text-1)", cursor: "pointer", transition: "0.2s" }}
+                style={{
+                  flex: 1, padding: "12px 8px", borderRadius: "14px",
+                  border: language === "english" ? "1.5px solid var(--nova)" : "1.5px solid var(--border)",
+                  background: "transparent", color: language === "english" ? "var(--nova)" : "var(--text-2)",
+                  cursor: "pointer", fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 600,
+                }}
                 onClick={() => {
                   setLanguage("english");
                   localStorage.setItem("nova_language", "english");
@@ -1022,11 +1027,16 @@ export default function NovaApp() {
                   showToast("language set to english 🇺🇸");
                 }}
               >
-                English
+                🇺🇸 English
               </button>
               <button
                 className={`lang-pill ${language === "hinglish" ? "active" : ""}`}
-                style={{ flex: 1, padding: "8px", borderRadius: "16px", border: "1px solid var(--border)", background: language === "hinglish" ? "var(--bg-3)" : "transparent", color: "var(--text-1)", cursor: "pointer", transition: "0.2s" }}
+                style={{
+                  flex: 1, padding: "12px 8px", borderRadius: "14px",
+                  border: language === "hinglish" ? "1.5px solid var(--nova)" : "1.5px solid var(--border)",
+                  background: "transparent", color: language === "hinglish" ? "var(--nova)" : "var(--text-2)",
+                  cursor: "pointer", fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 600,
+                }}
                 onClick={() => {
                   setLanguage("hinglish");
                   localStorage.setItem("nova_language", "hinglish");
@@ -1034,7 +1044,7 @@ export default function NovaApp() {
                   showToast("language set to hinglish 🇮🇳");
                 }}
               >
-                Hinglish
+                🇮🇳 Hinglish
               </button>
             </div>
           </div>
@@ -1176,6 +1186,7 @@ export default function NovaApp() {
             </div>
             <div className="topbar-btns">
               <div className="model-pill"><span className="mp-dot"></span><span>llama-3.3-70b</span></div>
+              <div className="lang-badge" title="Change language" onClick={() => setSettingsOpen(true)}>{language === "hinglish" ? "🇮🇳" : "🇺🇸"}</div>
               <button className="tbtn" onClick={handleNewChat}>✦<span className="tip">New chat</span></button>
               <button className="tbtn" onClick={() => setSettingsOpen(true)}>⚙️<span className="tip">Settings</span></button>
             </div>

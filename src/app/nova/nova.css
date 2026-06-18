@@ -281,6 +281,14 @@ body.light .online-dot{border-color:var(--bg)}
   font-size:12px;font-weight:500;color:var(--text-2);
 }
 .mp-dot{width:7px;height:7px;border-radius:50%;background:var(--nova);animation:pulse 2.5s ease-in-out infinite}
+.lang-badge{
+  display:flex;align-items:center;justify-content:center;
+  width:34px;height:34px;border-radius:10px;
+  background:var(--surface);border:1px solid var(--border);
+  font-size:17px;cursor:pointer;flex-shrink:0;
+  transition:transform .15s,border-color .2s;
+}
+.lang-badge:hover{transform:scale(1.07);border-color:var(--border-h)}
 
 /* Chat area */
 .chat-area{
@@ -459,9 +467,15 @@ body.light .sp-head{background:rgba(250,245,255,.97)}
 
 /* Persona cards */
 .persona-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.persona-card{padding:14px;border-radius:var(--rs);background:var(--surface);border:2px solid var(--border);cursor:pointer;text-align:left;transition:background .2s,border-color .2s,transform .15s}
+.persona-card{padding:14px;border-radius:var(--rs);background:var(--surface);border:2px solid var(--border);cursor:pointer;text-align:left;transition:background .2s,border-color .2s,transform .15s,box-shadow .2s;position:relative;overflow:hidden}
 .persona-card:hover{background:var(--surface-h);transform:translateY(-1px)}
-.persona-card.active{border-color:var(--nova);background:rgba(255,110,180,.07)}
+.persona-card.active{
+  border-color:var(--nova);
+  background:rgba(255,61,139,.07);
+  outline:2px solid rgba(255,61,139,.4);
+  outline-offset:1px;
+  box-shadow:0 0 0 4px rgba(255,61,139,.08),inset 0 0 20px rgba(255,61,139,.04);
+}
 .pc-icon{font-size:22px;margin-bottom:6px;display:block}
 .pc-name{font-size:13px;font-weight:700;color:var(--text);display:block;margin-bottom:3px}
 .pc-desc{font-size:11.5px;color:var(--text-2);line-height:1.4;display:block}
@@ -483,12 +497,58 @@ body.light .sp-head{background:rgba(250,245,255,.97)}
 .toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(60px);background:rgba(20,10,40,.95);border:1px solid var(--border);backdrop-filter:blur(16px);color:var(--text);padding:10px 20px;border-radius:12px;font-size:13px;font-weight:500;z-index:999;transition:transform .3s cubic-bezier(.22,1,.36,1);pointer-events:none;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0)}
 
+/* ── Language pill active outline ───────────────────── */
+.lang-pill{
+  font-family:'Inter',sans-serif;
+  transition:background .2s,border-color .2s,box-shadow .2s,color .2s,transform .15s;
+}
+.lang-pill.active{
+  border-color:var(--nova) !important;
+  background:rgba(255,61,139,.1) !important;
+  color:var(--nova) !important;
+  outline:2px solid rgba(255,61,139,.35);
+  outline-offset:1px;
+  box-shadow:0 0 0 4px rgba(255,61,139,.08);
+}
+
+/* ── Mobile — 640px ─────────────────────────────────── */
 @media(max-width:640px){
-  .app{max-width:100%}.starters{grid-template-columns:1fr}.settings-panel{width:100%}
-  .input-hints{display:none}.msg-inner,.typing-inner{padding:0 12px}
-  .input-zone{padding:8px 12px 16px}.topbar{padding:10px 14px}
-  .ob-card{padding:24px 16px 20px; max-width: 100%; border-radius: 20px;}
-  .onboarding{padding: 12px;}
+  .app{max-width:100%}
+  .starters{grid-template-columns:1fr 1fr}
+  .settings-panel{width:100%;right:0;left:0}
+  .input-hints{display:none}
+  .msg-inner,.typing-inner{padding:0 10px}
+  .msg-bubble{max-width:88%;font-size:14px;padding:11px 14px}
+  .input-zone{padding:8px 10px 20px}
+  .topbar{padding:10px 12px;gap:8px}
+  .topbar-btns{gap:4px}
+  .tbtn{width:34px;height:34px;font-size:15px}
+  .nova-av{width:36px;height:36px;font-size:15px}
+  .nova-name{font-size:14px}
+  .nova-status{font-size:10px}
+  .ob-card{padding:24px 16px 20px;max-width:100%;border-radius:20px}
+  .onboarding{padding:12px}
+  .send-btn{width:40px;height:40px;border-radius:12px}
+  .sidebar-toggle{width:40px;height:40px;font-size:17px}
+  .persona-card{padding:12px}
+  .sp-body{padding:16px 16px;gap:20px}
+  .sp-head{padding:16px 18px}
+  .settings-panel .sp-head{padding:16px 18px}
+  .scroll-fab{bottom:120px;right:14px;width:36px;height:36px}
+  .welcome{padding:24px 16px}
+  .welcome-title{font-size:22px}
+  .welcome-orb{width:72px;height:72px}
+  .starters{max-width:100%}
+  .model-pill{display:none}
+  .lang-badge{width:32px;height:32px;font-size:16px}
+}
+
+/* ── Mobile — 480px ─────────────────────────────────── */
+@media(max-width:480px){
+  .auth-card{padding:32px 20px 28px}
+  .starters{grid-template-columns:1fr}
+  .starter{padding:12px 14px}
+  .topbar{padding:10px 10px;gap:6px}
 }
 
 /* ── Auth Gate ─────────────────────────────────────────── */
