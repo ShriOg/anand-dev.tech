@@ -108,8 +108,8 @@ export interface IUser extends Document {
 const userSchema = new Schema<IUser>({
   username: { type: String, required: true, unique: true, lowercase: true, trim: true, minlength: 3, maxlength: 30 },
   passwordHash: { type: String, required: true },
-  // sparse: true allows multiple docs with no email (null/undefined) while still enforcing uniqueness among those that do have one
-  email: { type: String, sparse: true, unique: true, lowercase: true, trim: true },
+  // email is optional and not currently used for registration
+  email: { type: String, lowercase: true, trim: true },
   name: { type: String, trim: true },
   gender: { type: String, enum: ['male', 'female'] },
   onboardingCompleted: { type: Boolean, default: false },
