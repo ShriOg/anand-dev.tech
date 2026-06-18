@@ -185,11 +185,12 @@ export default function NovaApp() {
     if (savedName) {
       setCompanionName(savedName);
       if (savedImage) setCompanionImage(savedImage);
-      bootIntoApp(savedPersona || "nova");
+      bootIntoApp(savedPersona || "nova", savedName); // pass name directly to avoid stale state
     } else {
       setOnboardingMode("new");
     }
   };
+
 
   // API Helpers
   const getHeaders = () => ({
@@ -245,7 +246,68 @@ export default function NovaApp() {
     } catch {}
   };
 
-  const bootIntoApp = async (persona: string) => {
+  // Stream an opening greeting from the companion for a fresh/empty chat.
+  // compName is passed explicitly to avoid stale React state closures.
+  const autoGreet = async (chatId: string, persona: string, compName: string) => {
+    setIsStreaming(true);
+    setFirstMsg(false);
+    setStreamedText("");
+    let fullText = "";
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [{ role: "user", content: "hey!" }],
+          personality: persona,
+          companionName: compName || "Nova",
+        }),
+      });
+      if (!res.body) return;
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        const lines = buf.split("\n");
+        buf = lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const payload = line.slice(6).trim();
+          if (payload === "[DONE]") break;
+          try {
+            const obj = JSON.parse(payload);
+            const chunk = obj.text || obj.choices?.[0]?.delta?.content || "";
+            if (chunk) {
+              fullText += chunk;
+              setStreamedText(fullText);
+              scrollToBottom(true);
+            }
+          } catch {}
+        }
+      }
+    } catch {}
+    setStreamedText("");
+    if (fullText) {
+      const greetMsg = [{ role: "assistant", content: fullText }];
+      setMessages(greetMsg);
+      // Save greeting without triggering auto-title (only 1 msg, not 2)
+      try {
+        await fetch(`/api/chats/${chatId}/messages`, {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify({ messages: greetMsg }),
+        });
+      } catch {}
+    }
+    setIsStreaming(false);
+    scrollToBottom(true);
+  };
+
+  const bootIntoApp = async (persona: string, compName?: string) => {
+    const name = compName || companionName || localStorage.getItem("companion-name") || "Nova";
     const chats = await loadChats();
     setAllChats(chats);
     if (!chats.length) {
@@ -254,15 +316,21 @@ export default function NovaApp() {
         setAllChats([chat]);
         setCurrentChatId(chat.id);
         setMessages([]);
-        setFirstMsg(true);
+        setFirstMsg(false);
+        autoGreet(chat.id, persona, name);
       }
     } else {
       const chat = chats[0];
       setCurrentChatId(chat.id);
       const msgs = await loadChatMessages(chat.id);
       setMessages(msgs);
-      setFirstMsg(msgs.length === 0);
-      scrollToBottom();
+      if (msgs.length === 0) {
+        setFirstMsg(false);
+        autoGreet(chat.id, persona, name);
+      } else {
+        setFirstMsg(false);
+        scrollToBottom();
+      }
     }
   };
 
@@ -272,9 +340,14 @@ export default function NovaApp() {
     setCurrentChatId(chatId);
     const msgs = await loadChatMessages(chatId);
     setMessages(msgs);
-    setFirstMsg(msgs.length === 0);
     setSidebarOpen(false);
-    scrollToBottom();
+    if (msgs.length === 0) {
+      setFirstMsg(false);
+      autoGreet(chatId, currentPersona, companionName || "Nova");
+    } else {
+      setFirstMsg(false);
+      scrollToBottom();
+    }
   };
 
   const handleNewChat = async () => {
@@ -284,9 +357,9 @@ export default function NovaApp() {
     setAllChats([chat, ...allChats]);
     setCurrentChatId(chat.id);
     setMessages([]);
-    setFirstMsg(true);
+    setFirstMsg(false);
     setSidebarOpen(false);
-    showToast("fresh start ✨");
+    autoGreet(chat.id, currentPersona, companionName || "Nova");
   };
 
   const handleDeleteChat = async (chatId: string) => {
