@@ -1,4 +1,8 @@
 import mongoose, { Schema, Document } from "mongoose";
+import dns from "dns";
+
+// Temporary fix for Node.js DNS resolution issues on Windows for SRV records
+dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 // --- Connection Utility ---
 let isConnected = false;
