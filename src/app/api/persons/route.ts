@@ -1,3 +1,5 @@
+import { verifyToken } from "@/lib/auth";
+import { cookies } from "next/headers";
 import { ensureDb, Person } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { nanoid } from "nanoid";
@@ -5,7 +7,10 @@ import { nanoid } from "nanoid";
 export async function GET(req: Request) {
   await ensureDb();
   try {
-    const userId = req.headers.get("x-user-id");
+    const cookieStore = await cookies();
+    const token = cookieStore.get("nova_session")?.value;
+    const userId = token ? verifyToken(token) : null;
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!userId) return NextResponse.json({ persons: [] });
     const persons = await Person.find({ userId }).sort({ createdAt: 1 }).lean();
     return NextResponse.json({
@@ -24,7 +29,10 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   await ensureDb();
   try {
-    const userId = req.headers.get("x-user-id");
+    const cookieStore = await cookies();
+    const token = cookieStore.get("nova_session")?.value;
+    const userId = token ? verifyToken(token) : null;
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const {

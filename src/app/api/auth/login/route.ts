@@ -1,6 +1,8 @@
 import { ensureDb, User } from "@/lib/db";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { signToken } from "@/lib/auth";
+import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
   try {
@@ -31,7 +33,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid username or password" }, { status: 401 });
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       userId: user._id.toString(),
       username: user.username,
       name: user.name ?? null,
@@ -44,6 +46,16 @@ export async function POST(req: Request) {
       language: user.language ?? "english",
       relationship: user.relationship ?? "girlfriend",
     });
+    
+    const cookieStore = await cookies();
+    cookieStore.set("nova_session", signToken(user._id.toString()), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 30
+    });
+    
+    return response;
   } catch (err: any) {
     console.error("Login error:", err);
     return NextResponse.json({ error: "Login failed. Please try again." }, { status: 500 });

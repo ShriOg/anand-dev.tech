@@ -1,3 +1,5 @@
+import { verifyToken } from "@/lib/auth";
+import { cookies } from "next/headers";
 import { ensureDb, Message, Chat } from "@/lib/db";
 import { NextResponse } from "next/server";
 
@@ -11,7 +13,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   }
 
   try {
-    const userId = req.headers.get("x-user-id");
+    const cookieStore = await cookies();
+    const token = cookieStore.get("nova_session")?.value;
+    const userId = token ? verifyToken(token) : null;
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!userId) return NextResponse.json({ messages: [] });
 
     const chat = await Chat.findOne({ _id: id, userId });
@@ -42,7 +47,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   }
 
   try {
-    const userId = req.headers.get("x-user-id");
+    const cookieStore = await cookies();
+    const token = cookieStore.get("nova_session")?.value;
+    const userId = token ? verifyToken(token) : null;
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!userId) return NextResponse.json({ error: "Missing x-user-id header" }, { status: 400 });
 
     const chat = await Chat.findOne({ _id: id, userId });

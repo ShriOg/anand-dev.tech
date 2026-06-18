@@ -1,3 +1,5 @@
+import { verifyToken } from "@/lib/auth";
+import { cookies } from "next/headers";
 import { ensureDb, Person } from "@/lib/db";
 import { NextResponse } from "next/server";
 
@@ -11,6 +13,11 @@ const RELATIONSHIP_MODIFIERS: Record<string, string> = {
 
 export async function POST(req: Request) {
   await ensureDb();
+
+  const cookieStore = await cookies();
+    const token = cookieStore.get("nova_session")?.value;
+    const userId = token ? verifyToken(token) : null;
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
     const {

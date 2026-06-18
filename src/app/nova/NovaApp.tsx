@@ -104,13 +104,20 @@ export default function NovaApp() {
   }, []);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem("nova_user");
-    const savedUserId = localStorage.getItem("nova_userId");
-    if (savedUser && savedUserId) {
-      setLoggedInUser(savedUser);
-      userIdRef.current = savedUserId;
-      initAfterAuth();
-    }
+    const checkSession = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const data = await res.json();
+          setLoggedInUser(data.username);
+          userIdRef.current = data.userId;
+          initAfterAuth();
+        }
+      } catch (e) {
+        // Not logged in
+      }
+    };
+    checkSession();
   }, []);
 
   useEffect(() => {
@@ -128,9 +135,9 @@ export default function NovaApp() {
 
     try {
       const [personsRes, chatsRes, settingsRes] = await Promise.all([
-        fetch("/api/persons", { headers: { "x-user-id": userIdRef.current } }),
-        fetch("/api/chats", { headers: { "x-user-id": userIdRef.current } }),
-        fetch("/api/user/settings", { headers: { "x-user-id": userIdRef.current } })
+        fetch("/api/persons", { headers: { } }),
+        fetch("/api/chats", { headers: { } }),
+        fetch("/api/user/settings", { headers: { } })
       ]);
 
       const personsData = await personsRes.json();
@@ -174,7 +181,7 @@ export default function NovaApp() {
       try {
         const res = await fetch("/api/chats", {
           method: "POST",
-          headers: { "Content-Type": "application/json", "x-user-id": userIdRef.current },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ personId })
         });
         const data = await res.json();
@@ -192,7 +199,7 @@ export default function NovaApp() {
       setCurrentChatId(chatId);
       try {
         const res = await fetch(`/api/chats/${chatId}/messages`, {
-          headers: { "x-user-id": userIdRef.current }
+          headers: { }
         });
         const data = await res.json();
         if (data.messages) {
@@ -220,7 +227,7 @@ export default function NovaApp() {
     try {
       const res = await fetch("/api/persons", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-user-id": userIdRef.current },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: cpName, emoji: cpEmoji, gender: cpGender,
           personality: cpPersonality, relationship: cpRelationship, language: cpLanguage
@@ -249,8 +256,7 @@ export default function NovaApp() {
     
     try {
       const res = await fetch(`/api/persons/${activePersonId}`, {
-        method: "DELETE",
-        headers: { "x-user-id": userIdRef.current }
+        method: "DELETE"
       });
       if (res.ok) {
         const newPersons = persons.filter(p => p.id !== activePersonId);
@@ -291,11 +297,15 @@ export default function NovaApp() {
         else if (data.error?.toLowerCase().includes("password")) setAuthPasswordError(data.error);
         else setAuthError(data.error || "Authentication failed");
       } else {
-        localStorage.setItem("nova_user", data.user.username);
-        localStorage.setItem("nova_userId", data.user.id);
-        setLoggedInUser(data.user.username);
-        userIdRef.current = data.user.id;
-        initAfterAuth();
+        const meRes = await fetch("/api/auth/me");
+        if (meRes.ok) {
+          const meData = await meRes.json();
+          setLoggedInUser(meData.username);
+          userIdRef.current = meData.userId;
+          initAfterAuth();
+        } else {
+          setAuthError("Failed to verify session. Please try again.");
+        }
       }
     } catch (e) {
       setAuthError("Network error. Please try again.");
@@ -303,9 +313,8 @@ export default function NovaApp() {
     setAuthLoading(false);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("nova_user");
-    localStorage.removeItem("nova_userId");
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
     setLoggedInUser(null);
     userIdRef.current = "";
     setPersons([]);
@@ -369,14 +378,14 @@ export default function NovaApp() {
       // 1. Save user msg
       await fetch(`/api/chats/${currentChatId}/messages`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-user-id": userIdRef.current },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role: "user", content: userText })
       });
 
       // 2. Stream AI response
       const res = await fetch("/api/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-user-id": userIdRef.current },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: [...messages, newMsg].map(m => ({ role: m.role, content: m.content })),
           personId: activePersonId,
@@ -415,7 +424,7 @@ export default function NovaApp() {
       // 3. Save assistant msg
       await fetch(`/api/chats/${currentChatId}/messages`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-user-id": userIdRef.current },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ role: "assistant", content: fullResponse })
       });
 

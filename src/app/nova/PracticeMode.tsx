@@ -59,7 +59,7 @@ export default function PracticeMode({ personId, userId, activePerson, onClose }
     try {
       const res = await fetch("/api/practice/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-user-id": userId },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           messages: [...messages, newMsg],
           scenario,
@@ -113,7 +113,7 @@ export default function PracticeMode({ personId, userId, activePerson, onClose }
     try {
       const res = await fetch("/api/practice/analyze", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-user-id": userId },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages, scenario, personId })
       });
       const data = await res.json();
@@ -131,7 +131,7 @@ export default function PracticeMode({ personId, userId, activePerson, onClose }
     try {
       const res = await fetch("/api/practice/improve", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-user-id": userId },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages, analysis, personId })
       });
       const data = await res.json();

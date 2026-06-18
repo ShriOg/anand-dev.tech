@@ -1,3 +1,5 @@
+import { verifyToken } from "@/lib/auth";
+import { cookies } from "next/headers";
 import { ensureDb, Chat, Message } from "@/lib/db";
 import { NextResponse } from "next/server";
 
@@ -7,7 +9,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const { id } = await params;
   
   try {
-    const userId = req.headers.get("x-user-id");
+    const cookieStore = await cookies();
+    const token = cookieStore.get("nova_session")?.value;
+    const userId = token ? verifyToken(token) : null;
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const body = await req.json();
     
     if (!id || !userId) {
@@ -41,7 +46,10 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   const { id } = await params;
 
   try {
-    const userId = req.headers.get("x-user-id");
+    const cookieStore = await cookies();
+    const token = cookieStore.get("nova_session")?.value;
+    const userId = token ? verifyToken(token) : null;
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!id || !userId) {
       return NextResponse.json({ error: "bad request" }, { status: 400 });
     }

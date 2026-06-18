@@ -1,3 +1,5 @@
+import { verifyToken } from "@/lib/auth";
+import { cookies } from "next/headers";
 import { ensureDb, Person, Chat, Message } from "@/lib/db";
 import { NextResponse } from "next/server";
 
@@ -7,7 +9,10 @@ export async function DELETE(
 ) {
   await ensureDb();
   try {
-    const userId = req.headers.get("x-user-id");
+    const cookieStore = await cookies();
+    const token = cookieStore.get("nova_session")?.value;
+    const userId = token ? verifyToken(token) : null;
+    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { id } = await params;

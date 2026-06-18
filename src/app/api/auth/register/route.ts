@@ -1,6 +1,8 @@
 import { ensureDb, User } from "@/lib/db";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { signToken } from "@/lib/auth";
+import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
   try {
@@ -40,13 +42,23 @@ export async function POST(req: Request) {
       passwordHash,
     });
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       userId: user._id.toString(),
       username: user.username,
       name: user.name ?? null,
       gender: user.gender ?? null,
       onboardingCompleted: user.onboardingCompleted ?? false,
     }, { status: 201 });
+    
+    const cookieStore = await cookies();
+    cookieStore.set("nova_session", signToken(user._id.toString()), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 30
+    });
+    
+    return response;
   } catch (err: any) {
     // Mongoose duplicate key error
     if (err.code === 11000) {
