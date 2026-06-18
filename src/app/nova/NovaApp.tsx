@@ -150,13 +150,27 @@ export default function NovaApp() {
       });
       const data = await res.json();
       if (!res.ok) { setAuthError(data.error || "Something went wrong"); return; }
+
+      // Persist auth
       localStorage.setItem("nova_user_id", data.userId);
       localStorage.setItem("nova_username", data.username);
+
+      // Persist user profile
       if (data.onboardingCompleted) {
         localStorage.setItem("nova_onboarding", "true");
         localStorage.setItem("nova_user_name", data.name || "");
         localStorage.setItem("nova_user_gender", data.gender || "");
       }
+
+      // Persist companion settings returned from server (login only; register returns defaults)
+      if (data.companionName) {
+        localStorage.setItem("companion-name", data.companionName);
+        localStorage.setItem("companion-image", data.companionPhoto || "");
+        localStorage.setItem("persona", data.personality || "nova");
+        localStorage.setItem("nova_language", data.language || "english");
+        localStorage.setItem("nova_relationship", data.relationship || "girlfriend");
+      }
+
       userIdRef.current = data.userId;
       setLoggedInUser(data.username);
       initAfterAuth();
@@ -642,8 +656,26 @@ export default function NovaApp() {
     if (!name) return;
     setCompanionName(name);
     setCompanionImage(pendingImage);
+
+    // Update localStorage cache
     localStorage.setItem("companion-name", name);
     localStorage.setItem("companion-image", pendingImage);
+    localStorage.setItem("persona", currentPersona);
+    localStorage.setItem("nova_language", language);
+    localStorage.setItem("nova_relationship", relationship);
+
+    // Persist to DB so settings restore on any device/login
+    fetch("/api/user/settings", {
+      method: "PUT",
+      headers: getHeaders(),
+      body: JSON.stringify({
+        companionName: name,
+        companionPhoto: pendingImage,
+        personality: currentPersona,
+        language,
+        relationship,
+      }),
+    }).catch(() => {}); // fire-and-forget, localStorage is the fallback
 
     if (onboardingMode === "companion") {
       bootIntoApp(currentPersona, name, language, relationship);
@@ -967,6 +999,7 @@ export default function NovaApp() {
                   onClick={() => {
                     setCurrentPersona(key);
                     localStorage.setItem("persona", key);
+                    fetch("/api/user/settings", { method: "PUT", headers: getHeaders(), body: JSON.stringify({ personality: key }) }).catch(() => {});
                     showToast(`switched to ${key} mode ✨`);
                   }}
                 >
@@ -985,6 +1018,7 @@ export default function NovaApp() {
                 onClick={() => {
                   setLanguage("english");
                   localStorage.setItem("nova_language", "english");
+                  fetch("/api/user/settings", { method: "PUT", headers: getHeaders(), body: JSON.stringify({ language: "english" }) }).catch(() => {});
                   showToast("language set to english 🇺🇸");
                 }}
               >
@@ -996,6 +1030,7 @@ export default function NovaApp() {
                 onClick={() => {
                   setLanguage("hinglish");
                   localStorage.setItem("nova_language", "hinglish");
+                  fetch("/api/user/settings", { method: "PUT", headers: getHeaders(), body: JSON.stringify({ language: "hinglish" }) }).catch(() => {});
                   showToast("language set to hinglish 🇮🇳");
                 }}
               >
@@ -1019,6 +1054,7 @@ export default function NovaApp() {
                   onClick={() => {
                     setRelationship(r.id);
                     localStorage.setItem("nova_relationship", r.id);
+                    fetch("/api/user/settings", { method: "PUT", headers: getHeaders(), body: JSON.stringify({ relationship: r.id }) }).catch(() => {});
                     showToast(`vibe set to ${r.name} ✨`);
                   }}
                 >

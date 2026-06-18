@@ -96,6 +96,12 @@ export interface IUser extends Document {
   name?: string;
   gender?: 'male' | 'female';
   onboardingCompleted?: boolean;
+  // Companion settings — persisted so they restore on any device
+  companionName?: string;
+  companionPhoto?: string;
+  personality?: string;
+  language?: string;
+  relationship?: string;
   createdAt: Date;
 }
 
@@ -107,6 +113,12 @@ const userSchema = new Schema<IUser>({
   name: { type: String, trim: true },
   gender: { type: String, enum: ['male', 'female'] },
   onboardingCompleted: { type: Boolean, default: false },
+  // Companion settings
+  companionName: { type: String, trim: true },
+  companionPhoto: { type: String },
+  personality: { type: String, default: 'nova' },
+  language: { type: String, default: 'english' },
+  relationship: { type: String, default: 'girlfriend' },
 }, { timestamps: { createdAt: true, updatedAt: false } });
 
 // --- Models ---

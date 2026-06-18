@@ -37,6 +37,12 @@ export async function POST(req: Request) {
       name: user.name ?? null,
       gender: user.gender ?? null,
       onboardingCompleted: user.onboardingCompleted ?? false,
+      // Companion settings
+      companionName: user.companionName ?? null,
+      companionPhoto: user.companionPhoto ?? null,
+      personality: user.personality ?? "nova",
+      language: user.language ?? "english",
+      relationship: user.relationship ?? "girlfriend",
     });
   } catch (err: any) {
     console.error("Login error:", err);
