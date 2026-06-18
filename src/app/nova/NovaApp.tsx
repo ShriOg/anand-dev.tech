@@ -12,7 +12,7 @@ declare global {
 }
 
 const PERSONAS: Record<string, { status: string; name: string; desc: string; icon: string }> = {
-  nova: { status: "online · thinking about you 💕", name: "Girlfriend", desc: "warm, playful, your person", icon: "🩷" },
+  nova: { status: "online · thinking about you 💕", name: "Friend", desc: "warm, playful, your person", icon: "🩷" },
   scholar: { status: "online · ready to study with you 📚", name: "Scholar", desc: "patient study buddy 🤓", icon: "📚" },
   sage: { status: "online · here to guide you 🌿", name: "Sage", desc: "calm & wise, listens deeply", icon: "🌿" },
   spark: { status: "online · buzzing with ideas ⚡", name: "Spark", desc: "chaotic creative energy ✨", icon: "⚡" }
