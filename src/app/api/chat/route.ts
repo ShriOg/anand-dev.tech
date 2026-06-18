@@ -109,36 +109,37 @@ Language: ${language}
 
     const systemPrompt = `${contextInjection}\n\n${basePrompt}\n\n${relMod}\n\n${langInst}`;
 
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const response = await fetch("https://integrate.api.nvidia.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+        "Authorization": `Bearer ${process.env.NVIDIA_API_KEY}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model: "meta/llama-3.3-70b-instruct",
         messages: [
           { role: "system", content: systemPrompt },
           ...messages.slice(-20)
         ],
         stream: true,
-        temperature: 0.85,
+        temperature: 0.2,
+        top_p: 0.7,
         max_tokens: 1024
       })
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Groq API error text:", errorText);
-      throw new Error(`Groq API error: ${response.statusText} - ${errorText}`);
+      console.error("Nvidia API error text:", errorText);
+      throw new Error(`Nvidia API error: ${response.statusText} - ${errorText}`);
     }
 
     if (!response.body) {
-      throw new Error("No response body from Groq API");
+      throw new Error("No response body from Nvidia API");
     }
 
-    // Transform the raw Groq SSE stream into a normalised { text } format
-    // so the frontend doesn't need to know about Groq's delta structure.
+    // Transform the raw Nvidia SSE stream into a normalised { text } format
+    // so the frontend doesn't need to know about delta structure.
     const { readable, writable } = new TransformStream();
     const writer = writable.getWriter();
     const encoder = new TextEncoder();
