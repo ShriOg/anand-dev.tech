@@ -21,6 +21,7 @@ export interface IPerson extends Document {
   id: string; // nanoid
   name: string;
   emoji: string;
+  avatar?: string;
   gender: 'she' | 'he' | 'they';
   personality: 'nova' | 'scholar' | 'sage' | 'spark';
   relationship: 'girlfriend' | 'bestfriend' | 'classmate' | 'crush' | 'situationship';
@@ -33,6 +34,7 @@ const personSchema = new Schema<IPerson>({
   id: { type: String, required: true, unique: true },
   name: { type: String, required: true, maxlength: 20 },
   emoji: { type: String, required: true },
+  avatar: { type: String, default: null },
   gender: { type: String, required: true, enum: ['she', 'he', 'they'] },
   personality: { type: String, required: true, enum: ['nova', 'scholar', 'sage', 'spark'] },
   relationship: { type: String, required: true, enum: ['girlfriend', 'bestfriend', 'classmate', 'crush', 'situationship'] },

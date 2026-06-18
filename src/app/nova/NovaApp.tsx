@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./nova.css";
 import PracticeMode from "./PracticeMode";
+import { Avatar } from "./Avatar";
+import { compressImage } from "./utils";
 
 declare global {
   interface Window {
@@ -15,6 +17,7 @@ interface Person {
   id: string;
   name: string;
   emoji: string;
+  avatar?: string;
   gender: 'she' | 'he' | 'they';
   personality: 'nova' | 'scholar' | 'sage' | 'spark';
   relationship: 'girlfriend' | 'bestfriend' | 'classmate' | 'crush' | 'situationship';
@@ -59,6 +62,7 @@ export default function NovaApp() {
   // Create Person Modal
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [cpEmoji, setCpEmoji] = useState("👩");
+  const [cpAvatar, setCpAvatar] = useState<string | null>(null);
   const [cpName, setCpName] = useState("");
   const [cpGender, setCpGender] = useState<"she" | "he" | "they">("she");
   const [cpPersonality, setCpPersonality] = useState<"nova" | "scholar" | "sage" | "spark">("nova");
@@ -66,9 +70,10 @@ export default function NovaApp() {
   const [cpLanguage, setCpLanguage] = useState<"english" | "hinglish">("english");
   const [cpCreating, setCpCreating] = useState(false);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const settingsFileInputRef = useRef<HTMLInputElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const scrollFabRef = useRef<HTMLButtonElement>(null);
   const userIdRef = useRef<string>("");
 
   useEffect(() => {
@@ -221,6 +226,37 @@ export default function NovaApp() {
     loadChatForPerson(personId, chatMap);
   };
 
+  const handleCpAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      try {
+        const base64 = await compressImage(e.target.files[0]);
+        setCpAvatar(base64);
+      } catch (error) {
+        alert("Failed to compress image");
+      }
+    }
+  };
+
+  const handleSettingsAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0] && activePersonId) {
+      try {
+        const base64 = await compressImage(e.target.files[0]);
+        const res = await fetch(`/api/persons/${activePersonId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ avatarBase64: base64 })
+        });
+        const data = await res.json();
+        if (data.person) {
+          setPersons(prev => prev.map(p => p.id === activePersonId ? { ...p, avatar: base64 } : p));
+          showToast("Avatar updated");
+        }
+      } catch (error) {
+        alert("Failed to upload avatar");
+      }
+    }
+  };
+
   const createPerson = async () => {
     if (!cpName.trim() || cpCreating) return;
     setCpCreating(true);
@@ -229,8 +265,13 @@ export default function NovaApp() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: cpName, emoji: cpEmoji, gender: cpGender,
-          personality: cpPersonality, relationship: cpRelationship, language: cpLanguage
+          name: cpName, 
+          emoji: cpEmoji, 
+          gender: cpGender,
+          personality: cpPersonality, 
+          relationship: cpRelationship, 
+          language: cpLanguage,
+          avatarBase64: cpAvatar
         })
       });
       const data = await res.json();
@@ -240,6 +281,7 @@ export default function NovaApp() {
         setCreateModalOpen(false);
         setCpName("");
         setCpEmoji("👩");
+        setCpAvatar(null);
         showToast("Person created!");
       } else {
         alert(data.error || "Failed to create person");
@@ -344,20 +386,6 @@ export default function NovaApp() {
     if (messages.length > 0 || streamedText) scrollToBottom(true);
   }, [messages, streamedText]);
 
-  // Handle scroll fab visibility
-  useEffect(() => {
-    const el = chatContainerRef.current;
-    if (!el) return;
-    const handleScroll = () => {
-      if (!scrollFabRef.current) return;
-      const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
-      if (distFromBottom > 150) scrollFabRef.current.classList.add("show");
-      else scrollFabRef.current.classList.remove("show");
-    };
-    el.addEventListener("scroll", handleScroll);
-    return () => el.removeEventListener("scroll", handleScroll);
-  }, []);
-
   const handleSend = async () => {
     if ((!inputValue.trim() && !streamedText) || isStreaming || !currentChatId || !activePersonId) return;
     
@@ -452,57 +480,51 @@ export default function NovaApp() {
 
   return (
     <>
-      <div className="aurora">
-        <div className="aurora-blob ab1"></div>
-        <div className="aurora-blob ab2"></div>
-        <div className="aurora-blob ab3"></div>
-      </div>
-
       <div className={`toast ${toastShow ? "show" : ""}`}>{toastMsg}</div>
 
       {/* Auth Gate */}
       {!loggedInUser && (
         <div className="auth-gate">
           <div className="auth-card">
-            <div className="auth-logo">🩷</div>
-            <div className="auth-title">Nova</div>
-            <div className="auth-sub">your ai companion</div>
+            <div className="auth-logo" style={{ fontSize: 36, marginBottom: 16 }}>🩷</div>
+            <div className="auth-title" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 32, fontWeight: 800, background: 'var(--gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: 8 }}>Nova</div>
+            <div className="auth-sub" style={{ fontSize: 14, color: 'var(--text-2)', marginBottom: 32 }}>your premium ai companion</div>
             
-            <div className="auth-tabs">
-              <button className={`auth-tab ${authMode === "login" ? "active" : ""}`} onClick={() => { setAuthMode("login"); setAuthError(""); setAuthUsernameError(""); setAuthPasswordError(""); }}>Log In</button>
-              <button className={`auth-tab ${authMode === "register" ? "active" : ""}`} onClick={() => { setAuthMode("register"); setAuthError(""); setAuthUsernameError(""); setAuthPasswordError(""); }}>Register</button>
+            <div className="auth-tabs" style={{ display: 'flex', width: '100%', background: 'var(--surface-2)', padding: 4, borderRadius: 12, marginBottom: 24 }}>
+              <button className={`auth-tab ${authMode === "login" ? "active" : ""}`} onClick={() => { setAuthMode("login"); setAuthError(""); setAuthUsernameError(""); setAuthPasswordError(""); }} style={{ flex: 1, padding: '10px 0', border: 'none', background: authMode === 'login' ? 'var(--surface-3)' : 'transparent', color: authMode === 'login' ? 'var(--text-1)' : 'var(--text-3)', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>Log In</button>
+              <button className={`auth-tab ${authMode === "register" ? "active" : ""}`} onClick={() => { setAuthMode("register"); setAuthError(""); setAuthUsernameError(""); setAuthPasswordError(""); }} style={{ flex: 1, padding: '10px 0', border: 'none', background: authMode === 'register' ? 'var(--surface-3)' : 'transparent', color: authMode === 'register' ? 'var(--text-1)' : 'var(--text-3)', borderRadius: 8, cursor: 'pointer', fontWeight: 600 }}>Register</button>
             </div>
             
-            <form className="auth-form" onSubmit={handleAuthSubmit}>
-              {authError && <div className="auth-error">{authError}</div>}
+            <form className="auth-form" onSubmit={handleAuthSubmit} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {authError && <div className="auth-error" style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', padding: '12px', borderRadius: 8, fontSize: 13, textAlign: 'center', border: '1px solid rgba(239, 68, 68, 0.2)' }}>{authError}</div>}
               
-              <div className="auth-field">
-                <label>Username</label>
+              <div className="auth-field" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Username</label>
                 <input 
                   type="text" 
                   placeholder="Enter username" 
                   value={authUsername} 
                   onChange={e => setAuthUsername(e.target.value)}
                   disabled={authLoading}
-                  style={authUsernameError ? { borderColor: 'rgba(248,113,113,0.5)' } : {}}
+                  style={{ width: '100%', padding: '14px 16px', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 12, color: 'var(--text-1)', fontSize: 15, ...authUsernameError ? { borderColor: '#EF4444' } : {} }}
                 />
-                {authUsernameError && <div style={{color: 'var(--red)', fontSize: '11px', marginTop: '-3px'}}>{authUsernameError}</div>}
+                {authUsernameError && <div style={{color: '#EF4444', fontSize: '11px', marginTop: '-2px'}}>{authUsernameError}</div>}
               </div>
               
-              <div className="auth-field">
-                <label>Password</label>
+              <div className="auth-field" style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Password</label>
                 <input 
                   type="password" 
                   placeholder="Enter password" 
                   value={authPassword} 
                   onChange={e => setAuthPassword(e.target.value)}
                   disabled={authLoading}
-                  style={authPasswordError ? { borderColor: 'rgba(248,113,113,0.5)' } : {}}
+                  style={{ width: '100%', padding: '14px 16px', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 12, color: 'var(--text-1)', fontSize: 15, ...authPasswordError ? { borderColor: '#EF4444' } : {} }}
                 />
-                {authPasswordError && <div style={{color: 'var(--red)', fontSize: '11px', marginTop: '-3px'}}>{authPasswordError}</div>}
+                {authPasswordError && <div style={{color: '#EF4444', fontSize: '11px', marginTop: '-2px'}}>{authPasswordError}</div>}
               </div>
               
-              <button type="submit" className="auth-submit" disabled={authLoading || !authUsername || !authPassword}>
+              <button type="submit" className="m-submit" disabled={authLoading || !authUsername || !authPassword} style={{ marginTop: 8 }}>
                 {authLoading ? "Please wait..." : (authMode === "login" ? "Log In ➔" : "Create Account ➔")}
               </button>
             </form>
@@ -511,120 +533,144 @@ export default function NovaApp() {
       )}
 
       {/* Create Person Modal */}
-      {createModalOpen && (
-        <div className="auth-gate" style={{ zIndex: 400 }}>
-          <div className="auth-card" style={{ maxWidth: 460, padding: "30px" }}>
-            <div className="sp-head" style={{ borderBottom: 'none', padding: '0 0 16px', width: '100%' }}>
-              <div className="sp-title">Create Person</div>
-              <button className="sp-close" onClick={() => setCreateModalOpen(false)}>✕</button>
+      <div className={`modal-overlay ${createModalOpen ? "open" : ""}`} onClick={(e) => { if (e.target === e.currentTarget) setCreateModalOpen(false); }}>
+        <div className="modal-card">
+          <div className="mh-head">
+            <h2>Create Person</h2>
+            <button className="m-close" onClick={() => setCreateModalOpen(false)}>✕</button>
+          </div>
+          
+          <div className="m-avatar-sec">
+            <input 
+              type="file" 
+              accept="image/*" 
+              ref={fileInputRef} 
+              style={{ display: 'none' }} 
+              onChange={handleCpAvatarUpload}
+            />
+            <div className="m-avatar-circle" onClick={() => fileInputRef.current?.click()}>
+              {cpAvatar ? <img src={cpAvatar} alt="Avatar" /> : cpEmoji}
             </div>
-            
-            <div style={{ width: '100%', maxHeight: '70vh', overflowY: 'auto', paddingRight: 4 }}>
-              <div className="auth-field" style={{ marginBottom: 16 }}>
-                <label>Avatar Emoji</label>
-                <input type="text" value={cpEmoji} onChange={e => setCpEmoji(e.target.value)} placeholder="👩" maxLength={4} style={{ fontSize: 24, textAlign: 'center', padding: '8px' }} />
-              </div>
-              
-              <div className="auth-field" style={{ marginBottom: 16 }}>
-                <label>Name</label>
-                <input type="text" value={cpName} onChange={e => setCpName(e.target.value)} placeholder="Name..." maxLength={20} />
-              </div>
+            <div className="cam-badge" style={{ pointerEvents: 'none' }}>📷</div>
+            <div className="m-avatar-hint">Tap to upload a photo</div>
+          </div>
+          
+          <div className="m-section">
+            <div className="m-label">Name</div>
+            <input className="m-input" type="text" value={cpName} onChange={e => setCpName(e.target.value)} placeholder="E.g. Sarah" maxLength={20} />
+          </div>
 
-              <div className="auth-field" style={{ marginBottom: 16 }}>
-                <label>Gender</label>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {['she', 'he', 'they'].map(g => (
-                    <button key={g} className={`lang-pill ${cpGender === g ? 'active' : ''}`} onClick={() => setCpGender(g as any)} style={{ flex: 1, padding: '8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}>
-                      {g}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="auth-field" style={{ marginBottom: 16 }}>
-                <label>Personality</label>
-                <div className="persona-grid">
-                  {[
-                    { id: 'nova', name: 'Nova', icon: '🩷', desc: 'Warm companion' },
-                    { id: 'scholar', name: 'Scholar', icon: '📚', desc: 'Study buddy' },
-                    { id: 'sage', name: 'Sage', icon: '🌿', desc: 'Wise guide' },
-                    { id: 'spark', name: 'Spark', icon: '⚡', desc: 'Creative chaos' }
-                  ].map(p => (
-                    <div key={p.id} className={`persona-card ${cpPersonality === p.id ? 'active' : ''}`} onClick={() => setCpPersonality(p.id as any)}>
-                      <span className="pc-icon">{p.icon}</span>
-                      <span className="pc-name">{p.name}</span>
-                      <span className="pc-desc">{p.desc}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="auth-field" style={{ marginBottom: 16 }}>
-                <label>Relationship Vibe</label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                  {['girlfriend', 'bestfriend', 'classmate', 'crush', 'situationship'].map(r => (
-                    <button key={r} className={`lang-pill ${cpRelationship === r ? 'active' : ''}`} onClick={() => setCpRelationship(r as any)} style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 13 }}>
-                      {r}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="auth-field" style={{ marginBottom: 24 }}>
-                <label>Language</label>
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {['english', 'hinglish'].map(l => (
-                    <button key={l} className={`lang-pill ${cpLanguage === l ? 'active' : ''}`} onClick={() => setCpLanguage(l as any)} style={{ flex: 1, padding: '8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}>
-                      {l}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              
-              <button className="auth-submit" disabled={!cpName.trim() || cpCreating} onClick={createPerson}>
-                {cpCreating ? "Creating..." : "Create Person"}
-              </button>
+          <div className="m-section">
+            <div className="m-label">Gender</div>
+            <div className="m-pills-row">
+              {['she', 'he', 'they'].map(g => (
+                <button key={g} className={`m-pill m-pill-gender ${cpGender === g ? 'active' : ''}`} onClick={() => setCpGender(g as any)}>{g}</button>
+              ))}
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Settings Panel */}
-      <div className={`settings-overlay ${settingsOpen ? "open" : ""}`} onClick={() => setSettingsOpen(false)}></div>
-      <div className={`settings-panel ${settingsOpen ? "open" : ""}`}>
-        <div className="sp-head">
-          <div className="sp-title">Settings</div>
-          <button className="sp-close" onClick={() => setSettingsOpen(false)}>✕</button>
-        </div>
-        <div className="sp-body">
-          <div className="sp-section">
-            <div className="sp-label">Theme</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="m-section">
+            <div className="m-label">Personality Type</div>
+            <div className="m-grid">
               {[
-                { id: 'default', name: 'Default Dark', icon: '🌌' },
-                { id: 'instagram', name: 'Instagram', icon: '📸' },
-                { id: 'whatsapp', name: 'WhatsApp', icon: '💬' },
-                { id: 'imessage', name: 'iMessage', icon: '🍏' }
-              ].map(t => (
-                <button 
-                  key={t.id} 
-                  className={`lang-pill ${theme === t.id ? 'active' : ''}`}
-                  onClick={() => setTheme(t.id)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', borderRadius: 12, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer', fontSize: 14, fontWeight: 500, textAlign: 'left' }}
-                >
-                  <span style={{ fontSize: 20 }}>{t.icon}</span> {t.name}
-                </button>
+                { id: 'nova', name: 'Nova', icon: '🩷', desc: 'Warm companion' },
+                { id: 'scholar', name: 'Scholar', icon: '📚', desc: 'Study buddy' },
+                { id: 'sage', name: 'Sage', icon: '🌿', desc: 'Wise guide' },
+                { id: 'spark', name: 'Spark', icon: '⚡', desc: 'Creative chaos' }
+              ].map(p => (
+                <div key={p.id} className={`m-grid-card ${cpPersonality === p.id ? 'active' : ''}`} onClick={() => setCpPersonality(p.id as any)}>
+                  <div className="mg-emoji">{p.icon}</div>
+                  <div className="mg-name">{p.name}</div>
+                  <div className="mg-desc">{p.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="m-section">
+            <div className="m-label">Relationship Mode</div>
+            <div className="m-pills-row">
+              {['girlfriend', 'bestfriend', 'classmate', 'crush', 'situationship'].map(r => (
+                <button key={r} className={`m-pill ${cpRelationship === r ? 'active' : ''}`} onClick={() => setCpRelationship(r as any)}>{r}</button>
+              ))}
+            </div>
+          </div>
+
+          <div className="m-section" style={{ marginBottom: 32 }}>
+            <div className="m-label">Language Preference</div>
+            <div className="m-pills-row">
+              {['english', 'hinglish'].map(l => (
+                <button key={l} className={`m-pill m-pill-gender ${cpLanguage === l ? 'active' : ''}`} onClick={() => setCpLanguage(l as any)}>{l}</button>
               ))}
             </div>
           </div>
           
-          <div className="sp-section">
-            <div className="sp-label">Account</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <button className="m-submit" disabled={!cpName.trim() || cpCreating} onClick={createPerson}>
+            {cpCreating ? "Creating..." : "Create Companion"}
+          </button>
+        </div>
+      </div>
+
+      {/* Settings Panel */}
+      <div className={`settings-overlay ${settingsOpen ? "open" : ""}`} onClick={() => setSettingsOpen(false)}></div>
+      <div className={`settings-drawer ${settingsOpen ? "open" : ""}`}>
+        <div className="sd-head">
+          <h2>Settings</h2>
+          <button className="sd-close" onClick={() => setSettingsOpen(false)}>✕</button>
+        </div>
+        
+        <div className="sd-body">
+          {activePerson && (
+            <div className="sd-section">
+              <div className="sd-label">Companion Avatar</div>
+              <input 
+                type="file" 
+                accept="image/*" 
+                ref={settingsFileInputRef} 
+                style={{ display: 'none' }} 
+                onChange={handleSettingsAvatarUpload}
+              />
+              <div className="settings-av-zone" onClick={() => settingsFileInputRef.current?.click()} style={{ cursor: 'pointer' }}>
+                <div className="av-edit-wrap">
+                  <Avatar avatar={activePerson.avatar} name={activePerson.name} size={48} />
+                  <div className="av-edit-badge">📷</div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 14, fontWeight: 600, color: 'var(--text-1)' }}>{activePerson.name}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>Click to update photo</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="sd-section">
+            <div className="sd-label">App Theme</div>
+            <div className="theme-grid">
+              {[
+                { id: 'default', name: 'Velvet Dark' },
+                { id: 'instagram', name: 'Instagram' },
+                { id: 'whatsapp', name: 'WhatsApp' },
+                { id: 'imessage', name: 'iMessage' }
+              ].map(t => (
+                <div key={t.id} className={`theme-card ${theme === t.id ? 'active' : ''}`} onClick={() => setTheme(t.id)}>
+                  <div className="theme-preview">
+                    <div style={{ width: '60%', height: 6, background: 'var(--surface-3)', borderRadius: 3 }}></div>
+                    <div style={{ width: '80%', height: 6, background: 'var(--surface-3)', borderRadius: 3 }}></div>
+                    <div style={{ width: '40%', height: 6, background: 'var(--gradient, #555)', borderRadius: 3, marginLeft: 'auto', marginTop: 'auto' }}></div>
+                  </div>
+                  <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-1)' }}>{t.name}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="sd-section" style={{ marginTop: 'auto' }}>
+            <div className="sd-label">Account Management</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {activePersonId && (
-                <button className="danger-btn" onClick={deleteCurrentPerson}>🗑️ Delete Current Person</button>
+                <button className="sd-danger" onClick={deleteCurrentPerson}>Delete Current Person</button>
               )}
-              <button className="danger-btn" onClick={handleLogout}>🚪 Sign Out</button>
+              <button className="sd-danger" onClick={handleLogout}>Sign Out</button>
             </div>
           </div>
         </div>
@@ -634,45 +680,49 @@ export default function NovaApp() {
         {/* Sidebar */}
         <div className={`sidebar ${sidebarOpen ? "open" : ""}`} id="sidebar">
           <div className="sidebar-head">
-            <div className="sidebar-title">Persons</div>
-            <button className="sidebar-new" onClick={() => { setCreateModalOpen(true); setSidebarOpen(false); }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14m-7-7h14"/></svg> Add
-            </button>
+            <div className="sidebar-title">
+              <span style={{ fontSize: 24 }}>✧</span> Nova
+            </div>
           </div>
           <div className="sidebar-list">
             {persons.map(p => (
               <div key={p.id} className={`sidebar-chat ${activePersonId === p.id ? "active" : ""}`} onClick={() => switchPerson(p.id)}>
-                <div className="sidebar-chat-icon" style={{ background: 'transparent', fontSize: 22, boxShadow: 'none' }}>{p.emoji}</div>
+                <Avatar avatar={p.avatar} name={p.name} size={38} className="sidebar-chat-icon" />
                 <div className="sidebar-chat-info">
                   <div className="sidebar-chat-title">{p.name}</div>
                   <div className="sidebar-chat-meta">{p.relationship}</div>
                 </div>
+                <div className="sidebar-chat-time">
+                  {/* Mock time placeholder */}
+                  Now
+                </div>
               </div>
             ))}
           </div>
+          <div className="sidebar-add-wrapper">
+            <button className="sidebar-add-btn" onClick={() => { setCreateModalOpen(true); setSidebarOpen(false); }}>
+              + Add Person
+            </button>
+          </div>
         </div>
         
-        <div className={`sidebar-overlay ${sidebarOpen ? "open" : ""}`} onClick={() => setSidebarOpen(false)}></div>
+        {sidebarOpen && <div className="sidebar-overlay open" onClick={() => setSidebarOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 99, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}></div>}
         <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>☰</button>
 
-        <div className="app">
+        <div className="app" style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%', minWidth: 0 }}>
           {/* IG Story Row (only visible in instagram theme via CSS, and replaces sidebar) */}
           {theme === "instagram" && persons.length > 0 && (
-            <div className="ig-story-row">
+            <div className="ig-story-row" style={{ display: 'flex', gap: 16, padding: '16px 20px', borderBottom: '1px solid var(--border)', overflowX: 'auto', flexShrink: 0, background: 'var(--bg)', scrollbarWidth: 'none' }}>
               {persons.map(p => (
-                <div key={p.id} className="ig-story-item" onClick={() => switchPerson(p.id)}>
-                  <div className="ig-story-ring" style={activePersonId === p.id ? {} : { background: 'var(--border)' }}>
-                    <div className="ig-story-inner">{p.emoji}</div>
+                <div key={p.id} className="ig-story-item" onClick={() => switchPerson(p.id)} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                  <div className="ig-story-ring" style={{ width: 64, height: 64, borderRadius: '50%', padding: 2, background: activePersonId === p.id ? 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)' : 'var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div className="ig-story-inner" style={{ width: '100%', height: '100%', borderRadius: '50%', border: '2px solid #fff', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                      <Avatar avatar={p.avatar} name={p.name} size={60} />
+                    </div>
                   </div>
-                  <div className="ig-story-name" style={activePersonId === p.id ? { fontWeight: 600 } : {}}>{p.name}</div>
+                  <div className="ig-story-name" style={{ fontSize: 11, color: 'var(--text-1)', fontWeight: activePersonId === p.id ? 600 : 400 }}>{p.name}</div>
                 </div>
               ))}
-              <div className="ig-story-item" onClick={() => setCreateModalOpen(true)}>
-                <div className="ig-story-ring" style={{ background: 'transparent', border: '1px dashed var(--text-3)', padding: 0 }}>
-                  <div className="ig-story-inner" style={{ fontSize: 18, color: 'var(--text-2)' }}>+</div>
-                </div>
-                <div className="ig-story-name">Add</div>
-              </div>
             </div>
           )}
 
@@ -680,21 +730,17 @@ export default function NovaApp() {
           {activePerson && (
             <div className="topbar">
               <div className="nova-av-wrap">
-                <div className="nova-av" style={{ background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 20, boxShadow: 'none' }}>
-                  {activePerson.emoji}
-                </div>
-                <div className="online-ring"></div>
-                <div className="online-dot"></div>
+                <Avatar avatar={activePerson.avatar} name={activePerson.name} size={40} className="nova-av" />
               </div>
               <div className="nova-info">
                 <div className="nova-name">{activePerson.name}</div>
                 <div className="nova-status">
                   <span className="ns-dot"></span>
-                  <span>online</span>
+                  <span>online · always here</span>
                 </div>
               </div>
               <div className="topbar-btns">
-                <button className="tbtn" style={{ fontSize: 13, padding: '4px 8px', border: '1px solid var(--border)', borderRadius: 12, marginRight: 8 }} onClick={() => setPracticeModeOpen(true)}>🎯 Practice</button>
+                <button className="tbtn" style={{ fontSize: 13, padding: '0 12px', border: '1px solid var(--border)', borderRadius: 18, width: 'auto' }} onClick={() => setPracticeModeOpen(true)}>🎯 Practice</button>
                 <button className="tbtn" onClick={() => setSettingsOpen(true)}>⚙️</button>
               </div>
             </div>
@@ -703,28 +749,27 @@ export default function NovaApp() {
           {/* Chat Area */}
           <div className="chat-area" ref={chatContainerRef}>
             {persons.length === 0 ? (
-              <div className="welcome">
-                <div className="welcome-orb" style={{ background: 'transparent', fontSize: 60, boxShadow: 'none', animation: 'none' }}>🥺</div>
-                <div className="welcome-title">No one here yet</div>
-                <div className="welcome-sub">Create your first person to start chatting.</div>
-                <button className="ob-start-btn" style={{ maxWidth: 200 }} onClick={() => setCreateModalOpen(true)}>+ Add Person</button>
+              <div className="welcome" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 24, padding: '32px 24px', animation: 'msgIn 0.5s ease both' }}>
+                <div style={{ width: 90, height: 90, borderRadius: '50%', background: 'var(--surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40, border: '1px dashed var(--border)' }}>✨</div>
+                <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 24, fontWeight: 700, color: 'var(--text-1)', textAlign: 'center' }}>No one here yet</div>
+                <div style={{ fontSize: 14, color: 'var(--text-2)', textAlign: 'center', maxWidth: 300, lineHeight: 1.6 }}>Create your first companion to start building a connection.</div>
+                <button className="m-submit" style={{ maxWidth: 200, marginTop: 12 }} onClick={() => setCreateModalOpen(true)}>+ Add Person</button>
               </div>
             ) : (
               <>
                 {messages.length === 0 && !streamedText && activePerson && (
-                  <div className="welcome">
-                    <div className="welcome-orb" style={{ background: 'transparent', fontSize: 60, boxShadow: 'none', animation: 'none' }}>{activePerson.emoji}</div>
-                    <div className="welcome-title">Say hi to {activePerson.name}</div>
+                  <div className="welcome" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '40px 24px' }}>
+                    <Avatar avatar={activePerson.avatar} name={activePerson.name} size={80} className="welcome-orb" />
+                    <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 20, fontWeight: 700, color: 'var(--text-1)' }}>Say hi to {activePerson.name}</div>
                   </div>
                 )}
 
                 {messages.map((msg, i) => (
                   <div key={i} className={`msg-row ${msg.role === "user" ? "user" : "nova"}`}>
                     <div className="msg-inner">
-                      <div className={`msg-av ${msg.role === "user" ? "user-av" : "nova-av"}`} style={msg.role !== "user" ? { background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 16, boxShadow: 'none' } : {}}>
-                        {msg.role === "user" ? "U" : activePerson?.emoji}
-                      </div>
+                      {msg.role !== "user" && <Avatar avatar={activePerson?.avatar} name={activePerson?.name || "Nova"} size={28} className="msg-av" />}
                       <div className="msg-body">
+                        {msg.role !== "user" && <div className="msg-meta">{activePerson?.name}</div>}
                         <div className="msg-bubble" dangerouslySetInnerHTML={{ __html: window.marked ? window.marked.parse(msg.content) : msg.content }} />
                       </div>
                     </div>
@@ -734,8 +779,9 @@ export default function NovaApp() {
                 {isStreaming && streamedText && (
                   <div className="msg-row nova">
                     <div className="msg-inner">
-                      <div className="msg-av nova-av" style={{ background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 16, boxShadow: 'none' }}>{activePerson?.emoji}</div>
+                      <Avatar avatar={activePerson?.avatar} name={activePerson?.name || "Nova"} size={28} className="msg-av" />
                       <div className="msg-body">
+                        <div className="msg-meta">{activePerson?.name}</div>
                         <div className="msg-bubble" dangerouslySetInnerHTML={{ __html: window.marked ? window.marked.parse(streamedText) : streamedText }} />
                       </div>
                     </div>
@@ -743,11 +789,13 @@ export default function NovaApp() {
                 )}
 
                 {isStreaming && !streamedText && (
-                  <div className="typing-row">
-                    <div className="typing-inner">
-                      <div className="msg-av nova-av" style={{ background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 16, boxShadow: 'none' }}>{activePerson?.emoji}</div>
-                      <div className="typing-bubble">
-                        <div className="td"></div><div className="td"></div><div className="td"></div>
+                  <div className="msg-row nova">
+                    <div className="msg-inner">
+                      <Avatar avatar={activePerson?.avatar} name={activePerson?.name || "Nova"} size={28} className="msg-av" />
+                      <div className="msg-body">
+                        <div className="typing-bubble">
+                          <div className="td"></div><div className="td"></div><div className="td"></div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -759,8 +807,8 @@ export default function NovaApp() {
           {/* Input Area */}
           {persons.length > 0 && activePerson && (
             <div className="input-zone">
-              <div className="input-card">
-                <div className="input-bar">
+              <div className="input-inner">
+                <div className="input-card">
                   <textarea
                     ref={inputRef}
                     placeholder={`Message ${activePerson.name}...`}
@@ -768,14 +816,15 @@ export default function NovaApp() {
                     onChange={(e) => {
                       setInputValue(e.target.value);
                       e.target.style.height = 'auto';
-                      e.target.style.height = `${Math.min(e.target.scrollHeight, 180)}px`;
+                      e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
                     }}
                     onKeyDown={handleKeyDown}
                     rows={1}
                   />
-                  <div className="input-right">
+                  <div className="input-bottom">
+                    <div className="char-ct">{inputValue.length}/2000</div>
                     <button className="send-btn" disabled={!inputValue.trim() || isStreaming} onClick={handleSend}>
-                      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
                     </button>
                   </div>
                 </div>
@@ -783,7 +832,6 @@ export default function NovaApp() {
             </div>
           )}
           
-          <button ref={scrollFabRef} className="scroll-fab" onClick={() => scrollToBottom(true)}>↓</button>
         </div>
       </div>
       

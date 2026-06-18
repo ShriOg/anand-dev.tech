@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { Avatar } from "./Avatar";
 
 interface PracticeModeProps {
   personId: string;
@@ -204,7 +205,7 @@ export default function PracticeMode({ personId, userId, activePerson, onClose }
                 <div key={i} className={`msg-row ${m.role === 'user' ? 'user' : 'nova'}`}>
                   <div className="msg-inner" style={{flexDirection: 'column', alignItems: m.role==='user'?'flex-end':'flex-start'}}>
                     <div style={{display:'flex', gap: 8, alignItems: 'flex-end'}}>
-                      {m.role !== 'user' && <div className="msg-av" style={{background:'rgba(255,255,255,0.1)'}}>{activePerson?.emoji}</div>}
+                      {m.role !== 'user' && <Avatar avatar={activePerson?.avatar} name={activePerson?.name || "Nova"} size={28} className="msg-av" />}
                       <div className="msg-bubble" style={{background: m.role==='user' ? 'var(--prac-accent)' : 'var(--prac-surface)', color: '#fff'}}>{m.content}</div>
                     </div>
                     {m.role === 'user' && (
@@ -216,7 +217,7 @@ export default function PracticeMode({ personId, userId, activePerson, onClose }
               {isStreaming && streamedText && (
                 <div className={`msg-row nova`}>
                   <div className="msg-inner">
-                    <div className="msg-av" style={{background:'rgba(255,255,255,0.1)'}}>{activePerson?.emoji}</div>
+                    <Avatar avatar={activePerson?.avatar} name={activePerson?.name || "Nova"} size={28} className="msg-av" />
                     <div className="msg-bubble" style={{background: 'var(--prac-surface)', color: '#fff'}}>{streamedText}</div>
                   </div>
                 </div>

@@ -33,27 +33,27 @@ export async function POST(req: Request) {
     const token = cookieStore.get("nova_session")?.value;
     const userId = token ? verifyToken(token) : null;
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const {
-      name, emoji = "🧑", gender = "they",
-      personality = "nova", relationship = "bestfriend", language = "english"
-    } = await req.json();
+    const body = await req.json();
+    const { name, emoji, gender, personality, relationship, language, avatarBase64 } = body;
 
-    if (!name || !name.trim()) return NextResponse.json({ error: "Name is required" }, { status: 400 });
-    if (name.trim().length > 20) return NextResponse.json({ error: "Name too long (max 20)" }, { status: 400 });
+    if (!name || !gender || !personality || !relationship) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
 
     const id = nanoid(12);
     const person = await Person.create({
       userId, id,
       name: name.trim(),
-      emoji: emoji.trim().slice(0, 4) || "🧑",
+      emoji: emoji ? emoji.trim().slice(0, 4) : "🧑",
+      avatar: avatarBase64 || null,
       gender, personality, relationship, language,
     });
 
     return NextResponse.json({
       person: {
         id: person.id, name: person.name, emoji: person.emoji,
+        avatar: person.avatar,
         gender: person.gender, personality: person.personality,
         relationship: person.relationship, language: person.language,
         createdAt: person.createdAt,
