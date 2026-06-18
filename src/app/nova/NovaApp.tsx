@@ -307,6 +307,19 @@ export default function NovaApp() {
           userGender: userGender
         }),
       });
+      
+      if (!res.ok) {
+        let errMsg = "something went wrong 😭";
+        try {
+          const errData = await res.json();
+          if (errData.error) errMsg = errData.error;
+        } catch {}
+        setStreamedText("");
+        setMessages([{ role: "assistant", content: errMsg }]);
+        setIsStreaming(false);
+        return;
+      }
+
       if (!res.body) return;
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -490,6 +503,17 @@ export default function NovaApp() {
         })
       });
 
+      if (!res.ok) {
+        let errMsg = "ugh something broke 😭 wanna try again?";
+        try {
+          const errData = await res.json();
+          if (errData.error) errMsg = errData.error;
+        } catch {}
+        setMessages([...newMsgs, { role: "assistant", content: errMsg }]);
+        setIsStreaming(false);
+        return;
+      }
+
       if (!res.body) throw new Error("No response body");
 
       const reader = res.body.getReader();
@@ -567,6 +591,17 @@ export default function NovaApp() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(reqBody)
     }).then(async res => {
+      if (!res.ok) {
+        let errMsg = "ugh something broke 😭 wanna try again?";
+        try {
+          const errData = await res.json();
+          if (errData.error) errMsg = errData.error;
+        } catch {}
+        setMessages([...newMsgs, { role: "assistant", content: errMsg }]);
+        setIsStreaming(false);
+        return;
+      }
+      
       if (!res.body) return;
       const reader = res.body.getReader();
       const decoder = new TextDecoder();

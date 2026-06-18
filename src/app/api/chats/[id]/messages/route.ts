@@ -56,7 +56,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     const validMessages = messages.filter((m: any) => m.content && m.content.trim() !== '');
 
-    // Insert new valid messages
+    // Insert new valid messages (replace existing to avoid duplicates, since frontend sends full list)
     const toInsert = validMessages.map((m: any) => ({
       chatId: id,
       role: m.role,
@@ -65,6 +65,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     }));
 
     if (toInsert.length > 0) {
+      await Message.deleteMany({ chatId: id });
       await Message.insertMany(toInsert);
     }
     

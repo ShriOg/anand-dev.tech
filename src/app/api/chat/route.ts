@@ -128,7 +128,9 @@ Language: ${language}
     });
 
     if (!response.ok) {
-      throw new Error(`Groq API error: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error("Groq API error text:", errorText);
+      throw new Error(`Groq API error: ${response.statusText} - ${errorText}`);
     }
 
     if (!response.body) {
@@ -190,6 +192,10 @@ Language: ${language}
 
   } catch (error: any) {
     console.error("Chat API Error:", error);
-    return NextResponse.json({ error: "Failed to fetch response" }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Failed to fetch response" }, { status: 500 });
   }
+}
+
+export async function GET() {
+  return NextResponse.json({ error: "Method not allowed. Please use POST to chat." }, { status: 405 });
 }
