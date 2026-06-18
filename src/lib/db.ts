@@ -35,6 +35,7 @@ export const ensureDb = async () => {
 export interface IChat extends Document {
   title: string;
   personality: string;
+  userId: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -42,6 +43,7 @@ export interface IChat extends Document {
 const chatSchema = new Schema<IChat>({
   title: { type: String, required: true },
   personality: { type: String, required: true },
+  userId: { type: String, required: true, index: true },
 }, { timestamps: true });
 
 export interface IMessage extends Document {

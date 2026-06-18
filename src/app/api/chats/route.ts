@@ -1,13 +1,16 @@
 import { ensureDb, Chat } from "@/lib/db";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req: Request) {
   await ensureDb();
   try {
-    const chats = await Chat.find().sort({ updatedAt: -1 }).lean();
+    const userId = req.headers.get("x-user-id");
+    if (!userId) return NextResponse.json({ chats: [] });
+
+    const chats = await Chat.find({ userId }).sort({ updatedAt: -1 }).lean();
     
     // Map _id to id for client compatibility
-    const formattedChats = chats.map(chat => ({
+    const formattedChats = chats.map((chat: any) => ({
       ...chat,
       id: chat._id.toString(),
       _id: undefined,
@@ -24,11 +27,15 @@ export async function GET() {
 export async function POST(req: Request) {
   await ensureDb();
   try {
+    const userId = req.headers.get("x-user-id");
+    if (!userId) return NextResponse.json({ error: "Missing x-user-id header" }, { status: 400 });
+
     const { personality = "nova" } = await req.json();
     
     const newChat = await Chat.create({
       title: "new chat",
       personality,
+      userId,
     });
 
     const chatData = newChat.toObject();

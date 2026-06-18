@@ -7,10 +7,16 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const { id } = await params;
   
   try {
+    const userId = req.headers.get("x-user-id");
     const { title } = await req.json();
     
-    if (!title || !id) {
+    if (!title || !id || !userId) {
       return NextResponse.json({ error: "bad request" }, { status: 400 });
+    }
+
+    const chat = await Chat.findOne({ _id: id, userId });
+    if (!chat) {
+      return NextResponse.json({ error: "not found or forbidden" }, { status: 403 });
     }
 
     await Chat.findByIdAndUpdate(id, {
@@ -30,11 +36,17 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   
   const { id } = await params;
 
-  if (!id) {
-    return NextResponse.json({ error: "bad request" }, { status: 400 });
-  }
-
   try {
+    const userId = req.headers.get("x-user-id");
+    if (!id || !userId) {
+      return NextResponse.json({ error: "bad request" }, { status: 400 });
+    }
+
+    const chat = await Chat.findOne({ _id: id, userId });
+    if (!chat) {
+      return NextResponse.json({ error: "not found or forbidden" }, { status: 403 });
+    }
+
     // Delete associated messages first
     await Message.deleteMany({ chatId: id });
     await Chat.findByIdAndDelete(id);

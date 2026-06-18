@@ -45,6 +45,7 @@ export default function NovaApp() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollFabRef = useRef<HTMLButtonElement>(null);
+  const userIdRef = useRef<string>("");
 
   // Initialization
   useEffect(() => {
@@ -64,6 +65,13 @@ export default function NovaApp() {
       };
       window.marked.setOptions({ renderer });
     }
+
+    let uid = localStorage.getItem("nova_user_id");
+    if (!uid) {
+      uid = crypto.randomUUID();
+      localStorage.setItem("nova_user_id", uid);
+    }
+    userIdRef.current = uid;
 
     const savedName = localStorage.getItem("companion-name");
     const savedImage = localStorage.getItem("companion-image");
@@ -131,9 +139,14 @@ export default function NovaApp() {
   }, [firstMsg]);
 
   // API Helpers
+  const getHeaders = () => ({
+    "Content-Type": "application/json",
+    "x-user-id": userIdRef.current
+  });
+
   const loadChats = async () => {
     try {
-      const res = await fetch("/api/chats");
+      const res = await fetch("/api/chats", { headers: { "x-user-id": userIdRef.current } });
       const data = await res.json();
       return data.chats || [];
     } catch { return []; }
@@ -143,7 +156,7 @@ export default function NovaApp() {
     try {
       const res = await fetch("/api/chats", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getHeaders(),
         body: JSON.stringify({ personality: persona })
       });
       const data = await res.json();
@@ -153,7 +166,7 @@ export default function NovaApp() {
 
   const loadChatMessages = async (chatId: string) => {
     try {
-      const res = await fetch(`/api/chats/${chatId}/messages`);
+      const res = await fetch(`/api/chats/${chatId}/messages`, { headers: { "x-user-id": userIdRef.current } });
       const data = await res.json();
       return data.messages || [];
     } catch { return []; }
@@ -163,7 +176,7 @@ export default function NovaApp() {
     try {
       await fetch(`/api/chats/${chatId}/messages`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getHeaders(),
         body: JSON.stringify({ messages: msgs })
       });
       // Auto-title
@@ -171,7 +184,7 @@ export default function NovaApp() {
         const title = msgs[0].content.slice(0, 40);
         await fetch(`/api/chats/${chatId}`, {
           method: "PATCH",
-          headers: { "Content-Type": "application/json" },
+          headers: getHeaders(),
           body: JSON.stringify({ title })
         });
         setAllChats(prev => prev.map(c => c.id === chatId ? { ...c, title } : c));
@@ -225,7 +238,7 @@ export default function NovaApp() {
   const handleDeleteChat = async (chatId: string) => {
     if (!confirm("delete this chat?")) return;
     try {
-      await fetch(`/api/chats/${chatId}`, { method: "DELETE" });
+      await fetch(`/api/chats/${chatId}`, { method: "DELETE", headers: { "x-user-id": userIdRef.current } });
       const newChats = allChats.filter(c => c.id !== chatId);
       setAllChats(newChats);
       if (currentChatId === chatId) {
@@ -245,7 +258,7 @@ export default function NovaApp() {
     if (newTitle && newTitle.trim()) {
       await fetch(`/api/chats/${chatId}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: getHeaders(),
         body: JSON.stringify({ title: newTitle.trim() })
       });
       setAllChats(prev => prev.map(c => c.id === chatId ? { ...c, title: newTitle.trim() } : c));
@@ -581,7 +594,7 @@ export default function NovaApp() {
               <button className="danger-btn" onClick={async () => {
                 if (!currentChatId) return;
                 await fetch(`/api/chats/${currentChatId}/messages`, {
-                  method: "POST", headers: { "Content-Type": "application/json" },
+                  method: "POST", headers: { "Content-Type": "application/json", "x-user-id": userIdRef.current },
                   body: JSON.stringify({ messages: [] })
                 });
                 setMessages([]);

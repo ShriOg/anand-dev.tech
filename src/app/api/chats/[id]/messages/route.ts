@@ -11,6 +11,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   }
 
   try {
+    const userId = req.headers.get("x-user-id");
+    if (!userId) return NextResponse.json({ messages: [] });
+
+    const chat = await Chat.findOne({ _id: id, userId });
+    if (!chat) return NextResponse.json({ error: "not found or forbidden" }, { status: 403 });
+
     const messages = await Message.find({ chatId: id }).sort({ createdAt: 1 }).lean();
     
     // Format to match what client expects: { role, content }
@@ -36,6 +42,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   }
 
   try {
+    const userId = req.headers.get("x-user-id");
+    if (!userId) return NextResponse.json({ error: "Missing x-user-id header" }, { status: 400 });
+
+    const chat = await Chat.findOne({ _id: id, userId });
+    if (!chat) return NextResponse.json({ error: "not found or forbidden" }, { status: 403 });
+
     const { messages = [] } = await req.json();
 
     if (!Array.isArray(messages)) {
