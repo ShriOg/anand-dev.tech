@@ -74,13 +74,17 @@ const companionSchema = new Schema<ICompanion>({
 });
 
 export interface IUser extends Document {
-  email: string;
+  username: string;
+  passwordHash: string;
+  email?: string;
   name?: string;
   createdAt: Date;
 }
 
 const userSchema = new Schema<IUser>({
-  email: { type: String, required: true, unique: true },
+  username: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  passwordHash: { type: String, required: true },
+  email: { type: String },
   name: { type: String },
 }, { timestamps: { createdAt: true, updatedAt: false } });
 

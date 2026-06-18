@@ -20,6 +20,15 @@ const PERSONAS: Record<string, { status: string; name: string; desc: string; ico
 
 export default function NovaApp() {
   const [isMounted, setIsMounted] = useState(false);
+
+  // Auth
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [authUsername, setAuthUsername] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [loggedInUser, setLoggedInUser] = useState<string | null>(null); // username
+
   const [companionName, setCompanionName] = useState("");
   const [companionImage, setCompanionImage] = useState("");
   const [currentPersona, setCurrentPersona] = useState("nova");
@@ -50,7 +59,7 @@ export default function NovaApp() {
   // Initialization
   useEffect(() => {
     setIsMounted(true);
-    
+
     // Set marked renderer if available
     if (window.marked && window.hljs) {
       window.marked.setOptions({ breaks: true, gfm: true });
@@ -58,41 +67,12 @@ export default function NovaApp() {
       renderer.code = (code: string, lang: string) => {
         const l = (lang && window.hljs.getLanguage(lang)) ? lang : "plaintext";
         let hi;
-        try { hi = window.hljs.highlight(code, { language: l }).value; } 
+        try { hi = window.hljs.highlight(code, { language: l }).value; }
         catch { hi = window.hljs.highlightAuto(code).value; }
         const ec = code.replace(/"/g, "&quot;");
         return `<div class="code-block-wrap"><div class="code-block-header"><span>${l}</span><button class="code-copy-btn" data-code="${ec}">Copy</button></div><pre><code class="hljs language-${l}">${hi}</code></pre></div>`;
       };
       window.marked.setOptions({ renderer });
-    }
-
-    let uid = localStorage.getItem("nova_user_id");
-    if (!uid) {
-      uid = crypto.randomUUID();
-      localStorage.setItem("nova_user_id", uid);
-    }
-    userIdRef.current = uid;
-
-    const savedName = localStorage.getItem("companion-name");
-    const savedImage = localStorage.getItem("companion-image");
-    const savedPersona = localStorage.getItem("persona");
-    const savedTheme = localStorage.getItem("theme");
-
-    if (savedTheme === "light") {
-      setTheme("light");
-      document.body.classList.add("light");
-    } else {
-      document.body.classList.remove("light");
-    }
-
-    if (savedPersona) setCurrentPersona(savedPersona);
-
-    if (savedName) {
-      setCompanionName(savedName);
-      if (savedImage) setCompanionImage(savedImage);
-      bootIntoApp(savedPersona || "nova");
-    } else {
-      setOnboardingMode("new");
     }
 
     // Attach delegated events for code copy buttons
@@ -111,6 +91,19 @@ export default function NovaApp() {
     document.addEventListener('click', handleCopy);
     return () => document.removeEventListener('click', handleCopy);
   }, []);
+
+  // Check persisted auth session
+  useEffect(() => {
+    if (!isMounted) return;
+    const savedUserId = localStorage.getItem("nova_user_id");
+    const savedUsername = localStorage.getItem("nova_username");
+    if (savedUserId && savedUsername) {
+      userIdRef.current = savedUserId;
+      setLoggedInUser(savedUsername);
+      initAfterAuth();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMounted]);
 
   // Update body theme class
   useEffect(() => {
@@ -137,6 +130,66 @@ export default function NovaApp() {
     if (el) el.addEventListener("scroll", handleScroll);
     return () => { if (el) el.removeEventListener("scroll", handleScroll); };
   }, [firstMsg]);
+
+  // Auth handlers
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!authUsername.trim() || !authPassword.trim()) return;
+    setAuthError("");
+    setAuthLoading(true);
+    try {
+      const endpoint = authMode === "login" ? "/api/auth/login" : "/api/auth/register";
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: authUsername.trim(), password: authPassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setAuthError(data.error || "Something went wrong"); return; }
+      localStorage.setItem("nova_user_id", data.userId);
+      localStorage.setItem("nova_username", data.username);
+      userIdRef.current = data.userId;
+      setLoggedInUser(data.username);
+      initAfterAuth();
+    } catch {
+      setAuthError("Network error, please try again");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("nova_user_id");
+    localStorage.removeItem("nova_username");
+    setLoggedInUser(null);
+    setMessages([]);
+    setAllChats([]);
+    setCurrentChatId(null);
+    setFirstMsg(true);
+    setAuthUsername("");
+    setAuthPassword("");
+  };
+
+  const initAfterAuth = () => {
+    const savedName = localStorage.getItem("companion-name");
+    const savedImage = localStorage.getItem("companion-image");
+    const savedPersona = localStorage.getItem("persona");
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "light") {
+      setTheme("light");
+      document.body.classList.add("light");
+    } else {
+      document.body.classList.remove("light");
+    }
+    if (savedPersona) setCurrentPersona(savedPersona);
+    if (savedName) {
+      setCompanionName(savedName);
+      if (savedImage) setCompanionImage(savedImage);
+      bootIntoApp(savedPersona || "nova");
+    } else {
+      setOnboardingMode("new");
+    }
+  };
 
   // API Helpers
   const getHeaders = () => ({
@@ -215,6 +268,7 @@ export default function NovaApp() {
 
   const switchToChat = async (chatId: string) => {
     if (isStreaming) return;
+    if (chatId === currentChatId) { setSidebarOpen(false); return; } // already active
     setCurrentChatId(chatId);
     const msgs = await loadChatMessages(chatId);
     setMessages(msgs);
@@ -477,6 +531,43 @@ export default function NovaApp() {
   const escHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
 
   if (!isMounted) return null;
+
+  // Auth gate — show login/register screen if not logged in
+  if (!loggedInUser) return (
+    <div className="auth-gate">
+      <div className="auth-card">
+        <div className="auth-logo">🩷</div>
+        <h1 className="auth-title">Nova</h1>
+        <p className="auth-sub">your AI companion — sign in to continue</p>
+        <div className="auth-tabs">
+          <button className={`auth-tab ${authMode === "login" ? "active" : ""}`} onClick={() => { setAuthMode("login"); setAuthError(""); }}>Sign in</button>
+          <button className={`auth-tab ${authMode === "register" ? "active" : ""}`} onClick={() => { setAuthMode("register"); setAuthError(""); }}>Create account</button>
+        </div>
+        <form className="auth-form" onSubmit={handleAuth}>
+          <div className="auth-field">
+            <label>Username</label>
+            <input
+              type="text" autoComplete="username" autoCapitalize="none"
+              placeholder="e.g. luna_user" maxLength={30}
+              value={authUsername} onChange={e => setAuthUsername(e.target.value)}
+            />
+          </div>
+          <div className="auth-field">
+            <label>Password</label>
+            <input
+              type="password" autoComplete={authMode === "login" ? "current-password" : "new-password"}
+              placeholder={authMode === "register" ? "at least 6 characters" : "your password"}
+              value={authPassword} onChange={e => setAuthPassword(e.target.value)}
+            />
+          </div>
+          {authError && <div className="auth-error">{authError}</div>}
+          <button className="auth-submit" type="submit" disabled={authLoading || !authUsername.trim() || !authPassword.trim()}>
+            {authLoading ? "..." : authMode === "login" ? "Sign in 🩷" : "Create account ✨"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 
   return (
     <>
