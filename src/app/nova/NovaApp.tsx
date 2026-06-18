@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./nova.css";
 
-// Declare global for marked and hljs which are loaded via script tags in layout
 declare global {
   interface Window {
     marked: any;
@@ -11,20 +10,15 @@ declare global {
   }
 }
 
-const BUILT_IN_PERSONAS: Record<string, { status: string; name: string; desc: string; icon: string }> = {
-  nova: { status: "online · thinking about you 💕", name: "Friend", desc: "warm, playful, your person", icon: "🩷" },
-  scholar: { status: "online · ready to study with you 📚", name: "Scholar", desc: "patient study buddy 🤓", icon: "📚" },
-  sage: { status: "online · here to guide you 🌿", name: "Sage", desc: "calm & wise, listens deeply", icon: "🌿" },
-  spark: { status: "online · buzzing with ideas ⚡", name: "Spark", desc: "chaotic creative energy ✨", icon: "⚡" }
-};
-// Alias for backward compat
-const PERSONAS = BUILT_IN_PERSONAS;
-
-interface CustomPersona {
-  id: string; // starts with "custom_"
+interface Person {
+  id: string;
   name: string;
   emoji: string;
-  prompt: string;
+  gender: 'she' | 'he' | 'they';
+  personality: 'nova' | 'scholar' | 'sage' | 'spark';
+  relationship: 'girlfriend' | 'bestfriend' | 'classmate' | 'crush' | 'situationship';
+  language: 'english' | 'hinglish';
+  createdAt: string;
 }
 
 export default function NovaApp() {
@@ -38,56 +32,45 @@ export default function NovaApp() {
   const [authUsernameError, setAuthUsernameError] = useState("");
   const [authPasswordError, setAuthPasswordError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
-  const [loggedInUser, setLoggedInUser] = useState<string | null>(null); // username
+  const [loggedInUser, setLoggedInUser] = useState<string | null>(null);
 
-  const [companionName, setCompanionName] = useState("");
-  const [companionImage, setCompanionImage] = useState("");
-  const [currentPersona, setCurrentPersona] = useState("nova");
-  const [language, setLanguage] = useState("english");
-  const [relationship, setRelationship] = useState("girlfriend");
+  const [userName, setUserName] = useState("");
+  const [userGender, setUserGender] = useState<"male" | "female" | "">("");
+
+  // Persons & Chats
+  const [persons, setPersons] = useState<Person[]>([]);
+  const [activePersonId, setActivePersonId] = useState<string | null>(null);
+  const [chatMap, setChatMap] = useState<Record<string, string>>({});
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [soundOn, setSoundOn] = useState(false);
-  const [firstMsg, setFirstMsg] = useState(true);
-  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
-  const [allChats, setAllChats] = useState<any[]>([]);
-  const [theme, setTheme] = useState("dark");
+  const [streamedText, setStreamedText] = useState("");
+  
+  // App UI state
   const [inputValue, setInputValue] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [onboardingMode, setOnboardingMode] = useState<"hidden" | "user" | "companion" | "edit">("hidden");
-  const [userName, setUserName] = useState("");
-  const [userGender, setUserGender] = useState<"male" | "female" | "">("");
-  const [pendingImage, setPendingImage] = useState("");
-  const [pendingName, setPendingName] = useState("");
+  const [theme, setTheme] = useState("default");
   const [toastMsg, setToastMsg] = useState("");
   const [toastShow, setToastShow] = useState(false);
 
-  const [streamedText, setStreamedText] = useState("");
-
-  // Custom personalities
-  const [customPersonas, setCustomPersonas] = useState<CustomPersona[]>([]);
+  // Create Person Modal
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [cpEmoji, setCpEmoji] = useState("👩");
   const [cpName, setCpName] = useState("");
-  const [cpEmoji, setCpEmoji] = useState("✨");
-  const [cpPrompt, setCpPrompt] = useState("");
+  const [cpGender, setCpGender] = useState<"she" | "he" | "they">("she");
+  const [cpPersonality, setCpPersonality] = useState<"nova" | "scholar" | "sage" | "spark">("nova");
+  const [cpRelationship, setCpRelationship] = useState<"girlfriend" | "bestfriend" | "classmate" | "crush" | "situationship">("girlfriend");
+  const [cpLanguage, setCpLanguage] = useState<"english" | "hinglish">("english");
   const [cpCreating, setCpCreating] = useState(false);
-  const [cpDeleteId, setCpDeleteId] = useState<string | null>(null);
-
-  // Chat per personality map: { [personalityId]: chatId }
-  const [chatMap, setChatMap] = useState<Record<string, string>>({});
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollFabRef = useRef<HTMLButtonElement>(null);
   const userIdRef = useRef<string>("");
 
-  // Initialization
   useEffect(() => {
     setIsMounted(true);
-
-    // Set marked renderer if available
     if (window.marked && window.hljs) {
       window.marked.setOptions({ breaks: true, gfm: true });
       const renderer = new window.marked.Renderer();
@@ -102,16 +85,15 @@ export default function NovaApp() {
       window.marked.setOptions({ renderer });
     }
 
-    // Attach delegated events for code copy buttons
     const handleCopy = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       if (target && target.classList.contains('code-copy-btn')) {
         const code = target.getAttribute('data-code');
         if (code) {
-          navigator.clipboard.writeText(code.replace(/&quot;/g, '"'));
-          const originalText = target.textContent;
-          target.textContent = "Copied!";
-          setTimeout(() => target.textContent = originalText, 1500);
+          navigator.clipboard.writeText(code);
+          const orig = target.innerText;
+          target.innerText = "Copied!";
+          setTimeout(() => { target.innerText = orig; }, 2000);
         }
       }
     };
@@ -119,897 +101,343 @@ export default function NovaApp() {
     return () => document.removeEventListener('click', handleCopy);
   }, []);
 
-  // Check persisted auth session
   useEffect(() => {
-    if (!isMounted) return;
-    const savedUserId = localStorage.getItem("nova_user_id");
-    const savedUsername = localStorage.getItem("nova_username");
-    if (savedUserId && savedUsername) {
+    const savedUser = localStorage.getItem("nova_user");
+    const savedUserId = localStorage.getItem("nova_userId");
+    if (savedUser && savedUserId) {
+      setLoggedInUser(savedUser);
       userIdRef.current = savedUserId;
-      setLoggedInUser(savedUsername);
       initAfterAuth();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMounted]);
+  }, []);
 
-  // Update body theme class
   useEffect(() => {
-    if (theme === "light") {
-      document.body.classList.add("light");
+    if (theme === "default") {
+      document.documentElement.removeAttribute("data-theme");
     } else {
-      document.body.classList.remove("light");
+      document.documentElement.setAttribute("data-theme", theme);
     }
+    localStorage.setItem("nova_theme", theme);
   }, [theme]);
 
-  // Scroll handler
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!chatContainerRef.current || !scrollFabRef.current) return;
-      const { scrollHeight, scrollTop, clientHeight } = chatContainerRef.current;
-      const atBottom = scrollHeight - scrollTop - clientHeight < 80;
-      if (!atBottom && !firstMsg) {
-        scrollFabRef.current.classList.add("show");
-      } else {
-        scrollFabRef.current.classList.remove("show");
-      }
-    };
-    const el = chatContainerRef.current;
-    if (el) el.addEventListener("scroll", handleScroll);
-    return () => { if (el) el.removeEventListener("scroll", handleScroll); };
-  }, [firstMsg]);
+  const initAfterAuth = async () => {
+    const savedTheme = localStorage.getItem("nova_theme");
+    if (savedTheme) setTheme(savedTheme);
 
-  // Auth handlers
-  const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!authUsername.trim() || !authPassword.trim()) return;
-    setAuthError("");
-    setAuthLoading(true);
     try {
-      const endpoint = authMode === "login" ? "/api/auth/login" : "/api/auth/register";
-      const res = await fetch(endpoint, {
+      const [personsRes, chatsRes, settingsRes] = await Promise.all([
+        fetch("/api/persons", { headers: { "x-user-id": userIdRef.current } }),
+        fetch("/api/chats", { headers: { "x-user-id": userIdRef.current } }),
+        fetch("/api/user/settings", { headers: { "x-user-id": userIdRef.current } })
+      ]);
+
+      const personsData = await personsRes.json();
+      const chatsData = await chatsRes.json();
+      const settingsData = await settingsRes.json();
+
+      if (settingsData.settings) {
+        setUserName(settingsData.settings.name || "");
+        setUserGender(settingsData.settings.gender || "");
+      }
+
+      const loadedPersons = personsData.persons || [];
+      const loadedChats = chatsData.chats || [];
+
+      setPersons(loadedPersons);
+      
+      const newChatMap: Record<string, string> = {};
+      loadedChats.forEach((c: any) => {
+        if (c.personId) newChatMap[c.personId] = c.id;
+      });
+      setChatMap(newChatMap);
+
+      if (loadedPersons.length > 0) {
+        const savedActive = localStorage.getItem("nova_active_person_id");
+        if (savedActive && loadedPersons.find((p: any) => p.id === savedActive)) {
+          setActivePersonId(savedActive);
+          loadChatForPerson(savedActive, newChatMap);
+        } else {
+          setActivePersonId(loadedPersons[0].id);
+          loadChatForPerson(loadedPersons[0].id, newChatMap);
+        }
+      }
+    } catch (e) {
+      console.error("Boot error:", e);
+    }
+  };
+
+  const loadChatForPerson = async (personId: string, currentChatMap: Record<string, string>) => {
+    let chatId = currentChatMap[personId];
+    if (!chatId) {
+      try {
+        const res = await fetch("/api/chats", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-user-id": userIdRef.current },
+          body: JSON.stringify({ personId })
+        });
+        const data = await res.json();
+        if (data.chat) {
+          chatId = data.chat.id;
+          setChatMap(prev => ({ ...prev, [personId]: chatId }));
+        }
+      } catch (e) {
+        console.error("Failed to create chat for person");
+        return;
+      }
+    }
+    
+    if (chatId) {
+      setCurrentChatId(chatId);
+      try {
+        const res = await fetch(`/api/chats/${chatId}/messages`, {
+          headers: { "x-user-id": userIdRef.current }
+        });
+        const data = await res.json();
+        if (data.messages) {
+          setMessages(data.messages.sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()));
+        } else {
+          setMessages([]);
+        }
+      } catch (e) {
+        console.error("Failed to fetch messages");
+        setMessages([]);
+      }
+    }
+  };
+
+  const switchPerson = (personId: string) => {
+    setActivePersonId(personId);
+    localStorage.setItem("nova_active_person_id", personId);
+    setSidebarOpen(false);
+    loadChatForPerson(personId, chatMap);
+  };
+
+  const createPerson = async () => {
+    if (!cpName.trim() || cpCreating) return;
+    setCpCreating(true);
+    try {
+      const res = await fetch("/api/persons", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: authUsername.trim(), password: authPassword }),
+        headers: { "Content-Type": "application/json", "x-user-id": userIdRef.current },
+        body: JSON.stringify({
+          name: cpName, emoji: cpEmoji, gender: cpGender,
+          personality: cpPersonality, relationship: cpRelationship, language: cpLanguage
+        })
       });
       const data = await res.json();
-      if (!res.ok) { setAuthError(data.error || "Something went wrong"); return; }
-
-      // Persist auth
-      localStorage.setItem("nova_user_id", data.userId);
-      localStorage.setItem("nova_username", data.username);
-
-      // Persist user profile
-      if (data.onboardingCompleted) {
-        localStorage.setItem("nova_onboarding", "true");
-        localStorage.setItem("nova_user_name", data.name || "");
-        localStorage.setItem("nova_user_gender", data.gender || "");
+      if (data.person) {
+        setPersons(prev => [...prev, data.person]);
+        switchPerson(data.person.id);
+        setCreateModalOpen(false);
+        setCpName("");
+        setCpEmoji("👩");
+        showToast("Person created!");
+      } else {
+        alert(data.error || "Failed to create person");
       }
-
-      // Persist companion settings returned from server (login only; register returns defaults)
-      if (data.companionName) {
-        localStorage.setItem("companion-name", data.companionName);
-        localStorage.setItem("companion-image", data.companionPhoto || "");
-        localStorage.setItem("persona", data.personality || "nova");
-        localStorage.setItem("nova_language", data.language || "english");
-        localStorage.setItem("nova_relationship", data.relationship || "girlfriend");
-      }
-
-      userIdRef.current = data.userId;
-      setLoggedInUser(data.username);
-      initAfterAuth();
-    } catch {
-      setAuthError("Network error, please try again");
-    } finally {
-      setAuthLoading(false);
+    } catch (e) {
+      alert("Error creating person");
     }
+    setCpCreating(false);
+  };
+
+  const deleteCurrentPerson = async () => {
+    if (!activePersonId) return;
+    if (!confirm("Are you sure? This will delete this person and all your chat history with them. This cannot be undone.")) return;
+    
+    try {
+      const res = await fetch(`/api/persons/${activePersonId}`, {
+        method: "DELETE",
+        headers: { "x-user-id": userIdRef.current }
+      });
+      if (res.ok) {
+        const newPersons = persons.filter(p => p.id !== activePersonId);
+        setPersons(newPersons);
+        showToast("Person deleted");
+        setSettingsOpen(false);
+        if (newPersons.length > 0) {
+          switchPerson(newPersons[0].id);
+        } else {
+          setActivePersonId(null);
+          setCurrentChatId(null);
+          setMessages([]);
+        }
+      }
+    } catch (e) {
+      alert("Failed to delete person");
+    }
+  };
+
+  // Auth Handling
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError(""); setAuthUsernameError(""); setAuthPasswordError("");
+    const u = authUsername.trim();
+    if (u.length < 3) { setAuthUsernameError("Username must be at least 3 characters."); return; }
+    if (authPassword.length < 6) { setAuthPasswordError("Password must be at least 6 characters."); return; }
+    
+    setAuthLoading(true);
+    try {
+      const res = await fetch(`/api/user/${authMode}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: u, password: authPassword })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        if (data.error?.toLowerCase().includes("username")) setAuthUsernameError(data.error);
+        else if (data.error?.toLowerCase().includes("password")) setAuthPasswordError(data.error);
+        else setAuthError(data.error || "Authentication failed");
+      } else {
+        localStorage.setItem("nova_user", data.user.username);
+        localStorage.setItem("nova_userId", data.user.id);
+        setLoggedInUser(data.user.username);
+        userIdRef.current = data.user.id;
+        initAfterAuth();
+      }
+    } catch (e) {
+      setAuthError("Network error. Please try again.");
+    }
+    setAuthLoading(false);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("nova_user_id");
-    localStorage.removeItem("nova_username");
+    localStorage.removeItem("nova_user");
+    localStorage.removeItem("nova_userId");
     setLoggedInUser(null);
+    userIdRef.current = "";
+    setPersons([]);
     setMessages([]);
-    setAllChats([]);
-    setCurrentChatId(null);
-    setFirstMsg(true);
-    setAuthUsername("");
-    setAuthPassword("");
-    setUserName("");
-    setUserGender("");
-    setCustomPersonas([]);
     setChatMap({});
-    localStorage.removeItem("nova_onboarding");
-    localStorage.removeItem("nova_user_name");
-    localStorage.removeItem("nova_user_gender");
-    localStorage.removeItem("nova_custom_personalities");
-    localStorage.removeItem("nova_active_personality");
-  };
-
-  const initAfterAuth = () => {
-    const obDone = localStorage.getItem("nova_onboarding") === "true";
-    const uName = localStorage.getItem("nova_user_name") || "";
-    const uGen = (localStorage.getItem("nova_user_gender") as any) || "";
-    setUserName(uName);
-    setUserGender(uGen);
-
-    // Load cached custom personalities immediately
-    try {
-      const cached = localStorage.getItem("nova_custom_personalities");
-      if (cached) setCustomPersonas(JSON.parse(cached));
-    } catch { }
-
-    const savedName = localStorage.getItem("companion-name");
-    const savedImage = localStorage.getItem("companion-image");
-    const savedPersona = localStorage.getItem("nova_active_personality") || localStorage.getItem("persona") || "nova";
-    const savedLanguage = localStorage.getItem("nova_language");
-    const savedRelationship = localStorage.getItem("nova_relationship");
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "light") {
-      setTheme("light");
-      document.body.classList.add("light");
-    } else {
-      document.body.classList.remove("light");
-    }
-    if (savedPersona) setCurrentPersona(savedPersona);
-    if (savedLanguage) setLanguage(savedLanguage);
-    if (savedRelationship) setRelationship(savedRelationship);
-    if (savedName) {
-      setCompanionName(savedName);
-      if (savedImage) setCompanionImage(savedImage);
-      bootIntoApp(savedPersona, savedName, savedLanguage || "english", savedRelationship || "girlfriend");
-    } else {
-      setOnboardingMode(obDone ? "companion" : "user");
-    }
-  };
-
-
-  // API Helpers
-  const getHeaders = () => ({
-    "Content-Type": "application/json",
-    "x-user-id": userIdRef.current
-  });
-
-  const loadChats = async () => {
-    try {
-      const res = await fetch("/api/chats", { headers: { "x-user-id": userIdRef.current } });
-      const data = await res.json();
-      return data.chats || [];
-    } catch { return []; }
-  };
-
-  // Upsert: get-or-create one chat per personality
-  const ensureChat = async (persona: string): Promise<string | null> => {
-    try {
-      const res = await fetch("/api/chats", {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({ personality: persona })
-      });
-      const data = await res.json();
-      return data.chat?.id || null;
-    } catch { return null; }
-  };
-
-  // Fetch custom personalities from API and merge with localStorage cache
-  const loadCustomPersonalities = async () => {
-    try {
-      const res = await fetch("/api/personalities", { headers: { "x-user-id": userIdRef.current } });
-      const data = await res.json();
-      const list: CustomPersona[] = (data.personalities || []).map((p: any) => ({
-        id: p.id, name: p.name, emoji: p.emoji, prompt: p.prompt
-      }));
-      setCustomPersonas(list);
-      localStorage.setItem("nova_custom_personalities", JSON.stringify(list));
-      return list;
-    } catch { return []; }
-  };
-
-  const loadChatMessages = async (chatId: string) => {
-    try {
-      const res = await fetch(`/api/chats/${chatId}/messages`, { headers: { "x-user-id": userIdRef.current } });
-      const data = await res.json();
-      return data.messages || [];
-    } catch { return []; }
-  };
-
-  const saveMessages = async (chatId: string, msgs: any[]) => {
-    try {
-      await fetch(`/api/chats/${chatId}/messages`, {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({ messages: msgs })
-      });
-      // Auto-title
-      const userMsgs = msgs.filter(m => m.role === "user");
-      if (userMsgs.length === 1 && msgs.length <= 3) {
-        try {
-          const res = await fetch("/api/chat/title", {
-            method: "POST",
-            headers: getHeaders(),
-            body: JSON.stringify({ message: userMsgs[0].content })
-          });
-          const { title } = await res.json();
-          if (title) {
-            await fetch(`/api/chats/${chatId}`, {
-              method: "PATCH",
-              headers: getHeaders(),
-              body: JSON.stringify({ title })
-            });
-            setAllChats(prev => prev.map(c => c.id === chatId ? { ...c, title } : c));
-          }
-        } catch { }
-      }
-    } catch { }
-  };
-
-  // autoGreet updated to use local state fallback if not passed directly
-  const autoGreet = async (chatId: string, persona: string, compName: string, lang: string, rel: string) => {
-    setIsStreaming(true);
-    setFirstMsg(false);
-    setStreamedText("");
-    let fullText = "";
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [{ role: "user", content: "hey!" }],
-          personality: persona,
-          companionName: compName || "Nova",
-          language: lang,
-          relationship: rel,
-          userName: userName,
-          userGender: userGender
-        }),
-      });
-      
-      if (!res.ok) {
-        let errMsg = "something went wrong 😭";
-        try {
-          const errData = await res.json();
-          if (errData.error) errMsg = errData.error;
-        } catch {}
-        setStreamedText("");
-        setMessages([{ role: "assistant", content: errMsg }]);
-        setIsStreaming(false);
-        return;
-      }
-
-      if (!res.body) return;
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buf = "";
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += decoder.decode(value, { stream: true });
-        const lines = buf.split("\n");
-        buf = lines.pop() ?? "";
-        for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          const payload = line.slice(6).trim();
-          if (payload === "[DONE]") break;
-          try {
-            const obj = JSON.parse(payload);
-            const chunk = obj.text || obj.choices?.[0]?.delta?.content || "";
-            if (chunk) {
-              fullText += chunk;
-              setStreamedText(fullText);
-              scrollToBottom(true);
-            }
-          } catch { }
-        }
-      }
-    } catch { }
-    setStreamedText("");
-    if (fullText) {
-      const greetMsg = [{ role: "assistant", content: fullText }];
-      setMessages(greetMsg);
-      // Save greeting without triggering auto-title (only 1 msg, not 2)
-      try {
-        await fetch(`/api/chats/${chatId}/messages`, {
-          method: "POST",
-          headers: getHeaders(),
-          body: JSON.stringify({ messages: greetMsg }),
-        });
-      } catch { }
-    }
-    setIsStreaming(false);
-    scrollToBottom(true);
-  };
-
-  const bootIntoApp = async (persona: string, compName?: string, lang?: string, rel?: string) => {
-    const name = compName || companionName || localStorage.getItem("companion-name") || "Nova";
-    const appLang = lang || language || "english";
-    const appRel = rel || relationship || "girlfriend";
-
-    // Load all chats and custom personalities in parallel
-    const [chats, customList] = await Promise.all([
-      loadChats(),
-      loadCustomPersonalities()
-    ]);
-    setAllChats(chats);
-
-    // Build chatMap: { personalityId -> chatId }
-    const map: Record<string, string> = {};
-    for (const c of chats) map[c.personality] = c.id;
-    setChatMap(map);
-
-    // Ensure the active personality has a chat
-    let activeChatId = map[persona];
-    if (!activeChatId) {
-      const chatId = await ensureChat(persona);
-      if (chatId) {
-        activeChatId = chatId;
-        map[persona] = chatId;
-        setChatMap({ ...map });
-      }
-    }
-
-    if (!activeChatId) return;
-    setCurrentChatId(activeChatId);
-    const msgs = await loadChatMessages(activeChatId);
-    setMessages(msgs);
-    if (msgs.length === 0) {
-      setFirstMsg(false);
-      autoGreet(activeChatId, persona, name, appLang, appRel);
-    } else {
-      setFirstMsg(false);
-      scrollToBottom();
-    }
-  };
-
-  // Switch to a personality's persistent chat
-  const switchPersonality = async (persona: string) => {
-    if (isStreaming) return;
-    if (persona === currentPersona && chatMap[persona] === currentChatId) {
-      setSidebarOpen(false);
-      return;
-    }
-    setCurrentPersona(persona);
-    localStorage.setItem("nova_active_personality", persona);
-    localStorage.setItem("persona", persona);
-    setSidebarOpen(false);
-
-    let chatId = chatMap[persona];
-    if (!chatId) {
-      const newId = await ensureChat(persona);
-      if (newId) {
-        chatId = newId;
-        setChatMap(prev => ({ ...prev, [persona]: newId }));
-      }
-    }
-    if (!chatId) return;
-    setCurrentChatId(chatId);
-    const msgs = await loadChatMessages(chatId);
-    setMessages(msgs);
-    if (msgs.length === 0) {
-      setFirstMsg(false);
-      autoGreet(chatId, persona, companionName || "Nova", language, relationship);
-    } else {
-      setFirstMsg(false);
-      scrollToBottom();
-    }
-  };
-
-  // Create a new custom personality
-  const handleCreateCustomPersonality = async () => {
-    if (!cpName.trim() || !cpPrompt.trim()) return;
-    setCpCreating(true);
-    try {
-      const res = await fetch("/api/personalities", {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({ name: cpName.trim(), emoji: cpEmoji.trim() || "✨", prompt: cpPrompt.trim() })
-      });
-      if (!res.ok) {
-        const d = await res.json();
-        showToast(d.error || "failed to create");
-        return;
-      }
-      const { personality } = await res.json();
-      const cp: CustomPersona = { id: personality.id, name: personality.name, emoji: personality.emoji, prompt: personality.prompt };
-      const updated = [...customPersonas, cp];
-      setCustomPersonas(updated);
-      localStorage.setItem("nova_custom_personalities", JSON.stringify(updated));
-      setCreateModalOpen(false);
-      setCpName(""); setCpEmoji("✨"); setCpPrompt("");
-      showToast(`${cp.emoji} ${cp.name} created!`);
-      // Switch to the new personality
-      await switchPersonality(cp.id);
-    } catch {
-      showToast("something went wrong 😭");
-    } finally {
-      setCpCreating(false);
-    }
-  };
-
-  // Delete a custom personality
-  const handleDeleteCustomPersonality = async (id: string) => {
-    try {
-      await fetch(`/api/personalities/${id}`, { method: "DELETE", headers: { "x-user-id": userIdRef.current } });
-      const updated = customPersonas.filter(p => p.id !== id);
-      setCustomPersonas(updated);
-      localStorage.setItem("nova_custom_personalities", JSON.stringify(updated));
-      setCpDeleteId(null);
-      // If we were on that personality, switch to nova
-      if (currentPersona === id) switchPersonality("nova");
-      showToast("companion removed");
-    } catch {
-      showToast("failed to delete 😭");
-    }
-  };
-
-  const scrollToBottom = (smooth = false) => {
-    setTimeout(() => {
-      if (chatContainerRef.current) {
-        chatContainerRef.current.scrollTo({
-          top: chatContainerRef.current.scrollHeight,
-          behavior: smooth ? "smooth" : "instant"
-        });
-      }
-    }, 50);
+    setActivePersonId(null);
+    setCurrentChatId(null);
+    setTheme("default");
+    document.documentElement.removeAttribute("data-theme");
   };
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
     setToastShow(true);
-    setTimeout(() => setToastShow(false), 2200);
+    setTimeout(() => setToastShow(false), 3000);
   };
 
-  const speak = (text: string) => {
-    if ("speechSynthesis" in window) {
-      const u = new SpeechSynthesisUtterance(text.replace(/[#*\`>_~]/g, ""));
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(u);
-    }
+  const scrollToBottom = (smooth = true) => {
+    if (!chatContainerRef.current) return;
+    chatContainerRef.current.scrollTo({
+      top: chatContainerRef.current.scrollHeight,
+      behavior: smooth ? "smooth" : "auto"
+    });
   };
 
-  const submitMessage = async (text: string) => {
-    if (!text.trim() || isStreaming) return;
+  useEffect(() => {
+    if (messages.length > 0 || streamedText) scrollToBottom(true);
+  }, [messages, streamedText]);
+
+  // Handle scroll fab visibility
+  useEffect(() => {
+    const el = chatContainerRef.current;
+    if (!el) return;
+    const handleScroll = () => {
+      if (!scrollFabRef.current) return;
+      const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+      if (distFromBottom > 150) scrollFabRef.current.classList.add("show");
+      else scrollFabRef.current.classList.remove("show");
+    };
+    el.addEventListener("scroll", handleScroll);
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleSend = async () => {
+    if ((!inputValue.trim() && !streamedText) || isStreaming || !currentChatId || !activePersonId) return;
+    
+    const userText = inputValue.trim();
     setInputValue("");
-    if (inputRef.current) inputRef.current.style.height = "auto";
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+      inputRef.current.focus();
+    }
 
-    const newMsgs = [...messages, { role: "user", content: text }];
-    setMessages(newMsgs);
-    if (firstMsg) setFirstMsg(false);
-    scrollToBottom(true);
+    const newMsg = { role: "user", content: userText, createdAt: new Date().toISOString() };
+    setMessages(prev => [...prev, newMsg]);
     setIsStreaming(true);
     setStreamedText("");
+    scrollToBottom();
 
     try {
+      // 1. Save user msg
+      await fetch(`/api/chats/${currentChatId}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-user-id": userIdRef.current },
+        body: JSON.stringify({ role: "user", content: userText })
+      });
+
+      // 2. Stream AI response
       const res = await fetch("/api/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-user-id": userIdRef.current },
         body: JSON.stringify({
-          messages: newMsgs,
-          personality: currentPersona,
-          companionName: companionName || "Nova",
-          language: language,
-          relationship: relationship,
-          userName: userName,
-          userGender: userGender
+          messages: [...messages, newMsg].map(m => ({ role: m.role, content: m.content })),
+          personId: activePersonId,
+          userName,
+          userGender
         })
       });
 
-      if (!res.ok) {
-        let errMsg = "ugh something broke 😭 wanna try again?";
-        try {
-          const errData = await res.json();
-          if (errData.error) errMsg = errData.error;
-        } catch {}
-        setMessages([...newMsgs, { role: "assistant", content: errMsg }]);
-        setIsStreaming(false);
-        return;
-      }
-
-      if (!res.body) throw new Error("No response body");
-
-      const reader = res.body.getReader();
+      if (!res.ok) throw new Error("API Error");
+      const reader = res.body?.getReader();
       const decoder = new TextDecoder();
-      let buf = "";
-      let fullText = "";
+      let fullResponse = "";
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += decoder.decode(value, { stream: true });
-        const lines = buf.split("\n");
-        buf = lines.pop() || "";
-        for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          const data = line.slice(6).trim();
-          if (data === "[DONE]") break;
-          try {
-            const obj = JSON.parse(data);
-            if (obj.error) {
-              setMessages([...newMsgs, { role: "assistant", content: obj.error }]);
-              setIsStreaming(false);
-              return;
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value);
+          const lines = chunk.split("\n");
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const payload = line.slice(6).trim();
+              if (payload === "[DONE]") break;
+              try {
+                const data = JSON.parse(payload);
+                if (data.text) {
+                  fullResponse += data.text;
+                  setStreamedText(fullResponse);
+                }
+              } catch (e) {}
             }
-
-            const chunkText = obj.text || obj.choices?.[0]?.delta?.content || "";
-            if (chunkText) {
-              fullText += chunkText;
-              setStreamedText(fullText);
-              scrollToBottom(true);
-            }
-          } catch { }
+          }
         }
       }
 
+      // 3. Save assistant msg
+      await fetch(`/api/chats/${currentChatId}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-user-id": userIdRef.current },
+        body: JSON.stringify({ role: "assistant", content: fullResponse })
+      });
+
+      setMessages(prev => [...prev, { role: "assistant", content: fullResponse, createdAt: new Date().toISOString() }]);
       setStreamedText("");
-      const finalMsgs = [...newMsgs, { role: "assistant", content: fullText }];
-      setMessages(finalMsgs);
-      if (currentChatId) saveMessages(currentChatId, finalMsgs);
-      if (soundOn) speak(fullText.slice(0, 400));
-      scrollToBottom(true);
-    } catch (e) {
-      setStreamedText("");
-      setMessages([...newMsgs, { role: "assistant", content: "ugh something broke 😭 wanna try again?" }]);
+    } catch (error) {
+      console.error("Chat error:", error);
+      showToast("Message failed to send.");
     } finally {
       setIsStreaming(false);
+      scrollToBottom();
     }
   };
 
-  const regenMessage = () => {
-    if (isStreaming || messages.length === 0) return;
-    // Find last user message
-    let lastUserIdx = messages.length - 1;
-    while (lastUserIdx >= 0 && messages[lastUserIdx].role !== "user") lastUserIdx--;
-    if (lastUserIdx < 0) return;
-
-    const newMsgs = messages.slice(0, lastUserIdx + 1);
-    setMessages(newMsgs);
-    setIsStreaming(true);
-    setStreamedText("");
-
-    // Basically duplicate the fetch logic
-    const reqBody = {
-      messages: newMsgs,
-      personality: currentPersona,
-      companionName: companionName || "Nova",
-      language: language,
-      relationship: relationship,
-      userName: userName,
-      userGender: userGender
-    };
-
-    fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(reqBody)
-    }).then(async res => {
-      if (!res.ok) {
-        let errMsg = "ugh something broke 😭 wanna try again?";
-        try {
-          const errData = await res.json();
-          if (errData.error) errMsg = errData.error;
-        } catch {}
-        setMessages([...newMsgs, { role: "assistant", content: errMsg }]);
-        setIsStreaming(false);
-        return;
-      }
-      
-      if (!res.body) return;
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buf = "";
-      let fullText = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += decoder.decode(value, { stream: true });
-        const lines = buf.split("\n");
-        buf = lines.pop() || "";
-        for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          const data = line.slice(6).trim();
-          if (data === "[DONE]") break;
-          try {
-            const obj = JSON.parse(data);
-            if (obj.error) throw new Error(obj.error);
-
-            const chunkText = obj.text || obj.choices?.[0]?.delta?.content || "";
-            if (chunkText) {
-              fullText += chunkText;
-              setStreamedText(fullText);
-              scrollToBottom(true);
-            }
-          } catch { }
-        }
-      }
-      setStreamedText("");
-      const finalMsgs = [...newMsgs, { role: "assistant", content: fullText }];
-      setMessages(finalMsgs);
-      if (currentChatId) saveMessages(currentChatId, finalMsgs);
-      if (soundOn) speak(fullText.slice(0, 400));
-      scrollToBottom(true);
-    }).catch(e => {
-      setStreamedText("");
-      setMessages([...newMsgs, { role: "assistant", content: "ugh something broke 😭 wanna try again?" }]);
-    }).finally(() => {
-      setIsStreaming(false);
-    });
-  };
-
-  // Image resize
-  const resizeImage = (file: File, maxPx = 240): Promise<string> => {
-    return new Promise(resolve => {
-      const img = new Image();
-      const url = URL.createObjectURL(file);
-      img.onload = () => {
-        const r = Math.min(maxPx / img.width, maxPx / img.height, 1);
-        const c = document.createElement("canvas");
-        c.width = img.width * r;
-        c.height = img.height * r;
-        const ctx = c.getContext("2d");
-        if (ctx) ctx.drawImage(img, 0, 0, c.width, c.height);
-        URL.revokeObjectURL(url);
-        resolve(c.toDataURL("image/jpeg", 0.82));
-      };
-      img.onerror = () => { URL.revokeObjectURL(url); resolve(""); };
-      img.src = url;
-    });
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const data = await resizeImage(file);
-    if (data) setPendingImage(data);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  const saveUserOnboarding = async () => {
-    if (!userName.trim() || !userGender) return;
-    try {
-      await fetch("/api/user/onboarding", {
-        method: "POST",
-        headers: getHeaders(),
-        body: JSON.stringify({ name: userName.trim(), gender: userGender })
-      });
-      localStorage.setItem("nova_onboarding", "true");
-      localStorage.setItem("nova_user_name", userName.trim());
-      localStorage.setItem("nova_user_gender", userGender);
-      setOnboardingMode("companion");
-    } catch {}
-  };
-
-  const saveCompanionOnboarding = async () => {
-    const name = pendingName.trim();
-    if (!name) return;
-    setCompanionName(name);
-    setCompanionImage(pendingImage);
-
-    // Update localStorage cache
-    localStorage.setItem("companion-name", name);
-    localStorage.setItem("companion-image", pendingImage);
-    localStorage.setItem("persona", currentPersona);
-    localStorage.setItem("nova_language", language);
-    localStorage.setItem("nova_relationship", relationship);
-
-    // Persist to DB so settings restore on any device/login
-    fetch("/api/user/settings", {
-      method: "PUT",
-      headers: getHeaders(),
-      body: JSON.stringify({
-        companionName: name,
-        companionPhoto: pendingImage,
-        personality: currentPersona,
-        language,
-        relationship,
-      }),
-    }).catch(() => {}); // fire-and-forget, localStorage is the fallback
-
-    if (onboardingMode === "companion") {
-      bootIntoApp(currentPersona, name, language, relationship);
-    } else {
-      if (currentChatId) {
-        await fetch(`/api/chats/${currentChatId}`, {
-           method: "PATCH",
-           headers: getHeaders(),
-           body: JSON.stringify({ companionName: name, companionPhoto: pendingImage, language, relationshipType: relationship })
-        });
-      }
-      showToast(`saved! hey ${name} 💕`);
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
     }
-    setOnboardingMode("hidden");
   };
 
-  const parseMd = (t: string) => window.marked ? window.marked.parse(t) : t;
-  const escHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
+  const activePerson = persons.find(p => p.id === activePersonId);
 
   if (!isMounted) return null;
-
-  // Auth gate — premium inline-styled login screen
-  if (!loggedInUser) return (
-    <div style={{
-      position: "fixed", inset: 0, zIndex: 9999,
-      background: "#07071a",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      padding: "24px", fontFamily: "'Inter', sans-serif",
-    }}>
-      {/* Ambient glow blobs */}
-      <div style={{ position: "fixed", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
-        <div style={{ position: "absolute", width: 600, height: 500, borderRadius: "50%", background: "rgba(255,61,139,0.12)", filter: "blur(90px)", top: "-10%", left: "-8%", animation: "drift 22s ease-in-out infinite alternate" }} />
-        <div style={{ position: "absolute", width: 480, height: 420, borderRadius: "50%", background: "rgba(255,140,200,0.09)", filter: "blur(80px)", bottom: "-12%", right: "-8%", animation: "drift 18s ease-in-out infinite alternate-reverse" }} />
-      </div>
-
-      {/* Card */}
-      <div style={{
-        position: "relative", zIndex: 1,
-        background: "rgba(13,13,35,0.82)",
-        border: "1px solid rgba(255,110,180,0.16)",
-        borderRadius: 28, padding: "48px 44px 44px",
-        maxWidth: 420, width: "100%",
-        backdropFilter: "blur(40px)", WebkitBackdropFilter: "blur(40px)",
-        boxShadow: "0 0 80px rgba(255,61,139,0.07), 0 32px 80px rgba(0,0,0,0.55)",
-        display: "flex", flexDirection: "column", alignItems: "center",
-        animation: "fadeUp .45s cubic-bezier(.22,1,.36,1) both",
-      }}>
-        {/* Logo & heading */}
-        <div style={{ fontSize: 38, marginBottom: 16, lineHeight: 1 }}>🩷</div>
-        <h1 style={{
-          fontSize: 32, fontWeight: 800, letterSpacing: "-0.8px", margin: "0 0 8px",
-          background: "linear-gradient(135deg,#ff3d8b,#ff85bf)",
-          WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text",
-        }}>Nova</h1>
-        <p style={{ fontSize: 13.5, color: "rgba(240,240,250,0.5)", margin: "0 0 30px", textAlign: "center" }}>
-          your AI companion — sign in to continue
-        </p>
-
-        {/* Tab switcher */}
-        <div style={{
-          display: "flex", width: "100%", background: "rgba(255,255,255,0.04)",
-          border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: 3, marginBottom: 26,
-        }}>
-          {(["login", "register"] as const).map(mode => (
-            <button key={mode} onClick={() => {
-              setAuthMode(mode);
-              setAuthError("");
-              setAuthUsernameError("");
-              setAuthPasswordError("");
-            }} style={{
-              flex: 1, padding: "9px 0", borderRadius: 9, border: "none", cursor: "pointer",
-              fontSize: 13, fontWeight: 600, fontFamily: "inherit",
-              transition: "all .2s",
-              background: authMode === mode ? "linear-gradient(135deg,#ff3d8b,#ff80be)" : "transparent",
-              color: authMode === mode ? "#fff" : "rgba(240,240,250,0.45)",
-              boxShadow: authMode === mode ? "0 2px 14px rgba(255,61,139,0.35)" : "none",
-            }}>
-              {mode === "login" ? "Sign in" : "Create account"}
-            </button>
-          ))}
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleAuth} style={{ width: "100%", display: "flex", flexDirection: "column", gap: 14 }}>
-          {/* Username field */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-            <label style={{ fontSize: 11.5, fontWeight: 600, color: "rgba(240,240,250,0.4)", letterSpacing: "0.5px", textTransform: "uppercase" }}>Username</label>
-            <input
-              type="text"
-              autoComplete="username"
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              placeholder="e.g. luna_user"
-              maxLength={30}
-              value={authUsername}
-              onChange={e => {
-                const val = e.target.value;
-                setAuthUsername(val);
-                setAuthError("");
-                if (authMode === "register") {
-                  const trimmed = val.trim();
-                  if (trimmed.length > 0 && trimmed.length < 3) {
-                    setAuthUsernameError("At least 3 characters");
-                  } else if (trimmed.length > 30) {
-                    setAuthUsernameError("Max 30 characters");
-                  } else if (trimmed && !/^[a-z0-9_]+$/i.test(trimmed)) {
-                    setAuthUsernameError("Only letters, numbers, and _ allowed");
-                  } else {
-                    setAuthUsernameError("");
-                  }
-                } else {
-                  setAuthUsernameError("");
-                }
-              }}
-              style={{
-                width: "100%", padding: "13px 16px", boxSizing: "border-box",
-                background: "rgba(255,255,255,0.05)",
-                border: `1.5px solid ${authUsernameError ? "rgba(248,113,113,0.6)" : "rgba(255,255,255,0.09)"}`,
-                borderRadius: 12, color: "#f0f0fa",
-                fontFamily: "inherit", fontSize: 14.5, outline: "none",
-                transition: "border-color .2s, box-shadow .2s",
-              }}
-              onFocus={e => { e.target.style.borderColor = authUsernameError ? "rgba(248,113,113,0.6)" : "rgba(255,61,139,0.5)"; e.target.style.boxShadow = "0 0 0 4px rgba(255,61,139,0.1)"; }}
-              onBlur={e => { e.target.style.borderColor = authUsernameError ? "rgba(248,113,113,0.5)" : "rgba(255,255,255,0.09)"; e.target.style.boxShadow = "none"; }}
-            />
-            {authUsernameError && (
-              <span style={{ fontSize: 12, color: "#f87171", fontWeight: 500, paddingLeft: 4 }}>⚠ {authUsernameError}</span>
-            )}
-            {authMode === "register" && !authUsernameError && authUsername.trim().length >= 3 && (
-              <span style={{ fontSize: 12, color: "#34d399", fontWeight: 500, paddingLeft: 4 }}>✓ looks good</span>
-            )}
-          </div>
-
-          {/* Password field */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-            <label style={{ fontSize: 11.5, fontWeight: 600, color: "rgba(240,240,250,0.4)", letterSpacing: "0.5px", textTransform: "uppercase" }}>Password</label>
-            <input
-              type="password"
-              autoComplete={authMode === "login" ? "current-password" : "new-password"}
-              placeholder={authMode === "register" ? "at least 6 characters" : "your password"}
-              maxLength={128}
-              value={authPassword}
-              onChange={e => {
-                const val = e.target.value;
-                setAuthPassword(val);
-                setAuthError("");
-                if (authMode === "register") {
-                  if (val.length > 0 && val.length < 6) {
-                    setAuthPasswordError("At least 6 characters required");
-                  } else {
-                    setAuthPasswordError("");
-                  }
-                } else {
-                  setAuthPasswordError("");
-                }
-              }}
-              style={{
-                width: "100%", padding: "13px 16px", boxSizing: "border-box",
-                background: "rgba(255,255,255,0.05)",
-                border: `1.5px solid ${authPasswordError ? "rgba(248,113,113,0.6)" : "rgba(255,255,255,0.09)"}`,
-                borderRadius: 12, color: "#f0f0fa",
-                fontFamily: "inherit", fontSize: 14.5, outline: "none",
-                transition: "border-color .2s, box-shadow .2s",
-              }}
-              onFocus={e => { e.target.style.borderColor = authPasswordError ? "rgba(248,113,113,0.6)" : "rgba(255,61,139,0.5)"; e.target.style.boxShadow = "0 0 0 4px rgba(255,61,139,0.1)"; }}
-              onBlur={e => { e.target.style.borderColor = authPasswordError ? "rgba(248,113,113,0.5)" : "rgba(255,255,255,0.09)"; e.target.style.boxShadow = "none"; }}
-            />
-            {authPasswordError && (
-              <span style={{ fontSize: 12, color: "#f87171", fontWeight: 500, paddingLeft: 4 }}>⚠ {authPasswordError}</span>
-            )}
-          </div>
-
-          {authError && (
-            <div style={{
-              background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.22)",
-              color: "#f87171", borderRadius: 10, padding: "10px 14px",
-              fontSize: 13, fontWeight: 500, textAlign: "center",
-            }}>{authError}</div>
-          )}
-
-          <button
-            type="submit"
-            disabled={authLoading || !authUsername.trim() || !authPassword.trim() || !!authUsernameError || !!authPasswordError}
-            style={{
-              marginTop: 6, width: "100%", padding: "15px 0",
-              background: "linear-gradient(135deg,#ff3d8b,#ff80be)",
-              border: "none", borderRadius: 14,
-              color: "#fff", fontFamily: "inherit", fontSize: 15, fontWeight: 700,
-              cursor: authLoading || !authUsername.trim() || !authPassword.trim() || !!authUsernameError || !!authPasswordError ? "not-allowed" : "pointer",
-              opacity: authLoading || !authUsername.trim() || !authPassword.trim() || !!authUsernameError || !!authPasswordError ? 0.38 : 1,
-              boxShadow: "0 6px 28px rgba(255,61,139,0.35)",
-              transition: "opacity .2s, transform .15s, box-shadow .2s",
-            }}
-            onMouseEnter={e => { if (!authLoading) { (e.target as HTMLButtonElement).style.transform = "translateY(-1px)"; (e.target as HTMLButtonElement).style.boxShadow = "0 8px 36px rgba(255,61,139,0.5)"; } }}
-            onMouseLeave={e => { (e.target as HTMLButtonElement).style.transform = ""; (e.target as HTMLButtonElement).style.boxShadow = "0 6px 28px rgba(255,61,139,0.35)"; }}
-          >
-            {authLoading ? "Please wait…" : authMode === "login" ? "Sign in" : "Create account"}
-          </button>
-        </form>
-
-        <p style={{ marginTop: 22, fontSize: 12, color: "rgba(240,240,250,0.25)", textAlign: "center", lineHeight: 1.6 }}>
-          Powered by NOVA Corp © 2026 · Anand Shukla
-        </p>
-      </div>
-    </div>
-  );
-
 
   return (
     <>
@@ -1019,146 +447,138 @@ export default function NovaApp() {
         <div className="aurora-blob ab3"></div>
       </div>
 
-      {/* Onboarding */}
-      <div className={`onboarding ${onboardingMode === "hidden" ? "hidden" : ""}`} id="onboarding">
-        <div className="ob-card" style={{ maxWidth: 440 }}>
-          {onboardingMode === "user" ? (
-            <>
-              <div className="ob-sparkle">👋</div>
-              <div className="ob-heading">
-                <h2>welcome to <span>nova</span> ✨</h2>
-                <p>let's get to know you first</p>
+      <div className={`toast ${toastShow ? "show" : ""}`}>{toastMsg}</div>
+
+      {/* Auth Gate */}
+      {!loggedInUser && (
+        <div className="auth-gate">
+          <div className="auth-card">
+            <div className="auth-logo">🩷</div>
+            <div className="auth-title">Nova</div>
+            <div className="auth-sub">your ai companion</div>
+            
+            <div className="auth-tabs">
+              <button className={`auth-tab ${authMode === "login" ? "active" : ""}`} onClick={() => { setAuthMode("login"); setAuthError(""); setAuthUsernameError(""); setAuthPasswordError(""); }}>Log In</button>
+              <button className={`auth-tab ${authMode === "register" ? "active" : ""}`} onClick={() => { setAuthMode("register"); setAuthError(""); setAuthUsernameError(""); setAuthPasswordError(""); }}>Register</button>
+            </div>
+            
+            <form className="auth-form" onSubmit={handleAuthSubmit}>
+              {authError && <div className="auth-error">{authError}</div>}
+              
+              <div className="auth-field">
+                <label>Username</label>
+                <input 
+                  type="text" 
+                  placeholder="Enter username" 
+                  value={authUsername} 
+                  onChange={e => setAuthUsername(e.target.value)}
+                  disabled={authLoading}
+                  style={authUsernameError ? { borderColor: 'rgba(248,113,113,0.5)' } : {}}
+                />
+                {authUsernameError && <div style={{color: 'var(--red)', fontSize: '11px', marginTop: '-3px'}}>{authUsernameError}</div>}
               </div>
               
-              <div style={{ display: "flex", flexDirection: "column", gap: 20, width: "100%", marginTop: 20 }}>
-                <div style={{ textAlign: "left" }}>
-                  <label style={{ fontSize: 13, color: "var(--text-2)", marginBottom: 8, display: "block" }}>Your Name</label>
-                  <input
-                    className="ob-name-input" type="text" maxLength={30}
-                    placeholder="What should we call you?" autoComplete="off"
-                    value={userName} onChange={e => setUserName(e.target.value)}
-                  />
-                </div>
-                
-                <div style={{ textAlign: "left" }}>
-                  <label style={{ fontSize: 13, color: "var(--text-2)", marginBottom: 8, display: "block" }}>I identify as</label>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-                    <button 
-                      className={`lang-pill ${userGender === "male" ? "active" : ""}`} 
-                      style={{ flex: 1, padding: "12px", borderRadius: "12px", border: userGender === "male" ? "1px solid #ff3d8b" : "1px solid var(--border)", background: userGender === "male" ? "rgba(255,61,139,0.1)" : "transparent", color: userGender === "male" ? "#ff3d8b" : "var(--text-1)", cursor: "pointer", transition: "0.2s" }}
-                      onClick={() => setUserGender("male")}
-                    >Male</button>
-                    <button 
-                      className={`lang-pill ${userGender === "female" ? "active" : ""}`} 
-                      style={{ flex: 1, padding: "12px", borderRadius: "12px", border: userGender === "female" ? "1px solid #ff3d8b" : "1px solid var(--border)", background: userGender === "female" ? "rgba(255,61,139,0.1)" : "transparent", color: userGender === "female" ? "#ff3d8b" : "var(--text-1)", cursor: "pointer", transition: "0.2s" }}
-                      onClick={() => setUserGender("female")}
-                    >Female</button>
-                  </div>
-                </div>
-              </div>
-
-              <button className="ob-start-btn" disabled={!userName.trim() || !userGender} onClick={saveUserOnboarding} style={{ marginTop: 24 }}>
-                continue ➔
-              </button>
-            </>
-          ) : (
-            <>
-              <div className="ob-sparkle">🩷</div>
-              <div className="ob-heading" style={{ position: "relative" }}>
-                {onboardingMode === "companion" && (
-                  <button 
-                    onClick={() => setOnboardingMode("user")}
-                    style={{ position: "absolute", left: -10, top: 0, background: "transparent", border: "none", color: "var(--text-2)", fontSize: 24, cursor: "pointer", padding: "4px 8px" }}
-                  >
-                    ←
-                  </button>
-                )}
-                <h2>{onboardingMode === "edit" ? "edit" : "create"} your <span>companion</span> 🩷</h2>
-                <p>setup your perfect ai companion</p>
+              <div className="auth-field">
+                <label>Password</label>
+                <input 
+                  type="password" 
+                  placeholder="Enter password" 
+                  value={authPassword} 
+                  onChange={e => setAuthPassword(e.target.value)}
+                  disabled={authLoading}
+                  style={authPasswordError ? { borderColor: 'rgba(248,113,113,0.5)' } : {}}
+                />
+                {authPasswordError && <div style={{color: 'var(--red)', fontSize: '11px', marginTop: '-3px'}}>{authPasswordError}</div>}
               </div>
               
-              <div className="ob-scroll-area" style={{ maxHeight: "60vh", overflowY: "auto", paddingRight: 10, width: "100%" }}>
-                <div className="ob-av-section" style={{ marginTop: 10 }}>
-                  <div className="ob-av-ring" onClick={() => fileInputRef.current?.click()} title="tap to add her pic!">
-                    <div className="ob-av-inner">
-                      {pendingImage ? (
-                        <img className="ob-av-img" src={pendingImage} alt="companion" style={{ display: "block" }} />
-                      ) : (
-                        <span className="ob-av-letter">{pendingName ? pendingName.charAt(0).toUpperCase() : "?"}</span>
-                      )}
-                      <div className="ob-av-hover"><span>📷</span><span>add pic!</span></div>
-                    </div>
-                  </div>
-                  <span className="ob-av-hint">tap to add a photo — totally optional tho 🥺</span>
-                  {pendingImage && (
-                    <button className="ob-remove-img show" onClick={(e) => { e.stopPropagation(); setPendingImage(""); }}>✕ remove photo</button>
-                  )}
-                  <input type="file" ref={fileInputRef} accept="image/*" style={{ display: "none" }} onChange={handleImageUpload} />
-                </div>
-                
-                <div style={{ textAlign: "left", marginTop: 20 }}>
-                  <label style={{ fontSize: 13, color: "var(--text-2)", marginBottom: 8, display: "block" }}>Companion Name</label>
-                  <input
-                    className="ob-name-input" type="text" maxLength={20}
-                    placeholder="e.g. Nova, Aria, Luna…" autoComplete="off"
-                    value={pendingName} onChange={e => setPendingName(e.target.value)}
-                  />
-                </div>
-
-                <div style={{ textAlign: "left", marginTop: 20 }}>
-                  <label style={{ fontSize: 13, color: "var(--text-2)", marginBottom: 8, display: "block" }}>Relationship Type</label>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                    {userGender === "male" && [
-                      { id: "girlfriend", icon: "🩷", name: "Girlfriend" },
-                      { id: "bestfriend", icon: "🤝", name: "Best Friend" },
-                      { id: "classmate", icon: "📚", name: "Classmate" },
-                      { id: "crush", icon: "💜", name: "Crush" },
-                      { id: "situationship", icon: "🌙", name: "Situationship" }
-                    ].map(r => (
-                      <button key={r.id} className={`lang-pill ${relationship === r.id ? "active" : ""}`}
-                        style={{ padding: "8px 12px", borderRadius: "12px", border: relationship === r.id ? "1px solid #ff3d8b" : "1px solid var(--border)", background: relationship === r.id ? "rgba(255,61,139,0.1)" : "transparent", color: relationship === r.id ? "#ff3d8b" : "var(--text-1)", cursor: "pointer", fontSize: 13, transition: "0.2s" }}
-                        onClick={() => setRelationship(r.id)}
-                      >{r.icon} {r.name}</button>
-                    ))}
-                    {userGender === "female" && [
-                      { id: "bestfriend", icon: "🤝", name: "Best Friend" },
-                      { id: "classmate", icon: "📚", name: "Classmate" },
-                    ].map(r => (
-                      <button key={r.id} className={`lang-pill ${relationship === r.id ? "active" : ""}`}
-                        style={{ padding: "8px 12px", borderRadius: "12px", border: relationship === r.id ? "1px solid #ff3d8b" : "1px solid var(--border)", background: relationship === r.id ? "rgba(255,61,139,0.1)" : "transparent", color: relationship === r.id ? "#ff3d8b" : "var(--text-1)", cursor: "pointer", fontSize: 13, transition: "0.2s" }}
-                        onClick={() => setRelationship(r.id)}
-                      >{r.icon} {r.name}</button>
-                    ))}
-                  </div>
-                  {userGender === "female" && <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 8 }}>More companion types coming soon ✨</div>}
-                </div>
-
-                <div style={{ textAlign: "left", marginTop: 20, marginBottom: 20 }}>
-                  <label style={{ fontSize: 13, color: "var(--text-2)", marginBottom: 8, display: "block" }}>Language</label>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-                    <button 
-                      className={`lang-pill ${language === "english" ? "active" : ""}`} 
-                      style={{ flex: 1, minWidth: "120px", padding: "10px", borderRadius: "12px", border: language === "english" ? "1px solid #ff3d8b" : "1px solid var(--border)", background: language === "english" ? "rgba(255,61,139,0.1)" : "transparent", color: language === "english" ? "#ff3d8b" : "var(--text-1)", cursor: "pointer", transition: "0.2s" }}
-                      onClick={() => setLanguage("english")}
-                    >English 🇺🇸</button>
-                    <button 
-                      className={`lang-pill ${language === "hinglish" ? "active" : ""}`} 
-                      style={{ flex: 1, minWidth: "120px", padding: "10px", borderRadius: "12px", border: language === "hinglish" ? "1px solid #ff3d8b" : "1px solid var(--border)", background: language === "hinglish" ? "rgba(255,61,139,0.1)" : "transparent", color: language === "hinglish" ? "#ff3d8b" : "var(--text-1)", cursor: "pointer", transition: "0.2s" }}
-                      onClick={() => setLanguage("hinglish")}
-                    >Hinglish 🇮🇳</button>
-                  </div>
-                </div>
-              </div>
-
-              <button className="ob-start-btn" disabled={!pendingName.trim() || !relationship || !language} onClick={saveCompanionOnboarding}>
-                {onboardingMode === "edit" ? "save changes ✨" : "create companion 🩷"}
+              <button type="submit" className="auth-submit" disabled={authLoading || !authUsername || !authPassword}>
+                {authLoading ? "Please wait..." : (authMode === "login" ? "Log In ➔" : "Create Account ➔")}
               </button>
-            </>
-          )}
+            </form>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Settings */}
+      {/* Create Person Modal */}
+      {createModalOpen && (
+        <div className="auth-gate" style={{ zIndex: 400 }}>
+          <div className="auth-card" style={{ maxWidth: 460, padding: "30px" }}>
+            <div className="sp-head" style={{ borderBottom: 'none', padding: '0 0 16px', width: '100%' }}>
+              <div className="sp-title">Create Person</div>
+              <button className="sp-close" onClick={() => setCreateModalOpen(false)}>✕</button>
+            </div>
+            
+            <div style={{ width: '100%', maxHeight: '70vh', overflowY: 'auto', paddingRight: 4 }}>
+              <div className="auth-field" style={{ marginBottom: 16 }}>
+                <label>Avatar Emoji</label>
+                <input type="text" value={cpEmoji} onChange={e => setCpEmoji(e.target.value)} placeholder="👩" maxLength={4} style={{ fontSize: 24, textAlign: 'center', padding: '8px' }} />
+              </div>
+              
+              <div className="auth-field" style={{ marginBottom: 16 }}>
+                <label>Name</label>
+                <input type="text" value={cpName} onChange={e => setCpName(e.target.value)} placeholder="Name..." maxLength={20} />
+              </div>
+
+              <div className="auth-field" style={{ marginBottom: 16 }}>
+                <label>Gender</label>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {['she', 'he', 'they'].map(g => (
+                    <button key={g} className={`lang-pill ${cpGender === g ? 'active' : ''}`} onClick={() => setCpGender(g as any)} style={{ flex: 1, padding: '8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}>
+                      {g}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="auth-field" style={{ marginBottom: 16 }}>
+                <label>Personality</label>
+                <div className="persona-grid">
+                  {[
+                    { id: 'nova', name: 'Nova', icon: '🩷', desc: 'Warm companion' },
+                    { id: 'scholar', name: 'Scholar', icon: '📚', desc: 'Study buddy' },
+                    { id: 'sage', name: 'Sage', icon: '🌿', desc: 'Wise guide' },
+                    { id: 'spark', name: 'Spark', icon: '⚡', desc: 'Creative chaos' }
+                  ].map(p => (
+                    <div key={p.id} className={`persona-card ${cpPersonality === p.id ? 'active' : ''}`} onClick={() => setCpPersonality(p.id as any)}>
+                      <span className="pc-icon">{p.icon}</span>
+                      <span className="pc-name">{p.name}</span>
+                      <span className="pc-desc">{p.desc}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="auth-field" style={{ marginBottom: 16 }}>
+                <label>Relationship Vibe</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {['girlfriend', 'bestfriend', 'classmate', 'crush', 'situationship'].map(r => (
+                    <button key={r} className={`lang-pill ${cpRelationship === r ? 'active' : ''}`} onClick={() => setCpRelationship(r as any)} style={{ padding: '6px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', fontSize: 13 }}>
+                      {r}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="auth-field" style={{ marginBottom: 24 }}>
+                <label>Language</label>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {['english', 'hinglish'].map(l => (
+                    <button key={l} className={`lang-pill ${cpLanguage === l ? 'active' : ''}`} onClick={() => setCpLanguage(l as any)} style={{ flex: 1, padding: '8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}>
+                      {l}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              <button className="auth-submit" disabled={!cpName.trim() || cpCreating} onClick={createPerson}>
+                {cpCreating ? "Creating..." : "Create Person"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Panel */}
       <div className={`settings-overlay ${settingsOpen ? "open" : ""}`} onClick={() => setSettingsOpen(false)}></div>
       <div className={`settings-panel ${settingsOpen ? "open" : ""}`}>
         <div className="sp-head">
@@ -1166,527 +586,194 @@ export default function NovaApp() {
           <button className="sp-close" onClick={() => setSettingsOpen(false)}>✕</button>
         </div>
         <div className="sp-body">
-          <div>
-            <div className="sp-label">Your companion</div>
-            <div className="companion-preview">
-              <div className="sp-comp-av">
-                {companionImage ? <img src={companionImage} alt={companionName} /> : (companionName || "N").charAt(0).toUpperCase()}
-              </div>
-              <div className="sp-comp-info">
-                <div className="sp-comp-name">{companionName || "Nova"}</div>
-                <div className="sp-comp-sub">tap edit to rename or change photo</div>
-              </div>
-              <button className="sp-edit-btn" onClick={() => {
-                setSettingsOpen(false);
-                setPendingName(companionName);
-                setPendingImage(companionImage);
-                setOnboardingMode("edit");
-              }}>Edit</button>
-            </div>
-          </div>
-          <div>
-            <div className="sp-label">Personality</div>
-            <div className="persona-grid">
-              {Object.entries(PERSONAS).map(([key, p]) => (
-                <button
-                  key={key}
-                  className={`persona-card ${currentPersona === key ? "active" : ""}`}
-                  onClick={() => {
-                    setCurrentPersona(key);
-                    localStorage.setItem("persona", key);
-                    fetch("/api/user/settings", { method: "PUT", headers: getHeaders(), body: JSON.stringify({ personality: key }) }).catch(() => {});
-                    showToast(`switched to ${key} mode ✨`);
-                  }}
-                >
-                  <span className="pc-icon">{p.icon}</span><span className="pc-name">{p.name}</span>
-                  <span className="pc-desc">{p.desc}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <div className="sp-label">Language</div>
-            <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
-              <button
-                className={`lang-pill ${language === "english" ? "active" : ""}`}
-                style={{
-                  flex: 1, padding: "12px 8px", borderRadius: "14px",
-                  border: language === "english" ? "1.5px solid var(--nova)" : "1.5px solid var(--border)",
-                  background: "transparent", color: language === "english" ? "var(--nova)" : "var(--text-2)",
-                  cursor: "pointer", fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 600,
-                }}
-                onClick={() => {
-                  setLanguage("english");
-                  localStorage.setItem("nova_language", "english");
-                  fetch("/api/user/settings", { method: "PUT", headers: getHeaders(), body: JSON.stringify({ language: "english" }) }).catch(() => {});
-                  showToast("language set to english 🇺🇸");
-                }}
-              >
-                🇺🇸 English
-              </button>
-              <button
-                className={`lang-pill ${language === "hinglish" ? "active" : ""}`}
-                style={{
-                  flex: 1, padding: "12px 8px", borderRadius: "14px",
-                  border: language === "hinglish" ? "1.5px solid var(--nova)" : "1.5px solid var(--border)",
-                  background: "transparent", color: language === "hinglish" ? "var(--nova)" : "var(--text-2)",
-                  cursor: "pointer", fontFamily: "'Inter', sans-serif", fontSize: 14, fontWeight: 600,
-                }}
-                onClick={() => {
-                  setLanguage("hinglish");
-                  localStorage.setItem("nova_language", "hinglish");
-                  fetch("/api/user/settings", { method: "PUT", headers: getHeaders(), body: JSON.stringify({ language: "hinglish" }) }).catch(() => {});
-                  showToast("language set to hinglish 🇮🇳");
-                }}
-              >
-                🇮🇳 Hinglish
-              </button>
-            </div>
-          </div>
-          <div>
-            <div className="sp-label">Vibe</div>
-            <div className="persona-grid">
+          <div className="sp-section">
+            <div className="sp-label">Theme</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {[
-                { id: "girlfriend", icon: "🩷", name: "Girlfriend", desc: "romantic & protective" },
-                { id: "bestfriend", icon: "🤝", name: "Best Friend", desc: "chaotic & roasts you" },
-                { id: "classmate", icon: "📚", name: "Classmate", desc: "shares notes energy" },
-                { id: "crush", icon: "💜", name: "Crush", desc: "shy & nervous" },
-                { id: "situationship", icon: "🌙", name: "Situationship", desc: "mixed signals" }
-              ].map(r => (
-                <button
-                  key={r.id}
-                  className={`persona-card ${relationship === r.id ? "active" : ""}`}
-                  onClick={() => {
-                    setRelationship(r.id);
-                    localStorage.setItem("nova_relationship", r.id);
-                    fetch("/api/user/settings", { method: "PUT", headers: getHeaders(), body: JSON.stringify({ relationship: r.id }) }).catch(() => {});
-                    showToast(`vibe set to ${r.name} ✨`);
-                  }}
+                { id: 'default', name: 'Default Dark', icon: '🌌' },
+                { id: 'instagram', name: 'Instagram', icon: '📸' },
+                { id: 'whatsapp', name: 'WhatsApp', icon: '💬' },
+                { id: 'imessage', name: 'iMessage', icon: '🍏' }
+              ].map(t => (
+                <button 
+                  key={t.id} 
+                  className={`lang-pill ${theme === t.id ? 'active' : ''}`}
+                  onClick={() => setTheme(t.id)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', borderRadius: 12, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer', fontSize: 14, fontWeight: 500, textAlign: 'left' }}
                 >
-                  <span className="pc-icon">{r.icon}</span><span className="pc-name">{r.name}</span>
-                  <span className="pc-desc">{r.desc}</span>
+                  <span style={{ fontSize: 20 }}>{t.icon}</span> {t.name}
                 </button>
               ))}
             </div>
           </div>
-          <div>
-            <div className="sp-label">Preferences</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <div className="sp-row">
-                <div><div className="sp-row-label">Light mode</div><div className="sp-row-sub">Softer lavender theme</div></div>
-                <label className="toggle">
-                  <input type="checkbox" checked={theme === "light"} onChange={e => {
-                    const newTheme = e.target.checked ? "light" : "dark";
-                    setTheme(newTheme);
-                    localStorage.setItem("theme", newTheme);
-                  }} />
-                  <span className="toggle-slider"></span>
-                </label>
-              </div>
-              <div className="sp-row">
-                <div><div className="sp-row-label">Voice readout</div><div className="sp-row-sub">Speak replies aloud</div></div>
-                <label className="toggle">
-                  <input type="checkbox" checked={soundOn} onChange={e => setSoundOn(e.target.checked)} />
-                  <span className="toggle-slider"></span>
-                </label>
-              </div>
-            </div>
-          </div>
-          <div>
-            <div className="sp-label">Data</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <button className="danger-btn" onClick={async () => {
-                if (!currentChatId) return;
-                await fetch(`/api/chats/${currentChatId}/messages`, {
-                  method: "POST", headers: { "Content-Type": "application/json", "x-user-id": userIdRef.current },
-                  body: JSON.stringify({ messages: [] })
-                });
-                setMessages([]);
-                setFirstMsg(true);
-                setSettingsOpen(false);
-                showToast("cleared 🗑️");
-              }}>🗑️ Clear conversation</button>
-              <button className="danger-btn" onClick={() => {
-                localStorage.removeItem("companion-name");
-                localStorage.removeItem("companion-image");
-                window.location.reload();
-              }}>👤 Reset companion setup</button>
-              <button className="danger-btn" onClick={() => { setSettingsOpen(false); handleLogout(); }}>🚪 Sign out{loggedInUser ? ` (${loggedInUser})` : ""}</button>
-            </div>
-          </div>
-          <div style={{ textAlign: "center", padding: "8px 0" }}>
-            <div style={{ fontSize: 12, color: "var(--text-3)", lineHeight: 1.8 }}>
-              AI Companion · Powered by NOVA Corp © 2026 <br />Anand Shukla
-              <span style={{ fontSize: 22, marginTop: 6, display: "block" }}>🌸</span>
+          
+          <div className="sp-section">
+            <div className="sp-label">Account</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {activePersonId && (
+                <button className="danger-btn" onClick={deleteCurrentPerson}>🗑️ Delete Current Person</button>
+              )}
+              <button className="danger-btn" onClick={handleLogout}>🚪 Sign Out</button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* App Layout */}
       <div className="app-wrapper">
-        {/* Sidebar — personality switcher */}
+        {/* Sidebar */}
         <div className={`sidebar ${sidebarOpen ? "open" : ""}`} id="sidebar">
           <div className="sidebar-head">
-            <span className="sidebar-title">Nova</span>
-            <button className="sp-close" style={{ fontSize: 18, background: 'none', border: 'none', color: 'var(--text-2)', cursor: 'pointer', padding: '4px 8px' }} onClick={() => setSidebarOpen(false)}>✕</button>
+            <div className="sidebar-title">Persons</div>
+            <button className="sidebar-new" onClick={() => { setCreateModalOpen(true); setSidebarOpen(false); }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14m-7-7h14"/></svg> Add
+            </button>
           </div>
           <div className="sidebar-list">
-
-            {/* Built-in personalities */}
-            {Object.entries(BUILT_IN_PERSONAS).map(([key, p]) => {
-              const chat = allChats.find((c: any) => c.personality === key);
-              const lastMsg = chat?.lastMessage || "";
-              const preview = lastMsg.length > 40 ? lastMsg.slice(0, 40) + "…" : lastMsg;
-              const isActive = currentPersona === key;
-              return (
-                <div
-                  key={key}
-                  className={`sidebar-chat${isActive ? " active" : ""}`}
-                  onClick={() => switchPersonality(key)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <div className="sidebar-chat-icon" style={{ fontSize: 22 }}>{p.icon}</div>
-                  <div className="sidebar-chat-info">
-                    <div className="sidebar-chat-title" style={{ fontWeight: isActive ? 700 : 500 }}>{p.name}</div>
-                    <div className="sidebar-chat-meta" style={{ opacity: 0.6 }}>{preview || p.desc}</div>
-                  </div>
-                  {isActive && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--nova)', flexShrink: 0, alignSelf: 'center', marginRight: 4 }} />}
+            {persons.map(p => (
+              <div key={p.id} className={`sidebar-chat ${activePersonId === p.id ? "active" : ""}`} onClick={() => switchPerson(p.id)}>
+                <div className="sidebar-chat-icon" style={{ background: 'transparent', fontSize: 22, boxShadow: 'none' }}>{p.emoji}</div>
+                <div className="sidebar-chat-info">
+                  <div className="sidebar-chat-title">{p.name}</div>
+                  <div className="sidebar-chat-meta">{p.relationship}</div>
                 </div>
-              );
-            })}
-
-            {/* Custom personalities */}
-            {customPersonas.length > 0 && (
-              <div style={{ margin: '12px 12px 4px', fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.5px', borderTop: '1px solid var(--border)', paddingTop: 10 }}>Your companions</div>
-            )}
-            {customPersonas.map(cp => {
-              const chat = allChats.find((c: any) => c.personality === cp.id);
-              const lastMsg = chat?.lastMessage || "";
-              const preview = lastMsg.length > 40 ? lastMsg.slice(0, 40) + "…" : lastMsg;
-              const isActive = currentPersona === cp.id;
-              return (
-                <div
-                  key={cp.id}
-                  className={`sidebar-chat${isActive ? " active" : ""}`}
-                  onClick={() => switchPersonality(cp.id)}
-                  style={{ cursor: 'pointer', position: 'relative' }}
-                >
-                  <div className="sidebar-chat-icon" style={{ fontSize: 22 }}>{cp.emoji}</div>
-                  <div className="sidebar-chat-info">
-                    <div className="sidebar-chat-title" style={{ fontWeight: isActive ? 700 : 500 }}>{cp.name}</div>
-                    <div className="sidebar-chat-meta" style={{ opacity: 0.6 }}>{preview || 'custom companion'}</div>
-                  </div>
-                  <button
-                    className="sidebar-chat-menu"
-                    title="Delete companion"
-                    onClick={e => { e.stopPropagation(); setCpDeleteId(cpDeleteId === cp.id ? null : cp.id); }}
-                    style={{ opacity: 0, transition: '0.2s' }}
-                    onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
-                    onMouseLeave={e => (e.currentTarget.style.opacity = '0')}
-                  >🗑</button>
-                  {cpDeleteId === cp.id && (
-                    <>
-                      <div style={{ position: 'fixed', inset: 0, zIndex: 49 }} onClick={e => { e.stopPropagation(); setCpDeleteId(null); }} />
-                      <div className="sidebar-chat-actions" onClick={e => e.stopPropagation()}>
-                        <button className="sa-btn danger" style={{ color: 'var(--red)', fontWeight: 'bold' }} onClick={() => handleDeleteCustomPersonality(cp.id)}>⚠ Delete {cp.name}</button>
-                        <button className="sa-btn" onClick={() => setCpDeleteId(null)}>Cancel</button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              );
-            })}
-
-            {/* Create your own card */}
-            <div
-              className="sidebar-chat"
-              style={{ cursor: 'pointer', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 12, margin: '8px 8px 4px', background: 'transparent' }}
-              onClick={() => { setCreateModalOpen(true); setSidebarOpen(false); }}
-            >
-              <div className="sidebar-chat-icon" style={{ fontSize: 22 }}>✦</div>
-              <div className="sidebar-chat-info">
-                <div className="sidebar-chat-title" style={{ color: 'var(--nova)' }}>create your own</div>
-                <div className="sidebar-chat-meta" style={{ opacity: 0.5 }}>custom companion</div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
+        
         <div className={`sidebar-overlay ${sidebarOpen ? "open" : ""}`} onClick={() => setSidebarOpen(false)}></div>
         <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>☰</button>
-         <div className="app">
+
+        <div className="app">
+          {/* IG Story Row (only visible in instagram theme via CSS, and replaces sidebar) */}
+          {theme === "instagram" && persons.length > 0 && (
+            <div className="ig-story-row">
+              {persons.map(p => (
+                <div key={p.id} className="ig-story-item" onClick={() => switchPerson(p.id)}>
+                  <div className="ig-story-ring" style={activePersonId === p.id ? {} : { background: 'var(--border)' }}>
+                    <div className="ig-story-inner">{p.emoji}</div>
+                  </div>
+                  <div className="ig-story-name" style={activePersonId === p.id ? { fontWeight: 600 } : {}}>{p.name}</div>
+                </div>
+              ))}
+              <div className="ig-story-item" onClick={() => setCreateModalOpen(true)}>
+                <div className="ig-story-ring" style={{ background: 'transparent', border: '1px dashed var(--text-3)', padding: 0 }}>
+                  <div className="ig-story-inner" style={{ fontSize: 18, color: 'var(--text-2)' }}>+</div>
+                </div>
+                <div className="ig-story-name">Add</div>
+              </div>
+            </div>
+          )}
+
           {/* Topbar */}
-          <div className="topbar">
-            <div className="nova-av-wrap">
-              <div className="nova-av">
-                {companionImage ? <img src={companionImage} alt={companionName} /> :
-                  (currentPersona.startsWith("custom_")
-                    ? (customPersonas.find(p => p.id === currentPersona)?.emoji || "✨")
-                    : (BUILT_IN_PERSONAS[currentPersona]?.icon || (companionName || "N").charAt(0).toUpperCase())
-                  )}
+          {activePerson && (
+            <div className="topbar">
+              <div className="nova-av-wrap">
+                <div className="nova-av" style={{ background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 20, boxShadow: 'none' }}>
+                  {activePerson.emoji}
+                </div>
+                <div className="online-ring"></div>
+                <div className="online-dot"></div>
               </div>
-              <div className="online-ring"></div>
-              <div className="online-dot"></div>
-            </div>
-            <div className="nova-info">
-              <div className="nova-name">{companionName || "Nova"}</div>
-              <div className="nova-status">
-                <span className="ns-dot"></span>
-                <span>{BUILT_IN_PERSONAS[currentPersona]?.status || (customPersonas.find(p => p.id === currentPersona) ? `online · ${customPersonas.find(p => p.id === currentPersona)?.name} is here` : BUILT_IN_PERSONAS.nova.status)}</span>
+              <div className="nova-info">
+                <div className="nova-name">{activePerson.name}</div>
+                <div className="nova-status">
+                  <span className="ns-dot"></span>
+                  <span>online</span>
+                </div>
+              </div>
+              <div className="topbar-btns">
+                <button className="tbtn" onClick={() => setSettingsOpen(true)}>⚙️</button>
               </div>
             </div>
-            <div className="topbar-btns">
-              <div className="model-pill"><span className="mp-dot"></span><span>llama-3.3-70b</span></div>
-              <div className="lang-badge" title="Change language" onClick={() => setSettingsOpen(true)}>{language === "hinglish" ? "🇮🇳" : "🇺🇸"}</div>
-              <button className="tbtn" onClick={() => setSettingsOpen(true)}>⚙️<span className="tip">Settings</span></button>
-            </div>
-          </div>
+          )}
 
           {/* Chat Area */}
           <div className="chat-area" ref={chatContainerRef}>
-            {firstMsg && (
+            {persons.length === 0 ? (
               <div className="welcome">
-                <div className={`welcome-orb ${companionImage ? "has-img" : ""}`} style={!companionImage ? { background: "var(--nova-grad)" } : {}}>
-                  {companionImage ? (
-                    <img src={companionImage} alt={companionName} />
-                  ) : (
-                    <span className="welcome-orb-letter" style={{ fontSize: 38, fontWeight: 800, color: "#fff" }}>
-                      {(companionName || "N").charAt(0).toUpperCase()}
-                    </span>
-                  )}
-                </div>
-                <div>
-                  <div className="welcome-title">omg hey!! i'm <span className="g">{companionName || "Nova"}</span> 🩷</div>
-                  <div className="welcome-sub" style={{ marginTop: 8 }}>
-                    your person ✨ here whenever you need me — to vent, to celebrate, to talk about literally anything 🥺
-                  </div>
-                </div>
-                <div className="starters">
-                  {[
-                    { q: "i'm having the worst day rn honestly 😭", icon: "💭", title: "vent to me", sub: "i'm here, tell me everything" },
-                    { q: "omg tell me something cute or fun!!", icon: "✨", title: "fun vibes only", sub: "hype me up or surprise me" },
-                    { q: "i literally just did something i've been working towards forever and i'm so happy", icon: "🎉", title: "share a win!!", sub: "omg tell me the good news" },
-                    { q: "can i just talk to you about something on my mind", icon: "🥺", title: "let's just talk", sub: "no topic too small, i'm listening" },
-                  ].map((s, i) => (
-                    <button key={i} className="starter" onClick={() => submitMessage(s.q)}>
-                      <span className="starter-icon">{s.icon}</span><span className="starter-title">{s.title}</span>
-                      <span className="starter-sub">{s.sub}</span>
-                    </button>
-                  ))}
-                </div>
+                <div className="welcome-orb" style={{ background: 'transparent', fontSize: 60, boxShadow: 'none', animation: 'none' }}>🥺</div>
+                <div className="welcome-title">No one here yet</div>
+                <div className="welcome-sub">Create your first person to start chatting.</div>
+                <button className="ob-start-btn" style={{ maxWidth: 200 }} onClick={() => setCreateModalOpen(true)}>+ Add Person</button>
               </div>
-            )}
-
-            {!firstMsg && (
-              <div className="msg-row">
-                <div className="day-divider">
-                  <div className="day-line"></div>
-                  <div className="day-label">{new Date().toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" })}</div>
-                  <div className="day-line"></div>
-                </div>
-              </div>
-            )}
-
-            {messages.map((m, i) => {
-              const isNova = m.role === "assistant" || m.role === "nova";
-              const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-              const name = companionName || "Nova";
-
-              return (
-                <div key={i} className={`msg-row ${isNova ? "nova" : "user"}`}>
-                  <div className="msg-inner">
-                    {isNova && (
-                      <div className="msg-av nova-av">
-                        {companionImage ? <img src={companionImage} alt={name} /> : name.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    <div className="msg-body">
-                      <div className="msg-meta">
-                        {isNova ? (
-                          <><span>{name}</span><span>{time}</span></>
-                        ) : (
-                          <><span>{time}</span><span>You</span></>
-                        )}
-                        <div className="msg-actions">
-                          <button className="mact copy-msg" title="Copy" onClick={() => {
-                            navigator.clipboard.writeText(m.content);
-                            showToast("copied! 📋");
-                          }}>📋</button>
-                          {isNova && <button className="mact regen-msg" title="Regenerate" onClick={regenMessage}>↻</button>}
-                        </div>
-                      </div>
-                      <div className="msg-bubble" dangerouslySetInnerHTML={{ __html: parseMd(m.content) }}></div>
-                    </div>
-                    {!isNova && <div className="msg-av user-av">🧑</div>}
+            ) : (
+              <>
+                {messages.length === 0 && !streamedText && activePerson && (
+                  <div className="welcome">
+                    <div className="welcome-orb" style={{ background: 'transparent', fontSize: 60, boxShadow: 'none', animation: 'none' }}>{activePerson.emoji}</div>
+                    <div className="welcome-title">Say hi to {activePerson.name}</div>
                   </div>
-                </div>
-              );
-            })}
+                )}
 
-            {isStreaming && (
-              <div className="typing-row">
-                <div className="typing-inner">
-                  <div className="msg-av nova-av">
-                    {companionImage ? <img src={companionImage} alt={companionName} /> : (companionName || "N").charAt(0).toUpperCase()}
-                  </div>
-                  {streamedText ? (
-                    <div className="msg-body">
-                      <div className="msg-meta">
-                        <span>{companionName || "Nova"}</span><span>{new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                {messages.map((msg, i) => (
+                  <div key={i} className={`msg-row ${msg.role === "user" ? "user" : "nova"}`}>
+                    <div className="msg-inner">
+                      <div className={`msg-av ${msg.role === "user" ? "user-av" : "nova-av"}`} style={msg.role !== "user" ? { background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 16, boxShadow: 'none' } : {}}>
+                        {msg.role === "user" ? "U" : activePerson?.emoji}
                       </div>
-                      <div className="msg-bubble" dangerouslySetInnerHTML={{ __html: parseMd(streamedText) }}></div>
+                      <div className="msg-body">
+                        <div className="msg-bubble" dangerouslySetInnerHTML={{ __html: window.marked ? window.marked.parse(msg.content) : msg.content }} />
+                      </div>
                     </div>
-                  ) : (
-                    <div className="typing-bubble">
-                      <div className="td"></div><div className="td"></div><div className="td"></div>
+                  </div>
+                ))}
+
+                {isStreaming && streamedText && (
+                  <div className="msg-row nova">
+                    <div className="msg-inner">
+                      <div className="msg-av nova-av" style={{ background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 16, boxShadow: 'none' }}>{activePerson?.emoji}</div>
+                      <div className="msg-body">
+                        <div className="msg-bubble" dangerouslySetInnerHTML={{ __html: window.marked ? window.marked.parse(streamedText) : streamedText }} />
+                      </div>
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
+                )}
+
+                {isStreaming && !streamedText && (
+                  <div className="typing-row">
+                    <div className="typing-inner">
+                      <div className="msg-av nova-av" style={{ background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 16, boxShadow: 'none' }}>{activePerson?.emoji}</div>
+                      <div className="typing-bubble">
+                        <div className="td"></div><div className="td"></div><div className="td"></div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
-          <button className="scroll-fab" ref={scrollFabRef} onClick={() => scrollToBottom(true)}>↓</button>
-
-          {/* Input Zone */}
-          <div className="input-zone">
-            <div className="input-card">
-              <textarea
-                ref={inputRef} rows={1} placeholder={`Message ${companionName || "Nova"}…`}
-                maxLength={4000} autoComplete="off" value={inputValue}
-                onChange={e => {
-                  setInputValue(e.target.value);
-                  if (inputRef.current) {
-                    inputRef.current.style.height = "auto";
-                    inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 180) + "px";
-                  }
-                }}
-                onKeyDown={e => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    submitMessage(inputValue);
-                  }
-                }}
-              ></textarea>
-              <div className="input-bar">
-                <div className="input-hints">
-                  <span className="hint">↵ Send</span>
-                  <span className="hint">⇧↵ New line</span>
-                </div>
-                <div className="input-right">
-                  <span className="char-ct">{inputValue.length} / 4000</span>
-                  <button className="send-btn" disabled={!inputValue.trim() || isStreaming} onClick={() => submitMessage(inputValue)}>
-                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" /></svg>
-                  </button>
+          {/* Input Area */}
+          {persons.length > 0 && activePerson && (
+            <div className="input-zone">
+              <div className="input-card">
+                <div className="input-bar">
+                  <textarea
+                    ref={inputRef}
+                    placeholder={`Message ${activePerson.name}...`}
+                    value={inputValue}
+                    onChange={(e) => {
+                      setInputValue(e.target.value);
+                      e.target.style.height = 'auto';
+                      e.target.style.height = `${Math.min(e.target.scrollHeight, 180)}px`;
+                    }}
+                    onKeyDown={handleKeyDown}
+                    rows={1}
+                  />
+                  <div className="input-right">
+                    <button className="send-btn" disabled={!inputValue.trim() || isStreaming} onClick={handleSend}>
+                      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
+          
+          <button ref={scrollFabRef} className="scroll-fab" onClick={() => scrollToBottom(true)}>↓</button>
         </div>
       </div>
-
-      {/* Create Custom Personality Modal */}
-      {createModalOpen && (
-        <>
-          <div
-            onClick={() => setCreateModalOpen(false)}
-            style={{
-              position: 'fixed', inset: 0, zIndex: 900,
-              background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
-            }}
-          />
-          <div style={{
-            position: 'fixed', top: '50%', left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: 901, width: '90%', maxWidth: 480,
-            background: 'rgba(13,13,35,0.97)',
-            border: '1px solid rgba(255,110,180,0.18)',
-            borderRadius: 24, padding: '36px 32px 28px',
-            boxShadow: '0 0 80px rgba(255,61,139,0.12), 0 24px 60px rgba(0,0,0,0.6)',
-            display: 'flex', flexDirection: 'column', gap: 20,
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: '#f0f0fa' }}>create your companion ✦</div>
-                <div style={{ fontSize: 13, color: 'rgba(240,240,250,0.4)', marginTop: 4 }}>design someone all yours</div>
-              </div>
-              <button onClick={() => setCreateModalOpen(false)} style={{ background: 'none', border: 'none', color: 'rgba(240,240,250,0.4)', fontSize: 22, cursor: 'pointer', padding: '4px 8px', lineHeight: 1 }}>✕</button>
-            </div>
-
-            <div style={{ display: 'flex', gap: 12 }}>
-              <div style={{ flexShrink: 0 }}>
-                <div style={{ fontSize: 11, color: 'rgba(240,240,250,0.4)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Emoji</div>
-                <input
-                  type="text"
-                  value={cpEmoji}
-                  onChange={e => setCpEmoji(e.target.value.slice(0, 4))}
-                  placeholder="✨"
-                  style={{
-                    width: 56, height: 56, textAlign: 'center', fontSize: 26,
-                    background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.1)',
-                    borderRadius: 14, color: '#f0f0fa', outline: 'none', cursor: 'text',
-                    fontFamily: 'inherit',
-                  }}
-                />
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 11, color: 'rgba(240,240,250,0.4)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Name</div>
-                <input
-                  type="text"
-                  value={cpName}
-                  onChange={e => setCpName(e.target.value.slice(0, 20))}
-                  placeholder="e.g. Aria, Zara, Sky…"
-                  maxLength={20}
-                  style={{
-                    width: '100%', padding: '14px 16px', boxSizing: 'border-box',
-                    background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.1)',
-                    borderRadius: 14, color: '#f0f0fa', fontFamily: 'inherit', fontSize: 14.5,
-                    outline: 'none',
-                  }}
-                />
-                <div style={{ fontSize: 11, color: 'rgba(240,240,250,0.3)', marginTop: 4 }}>{cpName.length}/20</div>
-              </div>
-            </div>
-
-            <div>
-              <div style={{ fontSize: 11, color: 'rgba(240,240,250,0.4)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Their vibe</div>
-              <textarea
-                value={cpPrompt}
-                onChange={e => setCpPrompt(e.target.value.slice(0, 1000))}
-                placeholder={"Describe who they are, how they talk, what their vibe is. Write it like you're describing a real person, not giving instructions."}
-                rows={5}
-                style={{
-                  width: '100%', padding: '14px 16px', boxSizing: 'border-box',
-                  background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.1)',
-                  borderRadius: 14, color: '#f0f0fa', fontFamily: 'inherit', fontSize: 13.5,
-                  outline: 'none', resize: 'vertical', lineHeight: 1.6,
-                }}
-              />
-              <div style={{ fontSize: 11, color: 'rgba(240,240,250,0.3)', marginTop: 4 }}>{cpPrompt.length}/1000</div>
-            </div>
-
-            <button
-              disabled={!cpName.trim() || !cpPrompt.trim() || cpCreating}
-              onClick={handleCreateCustomPersonality}
-              style={{
-                padding: '15px 0', borderRadius: 14, border: 'none',
-                background: 'linear-gradient(135deg,#ff3d8b,#ff80be)',
-                color: '#fff', fontFamily: 'inherit', fontSize: 15, fontWeight: 700,
-                cursor: !cpName.trim() || !cpPrompt.trim() || cpCreating ? 'not-allowed' : 'pointer',
-                opacity: !cpName.trim() || !cpPrompt.trim() || cpCreating ? 0.4 : 1,
-                boxShadow: '0 6px 28px rgba(255,61,139,0.35)',
-                transition: 'opacity .2s',
-              }}
-            >
-              {cpCreating ? 'creating…' : `create ${cpEmoji || '✨'} ${cpName || 'companion'}`}
-            </button>
-          </div>
-        </>
-      )}
-
-      {/* Toast */}
-      <div className={`toast ${toastShow ? "show" : ""}`}>{toastMsg}</div>
     </>
   );
 }

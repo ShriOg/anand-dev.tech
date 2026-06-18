@@ -1,28 +1,13 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 // --- Connection Utility ---
-// Use mongoose.connection.readyState instead of a module-level flag so we
-// correctly handle dropped connections and hot-reload in Next.js dev mode.
 export const ensureDb = async () => {
   mongoose.set('strictQuery', true);
-
-  // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
-  if (mongoose.connection.readyState === 1) {
-    return;
-  }
-
+  if (mongoose.connection.readyState === 1) return;
   const MONGODB_URI = process.env.MONGODB_URI;
-
-  if (!MONGODB_URI) {
-    throw new Error(
-      "MONGODB_URI is not defined. Create a .env.local file with MONGODB_URI=<your Atlas connection string>."
-    );
-  }
-
+  if (!MONGODB_URI) throw new Error("MONGODB_URI is not defined.");
   try {
-    await mongoose.connect(MONGODB_URI, {
-      bufferCommands: false,
-    });
+    await mongoose.connect(MONGODB_URI, { bufferCommands: false });
     console.log("Connected to MongoDB");
   } catch (error) {
     console.error("MongoDB connection error:", error);
@@ -30,38 +15,57 @@ export const ensureDb = async () => {
   }
 };
 
-// --- Interfaces & Schemas ---
+// --- Person ---
+export interface IPerson extends Document {
+  userId: string;
+  id: string; // nanoid
+  name: string;
+  emoji: string;
+  gender: 'she' | 'he' | 'they';
+  personality: 'nova' | 'scholar' | 'sage' | 'spark';
+  relationship: 'girlfriend' | 'bestfriend' | 'classmate' | 'crush' | 'situationship';
+  language: 'english' | 'hinglish';
+  createdAt: Date;
+}
 
+const personSchema = new Schema<IPerson>({
+  userId: { type: String, required: true, index: true },
+  id: { type: String, required: true, unique: true },
+  name: { type: String, required: true, maxlength: 20 },
+  emoji: { type: String, required: true },
+  gender: { type: String, required: true, enum: ['she', 'he', 'they'] },
+  personality: { type: String, required: true, enum: ['nova', 'scholar', 'sage', 'spark'] },
+  relationship: { type: String, required: true, enum: ['girlfriend', 'bestfriend', 'classmate', 'crush', 'situationship'] },
+  language: { type: String, required: true, enum: ['english', 'hinglish'] },
+}, { timestamps: { createdAt: true, updatedAt: false } });
+
+personSchema.index({ userId: 1, id: 1 });
+
+// --- Chat ---
 export interface IChat extends Document {
   title: string;
-  personality: string;
-  companionName?: string;
-  companionPhoto?: string;
-  relationshipType?: string;
-  language?: string;
+  personId?: string;   // new: links chat to a Person
+  personality?: string; // legacy compat
+  userId: string;
   deleted?: boolean;
   deletedAt?: Date;
-  userId: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 const chatSchema = new Schema<IChat>({
   title: { type: String, required: true },
-  personality: { type: String, required: true },
-  companionName: { type: String },
-  companionPhoto: { type: String },
-  relationshipType: { type: String },
-  language: { type: String },
+  personId: { type: String, index: true },  // new field
+  personality: { type: String },            // kept for legacy
+  userId: { type: String, required: true, index: true },
   deleted: { type: Boolean, default: false },
   deletedAt: { type: Date },
-  userId: { type: String, required: true, index: true },
 }, { timestamps: true });
 
 chatSchema.index({ userId: 1, deleted: 1 });
-// Unique chat per personality per user
-chatSchema.index({ userId: 1, personality: 1 }, { unique: true });
+chatSchema.index({ userId: 1, personId: 1 }, { unique: true, sparse: true });
 
+// --- Message ---
 export interface IMessage extends Document {
   chatId: mongoose.Types.ObjectId;
   role: 'user' | 'assistant' | 'system';
@@ -77,77 +81,26 @@ const messageSchema = new Schema<IMessage>({
 
 messageSchema.index({ chatId: 1, createdAt: 1 });
 
-export interface ICompanion extends Document {
-  name: string;
-  description?: string;
-  prompt: string;
-  avatar?: string;
-}
-
-const companionSchema = new Schema<ICompanion>({
-  name: { type: String, required: true },
-  description: { type: String },
-  prompt: { type: String, required: true },
-  avatar: { type: String },
-});
-
+// --- User ---
 export interface IUser extends Document {
   username: string;
   passwordHash: string;
-  email?: string;
   name?: string;
   gender?: 'male' | 'female';
   onboardingCompleted?: boolean;
-  // Companion settings — persisted so they restore on any device
-  companionName?: string;
-  companionPhoto?: string;
-  personality?: string;
-  language?: string;
-  relationship?: string;
   createdAt: Date;
 }
 
 const userSchema = new Schema<IUser>({
   username: { type: String, required: true, unique: true, lowercase: true, trim: true, minlength: 3, maxlength: 30 },
   passwordHash: { type: String, required: true },
-  // email is optional and not currently used for registration
-  email: { type: String, lowercase: true, trim: true },
   name: { type: String, trim: true },
   gender: { type: String, enum: ['male', 'female'] },
   onboardingCompleted: { type: Boolean, default: false },
-  // Companion settings
-  companionName: { type: String, trim: true },
-  companionPhoto: { type: String },
-  personality: { type: String, default: 'nova' },
-  language: { type: String, default: 'english' },
-  relationship: { type: String, default: 'girlfriend' },
 }, { timestamps: { createdAt: true, updatedAt: false } });
-
-// --- Custom Personality ---
-
-export interface ICustomPersonality extends Document {
-  userId: string;
-  id: string; // nanoid
-  name: string;
-  emoji: string;
-  prompt: string;
-  createdAt: Date;
-}
-
-const customPersonalitySchema = new Schema<ICustomPersonality>({
-  userId: { type: String, required: true, index: true },
-  id: { type: String, required: true, unique: true },
-  name: { type: String, required: true, maxlength: 20 },
-  emoji: { type: String, required: true },
-  prompt: { type: String, required: true, maxlength: 1000 },
-}, { timestamps: { createdAt: true, updatedAt: false } });
-
-customPersonalitySchema.index({ userId: 1, id: 1 });
 
 // --- Models ---
-// Guard against OverwriteModelError during Next.js hot reload
+export const Person = mongoose.models.Person || mongoose.model<IPerson>("Person", personSchema);
 export const Chat = mongoose.models.Chat || mongoose.model<IChat>("Chat", chatSchema);
 export const Message = mongoose.models.Message || mongoose.model<IMessage>("Message", messageSchema);
-export const Companion = mongoose.models.Companion || mongoose.model<ICompanion>("Companion", companionSchema);
 export const User = mongoose.models.User || mongoose.model<IUser>("User", userSchema);
-export const CustomPersonality = mongoose.models.CustomPersonality || mongoose.model<ICustomPersonality>("CustomPersonality", customPersonalitySchema);
