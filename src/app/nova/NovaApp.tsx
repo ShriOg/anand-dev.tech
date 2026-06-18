@@ -11,12 +11,21 @@ declare global {
   }
 }
 
-const PERSONAS: Record<string, { status: string; name: string; desc: string; icon: string }> = {
+const BUILT_IN_PERSONAS: Record<string, { status: string; name: string; desc: string; icon: string }> = {
   nova: { status: "online · thinking about you 💕", name: "Friend", desc: "warm, playful, your person", icon: "🩷" },
   scholar: { status: "online · ready to study with you 📚", name: "Scholar", desc: "patient study buddy 🤓", icon: "📚" },
   sage: { status: "online · here to guide you 🌿", name: "Sage", desc: "calm & wise, listens deeply", icon: "🌿" },
   spark: { status: "online · buzzing with ideas ⚡", name: "Spark", desc: "chaotic creative energy ✨", icon: "⚡" }
 };
+// Alias for backward compat
+const PERSONAS = BUILT_IN_PERSONAS;
+
+interface CustomPersona {
+  id: string; // starts with "custom_"
+  name: string;
+  emoji: string;
+  prompt: string;
+}
 
 export default function NovaApp() {
   const [isMounted, setIsMounted] = useState(false);
@@ -55,10 +64,18 @@ export default function NovaApp() {
   const [toastShow, setToastShow] = useState(false);
 
   const [streamedText, setStreamedText] = useState("");
-  const [activeMenuChatId, setActiveMenuChatId] = useState<string | null>(null);
-  const [renamingChatId, setRenamingChatId] = useState<string | null>(null);
-  const [renameTitle, setRenameTitle] = useState("");
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  // Custom personalities
+  const [customPersonas, setCustomPersonas] = useState<CustomPersona[]>([]);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [cpName, setCpName] = useState("");
+  const [cpEmoji, setCpEmoji] = useState("✨");
+  const [cpPrompt, setCpPrompt] = useState("");
+  const [cpCreating, setCpCreating] = useState(false);
+  const [cpDeleteId, setCpDeleteId] = useState<string | null>(null);
+
+  // Chat per personality map: { [personalityId]: chatId }
+  const [chatMap, setChatMap] = useState<Record<string, string>>({});
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -199,9 +216,13 @@ export default function NovaApp() {
     setAuthPassword("");
     setUserName("");
     setUserGender("");
+    setCustomPersonas([]);
+    setChatMap({});
     localStorage.removeItem("nova_onboarding");
     localStorage.removeItem("nova_user_name");
     localStorage.removeItem("nova_user_gender");
+    localStorage.removeItem("nova_custom_personalities");
+    localStorage.removeItem("nova_active_personality");
   };
 
   const initAfterAuth = () => {
@@ -211,9 +232,15 @@ export default function NovaApp() {
     setUserName(uName);
     setUserGender(uGen);
 
+    // Load cached custom personalities immediately
+    try {
+      const cached = localStorage.getItem("nova_custom_personalities");
+      if (cached) setCustomPersonas(JSON.parse(cached));
+    } catch { }
+
     const savedName = localStorage.getItem("companion-name");
     const savedImage = localStorage.getItem("companion-image");
-    const savedPersona = localStorage.getItem("persona");
+    const savedPersona = localStorage.getItem("nova_active_personality") || localStorage.getItem("persona") || "nova";
     const savedLanguage = localStorage.getItem("nova_language");
     const savedRelationship = localStorage.getItem("nova_relationship");
     const savedTheme = localStorage.getItem("theme");
@@ -229,8 +256,7 @@ export default function NovaApp() {
     if (savedName) {
       setCompanionName(savedName);
       if (savedImage) setCompanionImage(savedImage);
-      // We pass the currently retrieved persona, language, and relationship explicitly
-      bootIntoApp(savedPersona || "nova", savedName, savedLanguage || "english", savedRelationship || "girlfriend"); // pass name directly to avoid stale state
+      bootIntoApp(savedPersona, savedName, savedLanguage || "english", savedRelationship || "girlfriend");
     } else {
       setOnboardingMode(obDone ? "companion" : "user");
     }
@@ -251,7 +277,8 @@ export default function NovaApp() {
     } catch { return []; }
   };
 
-  const createChat = async (persona: string) => {
+  // Upsert: get-or-create one chat per personality
+  const ensureChat = async (persona: string): Promise<string | null> => {
     try {
       const res = await fetch("/api/chats", {
         method: "POST",
@@ -259,8 +286,22 @@ export default function NovaApp() {
         body: JSON.stringify({ personality: persona })
       });
       const data = await res.json();
-      return data.chat;
+      return data.chat?.id || null;
     } catch { return null; }
+  };
+
+  // Fetch custom personalities from API and merge with localStorage cache
+  const loadCustomPersonalities = async () => {
+    try {
+      const res = await fetch("/api/personalities", { headers: { "x-user-id": userIdRef.current } });
+      const data = await res.json();
+      const list: CustomPersona[] = (data.personalities || []).map((p: any) => ({
+        id: p.id, name: p.name, emoji: p.emoji, prompt: p.prompt
+      }));
+      setCustomPersonas(list);
+      localStorage.setItem("nova_custom_personalities", JSON.stringify(list));
+      return list;
+    } catch { return []; }
   };
 
   const loadChatMessages = async (chatId: string) => {
@@ -381,90 +422,122 @@ export default function NovaApp() {
     const name = compName || companionName || localStorage.getItem("companion-name") || "Nova";
     const appLang = lang || language || "english";
     const appRel = rel || relationship || "girlfriend";
-    const chats = await loadChats();
+
+    // Load all chats and custom personalities in parallel
+    const [chats, customList] = await Promise.all([
+      loadChats(),
+      loadCustomPersonalities()
+    ]);
     setAllChats(chats);
-    if (!chats.length) {
-      const chat = await createChat(persona);
-      if (chat) {
-        setAllChats([chat]);
-        setCurrentChatId(chat.id);
-        setMessages([]);
-        setFirstMsg(false);
-        autoGreet(chat.id, persona, name, appLang, appRel);
-      }
-    } else {
-      const chat = chats[0];
-      setCurrentChatId(chat.id);
-      const msgs = await loadChatMessages(chat.id);
-      setMessages(msgs);
-      if (msgs.length === 0) {
-        setFirstMsg(false);
-        autoGreet(chat.id, persona, name, appLang, appRel);
-      } else {
-        setFirstMsg(false);
-        scrollToBottom();
+
+    // Build chatMap: { personalityId -> chatId }
+    const map: Record<string, string> = {};
+    for (const c of chats) map[c.personality] = c.id;
+    setChatMap(map);
+
+    // Ensure the active personality has a chat
+    let activeChatId = map[persona];
+    if (!activeChatId) {
+      const chatId = await ensureChat(persona);
+      if (chatId) {
+        activeChatId = chatId;
+        map[persona] = chatId;
+        setChatMap({ ...map });
       }
     }
-  };
 
-  const switchToChat = async (chatId: string) => {
-    if (isStreaming) return;
-    if (chatId === currentChatId) { setSidebarOpen(false); return; } // already active
-    setCurrentChatId(chatId);
-    const msgs = await loadChatMessages(chatId);
+    if (!activeChatId) return;
+    setCurrentChatId(activeChatId);
+    const msgs = await loadChatMessages(activeChatId);
     setMessages(msgs);
-    setSidebarOpen(false);
     if (msgs.length === 0) {
       setFirstMsg(false);
-      autoGreet(chatId, currentPersona, companionName || "Nova", language, relationship);
+      autoGreet(activeChatId, persona, name, appLang, appRel);
     } else {
       setFirstMsg(false);
       scrollToBottom();
     }
   };
 
-  const handleNewChat = async () => {
+  // Switch to a personality's persistent chat
+  const switchPersonality = async (persona: string) => {
     if (isStreaming) return;
-    const chat = await createChat(currentPersona);
-    if (!chat) return;
-    setAllChats([chat, ...allChats]);
-    setCurrentChatId(chat.id);
-    setMessages([]);
-    setFirstMsg(false);
-    setSidebarOpen(false);
-    autoGreet(chat.id, currentPersona, companionName || "Nova", language, relationship);
-  };
-
-  const handleDeleteChat = async (chatId: string) => {
-    try {
-      await fetch(`/api/chats/${chatId}`, { method: "DELETE", headers: { "x-user-id": userIdRef.current } });
-      const newChats = allChats.filter(c => c.id !== chatId);
-      setAllChats(newChats);
-      if (currentChatId === chatId) {
-        if (newChats.length) {
-          switchToChat(newChats[0].id);
-        } else {
-          setCurrentChatId(null);
-          setMessages([]);
-          setFirstMsg(true);
-        }
-      }
-      setActiveMenuChatId(null);
-      setDeleteConfirmId(null);
-    } catch { }
-  };
-
-  const submitRename = async (chatId: string) => {
-    if (renameTitle && renameTitle.trim()) {
-      await fetch(`/api/chats/${chatId}`, {
-        method: "PATCH",
-        headers: getHeaders(),
-        body: JSON.stringify({ title: renameTitle.trim() })
-      });
-      setAllChats(prev => prev.map(c => c.id === chatId ? { ...c, title: renameTitle.trim() } : c));
+    if (persona === currentPersona && chatMap[persona] === currentChatId) {
+      setSidebarOpen(false);
+      return;
     }
-    setRenamingChatId(null);
-    setActiveMenuChatId(null);
+    setCurrentPersona(persona);
+    localStorage.setItem("nova_active_personality", persona);
+    localStorage.setItem("persona", persona);
+    setSidebarOpen(false);
+
+    let chatId = chatMap[persona];
+    if (!chatId) {
+      const newId = await ensureChat(persona);
+      if (newId) {
+        chatId = newId;
+        setChatMap(prev => ({ ...prev, [persona]: newId }));
+      }
+    }
+    if (!chatId) return;
+    setCurrentChatId(chatId);
+    const msgs = await loadChatMessages(chatId);
+    setMessages(msgs);
+    if (msgs.length === 0) {
+      setFirstMsg(false);
+      autoGreet(chatId, persona, companionName || "Nova", language, relationship);
+    } else {
+      setFirstMsg(false);
+      scrollToBottom();
+    }
+  };
+
+  // Create a new custom personality
+  const handleCreateCustomPersonality = async () => {
+    if (!cpName.trim() || !cpPrompt.trim()) return;
+    setCpCreating(true);
+    try {
+      const res = await fetch("/api/personalities", {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ name: cpName.trim(), emoji: cpEmoji.trim() || "✨", prompt: cpPrompt.trim() })
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        showToast(d.error || "failed to create");
+        return;
+      }
+      const { personality } = await res.json();
+      const cp: CustomPersona = { id: personality.id, name: personality.name, emoji: personality.emoji, prompt: personality.prompt };
+      const updated = [...customPersonas, cp];
+      setCustomPersonas(updated);
+      localStorage.setItem("nova_custom_personalities", JSON.stringify(updated));
+      setCreateModalOpen(false);
+      setCpName(""); setCpEmoji("✨"); setCpPrompt("");
+      showToast(`${cp.emoji} ${cp.name} created!`);
+      // Switch to the new personality
+      await switchPersonality(cp.id);
+    } catch {
+      showToast("something went wrong 😭");
+    } finally {
+      setCpCreating(false);
+    }
+  };
+
+  // Delete a custom personality
+  const handleDeleteCustomPersonality = async (id: string) => {
+    try {
+      await fetch(`/api/personalities/${id}`, { method: "DELETE", headers: { "x-user-id": userIdRef.current } });
+      const updated = customPersonas.filter(p => p.id !== id);
+      setCustomPersonas(updated);
+      localStorage.setItem("nova_custom_personalities", JSON.stringify(updated));
+      setCpDeleteId(null);
+      // If we were on that personality, switch to nova
+      if (currentPersona === id) switchPersonality("nova");
+      showToast("companion removed");
+    } catch {
+      showToast("failed to delete 😭");
+    }
   };
 
   const scrollToBottom = (smooth = false) => {
@@ -1252,80 +1325,105 @@ export default function NovaApp() {
 
       {/* App Layout */}
       <div className="app-wrapper">
-        {/* Sidebar */}
+        {/* Sidebar — personality switcher */}
         <div className={`sidebar ${sidebarOpen ? "open" : ""}`} id="sidebar">
           <div className="sidebar-head">
             <span className="sidebar-title">Nova</span>
-            <button className="sidebar-new" onClick={handleNewChat}>✦ new chat</button>
+            <button className="sp-close" style={{ fontSize: 18, background: 'none', border: 'none', color: 'var(--text-2)', cursor: 'pointer', padding: '4px 8px' }} onClick={() => setSidebarOpen(false)}>✕</button>
           </div>
           <div className="sidebar-list">
-            {!allChats.length ? (
-              <div className="sidebar-empty">no chats yet 🥺<br />start one!</div>
-            ) : (
-              allChats.map(c => {
-                const active = c.id === currentChatId ? " active" : "";
-                const d = new Date(c.updatedAt || c.created_at || Date.now());
-                const meta = isNaN(d.getTime()) ? "" : d.toLocaleDateString([], { month: "short", day: "numeric" });
-                const icon = PERSONAS[c.personality]?.icon || "💬";
-                return (
-                  <div key={c.id} className={`sidebar-chat${active}`} onClick={() => switchToChat(c.id)}>
-                    <div className="sidebar-chat-icon">{icon}</div>
-                    <div className="sidebar-chat-info">
-                      {renamingChatId === c.id ? (
-                        <input
-                          autoFocus
-                          value={renameTitle}
-                          onChange={e => setRenameTitle(e.target.value)}
-                          onBlur={() => submitRename(c.id)}
-                          onKeyDown={e => {
-                            if (e.key === "Enter") submitRename(c.id);
-                            if (e.key === "Escape") setRenamingChatId(null);
-                          }}
-                          onClick={e => e.stopPropagation()}
-                          style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'inherit', borderRadius: '4px', padding: '2px 4px', width: '100%', fontSize: '13px', outline: 'none' }}
-                        />
-                      ) : (
-                        <div className="sidebar-chat-title">{c.title || "new chat"}</div>
-                      )}
-                      <div className="sidebar-chat-meta">{meta}</div>
-                    </div>
-                    <button className="sidebar-chat-menu" onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveMenuChatId(activeMenuChatId === c.id ? null : c.id);
-                      setDeleteConfirmId(null);
-                    }}>···</button>
-                    {activeMenuChatId === c.id && (
-                      <>
-                        <div style={{ position: 'fixed', inset: 0, zIndex: 49 }} onClick={(e) => { e.stopPropagation(); setActiveMenuChatId(null); setDeleteConfirmId(null); }}></div>
-                        <div className="sidebar-chat-actions" onClick={e => e.stopPropagation()}>
-                          <button className="sa-btn" onClick={() => {
-                            setRenamingChatId(c.id);
-                            setRenameTitle(c.title || "new chat");
-                            setActiveMenuChatId(null);
-                          }}>✎ Rename</button>
-                          {deleteConfirmId === c.id ? (
-                            <button className="sa-btn danger" style={{ color: "var(--red)", fontWeight: "bold" }} onClick={() => handleDeleteChat(c.id)}>⚠ Confirm Delete</button>
-                          ) : (
-                            <button className="sa-btn danger" onClick={() => setDeleteConfirmId(c.id)}>🗑️ Delete</button>
-                          )}
-                        </div>
-                      </>
-                    )}
+
+            {/* Built-in personalities */}
+            {Object.entries(BUILT_IN_PERSONAS).map(([key, p]) => {
+              const chat = allChats.find((c: any) => c.personality === key);
+              const lastMsg = chat?.lastMessage || "";
+              const preview = lastMsg.length > 40 ? lastMsg.slice(0, 40) + "…" : lastMsg;
+              const isActive = currentPersona === key;
+              return (
+                <div
+                  key={key}
+                  className={`sidebar-chat${isActive ? " active" : ""}`}
+                  onClick={() => switchPersonality(key)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="sidebar-chat-icon" style={{ fontSize: 22 }}>{p.icon}</div>
+                  <div className="sidebar-chat-info">
+                    <div className="sidebar-chat-title" style={{ fontWeight: isActive ? 700 : 500 }}>{p.name}</div>
+                    <div className="sidebar-chat-meta" style={{ opacity: 0.6 }}>{preview || p.desc}</div>
                   </div>
-                );
-              })
+                  {isActive && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--nova)', flexShrink: 0, alignSelf: 'center', marginRight: 4 }} />}
+                </div>
+              );
+            })}
+
+            {/* Custom personalities */}
+            {customPersonas.length > 0 && (
+              <div style={{ margin: '12px 12px 4px', fontSize: 11, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.5px', borderTop: '1px solid var(--border)', paddingTop: 10 }}>Your companions</div>
             )}
+            {customPersonas.map(cp => {
+              const chat = allChats.find((c: any) => c.personality === cp.id);
+              const lastMsg = chat?.lastMessage || "";
+              const preview = lastMsg.length > 40 ? lastMsg.slice(0, 40) + "…" : lastMsg;
+              const isActive = currentPersona === cp.id;
+              return (
+                <div
+                  key={cp.id}
+                  className={`sidebar-chat${isActive ? " active" : ""}`}
+                  onClick={() => switchPersonality(cp.id)}
+                  style={{ cursor: 'pointer', position: 'relative' }}
+                >
+                  <div className="sidebar-chat-icon" style={{ fontSize: 22 }}>{cp.emoji}</div>
+                  <div className="sidebar-chat-info">
+                    <div className="sidebar-chat-title" style={{ fontWeight: isActive ? 700 : 500 }}>{cp.name}</div>
+                    <div className="sidebar-chat-meta" style={{ opacity: 0.6 }}>{preview || 'custom companion'}</div>
+                  </div>
+                  <button
+                    className="sidebar-chat-menu"
+                    title="Delete companion"
+                    onClick={e => { e.stopPropagation(); setCpDeleteId(cpDeleteId === cp.id ? null : cp.id); }}
+                    style={{ opacity: 0, transition: '0.2s' }}
+                    onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+                    onMouseLeave={e => (e.currentTarget.style.opacity = '0')}
+                  >🗑</button>
+                  {cpDeleteId === cp.id && (
+                    <>
+                      <div style={{ position: 'fixed', inset: 0, zIndex: 49 }} onClick={e => { e.stopPropagation(); setCpDeleteId(null); }} />
+                      <div className="sidebar-chat-actions" onClick={e => e.stopPropagation()}>
+                        <button className="sa-btn danger" style={{ color: 'var(--red)', fontWeight: 'bold' }} onClick={() => handleDeleteCustomPersonality(cp.id)}>⚠ Delete {cp.name}</button>
+                        <button className="sa-btn" onClick={() => setCpDeleteId(null)}>Cancel</button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+
+            {/* Create your own card */}
+            <div
+              className="sidebar-chat"
+              style={{ cursor: 'pointer', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 12, margin: '8px 8px 4px', background: 'transparent' }}
+              onClick={() => { setCreateModalOpen(true); setSidebarOpen(false); }}
+            >
+              <div className="sidebar-chat-icon" style={{ fontSize: 22 }}>✦</div>
+              <div className="sidebar-chat-info">
+                <div className="sidebar-chat-title" style={{ color: 'var(--nova)' }}>create your own</div>
+                <div className="sidebar-chat-meta" style={{ opacity: 0.5 }}>custom companion</div>
+              </div>
+            </div>
           </div>
         </div>
         <div className={`sidebar-overlay ${sidebarOpen ? "open" : ""}`} onClick={() => setSidebarOpen(false)}></div>
         <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>☰</button>
-
-        <div className="app">
+         <div className="app">
           {/* Topbar */}
           <div className="topbar">
             <div className="nova-av-wrap">
               <div className="nova-av">
-                {companionImage ? <img src={companionImage} alt={companionName} /> : (companionName || "N").charAt(0).toUpperCase()}
+                {companionImage ? <img src={companionImage} alt={companionName} /> :
+                  (currentPersona.startsWith("custom_")
+                    ? (customPersonas.find(p => p.id === currentPersona)?.emoji || "✨")
+                    : (BUILT_IN_PERSONAS[currentPersona]?.icon || (companionName || "N").charAt(0).toUpperCase())
+                  )}
               </div>
               <div className="online-ring"></div>
               <div className="online-dot"></div>
@@ -1334,13 +1432,12 @@ export default function NovaApp() {
               <div className="nova-name">{companionName || "Nova"}</div>
               <div className="nova-status">
                 <span className="ns-dot"></span>
-                <span>{PERSONAS[currentPersona]?.status || PERSONAS.nova.status}</span>
+                <span>{BUILT_IN_PERSONAS[currentPersona]?.status || (customPersonas.find(p => p.id === currentPersona) ? `online · ${customPersonas.find(p => p.id === currentPersona)?.name} is here` : BUILT_IN_PERSONAS.nova.status)}</span>
               </div>
             </div>
             <div className="topbar-btns">
               <div className="model-pill"><span className="mp-dot"></span><span>llama-3.3-70b</span></div>
               <div className="lang-badge" title="Change language" onClick={() => setSettingsOpen(true)}>{language === "hinglish" ? "🇮🇳" : "🇺🇸"}</div>
-              <button className="tbtn" onClick={handleNewChat}>✦<span className="tip">New chat</span></button>
               <button className="tbtn" onClick={() => setSettingsOpen(true)}>⚙️<span className="tip">Settings</span></button>
             </div>
           </div>
@@ -1487,6 +1584,106 @@ export default function NovaApp() {
           </div>
         </div>
       </div>
+
+      {/* Create Custom Personality Modal */}
+      {createModalOpen && (
+        <>
+          <div
+            onClick={() => setCreateModalOpen(false)}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 900,
+              background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+            }}
+          />
+          <div style={{
+            position: 'fixed', top: '50%', left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 901, width: '90%', maxWidth: 480,
+            background: 'rgba(13,13,35,0.97)',
+            border: '1px solid rgba(255,110,180,0.18)',
+            borderRadius: 24, padding: '36px 32px 28px',
+            boxShadow: '0 0 80px rgba(255,61,139,0.12), 0 24px 60px rgba(0,0,0,0.6)',
+            display: 'flex', flexDirection: 'column', gap: 20,
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: '#f0f0fa' }}>create your companion ✦</div>
+                <div style={{ fontSize: 13, color: 'rgba(240,240,250,0.4)', marginTop: 4 }}>design someone all yours</div>
+              </div>
+              <button onClick={() => setCreateModalOpen(false)} style={{ background: 'none', border: 'none', color: 'rgba(240,240,250,0.4)', fontSize: 22, cursor: 'pointer', padding: '4px 8px', lineHeight: 1 }}>✕</button>
+            </div>
+
+            <div style={{ display: 'flex', gap: 12 }}>
+              <div style={{ flexShrink: 0 }}>
+                <div style={{ fontSize: 11, color: 'rgba(240,240,250,0.4)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Emoji</div>
+                <input
+                  type="text"
+                  value={cpEmoji}
+                  onChange={e => setCpEmoji(e.target.value.slice(0, 4))}
+                  placeholder="✨"
+                  style={{
+                    width: 56, height: 56, textAlign: 'center', fontSize: 26,
+                    background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.1)',
+                    borderRadius: 14, color: '#f0f0fa', outline: 'none', cursor: 'text',
+                    fontFamily: 'inherit',
+                  }}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 11, color: 'rgba(240,240,250,0.4)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Name</div>
+                <input
+                  type="text"
+                  value={cpName}
+                  onChange={e => setCpName(e.target.value.slice(0, 20))}
+                  placeholder="e.g. Aria, Zara, Sky…"
+                  maxLength={20}
+                  style={{
+                    width: '100%', padding: '14px 16px', boxSizing: 'border-box',
+                    background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.1)',
+                    borderRadius: 14, color: '#f0f0fa', fontFamily: 'inherit', fontSize: 14.5,
+                    outline: 'none',
+                  }}
+                />
+                <div style={{ fontSize: 11, color: 'rgba(240,240,250,0.3)', marginTop: 4 }}>{cpName.length}/20</div>
+              </div>
+            </div>
+
+            <div>
+              <div style={{ fontSize: 11, color: 'rgba(240,240,250,0.4)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Their vibe</div>
+              <textarea
+                value={cpPrompt}
+                onChange={e => setCpPrompt(e.target.value.slice(0, 1000))}
+                placeholder={"Describe who they are, how they talk, what their vibe is. Write it like you're describing a real person, not giving instructions."}
+                rows={5}
+                style={{
+                  width: '100%', padding: '14px 16px', boxSizing: 'border-box',
+                  background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.1)',
+                  borderRadius: 14, color: '#f0f0fa', fontFamily: 'inherit', fontSize: 13.5,
+                  outline: 'none', resize: 'vertical', lineHeight: 1.6,
+                }}
+              />
+              <div style={{ fontSize: 11, color: 'rgba(240,240,250,0.3)', marginTop: 4 }}>{cpPrompt.length}/1000</div>
+            </div>
+
+            <button
+              disabled={!cpName.trim() || !cpPrompt.trim() || cpCreating}
+              onClick={handleCreateCustomPersonality}
+              style={{
+                padding: '15px 0', borderRadius: 14, border: 'none',
+                background: 'linear-gradient(135deg,#ff3d8b,#ff80be)',
+                color: '#fff', fontFamily: 'inherit', fontSize: 15, fontWeight: 700,
+                cursor: !cpName.trim() || !cpPrompt.trim() || cpCreating ? 'not-allowed' : 'pointer',
+                opacity: !cpName.trim() || !cpPrompt.trim() || cpCreating ? 0.4 : 1,
+                boxShadow: '0 6px 28px rgba(255,61,139,0.35)',
+                transition: 'opacity .2s',
+              }}
+            >
+              {cpCreating ? 'creating…' : `create ${cpEmoji || '✨'} ${cpName || 'companion'}`}
+            </button>
+          </div>
+        </>
+      )}
 
       {/* Toast */}
       <div className={`toast ${toastShow ? "show" : ""}`}>{toastMsg}</div>

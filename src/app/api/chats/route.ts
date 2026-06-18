@@ -38,22 +38,27 @@ export async function POST(req: Request) {
       language
     } = await req.json();
     
-    const newChat = await Chat.create({
-      title: companionName ? `Chat with ${companionName}` : "new chat",
-      personality,
-      companionName,
-      companionPhoto,
-      relationshipType,
-      language,
-      userId,
-    });
+    // Upsert: find-or-create one chat per personality per user
+    const chat = await Chat.findOneAndUpdate(
+      { userId, personality },
+      {
+        $setOnInsert: {
+          title: companionName ? `Chat with ${companionName}` : `${personality} chat`,
+          personality,
+          companionName,
+          companionPhoto,
+          relationshipType,
+          language,
+          userId,
+        }
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    ).lean() as any;
 
-    const chatData = newChat.toObject();
-    
     return NextResponse.json({
       chat: {
-        ...chatData,
-        id: chatData._id.toString(),
+        ...chat,
+        id: chat._id.toString(),
         _id: undefined,
         __v: undefined
       }

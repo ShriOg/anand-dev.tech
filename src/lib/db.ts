@@ -59,6 +59,8 @@ const chatSchema = new Schema<IChat>({
 }, { timestamps: true });
 
 chatSchema.index({ userId: 1, deleted: 1 });
+// Unique chat per personality per user
+chatSchema.index({ userId: 1, personality: 1 }, { unique: true });
 
 export interface IMessage extends Document {
   chatId: mongoose.Types.ObjectId;
@@ -121,9 +123,31 @@ const userSchema = new Schema<IUser>({
   relationship: { type: String, default: 'girlfriend' },
 }, { timestamps: { createdAt: true, updatedAt: false } });
 
+// --- Custom Personality ---
+
+export interface ICustomPersonality extends Document {
+  userId: string;
+  id: string; // nanoid
+  name: string;
+  emoji: string;
+  prompt: string;
+  createdAt: Date;
+}
+
+const customPersonalitySchema = new Schema<ICustomPersonality>({
+  userId: { type: String, required: true, index: true },
+  id: { type: String, required: true, unique: true },
+  name: { type: String, required: true, maxlength: 20 },
+  emoji: { type: String, required: true },
+  prompt: { type: String, required: true, maxlength: 1000 },
+}, { timestamps: { createdAt: true, updatedAt: false } });
+
+customPersonalitySchema.index({ userId: 1, id: 1 });
+
 // --- Models ---
 // Guard against OverwriteModelError during Next.js hot reload
 export const Chat = mongoose.models.Chat || mongoose.model<IChat>("Chat", chatSchema);
 export const Message = mongoose.models.Message || mongoose.model<IMessage>("Message", messageSchema);
 export const Companion = mongoose.models.Companion || mongoose.model<ICompanion>("Companion", companionSchema);
 export const User = mongoose.models.User || mongoose.model<IUser>("User", userSchema);
+export const CustomPersonality = mongoose.models.CustomPersonality || mongoose.model<ICustomPersonality>("CustomPersonality", customPersonalitySchema);
