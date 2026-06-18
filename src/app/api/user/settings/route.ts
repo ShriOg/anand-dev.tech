@@ -59,7 +59,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
     }
 
-    const user = await User.findByIdAndUpdate(userId, update, { new: true });
+    const user = await User.findByIdAndUpdate(userId, update, { returnDocument: "after" });
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     return NextResponse.json({ success: true });

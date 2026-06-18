@@ -22,7 +22,7 @@ export async function POST(req: Request) {
         gender,
         onboardingCompleted: true
       },
-      { new: true }
+      { returnDocument: "after" }
     );
 
     if (!user) {
