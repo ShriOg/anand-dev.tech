@@ -54,7 +54,7 @@ export interface IMessage extends Document {
 const messageSchema = new Schema<IMessage>({
   chatId: { type: Schema.Types.ObjectId, ref: 'Chat', required: true },
   role: { type: String, required: true, enum: ['user', 'assistant', 'system'] },
-  content: { type: String, required: true },
+  content: { type: String, required: false },
 }, { timestamps: { createdAt: true, updatedAt: false } });
 
 export interface ICompanion extends Document {

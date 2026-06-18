@@ -38,18 +38,25 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   try {
     const { messages = [] } = await req.json();
 
-    // MongoDB doesn't need transactions for simple replace, but we can do it safely
+    if (!Array.isArray(messages)) {
+      return NextResponse.json({ error: "Invalid messages format" }, { status: 400 });
+    }
+
     // Delete existing messages for this chat
     await Message.deleteMany({ chatId: id });
-    
-    // Insert new messages
-    if (messages.length > 0) {
-      const messagesToInsert = messages.map((m: any) => ({
-        chatId: id,
-        role: m.role,
-        content: m.content
-      }));
-      await Message.insertMany(messagesToInsert);
+
+    const validMessages = messages.filter((m: any) => m.content && m.content.trim() !== '');
+
+    // Insert new valid messages
+    const toInsert = validMessages.map((m: any) => ({
+      chatId: id,
+      role: m.role,
+      content: m.content,
+      createdAt: m.createdAt || new Date()
+    }));
+
+    if (toInsert.length > 0) {
+      await Message.insertMany(toInsert);
     }
     
     // Update chat timestamp
