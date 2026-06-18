@@ -1,28 +1,28 @@
 import mongoose, { Schema, Document } from "mongoose";
-import dns from "dns";
-
-// Temporary fix for Node.js DNS resolution issues on Windows for SRV records
-dns.setServers(['8.8.8.8', '8.8.4.4']);
 
 // --- Connection Utility ---
-let isConnected = false;
-
+// Use mongoose.connection.readyState instead of a module-level flag so we
+// correctly handle dropped connections and hot-reload in Next.js dev mode.
 export const ensureDb = async () => {
   mongoose.set('strictQuery', true);
 
-  if (isConnected) {
+  // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+  if (mongoose.connection.readyState === 1) {
     return;
   }
 
   const MONGODB_URI = process.env.MONGODB_URI;
 
   if (!MONGODB_URI) {
-    throw new Error("MONGODB_URI is not defined in environment variables");
+    throw new Error(
+      "MONGODB_URI is not defined. Create a .env.local file with MONGODB_URI=<your Atlas connection string>."
+    );
   }
 
   try {
-    await mongoose.connect(MONGODB_URI);
-    isConnected = true;
+    await mongoose.connect(MONGODB_URI, {
+      bufferCommands: false,
+    });
     console.log("Connected to MongoDB");
   } catch (error) {
     console.error("MongoDB connection error:", error);
@@ -100,16 +100,17 @@ export interface IUser extends Document {
 }
 
 const userSchema = new Schema<IUser>({
-  username: { type: String, required: true, unique: true, lowercase: true, trim: true },
+  username: { type: String, required: true, unique: true, lowercase: true, trim: true, minlength: 3, maxlength: 30 },
   passwordHash: { type: String, required: true },
-  email: { type: String },
-  name: { type: String },
+  // sparse: true allows multiple docs with no email (null/undefined) while still enforcing uniqueness among those that do have one
+  email: { type: String, sparse: true, unique: true, lowercase: true, trim: true },
+  name: { type: String, trim: true },
   gender: { type: String, enum: ['male', 'female'] },
   onboardingCompleted: { type: Boolean, default: false },
 }, { timestamps: { createdAt: true, updatedAt: false } });
 
 // --- Models ---
-// To avoid OverwriteModelError during hot reloading in Next.js
+// Guard against OverwriteModelError during Next.js hot reload
 export const Chat = mongoose.models.Chat || mongoose.model<IChat>("Chat", chatSchema);
 export const Message = mongoose.models.Message || mongoose.model<IMessage>("Message", messageSchema);
 export const Companion = mongoose.models.Companion || mongoose.model<ICompanion>("Companion", companionSchema);
