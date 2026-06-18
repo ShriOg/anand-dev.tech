@@ -1042,7 +1042,7 @@ export default function NovaApp() {
             <div className="sp-label">Vibe</div>
             <div className="persona-grid">
               {[
-                { id: "girlfriend", icon: "🩷", name: "Friend", desc: "romantic & protective" },
+                { id: "girlfriend", icon: "🩷", name: "Girlfriend", desc: "romantic & protective" },
                 { id: "bestfriend", icon: "🤝", name: "Best Friend", desc: "chaotic & roasts you" },
                 { id: "classmate", icon: "📚", name: "Classmate", desc: "shares notes energy" },
                 { id: "crush", icon: "💜", name: "Crush", desc: "shy & nervous" },
