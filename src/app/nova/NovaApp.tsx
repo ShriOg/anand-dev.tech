@@ -26,6 +26,8 @@ export default function NovaApp() {
   const [authUsername, setAuthUsername] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authError, setAuthError] = useState("");
+  const [authUsernameError, setAuthUsernameError] = useState("");
+  const [authPasswordError, setAuthPasswordError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState<string | null>(null); // username
 
@@ -740,7 +742,12 @@ export default function NovaApp() {
           border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: 3, marginBottom: 26,
         }}>
           {(["login", "register"] as const).map(mode => (
-            <button key={mode} onClick={() => { setAuthMode(mode); setAuthError(""); }} style={{
+            <button key={mode} onClick={() => {
+              setAuthMode(mode);
+              setAuthError("");
+              setAuthUsernameError("");
+              setAuthPasswordError("");
+            }} style={{
               flex: 1, padding: "9px 0", borderRadius: 9, border: "none", cursor: "pointer",
               fontSize: 13, fontWeight: 600, fontFamily: "inherit",
               transition: "all .2s",
@@ -755,33 +762,94 @@ export default function NovaApp() {
 
         {/* Form */}
         <form onSubmit={handleAuth} style={{ width: "100%", display: "flex", flexDirection: "column", gap: 14 }}>
-          {[
-            { label: "Username", type: "text", key: "username" as const, auto: "username", ph: "e.g. luna_user" },
-            { label: "Password", type: "password", key: "password" as const, auto: authMode === "login" ? "current-password" : "new-password", ph: authMode === "register" ? "at least 6 characters" : "your password" },
-          ].map(({ label, type, key, auto, ph }) => (
-            <div key={key} style={{ display: "flex", flexDirection: "column", gap: 7 }}>
-              <label style={{ fontSize: 11.5, fontWeight: 600, color: "rgba(240,240,250,0.4)", letterSpacing: "0.5px", textTransform: "uppercase" }}>{label}</label>
-              <input
-                type={type}
-                autoComplete={auto}
-                autoCapitalize="none"
-                placeholder={ph}
-                maxLength={key === "username" ? 30 : 128}
-                value={key === "username" ? authUsername : authPassword}
-                onChange={e => key === "username" ? setAuthUsername(e.target.value) : setAuthPassword(e.target.value)}
-                style={{
-                  width: "100%", padding: "13px 16px", boxSizing: "border-box",
-                  background: "rgba(255,255,255,0.05)",
-                  border: "1.5px solid rgba(255,255,255,0.09)",
-                  borderRadius: 12, color: "#f0f0fa",
-                  fontFamily: "inherit", fontSize: 14.5, outline: "none",
-                  transition: "border-color .2s, box-shadow .2s",
-                }}
-                onFocus={e => { e.target.style.borderColor = "rgba(255,61,139,0.5)"; e.target.style.boxShadow = "0 0 0 4px rgba(255,61,139,0.1)"; }}
-                onBlur={e => { e.target.style.borderColor = "rgba(255,255,255,0.09)"; e.target.style.boxShadow = "none"; }}
-              />
-            </div>
-          ))}
+          {/* Username field */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+            <label style={{ fontSize: 11.5, fontWeight: 600, color: "rgba(240,240,250,0.4)", letterSpacing: "0.5px", textTransform: "uppercase" }}>Username</label>
+            <input
+              type="text"
+              autoComplete="username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              placeholder="e.g. luna_user"
+              maxLength={30}
+              value={authUsername}
+              onChange={e => {
+                const val = e.target.value;
+                setAuthUsername(val);
+                setAuthError("");
+                if (authMode === "register") {
+                  const trimmed = val.trim();
+                  if (trimmed.length > 0 && trimmed.length < 3) {
+                    setAuthUsernameError("At least 3 characters");
+                  } else if (trimmed.length > 30) {
+                    setAuthUsernameError("Max 30 characters");
+                  } else if (trimmed && !/^[a-z0-9_]+$/i.test(trimmed)) {
+                    setAuthUsernameError("Only letters, numbers, and _ allowed");
+                  } else {
+                    setAuthUsernameError("");
+                  }
+                } else {
+                  setAuthUsernameError("");
+                }
+              }}
+              style={{
+                width: "100%", padding: "13px 16px", boxSizing: "border-box",
+                background: "rgba(255,255,255,0.05)",
+                border: `1.5px solid ${authUsernameError ? "rgba(248,113,113,0.6)" : "rgba(255,255,255,0.09)"}`,
+                borderRadius: 12, color: "#f0f0fa",
+                fontFamily: "inherit", fontSize: 14.5, outline: "none",
+                transition: "border-color .2s, box-shadow .2s",
+              }}
+              onFocus={e => { e.target.style.borderColor = authUsernameError ? "rgba(248,113,113,0.6)" : "rgba(255,61,139,0.5)"; e.target.style.boxShadow = "0 0 0 4px rgba(255,61,139,0.1)"; }}
+              onBlur={e => { e.target.style.borderColor = authUsernameError ? "rgba(248,113,113,0.5)" : "rgba(255,255,255,0.09)"; e.target.style.boxShadow = "none"; }}
+            />
+            {authUsernameError && (
+              <span style={{ fontSize: 12, color: "#f87171", fontWeight: 500, paddingLeft: 4 }}>⚠ {authUsernameError}</span>
+            )}
+            {authMode === "register" && !authUsernameError && authUsername.trim().length >= 3 && (
+              <span style={{ fontSize: 12, color: "#34d399", fontWeight: 500, paddingLeft: 4 }}>✓ looks good</span>
+            )}
+          </div>
+
+          {/* Password field */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+            <label style={{ fontSize: 11.5, fontWeight: 600, color: "rgba(240,240,250,0.4)", letterSpacing: "0.5px", textTransform: "uppercase" }}>Password</label>
+            <input
+              type="password"
+              autoComplete={authMode === "login" ? "current-password" : "new-password"}
+              placeholder={authMode === "register" ? "at least 6 characters" : "your password"}
+              maxLength={128}
+              value={authPassword}
+              onChange={e => {
+                const val = e.target.value;
+                setAuthPassword(val);
+                setAuthError("");
+                if (authMode === "register") {
+                  if (val.length > 0 && val.length < 6) {
+                    setAuthPasswordError("At least 6 characters required");
+                  } else {
+                    setAuthPasswordError("");
+                  }
+                } else {
+                  setAuthPasswordError("");
+                }
+              }}
+              style={{
+                width: "100%", padding: "13px 16px", boxSizing: "border-box",
+                background: "rgba(255,255,255,0.05)",
+                border: `1.5px solid ${authPasswordError ? "rgba(248,113,113,0.6)" : "rgba(255,255,255,0.09)"}`,
+                borderRadius: 12, color: "#f0f0fa",
+                fontFamily: "inherit", fontSize: 14.5, outline: "none",
+                transition: "border-color .2s, box-shadow .2s",
+              }}
+              onFocus={e => { e.target.style.borderColor = authPasswordError ? "rgba(248,113,113,0.6)" : "rgba(255,61,139,0.5)"; e.target.style.boxShadow = "0 0 0 4px rgba(255,61,139,0.1)"; }}
+              onBlur={e => { e.target.style.borderColor = authPasswordError ? "rgba(248,113,113,0.5)" : "rgba(255,255,255,0.09)"; e.target.style.boxShadow = "none"; }}
+            />
+            {authPasswordError && (
+              <span style={{ fontSize: 12, color: "#f87171", fontWeight: 500, paddingLeft: 4 }}>⚠ {authPasswordError}</span>
+            )}
+          </div>
 
           {authError && (
             <div style={{
@@ -791,16 +859,19 @@ export default function NovaApp() {
             }}>{authError}</div>
           )}
 
-          <button type="submit" disabled={authLoading || !authUsername.trim() || !authPassword.trim()} style={{
-            marginTop: 6, width: "100%", padding: "15px 0",
-            background: "linear-gradient(135deg,#ff3d8b,#ff80be)",
-            border: "none", borderRadius: 14,
-            color: "#fff", fontFamily: "inherit", fontSize: 15, fontWeight: 700,
-            cursor: authLoading || !authUsername.trim() || !authPassword.trim() ? "not-allowed" : "pointer",
-            opacity: authLoading || !authUsername.trim() || !authPassword.trim() ? 0.38 : 1,
-            boxShadow: "0 6px 28px rgba(255,61,139,0.35)",
-            transition: "opacity .2s, transform .15s, box-shadow .2s",
-          }}
+          <button
+            type="submit"
+            disabled={authLoading || !authUsername.trim() || !authPassword.trim() || !!authUsernameError || !!authPasswordError}
+            style={{
+              marginTop: 6, width: "100%", padding: "15px 0",
+              background: "linear-gradient(135deg,#ff3d8b,#ff80be)",
+              border: "none", borderRadius: 14,
+              color: "#fff", fontFamily: "inherit", fontSize: 15, fontWeight: 700,
+              cursor: authLoading || !authUsername.trim() || !authPassword.trim() || !!authUsernameError || !!authPasswordError ? "not-allowed" : "pointer",
+              opacity: authLoading || !authUsername.trim() || !authPassword.trim() || !!authUsernameError || !!authPasswordError ? 0.38 : 1,
+              boxShadow: "0 6px 28px rgba(255,61,139,0.35)",
+              transition: "opacity .2s, transform .15s, box-shadow .2s",
+            }}
             onMouseEnter={e => { if (!authLoading) { (e.target as HTMLButtonElement).style.transform = "translateY(-1px)"; (e.target as HTMLButtonElement).style.boxShadow = "0 8px 36px rgba(255,61,139,0.5)"; } }}
             onMouseLeave={e => { (e.target as HTMLButtonElement).style.transform = ""; (e.target as HTMLButtonElement).style.boxShadow = "0 6px 28px rgba(255,61,139,0.35)"; }}
           >
