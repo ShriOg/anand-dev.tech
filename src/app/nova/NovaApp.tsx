@@ -180,7 +180,7 @@ export default function NovaApp() {
         body: JSON.stringify({ messages: msgs })
       });
       // Auto-title
-      if (msgs.length === 1 && msgs[0].role === "user") {
+      if (msgs.length === 2 && msgs[0].role === "user") {
         const title = msgs[0].content.slice(0, 40);
         await fetch(`/api/chats/${chatId}`, {
           method: "PATCH",
@@ -337,8 +337,10 @@ export default function NovaApp() {
               setIsStreaming(false);
               return;
             }
-            if (obj.text) {
-              fullText += obj.text;
+            
+            const chunkText = obj.choices?.[0]?.delta?.content || obj.text || "";
+            if (chunkText) {
+              fullText += chunkText;
               setStreamedText(fullText);
               scrollToBottom(true);
             }
@@ -403,8 +405,10 @@ export default function NovaApp() {
           try {
             const obj = JSON.parse(data);
             if (obj.error) throw new Error(obj.error);
-            if (obj.text) {
-              fullText += obj.text;
+            
+            const chunkText = obj.choices?.[0]?.delta?.content || obj.text || "";
+            if (chunkText) {
+              fullText += chunkText;
               setStreamedText(fullText);
               scrollToBottom(true);
             }
