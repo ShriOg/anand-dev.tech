@@ -55,6 +55,10 @@ export default function NovaApp() {
   const [toastShow, setToastShow] = useState(false);
 
   const [streamedText, setStreamedText] = useState("");
+  const [activeMenuChatId, setActiveMenuChatId] = useState<string | null>(null);
+  const [renamingChatId, setRenamingChatId] = useState<string | null>(null);
+  const [renameTitle, setRenameTitle] = useState("");
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -275,14 +279,24 @@ export default function NovaApp() {
         body: JSON.stringify({ messages: msgs })
       });
       // Auto-title
-      if (msgs.length === 2 && msgs[0].role === "user") {
-        const title = msgs[0].content.slice(0, 40);
-        await fetch(`/api/chats/${chatId}`, {
-          method: "PATCH",
-          headers: getHeaders(),
-          body: JSON.stringify({ title })
-        });
-        setAllChats(prev => prev.map(c => c.id === chatId ? { ...c, title } : c));
+      const userMsgs = msgs.filter(m => m.role === "user");
+      if (userMsgs.length === 1 && msgs.length <= 3) {
+        try {
+          const res = await fetch("/api/chat/title", {
+            method: "POST",
+            headers: getHeaders(),
+            body: JSON.stringify({ message: userMsgs[0].content })
+          });
+          const { title } = await res.json();
+          if (title) {
+            await fetch(`/api/chats/${chatId}`, {
+              method: "PATCH",
+              headers: getHeaders(),
+              body: JSON.stringify({ title })
+            });
+            setAllChats(prev => prev.map(c => c.id === chatId ? { ...c, title } : c));
+          }
+        } catch { }
       }
     } catch { }
   };
@@ -422,7 +436,6 @@ export default function NovaApp() {
   };
 
   const handleDeleteChat = async (chatId: string) => {
-    if (!confirm("delete this chat?")) return;
     try {
       await fetch(`/api/chats/${chatId}`, { method: "DELETE", headers: { "x-user-id": userIdRef.current } });
       const newChats = allChats.filter(c => c.id !== chatId);
@@ -436,19 +449,22 @@ export default function NovaApp() {
           setFirstMsg(true);
         }
       }
+      setActiveMenuChatId(null);
+      setDeleteConfirmId(null);
     } catch { }
   };
 
-  const handleRenameChat = async (chatId: string, oldTitle: string) => {
-    const newTitle = prompt("rename chat:", oldTitle || "");
-    if (newTitle && newTitle.trim()) {
+  const submitRename = async (chatId: string) => {
+    if (renameTitle && renameTitle.trim()) {
       await fetch(`/api/chats/${chatId}`, {
         method: "PATCH",
         headers: getHeaders(),
-        body: JSON.stringify({ title: newTitle.trim() })
+        body: JSON.stringify({ title: renameTitle.trim() })
       });
-      setAllChats(prev => prev.map(c => c.id === chatId ? { ...c, title: newTitle.trim() } : c));
+      setAllChats(prev => prev.map(c => c.id === chatId ? { ...c, title: renameTitle.trim() } : c));
     }
+    setRenamingChatId(null);
+    setActiveMenuChatId(null);
   };
 
   const scrollToBottom = (smooth = false) => {
@@ -1255,15 +1271,46 @@ export default function NovaApp() {
                   <div key={c.id} className={`sidebar-chat${active}`} onClick={() => switchToChat(c.id)}>
                     <div className="sidebar-chat-icon">{icon}</div>
                     <div className="sidebar-chat-info">
-                      <div className="sidebar-chat-title">{c.title || "new chat"}</div>
+                      {renamingChatId === c.id ? (
+                        <input
+                          autoFocus
+                          value={renameTitle}
+                          onChange={e => setRenameTitle(e.target.value)}
+                          onBlur={() => submitRename(c.id)}
+                          onKeyDown={e => {
+                            if (e.key === "Enter") submitRename(c.id);
+                            if (e.key === "Escape") setRenamingChatId(null);
+                          }}
+                          onClick={e => e.stopPropagation()}
+                          style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', color: 'inherit', borderRadius: '4px', padding: '2px 4px', width: '100%', fontSize: '13px', outline: 'none' }}
+                        />
+                      ) : (
+                        <div className="sidebar-chat-title">{c.title || "new chat"}</div>
+                      )}
                       <div className="sidebar-chat-meta">{meta}</div>
                     </div>
                     <button className="sidebar-chat-menu" onClick={(e) => {
                       e.stopPropagation();
-                      const action = prompt("Type 'rename' to rename, 'delete' to delete:");
-                      if (action === "rename") handleRenameChat(c.id, c.title);
-                      else if (action === "delete") handleDeleteChat(c.id);
+                      setActiveMenuChatId(activeMenuChatId === c.id ? null : c.id);
+                      setDeleteConfirmId(null);
                     }}>···</button>
+                    {activeMenuChatId === c.id && (
+                      <>
+                        <div style={{ position: 'fixed', inset: 0, zIndex: 49 }} onClick={(e) => { e.stopPropagation(); setActiveMenuChatId(null); setDeleteConfirmId(null); }}></div>
+                        <div className="sidebar-chat-actions" onClick={e => e.stopPropagation()}>
+                          <button className="sa-btn" onClick={() => {
+                            setRenamingChatId(c.id);
+                            setRenameTitle(c.title || "new chat");
+                            setActiveMenuChatId(null);
+                          }}>✎ Rename</button>
+                          {deleteConfirmId === c.id ? (
+                            <button className="sa-btn danger" style={{ color: "var(--red)", fontWeight: "bold" }} onClick={() => handleDeleteChat(c.id)}>⚠ Confirm Delete</button>
+                          ) : (
+                            <button className="sa-btn danger" onClick={() => setDeleteConfirmId(c.id)}>🗑️ Delete</button>
+                          )}
+                        </div>
+                      </>
+                    )}
                   </div>
                 );
               })
