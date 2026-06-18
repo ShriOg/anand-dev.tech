@@ -1,0 +1,21 @@
+{
+  "name": "Nova - AI Companion",
+  "short_name": "Nova",
+  "description": "Your perfect AI companion.",
+  "start_url": "/nova",
+  "display": "standalone",
+  "background_color": "#07071a",
+  "theme_color": "#ff3d8b",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

@@ -815,7 +815,7 @@ export default function NovaApp() {
                 
                 <div style={{ textAlign: "left" }}>
                   <label style={{ fontSize: 13, color: "var(--text-2)", marginBottom: 8, display: "block" }}>I identify as</label>
-                  <div style={{ display: "flex", gap: 10 }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
                     <button 
                       className={`lang-pill ${userGender === "male" ? "active" : ""}`} 
                       style={{ flex: 1, padding: "12px", borderRadius: "12px", border: userGender === "male" ? "1px solid #ff3d8b" : "1px solid var(--border)", background: userGender === "male" ? "rgba(255,61,139,0.1)" : "transparent", color: userGender === "male" ? "#ff3d8b" : "var(--text-1)", cursor: "pointer", transition: "0.2s" }}
@@ -908,15 +908,15 @@ export default function NovaApp() {
 
                 <div style={{ textAlign: "left", marginTop: 20, marginBottom: 20 }}>
                   <label style={{ fontSize: 13, color: "var(--text-2)", marginBottom: 8, display: "block" }}>Language</label>
-                  <div style={{ display: "flex", gap: 10 }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
                     <button 
                       className={`lang-pill ${language === "english" ? "active" : ""}`} 
-                      style={{ flex: 1, padding: "10px", borderRadius: "12px", border: language === "english" ? "1px solid #ff3d8b" : "1px solid var(--border)", background: language === "english" ? "rgba(255,61,139,0.1)" : "transparent", color: language === "english" ? "#ff3d8b" : "var(--text-1)", cursor: "pointer", transition: "0.2s" }}
+                      style={{ flex: 1, minWidth: "120px", padding: "10px", borderRadius: "12px", border: language === "english" ? "1px solid #ff3d8b" : "1px solid var(--border)", background: language === "english" ? "rgba(255,61,139,0.1)" : "transparent", color: language === "english" ? "#ff3d8b" : "var(--text-1)", cursor: "pointer", transition: "0.2s" }}
                       onClick={() => setLanguage("english")}
                     >English 🇺🇸</button>
                     <button 
                       className={`lang-pill ${language === "hinglish" ? "active" : ""}`} 
-                      style={{ flex: 1, padding: "10px", borderRadius: "12px", border: language === "hinglish" ? "1px solid #ff3d8b" : "1px solid var(--border)", background: language === "hinglish" ? "rgba(255,61,139,0.1)" : "transparent", color: language === "hinglish" ? "#ff3d8b" : "var(--text-1)", cursor: "pointer", transition: "0.2s" }}
+                      style={{ flex: 1, minWidth: "120px", padding: "10px", borderRadius: "12px", border: language === "hinglish" ? "1px solid #ff3d8b" : "1px solid var(--border)", background: language === "hinglish" ? "rgba(255,61,139,0.1)" : "transparent", color: language === "hinglish" ? "#ff3d8b" : "var(--text-1)", cursor: "pointer", transition: "0.2s" }}
                       onClick={() => setLanguage("hinglish")}
                     >Hinglish 🇮🇳</button>
                   </div>

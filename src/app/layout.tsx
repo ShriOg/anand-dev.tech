@@ -11,6 +11,12 @@ const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 export const metadata: Metadata = {
   title: "Anand Shukla | Founder & Developer",
   description: "Futuristic interactive founder portfolio built by a top-tier creative engineer.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Nova",
+  },
 };
 
 export default async function RootLayout({
