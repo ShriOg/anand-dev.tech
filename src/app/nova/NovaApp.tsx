@@ -32,6 +32,8 @@ export default function NovaApp() {
   const [companionName, setCompanionName] = useState("");
   const [companionImage, setCompanionImage] = useState("");
   const [currentPersona, setCurrentPersona] = useState("nova");
+  const [language, setLanguage] = useState("english");
+  const [relationship, setRelationship] = useState("girlfriend");
   const [messages, setMessages] = useState<any[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [soundOn, setSoundOn] = useState(false);
@@ -174,6 +176,8 @@ export default function NovaApp() {
     const savedName = localStorage.getItem("companion-name");
     const savedImage = localStorage.getItem("companion-image");
     const savedPersona = localStorage.getItem("persona");
+    const savedLanguage = localStorage.getItem("nova_language");
+    const savedRelationship = localStorage.getItem("nova_relationship");
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme === "light") {
       setTheme("light");
@@ -182,10 +186,13 @@ export default function NovaApp() {
       document.body.classList.remove("light");
     }
     if (savedPersona) setCurrentPersona(savedPersona);
+    if (savedLanguage) setLanguage(savedLanguage);
+    if (savedRelationship) setRelationship(savedRelationship);
     if (savedName) {
       setCompanionName(savedName);
       if (savedImage) setCompanionImage(savedImage);
-      bootIntoApp(savedPersona || "nova", savedName); // pass name directly to avoid stale state
+      // We pass the currently retrieved persona, language, and relationship explicitly
+      bootIntoApp(savedPersona || "nova", savedName, savedLanguage || "english", savedRelationship || "girlfriend"); // pass name directly to avoid stale state
     } else {
       setOnboardingMode("new");
     }
@@ -246,9 +253,8 @@ export default function NovaApp() {
     } catch {}
   };
 
-  // Stream an opening greeting from the companion for a fresh/empty chat.
-  // compName is passed explicitly to avoid stale React state closures.
-  const autoGreet = async (chatId: string, persona: string, compName: string) => {
+  // autoGreet updated to use local state fallback if not passed directly
+  const autoGreet = async (chatId: string, persona: string, compName: string, lang: string, rel: string) => {
     setIsStreaming(true);
     setFirstMsg(false);
     setStreamedText("");
@@ -261,6 +267,8 @@ export default function NovaApp() {
           messages: [{ role: "user", content: "hey!" }],
           personality: persona,
           companionName: compName || "Nova",
+          language: lang,
+          relationship: rel
         }),
       });
       if (!res.body) return;
@@ -306,8 +314,10 @@ export default function NovaApp() {
     scrollToBottom(true);
   };
 
-  const bootIntoApp = async (persona: string, compName?: string) => {
+  const bootIntoApp = async (persona: string, compName?: string, lang?: string, rel?: string) => {
     const name = compName || companionName || localStorage.getItem("companion-name") || "Nova";
+    const appLang = lang || language || "english";
+    const appRel = rel || relationship || "girlfriend";
     const chats = await loadChats();
     setAllChats(chats);
     if (!chats.length) {
@@ -317,7 +327,7 @@ export default function NovaApp() {
         setCurrentChatId(chat.id);
         setMessages([]);
         setFirstMsg(false);
-        autoGreet(chat.id, persona, name);
+        autoGreet(chat.id, persona, name, appLang, appRel);
       }
     } else {
       const chat = chats[0];
@@ -326,7 +336,7 @@ export default function NovaApp() {
       setMessages(msgs);
       if (msgs.length === 0) {
         setFirstMsg(false);
-        autoGreet(chat.id, persona, name);
+        autoGreet(chat.id, persona, name, appLang, appRel);
       } else {
         setFirstMsg(false);
         scrollToBottom();
@@ -343,7 +353,7 @@ export default function NovaApp() {
     setSidebarOpen(false);
     if (msgs.length === 0) {
       setFirstMsg(false);
-      autoGreet(chatId, currentPersona, companionName || "Nova");
+      autoGreet(chatId, currentPersona, companionName || "Nova", language, relationship);
     } else {
       setFirstMsg(false);
       scrollToBottom();
@@ -359,7 +369,7 @@ export default function NovaApp() {
     setMessages([]);
     setFirstMsg(false);
     setSidebarOpen(false);
-    autoGreet(chat.id, currentPersona, companionName || "Nova");
+    autoGreet(chat.id, currentPersona, companionName || "Nova", language, relationship);
   };
 
   const handleDeleteChat = async (chatId: string) => {
@@ -436,7 +446,9 @@ export default function NovaApp() {
         body: JSON.stringify({
           messages: newMsgs,
           personality: currentPersona,
-          companionName: companionName || "Nova"
+          companionName: companionName || "Nova",
+          language: language,
+          relationship: relationship
         })
       });
 
@@ -505,7 +517,9 @@ export default function NovaApp() {
     const reqBody = {
       messages: newMsgs,
       personality: currentPersona,
-      companionName: companionName || "Nova"
+      companionName: companionName || "Nova",
+      language: language,
+      relationship: relationship
     };
 
     fetch("/api/chat", {
@@ -811,6 +825,58 @@ export default function NovaApp() {
                 >
                   <span className="pc-icon">{p.icon}</span><span className="pc-name">{p.name}</span>
                   <span className="pc-desc">{p.desc}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div className="sp-label">Language</div>
+            <div className="language-grid" style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
+              <button 
+                className={`lang-pill ${language === "english" ? "active" : ""}`}
+                style={{ flex: 1, padding: "8px", borderRadius: "16px", border: "1px solid var(--border)", background: language === "english" ? "var(--bg-3)" : "transparent", color: "var(--text-1)", cursor: "pointer", transition: "0.2s" }}
+                onClick={() => {
+                  setLanguage("english");
+                  localStorage.setItem("nova_language", "english");
+                  showToast("language set to english 🇺🇸");
+                }}
+              >
+                English
+              </button>
+              <button 
+                className={`lang-pill ${language === "hinglish" ? "active" : ""}`}
+                style={{ flex: 1, padding: "8px", borderRadius: "16px", border: "1px solid var(--border)", background: language === "hinglish" ? "var(--bg-3)" : "transparent", color: "var(--text-1)", cursor: "pointer", transition: "0.2s" }}
+                onClick={() => {
+                  setLanguage("hinglish");
+                  localStorage.setItem("nova_language", "hinglish");
+                  showToast("language set to hinglish 🇮🇳");
+                }}
+              >
+                Hinglish
+              </button>
+            </div>
+          </div>
+          <div>
+            <div className="sp-label">Vibe</div>
+            <div className="persona-grid">
+              {[
+                { id: "girlfriend", icon: "🩷", name: "Girlfriend", desc: "romantic & protective" },
+                { id: "bestfriend", icon: "🤝", name: "Best Friend", desc: "chaotic & roasts you" },
+                { id: "classmate", icon: "📚", name: "Classmate", desc: "shares notes energy" },
+                { id: "crush", icon: "💜", name: "Crush", desc: "shy & nervous" },
+                { id: "situationship", icon: "🌙", name: "Situationship", desc: "mixed signals" }
+              ].map(r => (
+                <button 
+                  key={r.id} 
+                  className={`persona-card ${relationship === r.id ? "active" : ""}`}
+                  onClick={() => {
+                    setRelationship(r.id);
+                    localStorage.setItem("nova_relationship", r.id);
+                    showToast(`vibe set to ${r.name} ✨`);
+                  }}
+                >
+                  <span className="pc-icon">{r.icon}</span><span className="pc-name">{r.name}</span>
+                  <span className="pc-desc">{r.desc}</span>
                 </button>
               ))}
             </div>
