@@ -8,9 +8,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   
   try {
     const userId = req.headers.get("x-user-id");
-    const { title } = await req.json();
+    const body = await req.json();
     
-    if (!title || !id || !userId) {
+    if (!id || !userId) {
       return NextResponse.json({ error: "bad request" }, { status: 400 });
     }
 
@@ -19,10 +19,14 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json({ error: "not found or forbidden" }, { status: 403 });
     }
 
-    await Chat.findByIdAndUpdate(id, {
-      title: title.slice(0, 80),
-      updatedAt: new Date()
-    });
+    const updateData: any = { updatedAt: new Date() };
+    if (body.title) updateData.title = body.title.slice(0, 80);
+    if (body.companionName) updateData.companionName = body.companionName;
+    if (body.companionPhoto !== undefined) updateData.companionPhoto = body.companionPhoto;
+    if (body.relationshipType) updateData.relationshipType = body.relationshipType;
+    if (body.language) updateData.language = body.language;
+
+    await Chat.findByIdAndUpdate(id, updateData);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
@@ -47,9 +51,12 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       return NextResponse.json({ error: "not found or forbidden" }, { status: 403 });
     }
 
-    // Delete associated messages first
-    await Message.deleteMany({ chatId: id });
-    await Chat.findByIdAndDelete(id);
+    // Soft delete chat, leave messages intact
+    await Chat.findByIdAndUpdate(id, {
+      deleted: true,
+      deletedAt: new Date(),
+      updatedAt: new Date()
+    });
     
     return NextResponse.json({ success: true });
   } catch (error: any) {

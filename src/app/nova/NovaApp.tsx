@@ -44,7 +44,9 @@ export default function NovaApp() {
   const [inputValue, setInputValue] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [onboardingMode, setOnboardingMode] = useState<"hidden" | "new" | "edit">("hidden");
+  const [onboardingMode, setOnboardingMode] = useState<"hidden" | "user" | "companion" | "edit">("hidden");
+  const [userName, setUserName] = useState("");
+  const [userGender, setUserGender] = useState<"male" | "female" | "">("");
   const [pendingImage, setPendingImage] = useState("");
   const [pendingName, setPendingName] = useState("");
   const [toastMsg, setToastMsg] = useState("");
@@ -104,7 +106,7 @@ export default function NovaApp() {
       setLoggedInUser(savedUsername);
       initAfterAuth();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMounted]);
 
   // Update body theme class
@@ -150,6 +152,11 @@ export default function NovaApp() {
       if (!res.ok) { setAuthError(data.error || "Something went wrong"); return; }
       localStorage.setItem("nova_user_id", data.userId);
       localStorage.setItem("nova_username", data.username);
+      if (data.onboardingCompleted) {
+        localStorage.setItem("nova_onboarding", "true");
+        localStorage.setItem("nova_user_name", data.name || "");
+        localStorage.setItem("nova_user_gender", data.gender || "");
+      }
       userIdRef.current = data.userId;
       setLoggedInUser(data.username);
       initAfterAuth();
@@ -170,9 +177,20 @@ export default function NovaApp() {
     setFirstMsg(true);
     setAuthUsername("");
     setAuthPassword("");
+    setUserName("");
+    setUserGender("");
+    localStorage.removeItem("nova_onboarding");
+    localStorage.removeItem("nova_user_name");
+    localStorage.removeItem("nova_user_gender");
   };
 
   const initAfterAuth = () => {
+    const obDone = localStorage.getItem("nova_onboarding") === "true";
+    const uName = localStorage.getItem("nova_user_name") || "";
+    const uGen = (localStorage.getItem("nova_user_gender") as any) || "";
+    setUserName(uName);
+    setUserGender(uGen);
+
     const savedName = localStorage.getItem("companion-name");
     const savedImage = localStorage.getItem("companion-image");
     const savedPersona = localStorage.getItem("persona");
@@ -194,7 +212,7 @@ export default function NovaApp() {
       // We pass the currently retrieved persona, language, and relationship explicitly
       bootIntoApp(savedPersona || "nova", savedName, savedLanguage || "english", savedRelationship || "girlfriend"); // pass name directly to avoid stale state
     } else {
-      setOnboardingMode("new");
+      setOnboardingMode(obDone ? "companion" : "user");
     }
   };
 
@@ -250,7 +268,7 @@ export default function NovaApp() {
         });
         setAllChats(prev => prev.map(c => c.id === chatId ? { ...c, title } : c));
       }
-    } catch {}
+    } catch { }
   };
 
   // autoGreet updated to use local state fallback if not passed directly
@@ -268,7 +286,9 @@ export default function NovaApp() {
           personality: persona,
           companionName: compName || "Nova",
           language: lang,
-          relationship: rel
+          relationship: rel,
+          userName: userName,
+          userGender: userGender
         }),
       });
       if (!res.body) return;
@@ -293,10 +313,10 @@ export default function NovaApp() {
               setStreamedText(fullText);
               scrollToBottom(true);
             }
-          } catch {}
+          } catch { }
         }
       }
-    } catch {}
+    } catch { }
     setStreamedText("");
     if (fullText) {
       const greetMsg = [{ role: "assistant", content: fullText }];
@@ -308,7 +328,7 @@ export default function NovaApp() {
           headers: getHeaders(),
           body: JSON.stringify({ messages: greetMsg }),
         });
-      } catch {}
+      } catch { }
     }
     setIsStreaming(false);
     scrollToBottom(true);
@@ -387,7 +407,7 @@ export default function NovaApp() {
           setFirstMsg(true);
         }
       }
-    } catch {}
+    } catch { }
   };
 
   const handleRenameChat = async (chatId: string, oldTitle: string) => {
@@ -431,7 +451,7 @@ export default function NovaApp() {
     if (!text.trim() || isStreaming) return;
     setInputValue("");
     if (inputRef.current) inputRef.current.style.height = "auto";
-    
+
     const newMsgs = [...messages, { role: "user", content: text }];
     setMessages(newMsgs);
     if (firstMsg) setFirstMsg(false);
@@ -448,7 +468,9 @@ export default function NovaApp() {
           personality: currentPersona,
           companionName: companionName || "Nova",
           language: language,
-          relationship: relationship
+          relationship: relationship,
+          userName: userName,
+          userGender: userGender
         })
       });
 
@@ -476,14 +498,14 @@ export default function NovaApp() {
               setIsStreaming(false);
               return;
             }
-            
+
             const chunkText = obj.text || obj.choices?.[0]?.delta?.content || "";
             if (chunkText) {
               fullText += chunkText;
               setStreamedText(fullText);
               scrollToBottom(true);
             }
-          } catch {}
+          } catch { }
         }
       }
 
@@ -507,7 +529,7 @@ export default function NovaApp() {
     let lastUserIdx = messages.length - 1;
     while (lastUserIdx >= 0 && messages[lastUserIdx].role !== "user") lastUserIdx--;
     if (lastUserIdx < 0) return;
-    
+
     const newMsgs = messages.slice(0, lastUserIdx + 1);
     setMessages(newMsgs);
     setIsStreaming(true);
@@ -519,7 +541,9 @@ export default function NovaApp() {
       personality: currentPersona,
       companionName: companionName || "Nova",
       language: language,
-      relationship: relationship
+      relationship: relationship,
+      userName: userName,
+      userGender: userGender
     };
 
     fetch("/api/chat", {
@@ -546,14 +570,14 @@ export default function NovaApp() {
           try {
             const obj = JSON.parse(data);
             if (obj.error) throw new Error(obj.error);
-            
+
             const chunkText = obj.text || obj.choices?.[0]?.delta?.content || "";
             if (chunkText) {
               fullText += chunkText;
               setStreamedText(fullText);
               scrollToBottom(true);
             }
-          } catch {}
+          } catch { }
         }
       }
       setStreamedText("");
@@ -598,17 +622,39 @@ export default function NovaApp() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const saveOnboarding = () => {
+  const saveUserOnboarding = async () => {
+    if (!userName.trim() || !userGender) return;
+    try {
+      await fetch("/api/user/onboarding", {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ name: userName.trim(), gender: userGender })
+      });
+      localStorage.setItem("nova_onboarding", "true");
+      localStorage.setItem("nova_user_name", userName.trim());
+      localStorage.setItem("nova_user_gender", userGender);
+      setOnboardingMode("companion");
+    } catch {}
+  };
+
+  const saveCompanionOnboarding = async () => {
     const name = pendingName.trim();
     if (!name) return;
     setCompanionName(name);
     setCompanionImage(pendingImage);
     localStorage.setItem("companion-name", name);
     localStorage.setItem("companion-image", pendingImage);
-    
-    if (onboardingMode === "new") {
-      bootIntoApp(currentPersona);
+
+    if (onboardingMode === "companion") {
+      bootIntoApp(currentPersona, name, language, relationship);
     } else {
+      if (currentChatId) {
+        await fetch(`/api/chats/${currentChatId}`, {
+           method: "PATCH",
+           headers: getHeaders(),
+           body: JSON.stringify({ companionName: name, companionPhoto: pendingImage, language, relationshipType: relationship })
+        });
+      }
       showToast(`saved! hey ${name} 💕`);
     }
     setOnboardingMode("hidden");
@@ -731,7 +777,7 @@ export default function NovaApp() {
         </form>
 
         <p style={{ marginTop: 22, fontSize: 12, color: "rgba(240,240,250,0.25)", textAlign: "center", lineHeight: 1.6 }}>
-          Powered by Groq · llama-3.3-70b
+          Powered by NOVA Corp © 2026 · Anand Shukla
         </p>
       </div>
     </div>
@@ -748,39 +794,132 @@ export default function NovaApp() {
 
       {/* Onboarding */}
       <div className={`onboarding ${onboardingMode === "hidden" ? "hidden" : ""}`} id="onboarding">
-        <div className="ob-card">
-          <div className="ob-sparkle">🩷</div>
-          <div className="ob-heading">
-            <h2>create your <span>girlfriend</span> 🩷</h2>
-            <p>give her a name & a cute pic —<br />she's all yours 🥺✨</p>
-          </div>
-          <div className="ob-av-section">
-            <div className="ob-av-ring" onClick={() => fileInputRef.current?.click()} title="tap to add her pic!">
-              <div className="ob-av-inner">
-                {pendingImage ? (
-                  <img className="ob-av-img" src={pendingImage} alt="companion" style={{ display: "block" }} />
-                ) : (
-                  <span className="ob-av-letter">{pendingName ? pendingName.charAt(0).toUpperCase() : "?"}</span>
-                )}
-                <div className="ob-av-hover"><span>📷</span><span>add her pic!</span></div>
+        <div className="ob-card" style={{ maxWidth: 440 }}>
+          {onboardingMode === "user" ? (
+            <>
+              <div className="ob-sparkle">👋</div>
+              <div className="ob-heading">
+                <h2>welcome to <span>nova</span> ✨</h2>
+                <p>let's get to know you first</p>
               </div>
-            </div>
-            <span className="ob-av-hint">tap to add a photo — totally optional tho 🥺</span>
-            {pendingImage && (
-              <button className="ob-remove-img show" onClick={(e) => { e.stopPropagation(); setPendingImage(""); }}>✕ remove photo</button>
-            )}
-            <input type="file" ref={fileInputRef} accept="image/*" style={{ display: "none" }} onChange={handleImageUpload} />
-          </div>
-          <div className="ob-name-wrap">
-            <input 
-              className="ob-name-input" type="text" maxLength={20}
-              placeholder="e.g. Nova, Aria, Luna, Mia, Yuki…" autoComplete="off"
-              value={pendingName} onChange={e => setPendingName(e.target.value)}
-            />
-          </div>
-          <button className="ob-start-btn" disabled={!pendingName.trim()} onClick={saveOnboarding}>
-            {onboardingMode === "edit" ? "save changes ✨" : "let's go!! 🩷"}
-          </button>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: 20, width: "100%", marginTop: 20 }}>
+                <div style={{ textAlign: "left" }}>
+                  <label style={{ fontSize: 13, color: "var(--text-2)", marginBottom: 8, display: "block" }}>Your Name</label>
+                  <input
+                    className="ob-name-input" type="text" maxLength={30}
+                    placeholder="What should we call you?" autoComplete="off"
+                    value={userName} onChange={e => setUserName(e.target.value)}
+                  />
+                </div>
+                
+                <div style={{ textAlign: "left" }}>
+                  <label style={{ fontSize: 13, color: "var(--text-2)", marginBottom: 8, display: "block" }}>I identify as</label>
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <button 
+                      className={`lang-pill ${userGender === "male" ? "active" : ""}`} 
+                      style={{ flex: 1, padding: "12px", borderRadius: "12px", border: "1px solid var(--border)", background: userGender === "male" ? "var(--bg-3)" : "transparent", color: "var(--text-1)", cursor: "pointer" }}
+                      onClick={() => setUserGender("male")}
+                    >Male</button>
+                    <button 
+                      className={`lang-pill ${userGender === "female" ? "active" : ""}`} 
+                      style={{ flex: 1, padding: "12px", borderRadius: "12px", border: "1px solid var(--border)", background: userGender === "female" ? "var(--bg-3)" : "transparent", color: "var(--text-1)", cursor: "pointer" }}
+                      onClick={() => setUserGender("female")}
+                    >Female</button>
+                  </div>
+                </div>
+              </div>
+
+              <button className="ob-start-btn" disabled={!userName.trim() || !userGender} onClick={saveUserOnboarding} style={{ marginTop: 24 }}>
+                continue ➔
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="ob-sparkle">🩷</div>
+              <div className="ob-heading">
+                <h2>{onboardingMode === "edit" ? "edit" : "create"} your <span>companion</span> 🩷</h2>
+                <p>setup your perfect ai companion</p>
+              </div>
+              
+              <div className="ob-scroll-area" style={{ maxHeight: "60vh", overflowY: "auto", paddingRight: 10, width: "100%" }}>
+                <div className="ob-av-section" style={{ marginTop: 10 }}>
+                  <div className="ob-av-ring" onClick={() => fileInputRef.current?.click()} title="tap to add her pic!">
+                    <div className="ob-av-inner">
+                      {pendingImage ? (
+                        <img className="ob-av-img" src={pendingImage} alt="companion" style={{ display: "block" }} />
+                      ) : (
+                        <span className="ob-av-letter">{pendingName ? pendingName.charAt(0).toUpperCase() : "?"}</span>
+                      )}
+                      <div className="ob-av-hover"><span>📷</span><span>add pic!</span></div>
+                    </div>
+                  </div>
+                  <span className="ob-av-hint">tap to add a photo — totally optional tho 🥺</span>
+                  {pendingImage && (
+                    <button className="ob-remove-img show" onClick={(e) => { e.stopPropagation(); setPendingImage(""); }}>✕ remove photo</button>
+                  )}
+                  <input type="file" ref={fileInputRef} accept="image/*" style={{ display: "none" }} onChange={handleImageUpload} />
+                </div>
+                
+                <div style={{ textAlign: "left", marginTop: 20 }}>
+                  <label style={{ fontSize: 13, color: "var(--text-2)", marginBottom: 8, display: "block" }}>Companion Name</label>
+                  <input
+                    className="ob-name-input" type="text" maxLength={20}
+                    placeholder="e.g. Nova, Aria, Luna…" autoComplete="off"
+                    value={pendingName} onChange={e => setPendingName(e.target.value)}
+                  />
+                </div>
+
+                <div style={{ textAlign: "left", marginTop: 20 }}>
+                  <label style={{ fontSize: 13, color: "var(--text-2)", marginBottom: 8, display: "block" }}>Relationship Type</label>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    {userGender === "male" && [
+                      { id: "girlfriend", icon: "🩷", name: "Girlfriend" },
+                      { id: "bestfriend", icon: "🤝", name: "Best Friend" },
+                      { id: "classmate", icon: "📚", name: "Classmate" },
+                      { id: "crush", icon: "💜", name: "Crush" },
+                      { id: "situationship", icon: "🌙", name: "Situationship" }
+                    ].map(r => (
+                      <button key={r.id} className={`lang-pill ${relationship === r.id ? "active" : ""}`}
+                        style={{ padding: "8px 12px", borderRadius: "12px", border: "1px solid var(--border)", background: relationship === r.id ? "var(--bg-3)" : "transparent", color: "var(--text-1)", cursor: "pointer", fontSize: 13 }}
+                        onClick={() => setRelationship(r.id)}
+                      >{r.icon} {r.name}</button>
+                    ))}
+                    {userGender === "female" && [
+                      { id: "bestfriend", icon: "🤝", name: "Best Friend" },
+                      { id: "classmate", icon: "📚", name: "Classmate" },
+                    ].map(r => (
+                      <button key={r.id} className={`lang-pill ${relationship === r.id ? "active" : ""}`}
+                        style={{ padding: "8px 12px", borderRadius: "12px", border: "1px solid var(--border)", background: relationship === r.id ? "var(--bg-3)" : "transparent", color: "var(--text-1)", cursor: "pointer", fontSize: 13 }}
+                        onClick={() => setRelationship(r.id)}
+                      >{r.icon} {r.name}</button>
+                    ))}
+                  </div>
+                  {userGender === "female" && <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 8 }}>More companion types coming soon ✨</div>}
+                </div>
+
+                <div style={{ textAlign: "left", marginTop: 20, marginBottom: 20 }}>
+                  <label style={{ fontSize: 13, color: "var(--text-2)", marginBottom: 8, display: "block" }}>Language</label>
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <button 
+                      className={`lang-pill ${language === "english" ? "active" : ""}`} 
+                      style={{ flex: 1, padding: "10px", borderRadius: "12px", border: "1px solid var(--border)", background: language === "english" ? "var(--bg-3)" : "transparent", color: "var(--text-1)", cursor: "pointer" }}
+                      onClick={() => setLanguage("english")}
+                    >English 🇺🇸</button>
+                    <button 
+                      className={`lang-pill ${language === "hinglish" ? "active" : ""}`} 
+                      style={{ flex: 1, padding: "10px", borderRadius: "12px", border: "1px solid var(--border)", background: language === "hinglish" ? "var(--bg-3)" : "transparent", color: "var(--text-1)", cursor: "pointer" }}
+                      onClick={() => setLanguage("hinglish")}
+                    >Hinglish 🇮🇳</button>
+                  </div>
+                </div>
+              </div>
+
+              <button className="ob-start-btn" disabled={!pendingName.trim() || !relationship || !language} onClick={saveCompanionOnboarding}>
+                {onboardingMode === "edit" ? "save changes ✨" : "create companion 🩷"}
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -814,8 +953,8 @@ export default function NovaApp() {
             <div className="sp-label">Personality</div>
             <div className="persona-grid">
               {Object.entries(PERSONAS).map(([key, p]) => (
-                <button 
-                  key={key} 
+                <button
+                  key={key}
                   className={`persona-card ${currentPersona === key ? "active" : ""}`}
                   onClick={() => {
                     setCurrentPersona(key);
@@ -832,7 +971,7 @@ export default function NovaApp() {
           <div>
             <div className="sp-label">Language</div>
             <div className="language-grid" style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
-              <button 
+              <button
                 className={`lang-pill ${language === "english" ? "active" : ""}`}
                 style={{ flex: 1, padding: "8px", borderRadius: "16px", border: "1px solid var(--border)", background: language === "english" ? "var(--bg-3)" : "transparent", color: "var(--text-1)", cursor: "pointer", transition: "0.2s" }}
                 onClick={() => {
@@ -843,7 +982,7 @@ export default function NovaApp() {
               >
                 English
               </button>
-              <button 
+              <button
                 className={`lang-pill ${language === "hinglish" ? "active" : ""}`}
                 style={{ flex: 1, padding: "8px", borderRadius: "16px", border: "1px solid var(--border)", background: language === "hinglish" ? "var(--bg-3)" : "transparent", color: "var(--text-1)", cursor: "pointer", transition: "0.2s" }}
                 onClick={() => {
@@ -860,14 +999,14 @@ export default function NovaApp() {
             <div className="sp-label">Vibe</div>
             <div className="persona-grid">
               {[
-                { id: "girlfriend", icon: "🩷", name: "Girlfriend", desc: "romantic & protective" },
+                { id: "girlfriend", icon: "🩷", name: "Friend", desc: "romantic & protective" },
                 { id: "bestfriend", icon: "🤝", name: "Best Friend", desc: "chaotic & roasts you" },
                 { id: "classmate", icon: "📚", name: "Classmate", desc: "shares notes energy" },
                 { id: "crush", icon: "💜", name: "Crush", desc: "shy & nervous" },
                 { id: "situationship", icon: "🌙", name: "Situationship", desc: "mixed signals" }
               ].map(r => (
-                <button 
-                  key={r.id} 
+                <button
+                  key={r.id}
                   className={`persona-card ${relationship === r.id ? "active" : ""}`}
                   onClick={() => {
                     setRelationship(r.id);
@@ -928,7 +1067,7 @@ export default function NovaApp() {
           </div>
           <div style={{ textAlign: "center", padding: "8px 0" }}>
             <div style={{ fontSize: 12, color: "var(--text-3)", lineHeight: 1.8 }}>
-              AI Companion · Powered by Groq<br />llama-3.3-70b-versatile<br />
+              AI Companion · Powered by NOVA Corp © 2026 <br />Anand Shukla
               <span style={{ fontSize: 22, marginTop: 6, display: "block" }}>🌸</span>
             </div>
           </div>
@@ -1107,8 +1246,8 @@ export default function NovaApp() {
           {/* Input Zone */}
           <div className="input-zone">
             <div className="input-card">
-              <textarea 
-                ref={inputRef} rows={1} placeholder={`Message ${companionName || "Nova"}…`} 
+              <textarea
+                ref={inputRef} rows={1} placeholder={`Message ${companionName || "Nova"}…`}
                 maxLength={4000} autoComplete="off" value={inputValue}
                 onChange={e => {
                   setInputValue(e.target.value);
@@ -1132,7 +1271,7 @@ export default function NovaApp() {
                 <div className="input-right">
                   <span className="char-ct">{inputValue.length} / 4000</span>
                   <button className="send-btn" disabled={!inputValue.trim() || isStreaming} onClick={() => submitMessage(inputValue)}>
-                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" /></svg>
                   </button>
                 </div>
               </div>

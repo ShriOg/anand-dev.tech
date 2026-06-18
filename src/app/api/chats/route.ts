@@ -7,7 +7,7 @@ export async function GET(req: Request) {
     const userId = req.headers.get("x-user-id");
     if (!userId) return NextResponse.json({ chats: [] });
 
-    const chats = await Chat.find({ userId }).sort({ updatedAt: -1 }).lean();
+    const chats = await Chat.find({ userId, deleted: { $ne: true } }).sort({ updatedAt: -1 }).lean();
     
     // Map _id to id for client compatibility
     const formattedChats = chats.map((chat: any) => ({
@@ -30,11 +30,21 @@ export async function POST(req: Request) {
     const userId = req.headers.get("x-user-id");
     if (!userId) return NextResponse.json({ error: "Missing x-user-id header" }, { status: 400 });
 
-    const { personality = "nova" } = await req.json();
+    const { 
+      personality = "nova",
+      companionName,
+      companionPhoto,
+      relationshipType,
+      language
+    } = await req.json();
     
     const newChat = await Chat.create({
-      title: "new chat",
+      title: companionName ? `Chat with ${companionName}` : "new chat",
       personality,
+      companionName,
+      companionPhoto,
+      relationshipType,
+      language,
       userId,
     });
 

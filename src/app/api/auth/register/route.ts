@@ -25,7 +25,13 @@ export async function POST(req: Request) {
     const passwordHash = await bcrypt.hash(password, 10);
     const user = await User.create({ username: username.toLowerCase(), passwordHash });
 
-    return NextResponse.json({ userId: user._id.toString(), username: user.username }, { status: 201 });
+    return NextResponse.json({ 
+      userId: user._id.toString(), 
+      username: user.username,
+      name: user.name,
+      gender: user.gender,
+      onboardingCompleted: user.onboardingCompleted
+    }, { status: 201 });
   } catch (err: any) {
     console.error("Register error:", err);
     return NextResponse.json({ error: "Registration failed" }, { status: 500 });

@@ -35,6 +35,12 @@ export const ensureDb = async () => {
 export interface IChat extends Document {
   title: string;
   personality: string;
+  companionName?: string;
+  companionPhoto?: string;
+  relationshipType?: string;
+  language?: string;
+  deleted?: boolean;
+  deletedAt?: Date;
   userId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -43,8 +49,16 @@ export interface IChat extends Document {
 const chatSchema = new Schema<IChat>({
   title: { type: String, required: true },
   personality: { type: String, required: true },
+  companionName: { type: String },
+  companionPhoto: { type: String },
+  relationshipType: { type: String },
+  language: { type: String },
+  deleted: { type: Boolean, default: false },
+  deletedAt: { type: Date },
   userId: { type: String, required: true, index: true },
 }, { timestamps: true });
+
+chatSchema.index({ userId: 1, deleted: 1 });
 
 export interface IMessage extends Document {
   chatId: mongoose.Types.ObjectId;
@@ -58,6 +72,8 @@ const messageSchema = new Schema<IMessage>({
   role: { type: String, required: true, enum: ['user', 'assistant', 'system'] },
   content: { type: String, required: false },
 }, { timestamps: { createdAt: true, updatedAt: false } });
+
+messageSchema.index({ chatId: 1, createdAt: 1 });
 
 export interface ICompanion extends Document {
   name: string;
@@ -78,6 +94,8 @@ export interface IUser extends Document {
   passwordHash: string;
   email?: string;
   name?: string;
+  gender?: 'male' | 'female';
+  onboardingCompleted?: boolean;
   createdAt: Date;
 }
 
@@ -86,6 +104,8 @@ const userSchema = new Schema<IUser>({
   passwordHash: { type: String, required: true },
   email: { type: String },
   name: { type: String },
+  gender: { type: String, enum: ['male', 'female'] },
+  onboardingCompleted: { type: Boolean, default: false },
 }, { timestamps: { createdAt: true, updatedAt: false } });
 
 // --- Models ---

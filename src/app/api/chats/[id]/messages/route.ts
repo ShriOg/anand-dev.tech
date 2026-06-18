@@ -54,9 +54,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: "Invalid messages format" }, { status: 400 });
     }
 
-    // Delete existing messages for this chat
-    await Message.deleteMany({ chatId: id });
-
     const validMessages = messages.filter((m: any) => m.content && m.content.trim() !== '');
 
     // Insert new valid messages
