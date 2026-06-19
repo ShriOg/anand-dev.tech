@@ -320,7 +320,7 @@ export default function PracticeMode({ personId, userId: _userId, activePerson, 
             <button className={`ptab ${tab === "improve" ? "active" : ""}`} onClick={handleImproveTab}>Improve</button>
           </div>
 
-          <div className="practice-body">
+          <div className="prac-body">
             {/* ── REHEARSE TAB ── */}
             {tab === "rehearse" && (
           <div className="prac-rehearse">
