@@ -47,6 +47,7 @@ export default function NovaApp() {
   const [chatMap, setChatMap] = useState<Record<string, string>>({});
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
+  const [lastMsgMap, setLastMsgMap] = useState<Record<string, string>>({});
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamedText, setStreamedText] = useState("");
   const [practiceModeOpen, setPracticeModeOpen] = useState(false);
@@ -58,6 +59,8 @@ export default function NovaApp() {
   const [theme, setTheme] = useState("default");
   const [toastMsg, setToastMsg] = useState("");
   const [toastShow, setToastShow] = useState(false);
+  const [showScrollPill, setShowScrollPill] = useState(false);
+  const isNearBottomRef = useRef(true);
 
   // Create Person Modal
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -207,8 +210,12 @@ export default function NovaApp() {
           headers: { }
         });
         const data = await res.json();
-        if (data.messages) {
-          setMessages(data.messages.sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()));
+        if (data.messages && data.messages.length > 0) {
+          const sorted = data.messages.sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+          setMessages(sorted);
+          // Update last message preview for sidebar
+          const lastMsg = sorted[sorted.length - 1];
+          setLastMsgMap(prev => ({ ...prev, [personId]: lastMsg.content }));
         } else {
           setMessages([]);
         }
@@ -374,17 +381,22 @@ export default function NovaApp() {
     setTimeout(() => setToastShow(false), 3000);
   };
 
-  const scrollToBottom = (smooth = true) => {
+  const scrollToBottom = (smooth = true, force = false) => {
     if (!chatContainerRef.current) return;
-    chatContainerRef.current.scrollTo({
-      top: chatContainerRef.current.scrollHeight,
-      behavior: smooth ? "smooth" : "auto"
-    });
+    const el = chatContainerRef.current;
+    const isNear = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+    isNearBottomRef.current = isNear;
+    if (isNear || force) {
+      el.scrollTo({ top: el.scrollHeight, behavior: smooth ? "smooth" : "auto" });
+      setShowScrollPill(false);
+    } else {
+      setShowScrollPill(true);
+    }
   };
 
   useEffect(() => {
     if (messages.length > 0 || streamedText) scrollToBottom(true);
-  }, [messages, streamedText]);
+  }, [messages.length, streamedText]);
 
   const handleSend = async () => {
     if ((!inputValue.trim() && !streamedText) || isStreaming || !currentChatId || !activePersonId) return;
@@ -398,9 +410,11 @@ export default function NovaApp() {
 
     const newMsg = { role: "user", content: userText, createdAt: new Date().toISOString() };
     setMessages(prev => [...prev, newMsg]);
+    // Update sidebar preview
+    if (activePersonId) setLastMsgMap(prev => ({ ...prev, [activePersonId]: userText }));
     setIsStreaming(true);
     setStreamedText("");
-    scrollToBottom();
+    scrollToBottom(true, true);
 
     try {
       // 1. Save user msg
@@ -456,14 +470,16 @@ export default function NovaApp() {
         body: JSON.stringify({ role: "assistant", content: fullResponse })
       });
 
-      setMessages(prev => [...prev, { role: "assistant", content: fullResponse, createdAt: new Date().toISOString() }]);
+      const assistantMsg = { role: "assistant", content: fullResponse, createdAt: new Date().toISOString() };
+      setMessages(prev => [...prev, assistantMsg]);
+      if (activePersonId) setLastMsgMap(prev => ({ ...prev, [activePersonId]: fullResponse }));
       setStreamedText("");
     } catch (error) {
       console.error("Chat error:", error);
       showToast("Message failed to send.");
     } finally {
       setIsStreaming(false);
-      scrollToBottom();
+      scrollToBottom(true, true);
     }
   };
 
@@ -685,19 +701,23 @@ export default function NovaApp() {
             </div>
           </div>
           <div className="sidebar-list">
-            {persons.map(p => (
-              <div key={p.id} className={`sidebar-chat ${activePersonId === p.id ? "active" : ""}`} onClick={() => switchPerson(p.id)}>
-                <Avatar avatar={p.avatar} name={p.name} size={38} className="sidebar-chat-icon" />
-                <div className="sidebar-chat-info">
-                  <div className="sidebar-chat-title">{p.name}</div>
-                  <div className="sidebar-chat-meta">{p.relationship}</div>
+            {persons.map(p => {
+              const preview = lastMsgMap[p.id];
+              return (
+                <div key={p.id} className={`sidebar-chat ${activePersonId === p.id ? "active" : ""}`} onClick={() => switchPerson(p.id)}>
+                  <Avatar avatar={p.avatar} name={p.name} size={38} className="sidebar-chat-icon" />
+                  <div className="sidebar-chat-info">
+                    <div className="sidebar-chat-title">{p.name}</div>
+                    <div className="sidebar-chat-preview">
+                      {preview
+                        ? (preview.length > 40 ? preview.slice(0, 40) + '…' : preview)
+                        : <span style={{ fontStyle: 'italic', color: 'var(--text-3)' }}>say hi! 👋</span>
+                      }
+                    </div>
+                  </div>
                 </div>
-                <div className="sidebar-chat-time">
-                  {/* Mock time placeholder */}
-                  Now
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <div className="sidebar-add-wrapper">
             <button className="sidebar-add-btn" onClick={() => { setCreateModalOpen(true); setSidebarOpen(false); }}>
@@ -747,7 +767,15 @@ export default function NovaApp() {
           )}
 
           {/* Chat Area */}
-          <div className="chat-area" ref={chatContainerRef}>
+          <div className="chat-area" ref={chatContainerRef} style={{ position: 'relative' }}
+            onScroll={() => {
+              const el = chatContainerRef.current;
+              if (!el) return;
+              const isNear = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+              isNearBottomRef.current = isNear;
+              setShowScrollPill(!isNear && messages.length > 0);
+            }}
+          >
             {persons.length === 0 ? (
               <div className="welcome" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 24, padding: '32px 24px', animation: 'msgIn 0.5s ease both' }}>
                 <div style={{ width: 90, height: 90, borderRadius: '50%', background: 'var(--surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40, border: '1px dashed var(--border)' }}>✨</div>
@@ -760,21 +788,33 @@ export default function NovaApp() {
                 {messages.length === 0 && !streamedText && activePerson && (
                   <div className="welcome" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '40px 24px' }}>
                     <Avatar avatar={activePerson.avatar} name={activePerson.name} size={80} className="welcome-orb" />
-                    <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 20, fontWeight: 700, color: 'var(--text-1)' }}>Say hi to {activePerson.name}</div>
+                    <div style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 20, fontWeight: 700, color: 'var(--text-1)' }}>say hi to {activePerson.name} 👋</div>
+                    <div style={{ fontSize: 13, color: 'var(--text-3)', marginTop: -4 }}>start a conversation</div>
+                    <div className="empty-chips">
+                      {["hey! what are you up to?", "i've been thinking about you", "okay i need to tell you something"].map(chip => (
+                        <button key={chip} className="empty-chip" onClick={() => { setInputValue(chip); setTimeout(() => inputRef.current?.focus(), 50); }}>{chip}</button>
+                      ))}
+                    </div>
                   </div>
                 )}
 
-                {messages.map((msg, i) => (
-                  <div key={i} className={`msg-row ${msg.role === "user" ? "user" : "nova"}`}>
-                    <div className="msg-inner">
-                      {msg.role !== "user" && <Avatar avatar={activePerson?.avatar} name={activePerson?.name || "Nova"} size={28} className="msg-av" />}
-                      <div className="msg-body">
-                        {msg.role !== "user" && <div className="msg-meta">{activePerson?.name}</div>}
-                        <div className="msg-bubble" dangerouslySetInnerHTML={{ __html: window.marked ? window.marked.parse(msg.content) : msg.content }} />
+                {messages.map((msg, i) => {
+                  const prev = messages[i - 1];
+                  const isGrouped = prev &&
+                    prev.role === msg.role &&
+                    (new Date(msg.createdAt).getTime() - new Date(prev.createdAt).getTime()) < 120000;
+                  return (
+                    <div key={i} className={`msg-row ${msg.role === "user" ? "user" : "nova"}${isGrouped ? ' grouped' : ''}`}>
+                      <div className="msg-inner">
+                        {msg.role !== "user" && <Avatar avatar={activePerson?.avatar} name={activePerson?.name || "Nova"} size={28} className="msg-av" />}
+                        <div className="msg-body">
+                          {msg.role !== "user" && !isGrouped && <div className="msg-meta">{activePerson?.name}</div>}
+                          <div className="msg-bubble" dangerouslySetInnerHTML={{ __html: window.marked ? window.marked.parse(msg.content) : msg.content }} />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
 
                 {isStreaming && streamedText && (
                   <div className="msg-row nova">
@@ -799,6 +839,10 @@ export default function NovaApp() {
                       </div>
                     </div>
                   </div>
+                )}
+
+                {showScrollPill && (
+                  <button className="scroll-pill" onClick={() => scrollToBottom(true, true)}>↓ new message</button>
                 )}
               </>
             )}

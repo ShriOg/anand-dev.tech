@@ -10,12 +10,19 @@ interface PracticeModeProps {
   onClose: () => void;
 }
 
-export default function PracticeMode({ personId, userId, activePerson, onClose }: PracticeModeProps) {
+type Mood = "neutral" | "upset" | "happy" | "distant" | "confused";
+type Stakes = "low" | "medium" | "high" | "very high";
+
+const MOOD_EMOJIS: Record<Mood, string> = {
+  neutral: "😐", upset: "😤", happy: "😊", distant: "😶", confused: "😕"
+};
+
+export default function PracticeMode({ personId, userId: _userId, activePerson, onClose }: PracticeModeProps) {
   const [tab, setTab] = useState<"rehearse" | "analyze" | "improve">("rehearse");
-  
+
   const [scenario, setScenario] = useState("");
-  const [mood, setMood] = useState<"neutral" | "upset" | "happy" | "distant" | "confused">("neutral");
-  const [stakes, setStakes] = useState<"low" | "medium" | "high" | "very high">("medium");
+  const [mood, setMood] = useState<Mood>("neutral");
+  const [stakes, setStakes] = useState<Stakes>("medium");
 
   const [messages, setMessages] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -28,29 +35,24 @@ export default function PracticeMode({ personId, userId, activePerson, onClose }
   const [improve, setImprove] = useState<any>(null);
   const [isImproving, setIsImproving] = useState(false);
 
+  // inline impact analysis: msgIndex -> { loading, result }
+  const [impactMap, setImpactMap] = useState<Record<number, { loading: boolean; result: any | null }>>({});
+
   const chatRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const scrollToBottom = (smooth = true) => {
     if (!chatRef.current) return;
-    chatRef.current.scrollTo({
-      top: chatRef.current.scrollHeight,
-      behavior: smooth ? "smooth" : "auto"
-    });
+    chatRef.current.scrollTo({ top: chatRef.current.scrollHeight, behavior: smooth ? "smooth" : "auto" });
   };
 
-  useEffect(() => {
-    scrollToBottom(true);
-  }, [messages, streamedText, tab]);
+  useEffect(() => { scrollToBottom(true); }, [messages, streamedText, tab]);
 
   const handleSend = async () => {
     if ((!inputValue.trim() && !streamedText) || isStreaming) return;
-    
     const userText = inputValue.trim();
     setInputValue("");
-    if (inputRef.current) {
-      inputRef.current.style.height = 'auto';
-    }
+    if (inputRef.current) inputRef.current.style.height = "auto";
 
     const newMsg = { role: "user", content: userText };
     setMessages(prev => [...prev, newMsg]);
@@ -61,42 +63,26 @@ export default function PracticeMode({ personId, userId, activePerson, onClose }
       const res = await fetch("/api/practice/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [...messages, newMsg],
-          scenario,
-          otherPersonMood: mood,
-          stakes,
-          personId
-        })
+        body: JSON.stringify({ messages: [...messages, newMsg], scenario, otherPersonMood: mood, stakes, personId })
       });
-
       if (!res.ok) throw new Error("Practice Chat API Error");
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
       let fullResponse = "";
-
       if (reader) {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
-          const chunk = decoder.decode(value);
-          const lines = chunk.split("\n");
+          const lines = decoder.decode(value).split("\n");
           for (const line of lines) {
             if (line.startsWith("data: ")) {
               const payload = line.slice(6).trim();
               if (payload === "[DONE]") break;
-              try {
-                const data = JSON.parse(payload);
-                if (data.text) {
-                  fullResponse += data.text;
-                  setStreamedText(fullResponse);
-                }
-              } catch (e) {}
+              try { const d = JSON.parse(payload); if (d.text) { fullResponse += d.text; setStreamedText(fullResponse); } } catch {}
             }
           }
         }
       }
-
       setMessages(prev => [...prev, { role: "assistant", content: fullResponse }]);
       setStreamedText("");
     } catch (error) {
@@ -119,9 +105,7 @@ export default function PracticeMode({ personId, userId, activePerson, onClose }
       });
       const data = await res.json();
       setAnalysis(data);
-    } catch (e) {
-      console.error("Analysis failed", e);
-    }
+    } catch (e) { console.error("Analysis failed", e); }
     setIsAnalyzing(false);
   };
 
@@ -137,165 +121,253 @@ export default function PracticeMode({ personId, userId, activePerson, onClose }
       });
       const data = await res.json();
       setImprove(data);
-    } catch (e) {
-      console.error("Improve failed", e);
-    }
+    } catch (e) { console.error("Improve failed", e); }
     setIsImproving(false);
   };
 
+  const handleImproveTab = () => {
+    if (!analysis) {
+      handleAnalyze().then(() => handleImprove());
+    } else {
+      handleImprove();
+    }
+  };
+
+  const toggleImpact = async (idx: number, msgContent: string) => {
+    const existing = impactMap[idx];
+    if (existing?.result) {
+      setImpactMap(prev => { const c = { ...prev }; delete c[idx]; return c; });
+      return;
+    }
+    setImpactMap(prev => ({ ...prev, [idx]: { loading: true, result: null } }));
+    try {
+      const res = await fetch("/api/practice/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: [{ role: "user", content: msgContent }], scenario, personId })
+      });
+      const data = await res.json();
+      const score = data?.overallRead || "";
+      const color = score.toLowerCase().includes("well") || score.toLowerCase().includes("good") ? "green"
+        : score.toLowerCase().includes("bad") || score.toLowerCase().includes("wrong") ? "red" : "yellow";
+      setImpactMap(prev => ({ ...prev, [idx]: { loading: false, result: { text: data?.overallRead || "No analysis available.", color } } }));
+    } catch {
+      setImpactMap(prev => ({ ...prev, [idx]: { loading: false, result: { text: "Analysis unavailable.", color: "yellow" } } }));
+    }
+  };
+
   const loadPracticePrompt = (prompt: any) => {
-    setScenario(prompt.scenario);
-    setMood(prompt.mood as any);
-    setStakes(prompt.stakes as any);
+    setScenario(prompt.scenario || "");
+    setMood((prompt.mood as Mood) || "neutral");
+    setStakes((prompt.stakes as Stakes) || "medium");
     setMessages([]);
     setAnalysis(null);
     setImprove(null);
+    setImpactMap({});
     setTab("rehearse");
   };
 
-  const analyzeSingleMessage = async (msgContent: string) => {
-    alert("Inline impact analysis: (API integration pending)\nAnalyzing: " + msgContent);
-  };
+  const Skeleton = () => (
+    <div className="prac-skeleton-wrap">
+      <div className="skel skel-title" style={{ height: 28, width: "60%", marginBottom: 8 }}></div>
+      <div className="skel skel-box" style={{ height: 80, marginBottom: 12 }}></div>
+      <div className="skel skel-box" style={{ height: 60, marginBottom: 12 }}></div>
+      <div className="skel skel-box" style={{ height: 60 }}></div>
+    </div>
+  );
 
   return (
     <div className="practice-overlay" data-mode="practice">
+      {/* Header */}
       <div className="practice-header">
-        <div className="ph-left">🎯 Practice Mode <span className="ph-name">with {activePerson?.name}</span></div>
+        <div className="ph-left">
+          🎯 Practice Mode <span className="ph-name">with {activePerson?.name}</span>
+        </div>
         <button className="ph-close" onClick={onClose}>✕</button>
       </div>
 
+      {/* Tab pills - centered */}
       <div className="practice-tabs">
         <button className={`ptab ${tab === "rehearse" ? "active" : ""}`} onClick={() => setTab("rehearse")}>Rehearse</button>
         <button className={`ptab ${tab === "analyze" ? "active" : ""}`} onClick={handleAnalyze}>Analyze</button>
-        <button className={`ptab ${tab === "improve" ? "active" : ""}`} onClick={() => { if(!analysis) handleAnalyze().then(() => handleImprove()); else handleImprove(); }}>Improve</button>
+        <button className={`ptab ${tab === "improve" ? "active" : ""}`} onClick={handleImproveTab}>Improve</button>
       </div>
 
       <div className="practice-body">
+        {/* ── REHEARSE TAB ── */}
         {tab === "rehearse" && (
           <div className="prac-rehearse">
-            <div className="prac-context-bar">
-              <input 
-                className="prac-input-sit" 
-                placeholder="What are you trying to do? e.g. apologize for missing call" 
+            {/* Scenario card */}
+            <div className="prac-context-card">
+              <input
+                className="prac-scenario-input"
+                placeholder="What are you trying to do? e.g. apologize for missing a call"
                 value={scenario}
                 onChange={e => setScenario(e.target.value)}
               />
-              <div className="prac-pills-row">
-                <select className="prac-select" value={mood} onChange={e => setMood(e.target.value as any)}>
-                  <option value="neutral">Neutral Mood</option>
-                  <option value="upset">Upset Mood</option>
-                  <option value="happy">Happy Mood</option>
-                  <option value="distant">Distant Mood</option>
-                  <option value="confused">Confused Mood</option>
-                </select>
-                <select className="prac-select" value={stakes} onChange={e => setStakes(e.target.value as any)}>
-                  <option value="low">Low Stakes</option>
-                  <option value="medium">Medium Stakes</option>
-                  <option value="high">High Stakes</option>
-                  <option value="very high">Very High Stakes</option>
-                </select>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span className="prac-pills-label">Mood</span>
+                  <div className="prac-pills-section">
+                    {(["neutral", "upset", "happy", "distant", "confused"] as Mood[]).map(m => (
+                      <button key={m} className={`prac-pill ${mood === m ? "active" : ""}`} onClick={() => setMood(m)}>
+                        {MOOD_EMOJIS[m]} {m}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span className="prac-pills-label">Stakes</span>
+                  <div className="prac-pills-section">
+                    {(["low", "medium", "high", "very high"] as Stakes[]).map(s => (
+                      <button key={s} className={`prac-pill ${stakes === s ? "active" : ""}`} onClick={() => setStakes(s)}>{s}</button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
-            
+
+            {/* Chat area */}
             <div className="prac-chat-area" ref={chatRef}>
               {messages.length === 0 && !streamedText && (
-                 <div className="prac-empty">Set the scenario above and say something!</div>
+                <div className="prac-empty">Set the scenario above and say something!</div>
               )}
               {messages.map((m, i) => (
-                <div key={i} className={`msg-row ${m.role === 'user' ? 'user' : 'nova'}`}>
-                  <div className="msg-inner" style={{flexDirection: 'column', alignItems: m.role==='user'?'flex-end':'flex-start'}}>
-                    <div style={{display:'flex', gap: 8, alignItems: 'flex-end'}}>
-                      {m.role !== 'user' && <Avatar avatar={activePerson?.avatar} name={activePerson?.name || "Nova"} size={28} className="msg-av" />}
-                      <div className="msg-bubble" style={{background: m.role==='user' ? 'var(--prac-accent)' : 'var(--prac-surface)', color: '#fff'}}>{m.content}</div>
-                    </div>
-                    {m.role === 'user' && (
-                      <button className="inline-impact-btn" onClick={() => analyzeSingleMessage(m.content)}>👁 see impact</button>
+                <div key={i} className={`prac-msg-row`}>
+                  <div className={`prac-msg-inner ${m.role === "user" ? "user" : ""}`}>
+                    {m.role !== "user" && (
+                      <Avatar avatar={activePerson?.avatar} name={activePerson?.name || "Nova"} size={28} className="msg-av" />
                     )}
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: m.role === "user" ? "flex-end" : "flex-start", gap: 4 }}>
+                      <div className={m.role === "user" ? "prac-bubble-user" : "prac-bubble-received"}>
+                        {m.content}
+                      </div>
+                      {m.role === "user" && (
+                        <button className="impact-pill" onClick={() => toggleImpact(i, m.content)}>
+                          {impactMap[i]?.loading ? "⏳" : impactMap[i]?.result ? "✕ hide" : "👁 impact"}
+                        </button>
+                      )}
+                      {impactMap[i]?.result && (
+                        <div className={`impact-card ${impactMap[i].result.color}`}>
+                          {impactMap[i].result.text}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
               {isStreaming && streamedText && (
-                <div className={`msg-row nova`}>
-                  <div className="msg-inner">
+                <div className="prac-msg-row">
+                  <div className="prac-msg-inner">
                     <Avatar avatar={activePerson?.avatar} name={activePerson?.name || "Nova"} size={28} className="msg-av" />
-                    <div className="msg-bubble" style={{background: 'var(--prac-surface)', color: '#fff'}}>{streamedText}</div>
+                    <div className="prac-bubble-received">{streamedText}</div>
+                  </div>
+                </div>
+              )}
+              {isStreaming && !streamedText && (
+                <div className="prac-msg-row">
+                  <div className="prac-msg-inner">
+                    <Avatar avatar={activePerson?.avatar} name={activePerson?.name || "Nova"} size={28} className="msg-av" />
+                    <div className="typing-bubble">
+                      <div className="td"></div><div className="td"></div><div className="td"></div>
+                    </div>
                   </div>
                 </div>
               )}
             </div>
 
+            {/* Input */}
             <div className="prac-input-zone">
-               <div className="input-card" style={{background: 'var(--prac-surface)', border: 'none'}}>
-                  <textarea
-                    ref={inputRef}
-                    placeholder="Type your message..."
-                    value={inputValue}
-                    onChange={(e) => {
-                      setInputValue(e.target.value);
-                      e.target.style.height = 'auto';
-                      e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`;
-                    }}
-                    onKeyDown={(e) => {
-                      if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
-                    }}
-                    rows={1}
-                    style={{color: '#fff'}}
-                  />
-                  <button className="send-btn" onClick={handleSend} disabled={!inputValue.trim() || isStreaming} style={{color: 'var(--prac-accent)'}}>
-                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+              <div className="input-card">
+                <textarea
+                  ref={inputRef}
+                  placeholder="Type your message..."
+                  value={inputValue}
+                  onChange={e => { setInputValue(e.target.value); e.target.style.height = "auto"; e.target.style.height = `${Math.min(e.target.scrollHeight, 120)}px`; }}
+                  onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                  rows={1}
+                />
+                <div className="input-bottom">
+                  <div className="char-ct">{inputValue.length}/500</div>
+                  <button className="send-btn" onClick={handleSend} disabled={!inputValue.trim() || isStreaming}
+                    style={{ background: "linear-gradient(135deg, #F59E0B, #D97706)", boxShadow: "0 4px 16px rgba(245,158,11,0.4)" }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
                   </button>
-               </div>
+                </div>
+              </div>
             </div>
           </div>
         )}
 
+        {/* ── ANALYZE TAB ── */}
         {tab === "analyze" && (
           <div className="prac-scroll-content">
-            {isAnalyzing ? (
-              <div className="prac-skeleton-wrap">
-                <div className="skel skel-title"></div>
-                <div className="skel skel-text"></div>
-                <div className="skel skel-text w80"></div>
-                <div className="skel skel-box"></div>
-                <div className="skel skel-box"></div>
-              </div>
-            ) : analysis ? (
+            {isAnalyzing ? <Skeleton /> : analysis ? (
               <div className="prac-analysis-view">
-                <div className="pa-read">{analysis.overallRead}</div>
-                
-                <div className="pa-section">
-                  <div className="pa-label">What you did well</div>
-                  <ul className="pa-list">
-                    {analysis.didWell?.map((item: string, i: number) => <li key={i}>{item}</li>)}
-                  </ul>
-                </div>
+                {/* Overall read */}
+                <div className="pa-overall-card">{analysis.overallRead}</div>
 
-                <div className="pa-section">
-                  <div className="pa-label">What landed wrong</div>
-                  {analysis.landedWrong?.map((item: any, i: number) => (
-                    <div key={i} className="pa-quote-card">
-                      <div className="pa-quote">"{item.quote}"</div>
-                      <div className="pa-reason"><strong>Why:</strong> {item.reason}</div>
+                {/* What landed well */}
+                {analysis.didWell?.length > 0 && (
+                  <div className="pa-section">
+                    <div className="pa-label">✓ What landed well</div>
+                    {analysis.didWell.map((item: string, i: number) => (
+                      <div key={i} className="pa-card green">
+                        <div className="pa-card-icon">✓</div>
+                        <div className="pa-card-body">{item}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* What landed wrong */}
+                {analysis.landedWrong?.length > 0 && (
+                  <div className="pa-section">
+                    <div className="pa-label">✗ What landed wrong</div>
+                    {analysis.landedWrong.map((item: any, i: number) => (
+                      <div key={i} className="pa-card red">
+                        <div className="pa-card-icon">✗</div>
+                        <div className="pa-card-text">
+                          <div className="pa-card-quote">"{item.quote}"</div>
+                          <div className="pa-card-body">{item.reason}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Patterns */}
+                {analysis.patterns?.length > 0 && (
+                  <div className="pa-section">
+                    <div className="pa-label">🔄 Patterns</div>
+                    {analysis.patterns.map((item: string, i: number) => (
+                      <div key={i} className="pa-card amber">
+                        <div className="pa-card-icon">🔄</div>
+                        <div className="pa-card-body">{item}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Their perspective */}
+                {analysis.theirPerspective && (
+                  <div className="pa-section">
+                    <div className="pa-label">💜 Their perspective</div>
+                    <div className="pa-card purple">
+                      <div className="pa-card-body">{analysis.theirPerspective}</div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
 
-                <div className="pa-section">
-                  <div className="pa-label">Hidden patterns</div>
-                  <ul className="pa-list">
-                    {analysis.patterns?.map((item: string, i: number) => <li key={i}>{item}</li>)}
-                  </ul>
-                </div>
-
-                <div className="pa-section">
-                  <div className="pa-label">How they likely actually felt</div>
-                  <div className="pa-para">{analysis.theirPerspective}</div>
-                </div>
-
-                <div className="pa-section">
-                  <div className="pa-label">The thing you're not saying</div>
-                  <div className="pa-para">{analysis.unsaidThing}</div>
-                </div>
+                {/* Unsaid thing */}
+                {analysis.unsaidThing && (
+                  <div className="pa-section">
+                    <div className="pa-label">🌑 What you&apos;re not saying</div>
+                    <div className="pa-card dark">
+                      <div className="pa-card-body" style={{ color: "var(--text-2)", fontStyle: "italic" }}>{analysis.unsaidThing}</div>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="prac-empty">Rehearse a conversation first to get analysis.</div>
@@ -303,43 +375,59 @@ export default function PracticeMode({ personId, userId, activePerson, onClose }
           </div>
         )}
 
+        {/* ── IMPROVE TAB ── */}
         {tab === "improve" && (
           <div className="prac-scroll-content">
-            {isImproving ? (
-              <div className="prac-skeleton-wrap">
-                <div className="skel skel-title"></div>
-                <div className="skel skel-box"></div>
-                <div className="skel skel-box"></div>
-              </div>
-            ) : improve ? (
+            {isImproving ? <Skeleton /> : improve ? (
               <div className="prac-improve-view">
-                <div className="pa-section">
-                  <div className="pa-label">Suggested Opener</div>
-                  <div className="pa-opener-box">{improve.suggestedOpener}</div>
-                </div>
+                {/* Suggested opener / what to actually say */}
+                {improve.suggestedOpener && (
+                  <div className="pa-section">
+                    <div className="pa-label">💡 What to actually say</div>
+                    <div className="improve-highlight-box">{improve.suggestedOpener}</div>
+                  </div>
+                )}
 
-                <div className="pa-section">
-                  <div className="pa-label">Rewritten Messages</div>
-                  {improve.rewrites?.map((item: any, i: number) => (
-                    <div key={i} className="pa-rewrite-card">
-                      <div className="pr-orig"><span>You said:</span> {item.original}</div>
-                      <div className="pr-new"><span>Try this:</span> {item.rewritten}</div>
-                      <div className="pr-why">{item.why}</div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="pa-section">
-                  <div className="pa-label">Practice Prompts</div>
-                  <div className="pr-prompts-grid">
-                    {improve.practicePrompts?.map((item: any, i: number) => (
-                      <div key={i} className="pr-prompt-card" onClick={() => loadPracticePrompt(item)}>
-                        <div className="prp-label">{item.label}</div>
-                        <div className="prp-meta">{item.mood} • {item.stakes} stakes</div>
+                {/* Rewritten messages */}
+                {improve.rewrites?.length > 0 && (
+                  <div className="pa-section">
+                    <div className="pa-label">✏️ Rewritten messages</div>
+                    {improve.rewrites.map((item: any, i: number) => (
+                      <div key={i} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        <div className="improve-rewrite-pair">
+                          <div className="improve-orig-card">
+                            <div className="improve-label">You said</div>
+                            <div className="improve-text">{item.original}</div>
+                          </div>
+                          <div className="improve-new-card">
+                            <div className="improve-label">Try this</div>
+                            <div className="improve-text">{item.rewritten}</div>
+                          </div>
+                        </div>
+                        {item.why && <div className="improve-why">{item.why}</div>}
                       </div>
                     ))}
                   </div>
-                </div>
+                )}
+
+                {/* Practice prompts */}
+                {improve.practicePrompts?.length > 0 && (
+                  <div className="pa-section">
+                    <div className="pa-label">🎯 Try these scenarios</div>
+                    <div className="improve-scenario-cards">
+                      {improve.practicePrompts.map((item: any, i: number) => (
+                        <div key={i} className="improve-scenario-card" onClick={() => loadPracticePrompt(item)}>
+                          <div className="isc-emoji">{["💬", "🔥", "💔"][i % 3]}</div>
+                          <div className="isc-label">{item.label}</div>
+                          <div className="isc-pills">
+                            <span className="isc-pill">{item.mood}</span>
+                            <span className="isc-pill">{item.stakes} stakes</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="prac-empty">Analyze your conversation first to get improvements.</div>
