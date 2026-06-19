@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { ensureDb, Person } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { nanoid } from "nanoid";
+import { cacheGet, cacheSet, cacheDeletePrefix } from "@/lib/cache";
 
 export async function GET(req: Request) {
   await ensureDb();
@@ -11,15 +12,26 @@ export async function GET(req: Request) {
     const token = cookieStore.get("nova_session")?.value;
     const userId = token ? verifyToken(token) : null;
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    if (!userId) return NextResponse.json({ persons: [] });
+    const cacheKey = `persons:${userId}`;
+    const cached = cacheGet(cacheKey);
+    if (cached) {
+      return NextResponse.json({ persons: cached }, {
+        headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' }
+      });
+    }
+
     const persons = await Person.find({ userId }).sort({ createdAt: 1 }).lean();
-    return NextResponse.json({
-      persons: persons.map((p: any) => ({
-        id: p.id, name: p.name, emoji: p.emoji,
-        gender: p.gender, personality: p.personality,
-        relationship: p.relationship, language: p.language,
-        createdAt: p.createdAt,
-      }))
+    const mappedPersons = persons.map((p: any) => ({
+      id: p.id, name: p.name, emoji: p.emoji,
+      gender: p.gender, personality: p.personality,
+      relationship: p.relationship, language: p.language,
+      createdAt: p.createdAt,
+    }));
+
+    cacheSet(cacheKey, mappedPersons, 60000);
+
+    return NextResponse.json({ persons: mappedPersons }, {
+      headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' }
     });
   } catch (e: any) {
     return NextResponse.json({ persons: [] });
@@ -49,6 +61,8 @@ export async function POST(req: Request) {
       avatar: avatarBase64 || null,
       gender, personality, relationship, language,
     });
+
+    cacheDeletePrefix(`persons:${userId}`);
 
     return NextResponse.json({
       person: {

@@ -2,6 +2,7 @@ import { verifyToken } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { ensureDb, PracticeSession } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { cacheDeletePrefix } from "@/lib/cache";
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   await ensureDb();
@@ -49,6 +50,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
     if (!session) return NextResponse.json({ error: "not found" }, { status: 404 });
 
+    cacheDeletePrefix(`practice-sessions:${userId}:${session.personId}`);
+
     return NextResponse.json({ success: true, session });
   } catch (error) {
     console.error("PATCH practice session:", error);
@@ -67,6 +70,8 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
     const session = await PracticeSession.findOneAndDelete({ _id: id, userId });
     if (!session) return NextResponse.json({ error: "not found" }, { status: 404 });
+
+    cacheDeletePrefix(`practice-sessions:${userId}:${session.personId}`);
 
     return NextResponse.json({ success: true });
   } catch (error) {

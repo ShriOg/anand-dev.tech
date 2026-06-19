@@ -1,19 +1,23 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 // --- Connection Utility ---
-export const ensureDb = async () => {
-  mongoose.set('strictQuery', true);
-  if (mongoose.connection.readyState === 1) return;
+export async function ensureDb() {
+  if (mongoose.connection.readyState === 1) return; // already connected
+  if (mongoose.connection.readyState === 2) {
+    // connecting — wait for it
+    await new Promise(resolve => mongoose.connection.once('connected', resolve));
+    return;
+  }
   const MONGODB_URI = process.env.MONGODB_URI;
   if (!MONGODB_URI) throw new Error("MONGODB_URI is not defined.");
   try {
-    await mongoose.connect(MONGODB_URI, { bufferCommands: false });
+    await mongoose.connect(MONGODB_URI, { maxPoolSize: 10, serverSelectionTimeoutMS: 5000, socketTimeoutMS: 45000, bufferCommands: false });
     console.log("Connected to MongoDB");
   } catch (error) {
     console.error("MongoDB connection error:", error);
     throw error;
   }
-};
+}
 
 // --- Person ---
 export interface IPerson extends Document {

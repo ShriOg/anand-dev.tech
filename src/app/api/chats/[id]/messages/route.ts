@@ -2,6 +2,7 @@ import { verifyToken } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { ensureDb, Message, Chat } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { cacheGet, cacheSet, cacheDeletePrefix } from "@/lib/cache";
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   await ensureDb();
@@ -19,6 +20,14 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     if (!userId) return NextResponse.json({ messages: [] });
 
+    const cacheKey = `messages:${id}`;
+    const cached = cacheGet(cacheKey);
+    if (cached) {
+      return NextResponse.json({ messages: cached }, {
+        headers: { 'Cache-Control': 'private, max-age=10, stale-while-revalidate=30' }
+      });
+    }
+
     const chat = await Chat.findOne({ _id: id, userId });
     if (!chat) return NextResponse.json({ error: "not found or forbidden" }, { status: 403 });
 
@@ -31,7 +40,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       createdAt: msg.createdAt
     }));
 
-    return NextResponse.json({ messages: formattedMessages });
+    cacheSet(cacheKey, formattedMessages, 30000);
+
+    return NextResponse.json({ messages: formattedMessages }, {
+      headers: { 'Cache-Control': 'private, max-age=10, stale-while-revalidate=30' }
+    });
   } catch (error: any) {
     console.error("DB messages:", error);
     return NextResponse.json({ messages: [] });
@@ -80,6 +93,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     
     // Update chat timestamp
     await Chat.findByIdAndUpdate(id, { updatedAt: new Date() });
+
+    cacheDeletePrefix(`messages:${id}`);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

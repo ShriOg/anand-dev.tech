@@ -51,6 +51,10 @@ export default function NovaApp() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamedText, setStreamedText] = useState("");
   const [practiceModeOpen, setPracticeModeOpen] = useState(false);
+
+  // Caches
+  const personsCache = useRef<Person[] | null>(null);
+  const messagesCache = useRef<Map<string, any[]>>(new Map());
   
   // App UI state
   const [inputValue, setInputValue] = useState("");
@@ -142,25 +146,35 @@ export default function NovaApp() {
     if (savedTheme) setTheme(savedTheme);
 
     try {
-      const [personsRes, chatsRes, settingsRes] = await Promise.all([
-        fetch("/api/persons", { headers: { } }),
-        fetch("/api/chats", { headers: { } }),
-        fetch("/api/user/settings", { headers: { } })
-      ]);
+      let loadedPersons = personsCache.current;
 
-      const personsData = await personsRes.json();
-      const chatsData = await chatsRes.json();
-      const settingsData = await settingsRes.json();
+      const promises: Promise<any>[] = [
+        fetch("/api/chats", { headers: { } }).then(r => r.json()),
+        fetch("/api/user/settings", { headers: { } }).then(r => r.json())
+      ];
+      
+      if (!loadedPersons) {
+        promises.push(fetch("/api/persons", { headers: { } }).then(r => r.json()));
+      }
+
+      const results = await Promise.all(promises);
+      const chatsData = results[0];
+      const settingsData = results[1];
+      const personsData = results[2];
 
       if (settingsData.settings) {
         setUserName(settingsData.settings.name || "");
         setUserGender(settingsData.settings.gender || "");
       }
 
-      const loadedPersons = personsData.persons || [];
+      if (!loadedPersons && personsData) {
+        loadedPersons = personsData.persons || [];
+        personsCache.current = loadedPersons;
+      }
+
       const loadedChats = chatsData.chats || [];
 
-      setPersons(loadedPersons);
+      setPersons(loadedPersons!);
       
       const newChatMap: Record<string, string> = {};
       loadedChats.forEach((c: any) => {
@@ -168,15 +182,27 @@ export default function NovaApp() {
       });
       setChatMap(newChatMap);
 
-      if (loadedPersons.length > 0) {
+      if (loadedPersons! && loadedPersons!.length > 0) {
         const savedActive = localStorage.getItem("nova_active_person_id");
-        if (savedActive && loadedPersons.find((p: any) => p.id === savedActive)) {
+        if (savedActive && loadedPersons!.find((p: any) => p.id === savedActive)) {
           setActivePersonId(savedActive);
           loadChatForPerson(savedActive, newChatMap);
         } else {
-          setActivePersonId(loadedPersons[0].id);
-          loadChatForPerson(loadedPersons[0].id, newChatMap);
+          setActivePersonId(loadedPersons![0].id);
+          loadChatForPerson(loadedPersons![0].id, newChatMap);
         }
+
+        // Prefetch silently
+        loadedPersons!.slice(0, 3).forEach(async (person: any) => {
+          const cid = newChatMap[person.id];
+          if (cid && !messagesCache.current.has(cid)) {
+            const res = await fetch(`/api/chats/${cid}/messages`, { credentials: 'include' });
+            if (res.ok) {
+              const data = await res.json();
+              messagesCache.current.set(cid, data.messages || []);
+            }
+          }
+        });
       }
     } catch (e) {
       console.error("Boot error:", e);
@@ -210,15 +236,29 @@ export default function NovaApp() {
 
   useEffect(() => {
     if (currentChatId && activePersonId) {
+      if (messagesCache.current.has(currentChatId)) {
+        // Optimistic cache hit
+        const cached = messagesCache.current.get(currentChatId) || [];
+        setMessages(cached);
+        if (cached.length > 0) {
+          setLastMsgMap(prev => ({ ...prev, [activePersonId]: cached[cached.length - 1].content }));
+        }
+      }
+
       fetch(`/api/chats/${currentChatId}/messages`, { credentials: "include" })
         .then(res => res.json())
         .then(data => {
-          if (data.messages && data.messages.length > 0) {
+          if (data.messages) {
             const sorted = data.messages.sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-            setMessages(sorted);
-            const lastMsg = sorted[sorted.length - 1];
-            setLastMsgMap(prev => ({ ...prev, [activePersonId]: lastMsg.content }));
+            messagesCache.current.set(currentChatId, sorted);
+            // Only update state if length differs (simple heuristic to avoid re-renders if streaming)
+            setMessages(prev => (prev.length === sorted.length && !isStreaming) ? prev : sorted);
+            if (sorted.length > 0) {
+              const lastMsg = sorted[sorted.length - 1];
+              setLastMsgMap(prev => ({ ...prev, [activePersonId]: lastMsg.content }));
+            }
           } else {
+            messagesCache.current.set(currentChatId, []);
             setMessages([]);
           }
         })
@@ -270,6 +310,24 @@ export default function NovaApp() {
   const createPerson = async () => {
     if (!cpName.trim() || cpCreating) return;
     setCpCreating(true);
+
+    const tempId = `temp-${Date.now()}`;
+    const optimisticPerson: Person = {
+      id: tempId,
+      name: cpName,
+      emoji: cpEmoji,
+      gender: cpGender,
+      personality: cpPersonality,
+      relationship: cpRelationship,
+      language: cpLanguage,
+      avatar: cpAvatar || undefined,
+      createdAt: new Date().toISOString()
+    };
+    
+    setPersons(prev => [...prev, optimisticPerson]);
+    switchPerson(tempId);
+    setCreateModalOpen(false);
+
     try {
       const res = await fetch("/api/persons", {
         method: "POST",
@@ -286,17 +344,21 @@ export default function NovaApp() {
       });
       const data = await res.json();
       if (data.person) {
-        setPersons(prev => [...prev, data.person]);
+        personsCache.current = null;
+        setPersons(prev => prev.map(p => p.id === tempId ? data.person : p));
         switchPerson(data.person.id);
-        setCreateModalOpen(false);
         setCpName("");
         setCpEmoji("👩");
         setCpAvatar(null);
         showToast("Person created!");
       } else {
+        setPersons(prev => prev.filter(p => p.id !== tempId));
+        switchPerson(persons.length > 0 ? persons[0].id : "");
         alert(data.error || "Failed to create person");
       }
     } catch (e) {
+      setPersons(prev => prev.filter(p => p.id !== tempId));
+      switchPerson(persons.length > 0 ? persons[0].id : "");
       alert("Error creating person");
     }
     setCpCreating(false);
@@ -311,6 +373,7 @@ export default function NovaApp() {
         method: "DELETE"
       });
       if (res.ok) {
+        personsCache.current = null;
         const newPersons = persons.filter(p => p.id !== activePersonId);
         setPersons(newPersons);
         showToast("Person deleted");
@@ -477,7 +540,8 @@ export default function NovaApp() {
       const assistantMsg = { role: "assistant", content: fullResponse, createdAt: new Date().toISOString() };
       const finalMessages = [...updatedMessagesWithUser, assistantMsg];
       await saveMessages(finalMessages);
-
+      messagesCache.current.set(currentChatId, finalMessages);
+      
       setMessages(finalMessages);
       if (activePersonId) setLastMsgMap(prev => ({ ...prev, [activePersonId]: fullResponse }));
       setStreamedText("");

@@ -2,6 +2,7 @@ import { verifyToken } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { ensureDb, PracticeSession } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { cacheGet, cacheSet, cacheDeletePrefix } from "@/lib/cache";
 
 export async function GET(req: Request) {
   await ensureDb();
@@ -15,12 +16,18 @@ export async function GET(req: Request) {
     const personId = searchParams.get("personId");
     if (!personId) return NextResponse.json({ error: "personId required" }, { status: 400 });
 
+    const cacheKey = `practice-sessions:${userId}:${personId}`;
+    const cached = cacheGet(cacheKey);
+    if (cached) return NextResponse.json({ sessions: cached });
+
     const sessions = await PracticeSession.find({ userId, personId })
       .sort({ createdAt: -1 })
       .limit(20)
       .lean();
 
     console.log("sessions query:", userId, personId, "found:", sessions.length);
+
+    cacheSet(cacheKey, sessions, 60000);
 
     return NextResponse.json({ sessions });
   } catch (error) {
@@ -50,6 +57,8 @@ export async function POST(req: Request) {
       stakes,
       messages: []
     });
+
+    cacheDeletePrefix(`practice-sessions:${userId}:${personId}`);
 
     return NextResponse.json({ sessionId: session._id });
   } catch (error) {
