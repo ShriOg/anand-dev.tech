@@ -1,131 +1,164 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, Code, Sparkles, Zap } from "lucide-react";
-import Link from "next/link";
+import { useState, useEffect } from "react";
+import { motion, Variants } from "framer-motion";
+
+const item: Variants = {
+  hidden: { opacity: 0, y: 24 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
+};
+const container: Variants = {
+  hidden: {},
+  show:   { transition: { staggerChildren: 0.1, delayChildren: 0.9 } },
+};
 
 export function Hero() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end start"],
-  });
-
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const [ready, setReady] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setReady(true), 300); return () => clearTimeout(t); }, []);
 
   return (
-    <section 
-      ref={containerRef}
-      className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-zinc-950 pt-20"
+    <section
+      id="hero"
+      style={{ height: "100vh", position: "relative", display: "flex", alignItems: "center" }}
     >
-      {/* Dynamic Background */}
-      <div className="absolute inset-0 z-0 mesh-bg opacity-40" />
-      
-      {/* Animated Orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-[120px] animate-blob mix-blend-screen" />
-      <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] animate-blob animation-delay-2000 mix-blend-screen" />
-      <div className="absolute bottom-1/4 left-1/3 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[150px] animate-blob animation-delay-4000 mix-blend-screen" />
+      {/* Left-side dark scrim so text is always readable */}
+      <div style={{
+        position: "absolute", inset: 0, pointerEvents: "none",
+        background: "linear-gradient(to right, rgba(3,2,10,0.72) 0%, rgba(3,2,10,0.4) 55%, transparent 100%)",
+        zIndex: 1,
+      }} />
 
-      {/* Grid Pattern overlay */}
-      <div className="absolute inset-0 z-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
+      {/* Main copy */}
+      <div style={{ position: "relative", zIndex: 10, paddingLeft: "clamp(28px, 8vw, 120px)", maxWidth: 620 }}>
+        {ready && (
+          <motion.div variants={container} initial="hidden" animate="show">
+            {/* Label */}
+            <motion.p variants={item} style={{
+              fontFamily: "'JetBrains Mono', monospace", fontSize: 11,
+              letterSpacing: 3, color: "rgba(255,255,255,0.38)", marginBottom: 22,
+            }}>
+              // anand.shukla
+            </motion.p>
 
-      <motion.div 
-        style={{ y, opacity }}
-        className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full flex flex-col items-center text-center mt-12"
-      >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card border border-zinc-800/80 mb-8"
-        >
-          <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
-          <span className="text-sm font-medium text-zinc-300">Available for new opportunities</span>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-          className="overflow-hidden mb-4"
-        >
-          <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-[140px] font-outfit font-bold tracking-tighter leading-none text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-zinc-500 py-2">
-            Anand Shukla
-          </h1>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-3xl mb-10"
-        >
-          <p className="text-xl md:text-3xl font-light text-zinc-400 tracking-tight leading-snug">
-            Building digital experiences, systems, and <br className="hidden md:block"/> 
-            <span className="text-white font-medium relative inline-block">
-              future-ready products.
-              <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-gradient-to-r from-blue-500 to-purple-500 opacity-50" />
-            </span>
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="flex flex-col sm:flex-row items-center gap-6"
-        >
-          <Link href="#projects">
-            <button className="relative group px-8 py-4 rounded-full bg-white text-zinc-950 font-medium text-lg flex items-center gap-2 overflow-hidden hover:scale-105 transition-transform duration-300">
-              <span className="relative z-10">Explore Work</span>
-              <ArrowRight className="relative z-10 group-hover:translate-x-1 transition-transform" size={20} />
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-100 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            </button>
-          </Link>
-          <Link href="#contact">
-            <button className="px-8 py-4 rounded-full glass border border-zinc-700 text-white font-medium text-lg hover:bg-zinc-800/50 transition-colors duration-300">
-              Contact Me
-            </button>
-          </Link>
-        </motion.div>
-
-        {/* Tech Pills */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.8 }}
-          className="mt-20 flex flex-wrap justify-center gap-4 max-w-2xl"
-        >
-          {[
-            { name: "Developer", icon: <Code size={16} /> },
-            { name: "Founder of MenuNova", icon: <Zap size={16} /> },
-            { name: "Creative Engineer", icon: <Sparkles size={16} /> }
-          ].map((pill, i) => (
-            <div key={i} className="flex items-center gap-2 px-4 py-2 rounded-full glass border border-zinc-800/50 text-sm text-zinc-400 hover:text-white transition-colors duration-300 cursor-default">
-              <span className="text-brand-blue">{pill.icon}</span>
-              {pill.name}
+            {/* ANAND */}
+            <div style={{ overflow: "hidden" }}>
+              <motion.h1 variants={item} style={{
+                fontFamily: "'Outfit', 'Inter', sans-serif",
+                fontSize: "clamp(64px, 9.5vw, 100px)", fontWeight: 900,
+                letterSpacing: "-5px", lineHeight: 0.88, color: "#fff",
+                textShadow: "0 0 90px rgba(255,255,255,0.12)", marginBottom: 0,
+              }}>
+                ANAND
+              </motion.h1>
             </div>
-          ))}
-        </motion.div>
-      </motion.div>
 
-      {/* Scroll indicator */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+            {/* SHUKLA – outlined */}
+            <div style={{ overflow: "hidden", marginBottom: 32 }}>
+              <motion.h1 variants={item} style={{
+                fontFamily: "'Outfit', 'Inter', sans-serif",
+                fontSize: "clamp(64px, 9.5vw, 100px)", fontWeight: 900,
+                letterSpacing: "-5px", lineHeight: 0.88,
+                color: "transparent",
+                WebkitTextStroke: "1.5px rgba(255,255,255,0.22)",
+              }}>
+                SHUKLA
+              </motion.h1>
+            </div>
+
+            {/* Roles */}
+            <motion.div variants={item} style={{ marginBottom: 28 }}>
+              {[
+                { text: "Developer.",   color: "rgba(255,255,255,0.88)" },
+                { text: "Founder.",     color: "rgba(255,200,100,0.82)" },
+                { text: "AI Builder.",  color: "rgba(150,220,255,0.82)" },
+              ].map(r => (
+                <p key={r.text} style={{ fontSize: 22, fontWeight: 300, color: r.color, lineHeight: 1.45 }}>
+                  {r.text}
+                </p>
+              ))}
+            </motion.div>
+
+            {/* Description */}
+            <motion.p variants={item} style={{
+              fontSize: 14, fontWeight: 300,
+              color: "rgba(255,255,255,0.42)", lineHeight: 1.65,
+              maxWidth: 380, marginBottom: 36,
+            }}>
+              Creating software, AI systems, and startups from ideas.
+            </motion.p>
+
+            {/* CTA Buttons */}
+            <motion.div variants={item} style={{ display: "flex", gap: 14 }}>
+              <a href="#projects" style={{
+                fontFamily: "'JetBrains Mono', monospace", fontSize: 12,
+                color: "#fff", textDecoration: "none",
+                border: "1px solid rgba(255,255,255,0.28)",
+                background: "rgba(255,255,255,0.07)",
+                backdropFilter: "blur(12px)",
+                padding: "11px 24px", borderRadius: 3,
+                transition: "background 0.2s, border-color 0.2s",
+              }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.14)"; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.07)"; }}
+              >
+                View Work ↓
+              </a>
+              <a href="https://github.com/ShriOg" target="_blank" rel="noopener noreferrer" style={{
+                fontFamily: "'JetBrains Mono', monospace", fontSize: 12,
+                color: "rgba(255,255,255,0.65)", textDecoration: "none",
+                border: "1px solid rgba(255,255,255,0.12)",
+                background: "rgba(255,255,255,0.02)",
+                backdropFilter: "blur(12px)",
+                padding: "11px 24px", borderRadius: 3,
+                transition: "background 0.2s, border-color 0.2s, color 0.2s",
+              }}
+                onMouseEnter={e => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.background = "rgba(255,255,255,0.07)";
+                  el.style.color = "#fff";
+                }}
+                onMouseLeave={e => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.background = "rgba(255,255,255,0.02)";
+                  el.style.color = "rgba(255,255,255,0.65)";
+                }}
+              >
+                GitHub ↗
+              </a>
+            </motion.div>
+          </motion.div>
+        )}
+      </div>
+
+      {/* Available badge – bottom right */}
+      <div style={{
+        position: "absolute", right: "clamp(28px,6vw,80px)", bottom: 44,
+        zIndex: 10, display: "flex", alignItems: "center", gap: 8,
+      }}>
+        <span style={{
+          width: 6, height: 6, borderRadius: "50%",
+          background: "#00e676", boxShadow: "0 0 10px #00e676",
+          display: "inline-block",
+        }} />
+        <span style={{
+          fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+          color: "#00e676", letterSpacing: "2.5px",
+        }}>AVAILABLE</span>
+      </div>
+
+      {/* Scroll hint */}
+      <motion.div
+        animate={{ y: [0, 7, 0] }}
+        transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
+        style={{
+          position: "absolute", bottom: 44, left: "50%",
+          transform: "translateX(-50%)", zIndex: 10,
+        }}
       >
-        <span className="text-xs uppercase tracking-widest text-zinc-500 font-semibold">Scroll</span>
-        <div className="w-[1px] h-12 bg-gradient-to-b from-zinc-500 to-transparent relative overflow-hidden">
-          <motion.div 
-            className="absolute top-0 left-0 w-full h-1/2 bg-white"
-            animate={{ y: ["-100%", "200%"] }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-          />
-        </div>
+        <span style={{
+          fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+          letterSpacing: "0.22em", color: "rgba(255,255,255,0.22)",
+        }}>scroll to explore</span>
       </motion.div>
     </section>
   );

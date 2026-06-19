@@ -1,177 +1,410 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
-import Link from "next/link";
+
+const PROJECTS = [
+  {
+    id: "menunova",
+    name: "MenuNova",
+    status: "live",
+    description: "A restaurant tech startup I founded from scratch. Digital menus, cart system, admin dashboard, and QR ordering.",
+    stack: ["Next.js", "MongoDB", "Tailwind", "Vercel", "JWT"],
+    link: "https://menunova.vercel.app",
+    color: "#ff8c00",
+    bg: "radial-gradient(ellipse at 30% 60%, #ff8c00 0%, #7c2d00 40%, #1a0800 100%)"
+  },
+  {
+    id: "nova",
+    name: "Nova Companion",
+    status: "live",
+    description: "Live AI companion with real users. Full-stack with Next.js 15, MongoDB, Groq AI, JWT auth, and Vercel deployment.",
+    stack: ["Next.js 15", "MongoDB", "Groq AI", "JWT", "Vercel"],
+    link: "https://anand-dev.tech/nova",
+    color: "#6366f1",
+    bg: "radial-gradient(ellipse at 70% 40%, #6366f1 0%, #1e1b4b 40%, #030308 100%)"
+  },
+  {
+    id: "gesture",
+    name: "Gesture Control",
+    status: "live",
+    description: "Real-time computer vision system that controls your computer with hand gestures. Built with MediaPipe and OpenCV.",
+    stack: ["Python", "MediaPipe", "OpenCV", "NumPy"],
+    link: "https://github.com/ShriOg/gesture-control",
+    color: "#00e5ff",
+    bg: "radial-gradient(ellipse at 50% 50%, #00e5ff 0%, #0c4a6e 35%, #010d14 100%)"
+  },
+  {
+    id: "dustbin",
+    name: "Smart Dustbin",
+    status: "wip",
+    description: "IoT smart waste management system with Arduino and ESP32. Sensor-based lid control and fill-level monitoring.",
+    stack: ["Arduino", "ESP32", "C++", "IoT"],
+    link: "https://github.com/ShriOg/smart-dustbin",
+    color: "#00e676",
+    bg: "radial-gradient(ellipse at 40% 60%, #00e676 0%, #064e3b 40%, #01100a 100%)"
+  }
+];
 
 export function Projects() {
-  const [hoveredProject, setHoveredProject] = useState<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  const projects = [
-    {
-      title: "MenuNova",
-      description: "A premium, business-centric restaurant operating system and digital menu platform. Architected with high-end resilient PWA capabilities, real-time sync, and an immersive dashboard.",
-      tags: ["Next.js", "TypeScript", "Tailwind", "Socket.io", "PostgreSQL"],
-      link: "https://menunova.me",
-      featured: true,
-      year: "2026",
-      role: "Founder & Lead Developer"
-    },
-    {
-      title: "Nexus Engine",
-      description: "High-performance data visualization dashboard tailored for enterprise analytics. Features smooth interactive charts and sub-millisecond data fetching.",
-      tags: ["React", "Framer Motion", "D3.js", "tRPC"],
-      link: "#",
-      featured: false,
-      year: "2025",
-      role: "Full Stack Engineer"
-    },
-    {
-      title: "Aura UI",
-      description: "An experimental, deeply animated React component library focusing on tactile interactions, physics-based motion, and absolute developer experience.",
-      tags: ["React", "Radix", "Framer Motion", "CSS Variables"],
-      link: "#",
-      featured: false,
-      year: "2025",
-      role: "Creator"
-    }
-  ];
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
-  return (
-    <section id="projects" className="py-32 relative bg-zinc-950">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="mb-20">
-          <h2 className="text-sm uppercase tracking-widest text-brand-blue font-semibold mb-4 flex items-center gap-2">
-            <div className="w-8 h-[1px] bg-brand-blue" />
-            Selected Work
+  // Framer Motion Scroll setup for horizontal translation on desktop
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+  });
+
+  const x = useTransform(scrollYProgress, [0, 1], ["0%", "-75%"]);
+
+  // Calculate active index on scroll
+  useEffect(() => {
+    return scrollYProgress.onChange((latest) => {
+      // Divide the progress space into 4 steps
+      const idx = Math.min(
+        PROJECTS.length - 1,
+        Math.floor(latest * PROJECTS.length)
+      );
+      setActiveIndex(idx);
+    });
+  }, [scrollYProgress]);
+
+  if (isMobile) {
+    return (
+      <section
+        id="projects"
+        style={{
+          background: "var(--bg-deep)",
+          padding: "60px 24px",
+          position: "relative",
+          zIndex: 10,
+        }}
+      >
+        <div style={{ marginBottom: "40px" }}>
+          <p style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: "11px",
+            letterSpacing: "0.3em",
+            color: "#6366f1",
+            marginBottom: "8px",
+          }}>
+            03 / PROJECTS
+          </p>
+          <h2 style={{
+            fontSize: "32px",
+            fontWeight: 900,
+            color: "#ffffff",
+            letterSpacing: "-0.03em",
+          }}>
+            Selected Work.
           </h2>
-          <h3 className="text-4xl md:text-6xl font-outfit font-bold text-white tracking-tight">
-            Featured <span className="text-zinc-600">Projects</span>
-          </h3>
         </div>
 
-        <div className="space-y-12">
-          {projects.map((project, index) => (
-            <ProjectCard 
-              key={index} 
-              project={project} 
-              isHovered={hoveredProject === index}
-              onHover={() => setHoveredProject(index)}
-              onLeave={() => setHoveredProject(null)}
+        <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
+          {PROJECTS.map((proj) => (
+            <div
+              key={proj.id}
+              data-cursor-color={proj.color}
+              style={{
+                background: proj.bg,
+                borderRadius: "20px",
+                padding: "32px 24px",
+                minHeight: "450px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                border: "1px solid rgba(255, 255, 255, 0.08)",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+                  <span style={{
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: "10px",
+                    letterSpacing: "2px",
+                    color: proj.status === "live" ? "#00e676" : "#ffd600",
+                    background: "rgba(0,0,0,0.4)",
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                  }}>
+                    ● {proj.status.toUpperCase()}
+                  </span>
+                </div>
+                <h3 style={{
+                  fontSize: "36px",
+                  fontWeight: 800,
+                  letterSpacing: "-1px",
+                  color: "#ffffff",
+                  marginBottom: "12px",
+                  lineHeight: 1.1,
+                }}>
+                  {proj.name}
+                </h3>
+                <p style={{
+                  fontSize: "15px",
+                  color: "rgba(255, 255, 255, 0.8)",
+                  lineHeight: 1.6,
+                  marginBottom: "24px",
+                }}>
+                  {proj.description}
+                </p>
+              </div>
+
+              <div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "24px" }}>
+                  {proj.stack.map((tech) => (
+                    <span
+                      key={tech}
+                      style={{
+                        fontSize: "11px",
+                        fontFamily: "'JetBrains Mono', monospace",
+                        color: "#ffffff",
+                        background: "rgba(255, 255, 255, 0.08)",
+                        border: "1px solid rgba(255, 255, 255, 0.12)",
+                        padding: "4px 10px",
+                        borderRadius: "100px",
+                      }}
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+                <a
+                  href={proj.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    fontSize: "14px",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    color: "#ffffff",
+                    textDecoration: "none",
+                    fontWeight: "bold",
+                    borderBottom: "2px solid #ffffff",
+                    paddingBottom: "2px",
+                    display: "inline-block",
+                  }}
+                >
+                  View Project ↗
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <div ref={containerRef} style={{ height: "400vh", position: "relative" }}>
+      {/* Sticky viewports */}
+      <div style={{
+        position: "sticky",
+        top: 0,
+        height: "100vh",
+        width: "100%",
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+      }}>
+        {/* Title overlay */}
+        <div style={{
+          position: "absolute",
+          top: "6vh",
+          left: "clamp(24px, 8vw, 120px)",
+          zIndex: 20,
+        }}>
+          <p style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: "11px",
+            letterSpacing: "0.3em",
+            color: "#6366f1",
+            marginBottom: "8px",
+          }}>
+            03 / PROJECTS
+          </p>
+          <h2 style={{
+            fontSize: "clamp(32px, 3.5vw, 48px)",
+            fontWeight: 900,
+            color: "#ffffff",
+            letterSpacing: "-0.03em",
+          }}>
+            Selected Work.
+          </h2>
+        </div>
+
+        {/* Sliding flex row container */}
+        <motion.div
+          style={{
+            display: "flex",
+            width: "400vw",
+            height: "80vh",
+            x,
+          }}
+        >
+          {PROJECTS.map((proj, i) => (
+            <div
+              key={proj.id}
+              style={{
+                width: "100vw",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "0 10vw",
+                boxSizing: "border-box",
+              }}
+            >
+              <div
+                data-cursor-color={proj.color}
+                style={{
+                  width: "100%",
+                  maxWidth: "1100px",
+                  height: "85%",
+                  background: proj.bg,
+                  borderRadius: "24px",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  boxShadow: "0 20px 50px rgba(0, 0, 0, 0.4)",
+                  padding: "60px",
+                  display: "grid",
+                  gridTemplateColumns: "1.2fr 0.8fr",
+                  gap: "40px",
+                  alignItems: "center",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+              >
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "20px" }}>
+                    <span style={{
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: "10px",
+                      letterSpacing: "2.5px",
+                      color: proj.status === "live" ? "#00e676" : "#ffd600",
+                      background: "rgba(0,0,0,0.5)",
+                      padding: "6px 12px",
+                      borderRadius: "6px",
+                      fontWeight: "bold",
+                    }}>
+                      ● {proj.status.toUpperCase()}
+                    </span>
+                  </div>
+                  <h3 style={{
+                    fontSize: "clamp(36px, 4vw, 56px)",
+                    fontWeight: 900,
+                    letterSpacing: "-2px",
+                    color: "#ffffff",
+                    marginBottom: "20px",
+                    lineHeight: 1.05,
+                  }}>
+                    {proj.name}
+                  </h3>
+                  <p style={{
+                    fontSize: "17px",
+                    color: "rgba(255, 255, 255, 0.85)",
+                    lineHeight: 1.7,
+                    maxWidth: "520px",
+                  }}>
+                    {proj.description}
+                  </p>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start", gap: "32px" }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                    {proj.stack.map((tech) => (
+                      <span
+                        key={tech}
+                        style={{
+                          fontSize: "12px",
+                          fontFamily: "'JetBrains Mono', monospace",
+                          color: "#ffffff",
+                          background: "rgba(255, 255, 255, 0.08)",
+                          border: "1px solid rgba(255, 255, 255, 0.12)",
+                          padding: "6px 12px",
+                          borderRadius: "100px",
+                        }}
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+
+                  <a
+                    href={proj.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      fontSize: "15px",
+                      fontFamily: "'JetBrains Mono', monospace",
+                      color: "#ffffff",
+                      textDecoration: "none",
+                      fontWeight: "bold",
+                      borderBottom: "2px solid #ffffff",
+                      paddingBottom: "4px",
+                      display: "inline-block",
+                      transition: "opacity 0.2s",
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.opacity = "0.7"}
+                    onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+                  >
+                    View Project ↗
+                  </a>
+                </div>
+              </div>
+            </div>
+          ))}
+        </motion.div>
+
+        {/* Horizontal scroll indicator (dots) */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "6vh",
+            left: "50%",
+            transform: "translateX(-50%)",
+            display: "flex",
+            gap: "16px",
+            zIndex: 20,
+          }}
+        >
+          {PROJECTS.map((proj, idx) => (
+            <button
+              key={proj.id}
+              onClick={() => {
+                // Scroll to corresponding page section
+                window.scrollTo({
+                  top: containerRef.current
+                    ? containerRef.current.offsetTop + (idx * window.innerHeight)
+                    : 0,
+                  behavior: "smooth"
+                });
+              }}
+              style={{
+                width: "12px",
+                height: "12px",
+                borderRadius: "50%",
+                background: activeIndex === idx ? proj.color : "rgba(255, 255, 255, 0.2)",
+                boxShadow: activeIndex === idx ? `0 0 12px ${proj.color}` : "none",
+                border: "none",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+              }}
+              aria-label={`Go to project ${idx + 1}`}
             />
           ))}
         </div>
       </div>
-    </section>
-  );
-}
-
-function ProjectCard({ project, isHovered, onHover, onLeave }: { project: any, isHovered: boolean, onHover: () => void, onLeave: () => void }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["0 1", "1 0.8"]
-  });
-
-  const scale = useTransform(scrollYProgress, [0, 1], [0.9, 1]);
-  const opacity = useTransform(scrollYProgress, [0, 1], [0.2, 1]);
-
-  return (
-    <motion.div
-      ref={ref}
-      style={{ scale, opacity }}
-      onMouseEnter={onHover}
-      onMouseLeave={onLeave}
-      className={`relative group rounded-[2rem] overflow-hidden transition-all duration-700 ease-out border border-zinc-800/40 bg-zinc-900/20 backdrop-blur-sm ${
-        project.featured ? "p-1" : "p-0"
-      }`}
-    >
-      {project.featured && (
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 opacity-20 group-hover:opacity-100 transition-opacity duration-1000 blur-xl" />
-      )}
-      
-      <div className={`relative h-full flex flex-col lg:flex-row bg-zinc-950/80 rounded-[1.8rem] overflow-hidden z-10 border ${project.featured ? 'border-zinc-800/80' : 'border-transparent'}`}>
-        
-        {/* Project Info */}
-        <div className="w-full lg:w-5/12 p-8 lg:p-12 flex flex-col justify-between z-20 relative">
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                {project.featured && (
-                  <span className="px-3 py-1 rounded-full bg-blue-500/10 text-brand-blue text-xs font-semibold tracking-wider uppercase border border-blue-500/20">
-                    Flagship
-                  </span>
-                )}
-                <span className="text-zinc-500 text-sm font-medium">{project.year}</span>
-              </div>
-              <Link href={project.link} className="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-400 group-hover:bg-white group-hover:text-zinc-950 transition-colors duration-300">
-                <ArrowUpRight size={18} className="group-hover:rotate-45 transition-transform duration-300" />
-              </Link>
-            </div>
-            
-            <h4 className="text-3xl lg:text-4xl font-outfit font-bold text-white mb-4 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-zinc-500 transition-all duration-300">
-              {project.title}
-            </h4>
-            <div className="text-sm text-zinc-400 mb-6 font-medium">{project.role}</div>
-            
-            <p className="text-zinc-400 font-light leading-relaxed mb-8">
-              {project.description}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {project.tags.map((tag: string, i: number) => (
-              <span key={i} className="px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 font-medium tracking-wide">
-                {tag}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* Visual Preview */}
-        <div className="w-full lg:w-7/12 relative min-h-[300px] lg:min-h-0 bg-zinc-900/50 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent z-10 lg:hidden" />
-          
-          <motion.div 
-            className="absolute inset-0 w-full h-full bg-zinc-800 flex items-center justify-center p-8"
-            animate={{ 
-              scale: isHovered ? 1.05 : 1,
-            }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
-          >
-            {/* Abstract UI representation */}
-            <div className="w-full h-full max-h-[400px] bg-zinc-950 rounded-xl border border-zinc-800 shadow-2xl overflow-hidden flex flex-col relative group/ui">
-              {/* Header */}
-              <div className="h-10 border-b border-zinc-800 bg-zinc-900/50 flex items-center px-4 gap-2">
-                <div className="flex gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
-                </div>
-              </div>
-              {/* Body */}
-              <div className="flex-1 p-6 flex flex-col gap-4 relative">
-                <div className="w-1/3 h-6 rounded bg-zinc-800/50" />
-                <div className="flex gap-4">
-                  <div className="w-1/2 h-24 rounded-lg bg-zinc-900 border border-zinc-800/50" />
-                  <div className="w-1/2 h-24 rounded-lg bg-blue-900/20 border border-blue-500/20" />
-                </div>
-                <div className="w-full flex-1 rounded-lg bg-zinc-900/50 border border-zinc-800/50" />
-                
-                {project.title === "MenuNova" && (
-                  <motion.div 
-                    className="absolute inset-0 bg-gradient-to-tr from-blue-600/10 to-purple-600/10 pointer-events-none"
-                    animate={{ opacity: isHovered ? 1 : 0 }}
-                    transition={{ duration: 0.5 }}
-                  />
-                )}
-              </div>
-            </div>
-          </motion.div>
-        </div>
-        
-      </div>
-    </motion.div>
+    </div>
   );
 }

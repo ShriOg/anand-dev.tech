@@ -1,32 +1,79 @@
 import { Hero } from "@/components/sections/Hero";
 import { About } from "@/components/sections/About";
 import { Projects } from "@/components/sections/Projects";
-import { TechStack } from "@/components/sections/TechStack";
-import { Experience } from "@/components/sections/Experience";
+import { Skills } from "@/components/sections/Skills";
+import { Timeline } from "@/components/sections/Timeline";
 import { Contact } from "@/components/sections/Contact";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between w-full overflow-hidden bg-zinc-950 relative">
+    <>
+      {/* Section 1 — The Builder Engine */}
       <Hero />
+
+      {/* Section 2 — About / Terminal */}
       <About />
+
+      {/* Section 3 — Project Solar System */}
       <Projects />
-      <TechStack />
-      <Experience />
+
+      {/* Section 4 — Skills Constellation */}
+      <Skills />
+
+      {/* Section 6 — Timeline / Build Log */}
+      <Timeline />
+
+      {/* Section 7 — Contact Terminal */}
       <Contact />
-      
+
       {/* Footer */}
-      <footer className="w-full py-8 border-t border-zinc-800/50 bg-zinc-950 flex flex-col md:flex-row items-center justify-between px-6 lg:px-12 z-10 relative">
-        <div className="flex items-center gap-2 mb-4 md:mb-0">
-          <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
-            <span className="text-zinc-950 font-bold font-outfit text-xs">A</span>
+      <footer
+        style={{
+          background: "var(--bg-deep)",
+          borderTop: "1px solid rgba(99,102,241,0.08)",
+          padding: "32px clamp(24px, 5vw, 80px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: "16px",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{
+            width: "24px",
+            height: "24px",
+            borderRadius: "50%",
+            background: "#6366f1",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "10px",
+            fontWeight: 900,
+            color: "#fff",
+            fontFamily: "'JetBrains Mono', monospace",
+          }}>
+            A
           </div>
-          <span className="font-outfit font-medium text-sm text-zinc-300">Anand Shukla</span>
+          <span style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: "11px",
+            color: "#475569",
+            letterSpacing: "0.1em",
+          }}>
+            Anand Shukla
+          </span>
         </div>
-        <div className="text-zinc-500 text-sm font-light">
-          © {new Date().getFullYear()} — Designed & Developed by Anand Shukla.
-        </div>
+
+        <span style={{
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: "10px",
+          color: "#334155",
+          letterSpacing: "0.1em",
+        }}>
+          © {new Date().getFullYear()} — built with intent.
+        </span>
       </footer>
-    </main>
+    </>
   );
 }
