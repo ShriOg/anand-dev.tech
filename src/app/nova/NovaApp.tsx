@@ -205,26 +205,29 @@ export default function NovaApp() {
     
     if (chatId) {
       setCurrentChatId(chatId);
-      try {
-        const res = await fetch(`/api/chats/${chatId}/messages`, {
-          headers: { }
-        });
-        const data = await res.json();
-        if (data.messages && data.messages.length > 0) {
-          const sorted = data.messages.sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-          setMessages(sorted);
-          // Update last message preview for sidebar
-          const lastMsg = sorted[sorted.length - 1];
-          setLastMsgMap(prev => ({ ...prev, [personId]: lastMsg.content }));
-        } else {
-          setMessages([]);
-        }
-      } catch (e) {
-        console.error("Failed to fetch messages");
-        setMessages([]);
-      }
     }
   };
+
+  useEffect(() => {
+    if (currentChatId && activePersonId) {
+      fetch(`/api/chats/${currentChatId}/messages`, { credentials: "include" })
+        .then(res => res.json())
+        .then(data => {
+          if (data.messages && data.messages.length > 0) {
+            const sorted = data.messages.sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+            setMessages(sorted);
+            const lastMsg = sorted[sorted.length - 1];
+            setLastMsgMap(prev => ({ ...prev, [activePersonId]: lastMsg.content }));
+          } else {
+            setMessages([]);
+          }
+        })
+        .catch(e => {
+          console.error("Failed to fetch messages", e);
+          setMessages([]);
+        });
+    }
+  }, [currentChatId, activePersonId]);
 
   const switchPerson = (personId: string) => {
     setActivePersonId(personId);
@@ -422,6 +425,7 @@ export default function NovaApp() {
       await fetch(`/api/chats/${currentChatId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ messages: msgs })
       });
     };

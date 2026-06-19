@@ -20,6 +20,8 @@ export async function GET(req: Request) {
       .limit(20)
       .lean();
 
+    console.log("sessions query:", userId, personId, "found:", sessions.length);
+
     return NextResponse.json({ sessions });
   } catch (error) {
     console.error("GET practice sessions:", error);

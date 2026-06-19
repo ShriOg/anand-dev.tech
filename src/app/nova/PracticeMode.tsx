@@ -46,9 +46,12 @@ export default function PracticeMode({ personId, userId: _userId, activePerson, 
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    fetch(`/api/practice/sessions?personId=${personId}`)
+    fetch(`/api/practice/sessions?personId=${personId}`, { credentials: 'include' })
       .then(r => r.json())
-      .then(d => { if (d.sessions) setSessions(d.sessions); })
+      .then(d => { 
+        console.log("fetched sessions:", d);
+        if (d.sessions) setSessions(d.sessions); 
+      })
       .catch(e => console.error("Failed to load sessions", e));
   }, [personId]);
 
@@ -77,6 +80,7 @@ export default function PracticeMode({ personId, userId: _userId, activePerson, 
         const createRes = await fetch("/api/practice/sessions", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ personId, scenario: scenario || "Untitled practice", mood, stakes })
         });
         const createData = await createRes.json();
@@ -95,6 +99,7 @@ export default function PracticeMode({ personId, userId: _userId, activePerson, 
       const res = await fetch("/api/practice/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ messages: optimisticMessages, scenario, otherPersonMood: mood, stakes, personId })
       });
       if (!res.ok) throw new Error("Practice Chat API Error");
@@ -128,6 +133,7 @@ export default function PracticeMode({ personId, userId: _userId, activePerson, 
         fetch(`/api/practice/sessions/${currentSessionId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ messages: finalMsgs })
         }).catch(e => console.error("Failed to patch session", e));
       }
@@ -142,6 +148,7 @@ export default function PracticeMode({ personId, userId: _userId, activePerson, 
       const res = await fetch("/api/practice/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ messages, scenario, personId })
       });
       const data = await res.json();
@@ -150,6 +157,7 @@ export default function PracticeMode({ personId, userId: _userId, activePerson, 
         fetch(`/api/practice/sessions/${sessionId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ analysis: data })
         }).catch(e => console.error("Failed to patch session analysis", e));
       }
@@ -165,6 +173,7 @@ export default function PracticeMode({ personId, userId: _userId, activePerson, 
       const res = await fetch("/api/practice/improve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ messages, analysis, personId })
       });
       const data = await res.json();
@@ -173,6 +182,7 @@ export default function PracticeMode({ personId, userId: _userId, activePerson, 
         fetch(`/api/practice/sessions/${sessionId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
+          credentials: "include",
           body: JSON.stringify({ improve: data })
         }).catch(e => console.error("Failed to patch session improve", e));
       }
@@ -199,6 +209,7 @@ export default function PracticeMode({ personId, userId: _userId, activePerson, 
       const res = await fetch("/api/practice/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ messages: [{ role: "user", content: msgContent }], scenario, personId })
       });
       const data = await res.json();
@@ -232,15 +243,20 @@ export default function PracticeMode({ personId, userId: _userId, activePerson, 
     setAnalysis(session.analysis || null);
     setImprove(session.improve || null);
     setImpactMap({});
-    setTab("rehearse");
+    if (session.improve) setTab("improve");
+    else if (session.analysis) setTab("analyze");
+    else setTab("rehearse");
 
     try {
-      const res = await fetch(`/api/practice/sessions/${session._id}`);
+      const res = await fetch(`/api/practice/sessions/${session._id}`, { credentials: "include" });
       const data = await res.json();
       if (data.session) {
         setMessages(data.session.messages || []);
         setAnalysis(data.session.analysis || null);
         setImprove(data.session.improve || null);
+        if (data.session.improve) setTab("improve");
+        else if (data.session.analysis) setTab("analyze");
+        else setTab("rehearse");
       }
     } catch (e) {
       console.error("Failed to load full session details", e);
