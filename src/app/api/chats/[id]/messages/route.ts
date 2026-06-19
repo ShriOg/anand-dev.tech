@@ -24,10 +24,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
     const messages = await Message.find({ chatId: id }).sort({ createdAt: 1 }).lean();
     
-    // Format to match what client expects: { role, content }
+    // Format to match what client expects: { role, content, createdAt }
     const formattedMessages = messages.map(msg => ({
       role: msg.role,
-      content: msg.content
+      content: msg.content,
+      createdAt: msg.createdAt
     }));
 
     return NextResponse.json({ messages: formattedMessages });
@@ -62,7 +63,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: "Invalid messages format" }, { status: 400 });
     }
 
-    const validMessages = messages.filter((m: any) => m.content && m.content.trim() !== '');
+    const validMessages = messages.filter((m: any) => m.content !== null && m.content !== undefined);
 
     // Insert new valid messages (replace existing to avoid duplicates, since frontend sends full list)
     const toInsert = validMessages.map((m: any) => ({

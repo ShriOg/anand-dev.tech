@@ -101,8 +101,40 @@ const userSchema = new Schema<IUser>({
   onboardingCompleted: { type: Boolean, default: false },
 }, { timestamps: { createdAt: true, updatedAt: false } });
 
+// --- Practice Session ---
+export interface IPracticeSession extends Document {
+  userId: string;
+  personId: string;
+  scenario: string;
+  mood: string;
+  stakes: string;
+  messages: { role: string; content: string; createdAt?: Date }[];
+  analysis?: any;
+  improve?: any;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const practiceSessionSchema = new Schema<IPracticeSession>({
+  userId: { type: String, required: true, index: true },
+  personId: { type: String, required: true, index: true },
+  scenario: { type: String, required: true },
+  mood: { type: String, required: true },
+  stakes: { type: String, required: true },
+  messages: [{
+    role: { type: String, required: true },
+    content: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now }
+  }],
+  analysis: { type: Schema.Types.Mixed },
+  improve: { type: Schema.Types.Mixed },
+}, { timestamps: true });
+
+practiceSessionSchema.index({ userId: 1, personId: 1, createdAt: -1 });
+
 // --- Models ---
 export const Person = mongoose.models.Person || mongoose.model<IPerson>("Person", personSchema);
 export const Chat = mongoose.models.Chat || mongoose.model<IChat>("Chat", chatSchema);
 export const Message = mongoose.models.Message || mongoose.model<IMessage>("Message", messageSchema);
 export const User = mongoose.models.User || mongoose.model<IUser>("User", userSchema);
+export const PracticeSession = mongoose.models.PracticeSession || mongoose.model<IPracticeSession>("PracticeSession", practiceSessionSchema);

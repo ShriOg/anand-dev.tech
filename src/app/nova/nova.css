@@ -401,14 +401,57 @@ textarea::placeholder { color: var(--text-3); }
 }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
-.practice-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid var(--prac-border); }
-.ph-left { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 18px; color: var(--prac-accent); display: flex; align-items: center; gap: 8px; }
-.ph-name { color: var(--text-2); font-size: 14px; font-weight: 500; }
-.ph-close { background: none; border: none; color: var(--text-1); font-size: 20px; cursor: pointer; }
+/* ── Practice Mode Overlay ──────────────────────────────────────────── */
+.practice-overlay {
+  position: absolute; inset: 0; z-index: 50; background: var(--bg); display: flex; flex-direction: column;
+}
+.practice-layout {
+  display: flex; height: 100%; width: 100%;
+}
+.practice-sidebar {
+  width: 260px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; height: 100%; padding: 20px 12px;
+}
+.practice-main {
+  flex: 1; display: flex; flex-direction: column; min-width: 0;
+}
+@media (max-width: 768px) {
+  .practice-sidebar { display: none; }
+}
 
+.prac-new-btn {
+  width: 100%; padding: 12px; border-radius: var(--radius-md); background: var(--gradient);
+  color: white; font-weight: 600; border: none; cursor: pointer; margin-bottom: 16px;
+  font-family: 'Plus Jakarta Sans', sans-serif; transition: filter 150ms;
+}
+.prac-new-btn:hover { filter: brightness(1.1); }
 
+.prac-session-list {
+  display: flex; flex-direction: column; gap: 8px; overflow-y: auto; flex: 1; scrollbar-width: none;
+}
+.prac-session-card {
+  padding: 12px; background: var(--surface-2); border: 1px solid transparent; border-radius: var(--radius-sm);
+  cursor: pointer; transition: all 150ms;
+}
+.prac-session-card:hover { background: var(--surface-3); border-color: var(--border); }
+.prac-session-card.active { border-color: var(--prac-accent); background: rgba(245,158,11,0.05); }
+.psc-scenario {
+  font-size: 13px; font-weight: 500; color: var(--text-1); margin-bottom: 6px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.psc-meta {
+  display: flex; justify-content: space-between; font-size: 11px; color: var(--text-3);
+}
+.psc-mood {
+  color: var(--prac-accent); font-weight: 600;
+}
 
-.practice-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+.practice-header {
+  height: 60px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+  border-bottom: 1px solid var(--border); background: var(--surface);
+}
+
+.prac-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
 .prac-rehearse { display: flex; flex-direction: column; height: 100%; }
 
 .prac-context-bar { padding: 16px 24px; border-bottom: 1px solid var(--prac-border); background: var(--surface); }

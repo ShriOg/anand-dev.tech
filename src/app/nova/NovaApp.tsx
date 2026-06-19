@@ -409,27 +409,33 @@ export default function NovaApp() {
     }
 
     const newMsg = { role: "user", content: userText, createdAt: new Date().toISOString() };
-    setMessages(prev => [...prev, newMsg]);
+    const updatedMessagesWithUser = [...messages, newMsg];
+    setMessages(updatedMessagesWithUser);
     // Update sidebar preview
     if (activePersonId) setLastMsgMap(prev => ({ ...prev, [activePersonId]: userText }));
     setIsStreaming(true);
     setStreamedText("");
     scrollToBottom(true, true);
 
-    try {
-      // 1. Save user msg
+    const saveMessages = async (msgs: any[]) => {
+      console.log("saving messages", currentChatId, msgs.length);
       await fetch(`/api/chats/${currentChatId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: "user", content: userText })
+        body: JSON.stringify({ messages: msgs })
       });
+    };
+
+    try {
+      // 1. Save messages with new user msg
+      await saveMessages(updatedMessagesWithUser);
 
       // 2. Stream AI response
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: [...messages, newMsg].map(m => ({ role: m.role, content: m.content })),
+          messages: updatedMessagesWithUser.map(m => ({ role: m.role, content: m.content })),
           personId: activePersonId,
           userName,
           userGender
@@ -463,15 +469,12 @@ export default function NovaApp() {
         }
       }
 
-      // 3. Save assistant msg
-      await fetch(`/api/chats/${currentChatId}/messages`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: "assistant", content: fullResponse })
-      });
-
+      // 3. Save messages with new assistant msg
       const assistantMsg = { role: "assistant", content: fullResponse, createdAt: new Date().toISOString() };
-      setMessages(prev => [...prev, assistantMsg]);
+      const finalMessages = [...updatedMessagesWithUser, assistantMsg];
+      await saveMessages(finalMessages);
+
+      setMessages(finalMessages);
       if (activePersonId) setLastMsgMap(prev => ({ ...prev, [activePersonId]: fullResponse }));
       setStreamedText("");
     } catch (error) {

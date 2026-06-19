@@ -35,11 +35,22 @@ export default function PracticeMode({ personId, userId: _userId, activePerson, 
   const [improve, setImprove] = useState<any>(null);
   const [isImproving, setIsImproving] = useState(false);
 
+  // Persistence
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+
   // inline impact analysis: msgIndex -> { loading, result }
   const [impactMap, setImpactMap] = useState<Record<number, { loading: boolean; result: any | null }>>({});
 
   const chatRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    fetch(`/api/practice/sessions?personId=${personId}`)
+      .then(r => r.json())
+      .then(d => { if (d.sessions) setSessions(d.sessions); })
+      .catch(e => console.error("Failed to load sessions", e));
+  }, [personId]);
 
   const scrollToBottom = (smooth = true) => {
     if (!chatRef.current) return;
@@ -55,20 +66,41 @@ export default function PracticeMode({ personId, userId: _userId, activePerson, 
     if (inputRef.current) inputRef.current.style.height = "auto";
 
     const newMsg = { role: "user", content: userText };
-    setMessages(prev => [...prev, newMsg]);
+    const optimisticMessages = [...messages, newMsg];
+    setMessages(optimisticMessages);
     setIsStreaming(true);
     setStreamedText("");
 
+    let currentSessionId = sessionId;
+    if (!currentSessionId) {
+      try {
+        const createRes = await fetch("/api/practice/sessions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ personId, scenario: scenario || "Untitled practice", mood, stakes })
+        });
+        const createData = await createRes.json();
+        if (createData.sessionId) {
+          currentSessionId = createData.sessionId;
+          setSessionId(currentSessionId);
+          setSessions(prev => [{ _id: currentSessionId, scenario: scenario || "Untitled practice", mood, stakes, createdAt: new Date() }, ...prev]);
+        }
+      } catch (e) {
+        console.error("Failed to create session", e);
+      }
+    }
+
+    let fullResponse = "";
     try {
       const res = await fetch("/api/practice/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: [...messages, newMsg], scenario, otherPersonMood: mood, stakes, personId })
+        body: JSON.stringify({ messages: optimisticMessages, scenario, otherPersonMood: mood, stakes, personId })
       });
       if (!res.ok) throw new Error("Practice Chat API Error");
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
-      let fullResponse = "";
+      
       if (reader) {
         while (true) {
           const { done, value } = await reader.read();
@@ -83,13 +115,22 @@ export default function PracticeMode({ personId, userId: _userId, activePerson, 
           }
         }
       }
-      setMessages(prev => [...prev, { role: "assistant", content: fullResponse }]);
-      setStreamedText("");
     } catch (error) {
       console.error(error);
     } finally {
+      const finalMsgs = [...optimisticMessages, { role: "assistant", content: fullResponse }];
+      setMessages(finalMsgs);
+      setStreamedText("");
       setIsStreaming(false);
       scrollToBottom();
+      
+      if (currentSessionId && fullResponse) {
+        fetch(`/api/practice/sessions/${currentSessionId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: finalMsgs })
+        }).catch(e => console.error("Failed to patch session", e));
+      }
     }
   };
 
@@ -105,6 +146,13 @@ export default function PracticeMode({ personId, userId: _userId, activePerson, 
       });
       const data = await res.json();
       setAnalysis(data);
+      if (sessionId) {
+        fetch(`/api/practice/sessions/${sessionId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ analysis: data })
+        }).catch(e => console.error("Failed to patch session analysis", e));
+      }
     } catch (e) { console.error("Analysis failed", e); }
     setIsAnalyzing(false);
   };
@@ -121,6 +169,13 @@ export default function PracticeMode({ personId, userId: _userId, activePerson, 
       });
       const data = await res.json();
       setImprove(data);
+      if (sessionId) {
+        fetch(`/api/practice/sessions/${sessionId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ improve: data })
+        }).catch(e => console.error("Failed to patch session improve", e));
+      }
     } catch (e) { console.error("Improve failed", e); }
     setIsImproving(false);
   };
@@ -156,7 +211,44 @@ export default function PracticeMode({ personId, userId: _userId, activePerson, 
     }
   };
 
+  const startNewSession = () => {
+    setSessionId(null);
+    setScenario("");
+    setMood("neutral");
+    setStakes("medium");
+    setMessages([]);
+    setAnalysis(null);
+    setImprove(null);
+    setImpactMap({});
+    setTab("rehearse");
+  };
+
+  const loadSession = async (session: any) => {
+    setSessionId(session._id);
+    setScenario(session.scenario);
+    setMood(session.mood as Mood);
+    setStakes(session.stakes as Stakes);
+    setMessages(session.messages || []);
+    setAnalysis(session.analysis || null);
+    setImprove(session.improve || null);
+    setImpactMap({});
+    setTab("rehearse");
+
+    try {
+      const res = await fetch(`/api/practice/sessions/${session._id}`);
+      const data = await res.json();
+      if (data.session) {
+        setMessages(data.session.messages || []);
+        setAnalysis(data.session.analysis || null);
+        setImprove(data.session.improve || null);
+      }
+    } catch (e) {
+      console.error("Failed to load full session details", e);
+    }
+  };
+
   const loadPracticePrompt = (prompt: any) => {
+    setSessionId(null);
     setScenario(prompt.scenario || "");
     setMood((prompt.mood as Mood) || "neutral");
     setStakes((prompt.stakes as Stakes) || "medium");
@@ -178,24 +270,43 @@ export default function PracticeMode({ personId, userId: _userId, activePerson, 
 
   return (
     <div className="practice-overlay" data-mode="practice">
-      {/* Header */}
-      <div className="practice-header">
-        <div className="ph-left">
-          🎯 Practice Mode <span className="ph-name">with {activePerson?.name}</span>
+      <div className="practice-layout">
+        {/* Sidebar */}
+        <div className="practice-sidebar">
+          <button className="prac-new-btn" onClick={startNewSession}>+ New Session</button>
+          <div className="prac-session-list">
+             {sessions.map(s => (
+               <div key={s._id} className={`prac-session-card ${s._id === sessionId ? 'active' : ''}`} onClick={() => loadSession(s)}>
+                 <div className="psc-scenario">{s.scenario?.slice(0, 40)}{s.scenario?.length > 40 ? '...' : ''}</div>
+                 <div className="psc-meta">
+                   <span>{new Date(s.createdAt).toLocaleDateString()}</span>
+                   <span className="psc-mood">{MOOD_EMOJIS[s.mood as Mood]} {s.mood}</span>
+                 </div>
+               </div>
+             ))}
+          </div>
         </div>
-        <button className="ph-close" onClick={onClose}>✕</button>
-      </div>
 
-      {/* Tab pills - centered */}
-      <div className="practice-tabs">
-        <button className={`ptab ${tab === "rehearse" ? "active" : ""}`} onClick={() => setTab("rehearse")}>Rehearse</button>
-        <button className={`ptab ${tab === "analyze" ? "active" : ""}`} onClick={handleAnalyze}>Analyze</button>
-        <button className={`ptab ${tab === "improve" ? "active" : ""}`} onClick={handleImproveTab}>Improve</button>
-      </div>
+        {/* Main Content */}
+        <div className="practice-main">
+          {/* Header */}
+          <div className="practice-header">
+            <div className="ph-left">
+              🎯 Practice Mode <span className="ph-name">with {activePerson?.name}</span>
+            </div>
+            <button className="ph-close" onClick={onClose}>✕</button>
+          </div>
 
-      <div className="practice-body">
-        {/* ── REHEARSE TAB ── */}
-        {tab === "rehearse" && (
+          {/* Tab pills - centered */}
+          <div className="practice-tabs">
+            <button className={`ptab ${tab === "rehearse" ? "active" : ""}`} onClick={() => setTab("rehearse")}>Rehearse</button>
+            <button className={`ptab ${tab === "analyze" ? "active" : ""}`} onClick={handleAnalyze}>Analyze</button>
+            <button className={`ptab ${tab === "improve" ? "active" : ""}`} onClick={handleImproveTab}>Improve</button>
+          </div>
+
+          <div className="practice-body">
+            {/* ── REHEARSE TAB ── */}
+            {tab === "rehearse" && (
           <div className="prac-rehearse">
             {/* Scenario card */}
             <div className="prac-context-card">
@@ -436,5 +547,7 @@ export default function PracticeMode({ personId, userId: _userId, activePerson, 
         )}
       </div>
     </div>
+  </div>
+</div>
   );
 }
