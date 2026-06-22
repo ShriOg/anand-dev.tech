@@ -5,6 +5,7 @@ import { Canvas } from '@react-three/fiber'
 import { CameraRig, ZONE_PROGRESS } from './CameraRig'
 import { ZoneBoxes } from './ZoneBoxes'
 import { RoomArchitecture } from './RoomArchitecture'
+import { ZoneLighting } from './ZoneLighting'
 import { WorkshopNav } from './WorkshopNav'
 import { useScrollProgress } from './useScrollProgress'
 
@@ -298,21 +299,31 @@ export function WorkshopScene() {
         gl={{
           antialias: true,
           toneMapping: 4,       // THREE.ACESFilmicToneMapping
-          toneMappingExposure: 1.1,
+          toneMappingExposure: 1.2,
         }}
+        shadows                  // enable shadow map for directional shadow casters
         style={{ width: '100%', height: '100%' }}
       >
         {/* CameraRig — the ONLY thing that moves the camera (via spring) */}
         <CameraRig targetProgress={targetProgress} />
 
-        {/* Architecture — walls, floor, ceiling, zone dividers, window wall */}
+        {/* Architecture — walls, floor, ceiling, zone dividers, window wall.
+            All surfaces are now meshStandardMaterial (PBR) so zone lights
+            produce correct colour-temperature responses. */}
         <RoomArchitecture />
+
+        {/* Zone lighting — per-zone directional lights + point anchors.
+            This is the entire Prototype 0.4 experiment: does light alone,
+            on flat gray geometry, produce emotionally distinct zones? */}
+        <ZoneLighting />
 
         {/* Zone orientation markers — small glowing cubes, not room-filling boxes */}
         <ZoneBoxes />
 
-        {/* Fog — starts beyond the first partition so walls read fully, fades into void */}
-        <fog attach="fog" args={['#08080e', 22, 55]} />
+        {/* Fog — warm golden-amber near entrance, thins to dark cool at window.
+            Near start (22u) kept past the first wall so entrance reads fully.
+            Far end (50u) reaches just past the window wall. */}
+        <fog attach="fog" args={['#0c0a12', 22, 50]} />
       </Canvas>
 
       {/* HTML overlays — all driven by displayProgress synced from targetProgress */}
@@ -320,7 +331,7 @@ export function WorkshopScene() {
       <ZoneLabelOverlay currentProgress={displayProgress} />
       <ProgressBar progress={displayProgress} />
       <ScrollHint progress={displayProgress} />
-      <PrototypeBadge version="0.3" />
+      <PrototypeBadge version="0.4" />
 
       {/* rAF loop syncing ref → state for HTML overlays without blocking the R3F loop */}
       <ProgressReadout
