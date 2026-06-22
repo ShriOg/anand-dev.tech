@@ -6,120 +6,175 @@ import { useFrame, useThree } from '@react-three/fiber'
 import { useDampedSpring } from './useSpring'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SPLINE DEFINITION
-// The camera path routes through six waypoints following the vertical-climb
-// floorplan (Section 18/20 of brief). The path passes ADJACENT to Nova's Desk,
-// not stopping there — per the prototype spec.
-//
-// Coordinates are in Three.js world units (roughly 1 unit ≈ 1 meter):
-//
-//   Entrance   (0):  bottom of scene, warm entry
-//   Workbench  (1):  lower-left, experimentation side
-//   Creations  (2):  lower-right, project shelves  
-//   Mindset    (3):  upper-center, reflection zone
-//   NovaNear   (4):  passing point near Nova's desk (central)
-//   Window     (5):  top, the wow reveal
+// ZONE DEFINITIONS
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const ZONE_NAMES = ['Entrance', 'Workbench', 'Creations', 'Mindset', "Nova's Desk", 'Window'] as const
+export const ZONE_NAMES = [
+  'Entrance',
+  'Workbench',
+  'Creations',
+  'Mindset',
+  "Nova's Desk",
+  'Window',
+] as const
 export type ZoneName = typeof ZONE_NAMES[number]
 
-// Camera positions along the path
-const CAM_WAYPOINTS = [
-  new THREE.Vector3(0,    1.6,  8),    // Entrance — standing at door, looking in
-  new THREE.Vector3(-2.5, 1.6,  2),    // Workbench — slightly left
-  new THREE.Vector3(2.5,  1.8,  -4),   // Creations — slightly right, higher
-  new THREE.Vector3(-1,   2.2,  -10),  // Mindset — center-left, camera rises
-  new THREE.Vector3(1,    2.0,  -14),  // Near Nova's Desk — passing through center
-  new THREE.Vector3(0,    2.6,  -20),  // Window — highest, widest
-]
-
-// Camera look-at targets (where the camera points from each waypoint)
-const LOOK_WAYPOINTS = [
-  new THREE.Vector3(0,    1.0,  0),    // Looking into the room from entrance
-  new THREE.Vector3(-3,   1.2,  -2),   // Looking at workbench
-  new THREE.Vector3(3,    1.4,  -8),   // Looking at shelves
-  new THREE.Vector3(0,    1.8,  -14),  // Looking deeper, toward mindset wall
-  new THREE.Vector3(0,    1.8,  -18),  // Looking toward window from nova's desk
-  new THREE.Vector3(0,    1.2,  -12),  // Looking BACK into the room — the wow moment
-]
-
-// FOV at each waypoint (interpolated between them)
-// Tightest near Nova's Desk, widest at Window — per brief Section 5.1a
-const FOV_VALUES = [60, 62, 64, 56, 52, 75]
-
-// Progress thresholds that map nav zones to 0–1 range
-// Not uniform — segments have different "weights" creating pacing variation
-// (Slower segments use more of the 0–1 range)
+// User-facing progress thresholds — what value of targetProgress activates
+// each zone in the nav and label overlay.
 export const ZONE_PROGRESS: Record<ZoneName, number> = {
   'Entrance':    0.00,
-  'Workbench':   0.15,  // brisk entry pace
-  'Creations':   0.30,  // still brisk
-  'Mindset':     0.50,  // noticeably slower — 20% more range
-  "Nova's Desk": 0.68,  // settling, lingering
-  'Window':      1.00,  // slowest — longest segment of all (0.32 of range)
+  'Workbench':   0.15,
+  'Creations':   0.30,
+  'Mindset':     0.50,
+  "Nova's Desk": 0.68,
+  'Window':      1.00,
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// CAMERA SPLINE
+// Six waypoints following the vertical-climb floorplan (Section 18/20 of brief).
+// Path routes ADJACENT to Nova's Desk, not stopping there as a hard waypoint.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const CAM_WAYPOINTS = [
+  new THREE.Vector3(0,    1.6,  8),    // Entrance — standing at door, looking in
+  new THREE.Vector3(-2.5, 1.6,  2),    // Workbench — lower-left
+  new THREE.Vector3(2.5,  1.8, -4),    // Creations — lower-right
+  new THREE.Vector3(-1.0, 2.2, -10),   // Mindset — center-left, camera rises
+  new THREE.Vector3(1.0,  2.0, -14),   // Near Nova's Desk — central pass
+  new THREE.Vector3(0,    2.6, -20),   // Window — highest, widest
+]
+
+const LOOK_WAYPOINTS = [
+  new THREE.Vector3(0,    1.0,  0),    // Looking into the room
+  new THREE.Vector3(-3,   1.2, -2),    // Looking at workbench
+  new THREE.Vector3(3,    1.4, -8),    // Looking at shelves
+  new THREE.Vector3(0,    1.8, -14),   // Deeper, toward Nova/Window
+  new THREE.Vector3(0,    1.8, -18),   // Toward window from Nova's desk
+  new THREE.Vector3(0,    1.0, -12),   // Looking BACK — the wow reveal
+]
+
+// FOV at each waypoint — tightest near Nova's Desk, widest at Window (Section 5.1a)
+const FOV_VALUES = [60, 62, 64, 56, 52, 75]
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PER-SEGMENT PACING FUNCTION
+//
+// This is the mechanism that makes felt speed differences, not just
+// "this segment uses more of the 0-1 range."
+//
+// Each segment has two independently tunable parameters:
+//   1. splineStart/splineEnd → controls AVERAGE speed across the segment
+//      (ratio (se-ss)/(ue-us): higher = faster camera on average)
+//   2. easeExponent → controls the VELOCITY CURVE *within* the segment
+//      using ease-out: 1-(1-t)^n. Higher n = brisk start, strong deceleration
+//      toward the end of the segment.
+//
+// To verify pacing is actually working: scroll at a constant input rate and
+// watch the camera — its on-screen speed should visibly change without you
+// changing your scroll rate. If you have to scroll slower to make Window feel
+// slow, the curve isn't doing its job.
+//
+// Segment table: [userStart, userEnd, splineStart, splineEnd, easeExponent]
+// ─────────────────────────────────────────────────────────────────────────────
+
+const PACING_SEGS: [number, number, number, number, number][] = [
+  // user range       spline range      ease   avg-speed-ratio  feel
+  [0.00, 0.15,   0.000, 0.213,   1.0],  // Entrance → Workbench:  1.42×  brisk, linear
+  [0.15, 0.30,   0.213, 0.426,   1.1],  // Workbench → Creations: 1.42×  near-linear
+  [0.30, 0.50,   0.426, 0.613,   1.6],  // Creations → Mindset:   0.93×  ease-out, clear slow
+  [0.50, 0.68,   0.613, 0.769,   2.2],  // Mindset → Nova:        0.87×  strong ease-out
+  [0.68, 1.00,   0.769, 1.000,   3.0],  // Nova → Window:         0.72×  extreme, unmistakable
+]
+
+/**
+ * Maps user progress [0,1] → spline parameter [0,1] with per-segment
+ * velocity curves. This is the single function responsible for producing
+ * the felt pacing differences between zones.
+ *
+ * Ease-out formula: eased = 1 - (1-t)^n
+ * At segment start: camera speed = n × avgSpeed (fastest)
+ * At segment end:   camera speed → 0 (decelerates in)
+ * Average across segment: exactly avgSpeed (set by splineRange ratio)
+ */
+function applyPacing(p: number): number {
+  const clamped = Math.max(0, Math.min(1, p))
+  for (const [us, ue, ss, se, exp] of PACING_SEGS) {
+    if (clamped <= ue + 0.0001) {
+      const t     = Math.max(0, Math.min(1, (clamped - us) / (ue - us)))
+      const eased = 1 - Math.pow(1 - t, exp)   // ease-out: fast start → slow end
+      return ss + eased * (se - ss)
+    }
+  }
+  return 1.0
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FOV interpolation — smooth linear between waypoint FOV values
 // ─────────────────────────────────────────────────────────────────────────────
 
 function lerpFov(progress: number): number {
   const n = FOV_VALUES.length - 1
-  const t = progress * n
+  const t = Math.max(0, Math.min(1, progress)) * n
   const i = Math.floor(Math.min(t, n - 1))
   const f = t - i
   return FOV_VALUES[i] + (FOV_VALUES[i + 1] - FOV_VALUES[i]) * f
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// CameraRig
+//
+// THE RULE — repeated here for clarity because it's the most important
+// constraint in this entire prototype:
+//
+//   scroll/nav input → targetProgress (0-1) only
+//   spring → currentProgress (chases target every frame)
+//   applyPacing(currentProgress) → splineT
+//   spline.getPointAt(splineT) → camera position + lookAt
+//
+// Nothing else moves the camera. No exceptions.
+// ─────────────────────────────────────────────────────────────────────────────
+
 interface CameraRigProps {
   targetProgress: React.MutableRefObject<number>
 }
 
-/**
- * CameraRig — the heart of the camera system.
- *
- * RULE: This component reads `targetProgress` (set by scroll/nav) and
- * moves the camera via a critically-damped spring. It never receives
- * raw scroll delta. It never sets the camera directly from input.
- * The spring is what moves the camera. Always.
- */
 export function CameraRig({ targetProgress }: CameraRigProps) {
   const { camera } = useThree()
-  
-  // Spring-damped progress — the only variable that drives camera position
+
+  // The spring — this is the only thing that changes currentProgress
   const currentProgress = useDampedSpring(targetProgress, 120, 20)
 
-  // Build the spline curves (memoized — only constructed once)
-  const { positionSpline, lookAtSpline } = useMemo(() => {
-    return {
-      positionSpline: new THREE.CatmullRomCurve3(CAM_WAYPOINTS, false, 'catmullrom', 0.5),
-      lookAtSpline:   new THREE.CatmullRomCurve3(LOOK_WAYPOINTS, false, 'catmullrom', 0.5),
-    }
-  }, [])
+  // Build splines once
+  const { posSpline, lookSpline } = useMemo(() => ({
+    posSpline:  new THREE.CatmullRomCurve3(CAM_WAYPOINTS,  false, 'catmullrom', 0.5),
+    lookSpline: new THREE.CatmullRomCurve3(LOOK_WAYPOINTS, false, 'catmullrom', 0.5),
+  }), [])
 
   const tempPos    = useRef(new THREE.Vector3())
-  const tempLookAt = useRef(new THREE.Vector3())
+  const tempLook   = useRef(new THREE.Vector3())
 
   useFrame(() => {
-    const p = currentProgress.current
+    const rawP    = currentProgress.current
+    const splineT = applyPacing(rawP)  // per-segment velocity curve applied here
 
-    // Sample position and look-at from splines
-    positionSpline.getPoint(p, tempPos.current)
-    lookAtSpline.getPoint(p, tempLookAt.current)
+    // getPointAt uses arc-length parameterisation → equal Δt = equal metres
+    posSpline.getPointAt(splineT,  tempPos.current)
+    lookSpline.getPointAt(splineT, tempLook.current)
 
-    // Apply to camera
     camera.position.copy(tempPos.current)
-    camera.lookAt(tempLookAt.current)
+    camera.lookAt(tempLook.current)
 
-    // Interpolate FOV
+    // FOV interpolated by raw progress (not paced) so it tracks narrative, not speed
     if ('fov' in camera) {
-      const targetFov = lerpFov(p);
-      (camera as THREE.PerspectiveCamera).fov += (targetFov - (camera as THREE.PerspectiveCamera).fov) * 0.05;
-      (camera as THREE.PerspectiveCamera).updateProjectionMatrix()
+      const targetFov = lerpFov(rawP)
+      const cam = camera as THREE.PerspectiveCamera
+      cam.fov += (targetFov - cam.fov) * 0.06
+      cam.updateProjectionMatrix()
     }
   })
 
   return null
 }
 
-// Export splines for DOF focal distance computation
 export { CAM_WAYPOINTS, LOOK_WAYPOINTS }

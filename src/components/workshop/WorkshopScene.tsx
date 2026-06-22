@@ -4,6 +4,7 @@ import { useRef, useState, useEffect, useCallback } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { CameraRig, ZONE_PROGRESS } from './CameraRig'
 import { ZoneBoxes } from './ZoneBoxes'
+import { RoomArchitecture } from './RoomArchitecture'
 import { WorkshopNav } from './WorkshopNav'
 import { useScrollProgress } from './useScrollProgress'
 
@@ -122,7 +123,7 @@ function ScrollHint({ progress }: { progress: number }) {
 // ─────────────────────────────────────────────────────────────────────────────
 // Prototype badge
 // ─────────────────────────────────────────────────────────────────────────────
-function PrototypeBadge() {
+function PrototypeBadge({ version = '0.1' }: { version?: string }) {
   return (
     <div style={{
       position: 'fixed', top: '20px', right: '20px',
@@ -135,7 +136,7 @@ function PrototypeBadge() {
       letterSpacing: '0.15em', textTransform: 'uppercase',
       zIndex: 200, pointerEvents: 'none',
     }}>
-      Prototype 0.1
+      Prototype {version}
     </div>
   )
 }
@@ -196,25 +197,44 @@ export function WorkshopScene() {
     return () => el.removeEventListener('wheel', handleWheel)
   }, [targetProgress, setProgress])
 
-  // Keyboard navigation — same setProgress pipeline as scroll and nav clicks.
-  // ArrowDown/Right = forward, ArrowUp/Left = back, PageDown/Up = bigger jump.
+  // Keyboard navigation — all routes through setProgress → spring, same as scroll.
+  // Arrow keys + WASD: forward/deeper = progress+, backward = progress-.
+  // Page Up/Down: larger jumps (roughly one zone at a time).
   useEffect(() => {
-    const STEP = 0.04        // one arrow key press
-    const PAGE_STEP = 0.15   // page up/down
+    const STEP      = 0.04   // arrow / WASD single press
+    const PAGE_STEP = 0.15   // Page Up / Page Down
 
     const handleKey = (e: KeyboardEvent) => {
-      // Don't hijack keys when user is typing in an input/textarea
+      // Don't capture when user is typing
       const tag = (e.target as HTMLElement).tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA') return
 
       switch (e.key) {
+        // Forward — deeper into the workshop
         case 'ArrowDown':
         case 'ArrowRight':
+        case 's':
+        case 'S':
           e.preventDefault()
           setProgress(targetProgress.current + STEP)
           break
+        // Backward — back toward entrance
         case 'ArrowUp':
         case 'ArrowLeft':
+        case 'w':
+        case 'W':
+          e.preventDefault()
+          setProgress(targetProgress.current - STEP)
+          break
+        // D also nudges forward (strafe right = toward window)
+        case 'd':
+        case 'D':
+          e.preventDefault()
+          setProgress(targetProgress.current + STEP)
+          break
+        // A also nudges backward (strafe left = toward entrance)
+        case 'a':
+        case 'A':
           e.preventDefault()
           setProgress(targetProgress.current - STEP)
           break
@@ -282,22 +302,17 @@ export function WorkshopScene() {
         }}
         style={{ width: '100%', height: '100%' }}
       >
-        {/*
-         * CameraRig is the only thing that moves the camera.
-         * It reads targetProgress (set by scroll/nav) and drives it
-         * through a critically-damped spring — never directly.
-         */}
+        {/* CameraRig — the ONLY thing that moves the camera (via spring) */}
         <CameraRig targetProgress={targetProgress} />
 
-        {/* Placeholder geometry — flat-color boxes, one per zone */}
+        {/* Architecture — walls, floor, ceiling, zone dividers, window wall */}
+        <RoomArchitecture />
+
+        {/* Zone orientation markers — small glowing cubes, not room-filling boxes */}
         <ZoneBoxes />
 
-        {/*
-         * Atmospheric fog gives rough depth falloff.
-         * Validates whether the "sense, don't resolve" feeling is achievable
-         * before the real DOF postprocessing is set up with real assets.
-         */}
-        <fog attach="fog" args={['#080810', 14, 45]} />
+        {/* Fog — depth falloff across the full 35-unit room length */}
+        <fog attach="fog" args={['#080810', 16, 50]} />
       </Canvas>
 
       {/* HTML overlays — all driven by displayProgress synced from targetProgress */}
@@ -305,7 +320,7 @@ export function WorkshopScene() {
       <ZoneLabelOverlay currentProgress={displayProgress} />
       <ProgressBar progress={displayProgress} />
       <ScrollHint progress={displayProgress} />
-      <PrototypeBadge />
+      <PrototypeBadge version="0.2" />
 
       {/* rAF loop syncing ref → state for HTML overlays without blocking the R3F loop */}
       <ProgressReadout
