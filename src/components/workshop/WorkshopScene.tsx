@@ -213,16 +213,16 @@ export function WorkshopScene() {
         // Forward — deeper into the workshop
         case 'ArrowDown':
         case 'ArrowRight':
-        case 's':
-        case 'S':
+        case 'w':
+        case 'W':
           e.preventDefault()
           setProgress(targetProgress.current + STEP)
           break
         // Backward — back toward entrance
         case 'ArrowUp':
         case 'ArrowLeft':
-        case 'w':
-        case 'W':
+        case 's':
+        case 'S':
           e.preventDefault()
           setProgress(targetProgress.current - STEP)
           break
@@ -311,8 +311,8 @@ export function WorkshopScene() {
         {/* Zone orientation markers — small glowing cubes, not room-filling boxes */}
         <ZoneBoxes />
 
-        {/* Fog — depth falloff across the full 35-unit room length */}
-        <fog attach="fog" args={['#080810', 16, 50]} />
+        {/* Fog — starts beyond the first partition so walls read fully, fades into void */}
+        <fog attach="fog" args={['#08080e', 22, 55]} />
       </Canvas>
 
       {/* HTML overlays — all driven by displayProgress synced from targetProgress */}
@@ -320,7 +320,7 @@ export function WorkshopScene() {
       <ZoneLabelOverlay currentProgress={displayProgress} />
       <ProgressBar progress={displayProgress} />
       <ScrollHint progress={displayProgress} />
-      <PrototypeBadge version="0.2" />
+      <PrototypeBadge version="0.3" />
 
       {/* rAF loop syncing ref → state for HTML overlays without blocking the R3F loop */}
       <ProgressReadout

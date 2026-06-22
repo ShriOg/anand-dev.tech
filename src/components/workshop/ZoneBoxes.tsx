@@ -116,9 +116,6 @@ export function ZoneBoxes() {
           />
         </mesh>
       </group>
-
-      {/* Ambient fill — kept minimal; RoomArchitecture provides the zone lights */}
-      <ambientLight intensity={0.25} />
     </group>
   )
 }

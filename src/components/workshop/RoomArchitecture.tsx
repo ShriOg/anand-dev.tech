@@ -3,208 +3,233 @@
 import * as THREE from 'three'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Room bounding box — matches Section 20 of the brief
-// 1 unit ≈ 1 metre; cozy loft-studio proportions
+// COORDINATE REFERENCE
+//
+// Camera path: z = +8 (Entrance) → z = -20 (Window), x swings ±2.5, y = 1.6–2.6
+// Room width: 10 units (x: -5 to +5) matches Section 20's ~10m overall width
+// Ceiling: 3.0 units — cozy loft proportions (Section 20: 2.8–3.2m)
+//
+// Zone z-centres (derived from camera waypoints):
+//   Entrance:     z ≈ +5
+//   Workbench:    z ≈ +2  (left side, x ≈ -2.5)
+//   Creations:    z ≈ -4  (right side, x ≈ +2.5)
+//   Nova's Desk:  z ≈ -9  (central — always near, the constant anchor)
+//   Mindset:      z ≈ -11
+//   Window:       z ≈ -20
 // ─────────────────────────────────────────────────────────────────────────────
-const ROOM_W     = 10     // total width  (x: -5 to +5)
-const ROOM_CEIL  = 3.8    // ceiling height
-const ROOM_Z_BACK  = 11   // back wall (behind entrance camera start)
-const ROOM_Z_FRONT = -24  // window wall
-const ROOM_DEPTH   = ROOM_Z_BACK - ROOM_Z_FRONT  // 35
-const ROOM_Z_MID   = (ROOM_Z_BACK + ROOM_Z_FRONT) / 2  // -6.5
 
-// Zone divider openings — each creates a doorway feel as the camera passes through.
-// Positions verified against the camera path: the camera's x coordinate at each
-// z-boundary is near 0, so a centred opening fits without blocking the path.
-const DIVIDERS = [
-  { z: -1,  openW: 3.2, openH: 2.7, label: 'Entrance → Workbench' },
-  { z: -8,  openW: 3.0, openH: 2.7, label: 'Creations → Mindset'  },
-  { z: -17, openW: 4.5, openH: 3.0, label: 'Mindset → Window'     },
+const W     = 10    // room width (x: -5 to +5)
+const CEIL  = 3.0   // ceiling height (Section 20: 2.8–3.2m, cozy)
+const HALF  = W / 2
+
+// Flat gray for all architecture — no warmth, no material variation.
+// 0.3 test: does geometry alone make this feel like a room?
+// Using MeshLambertMaterial (flat-shaded) rather than Standard so the
+// geometry reads without being dependent on PBR lighting values.
+const WALL_COLOR = '#4a4a52'  // medium-dark gray, reads clearly against the dark void
+const FLOOR_COLOR = '#3a3a40' // slightly darker than walls (ground reads separately)
+const CEIL_COLOR  = '#2e2e34' // darker still — ceiling recedes appropriately
+
+// Wall thickness — visible but not bulky
+const T = 0.15
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Zone partition walls — positioned at thresholds between zones per Sec. 20.
+// Each has a centred doorway opening. The camera path has been verified to
+// pass through each opening (camera x ≈ 0 at each threshold z).
+//
+// Opening sizing: Section 20 specifies "walking distances" between zones,
+// implying human-scale thresholds (~0.9m door = ~1.5 units here, but widened
+// to 2.4 for camera clearance and the "wide workshop door" feel).
+// ─────────────────────────────────────────────────────────────────────────────
+const PARTITIONS = [
+  // Between Entrance and the Workbench/Creations level
+  // Camera crosses at x ≈ -1.25 (midway Entrance→Workbench), so opening centred ±1.5 works
+  { z: 0,    openW: 3.0, openH: 2.6, label: 'Entrance → Workbench/Creations' },
+  // Between Creations and Mindset
+  // Camera crosses at x ≈ 0.75 (midway Creations→Mindset)
+  { z: -7.5, openW: 3.0, openH: 2.6, label: 'Creations → Mindset' },
+  // Between Mindset/Nova and Window — wider opening (the "approach" reads more open)
+  // Camera at x ≈ 0.5 here
+  { z: -16,  openW: 4.0, openH: 2.8, label: 'Mindset/Nova → Window' },
 ]
 
-// Subtle warm-dark material props (no textures — prototype rule)
-const matWall    = { color: '#0d0d1c' as const, roughness: 0.95, metalness: 0 }
-const matFloor   = { color: '#0f0e1c' as const, roughness: 1.00, metalness: 0 }
-const matCeil    = { color: '#07070c' as const, roughness: 1.00, metalness: 0 }
-const matDivider = { color: '#121228' as const, roughness: 0.90, metalness: 0 }
-
 // ─────────────────────────────────────────────────────────────────────────────
-// DividerWall — a thin wall at z with a centred rectangular opening
-// Composed of three box segments: left column, right column, top bar.
-// Thickness T is exaggerated slightly (0.22) so the opening reads as a wall,
-// not just a floating line.
+// Helpers
 // ─────────────────────────────────────────────────────────────────────────────
-function DividerWall({ z, openW, openH }: { z: number; openW: number; openH: number }) {
-  const T      = 0.22
-  const half   = ROOM_W / 2        // 5
-  const colW   = half - openW / 2  // width of each side column
-  const topH   = ROOM_CEIL - openH // height of the bar above the opening
 
-  if (colW <= 0) return null
+/** A partition wall with a single centred doorway opening.
+ *  Made of three box segments: left pillar, right pillar, top transom. */
+function PartitionWall({ z, openW, openH }: { z: number; openW: number; openH: number }) {
+  const pillarW = HALF - openW / 2  // width of each side pillar
+  const transomH = CEIL - openH     // height of transom above door
+
+  if (pillarW < 0.01) return null
+
+  const pillarCX = openW / 2 + pillarW / 2   // centre-x of each pillar (symmetric)
+  const transomCY = openH + transomH / 2      // centre-y of transom
 
   return (
     <group position={[0, 0, z]}>
-      {/* Left column */}
-      <mesh position={[-(openW / 2 + colW / 2), ROOM_CEIL / 2, 0]}>
-        <boxGeometry args={[colW, ROOM_CEIL, T]} />
-        <meshStandardMaterial {...matDivider} />
+      {/* Left pillar */}
+      <mesh position={[-pillarCX, CEIL / 2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[pillarW, CEIL, T]} />
+        <meshLambertMaterial color={WALL_COLOR} />
       </mesh>
-
-      {/* Right column */}
-      <mesh position={[(openW / 2 + colW / 2), ROOM_CEIL / 2, 0]}>
-        <boxGeometry args={[colW, ROOM_CEIL, T]} />
-        <meshStandardMaterial {...matDivider} />
+      {/* Right pillar */}
+      <mesh position={[pillarCX, CEIL / 2, 0]} castShadow receiveShadow>
+        <boxGeometry args={[pillarW, CEIL, T]} />
+        <meshLambertMaterial color={WALL_COLOR} />
       </mesh>
-
-      {/* Top bar — above the opening */}
-      {topH > 0.01 && (
-        <mesh position={[0, openH + topH / 2, 0]}>
-          <boxGeometry args={[openW, topH, T]} />
-          <meshStandardMaterial {...matDivider} />
+      {/* Top transom */}
+      {transomH > 0.02 && (
+        <mesh position={[0, transomCY, 0]} castShadow>
+          <boxGeometry args={[openW, transomH, T]} />
+          <meshLambertMaterial color={WALL_COLOR} />
         </mesh>
       )}
-
-      {/* Thin emissive strip at floor level — zone threshold marker */}
-      <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[openW * 0.6, 0.06]} />
-        <meshStandardMaterial
-          color="#2a2a6a"
-          emissive="#2a2a8a"
-          emissiveIntensity={1.5}
-          roughness={0}
-        />
-      </mesh>
     </group>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// WindowWall — the front wall at the Window zone.
-// Large opening (most of the wall is open) with a subtle city-glow backdrop.
+// Window wall — the far end of the room (Section 20: "full window wall, city
+// skyline"). At 0.3 we only need the wall-with-cutout; no skybox yet.
+// A wide, tall opening with narrow frame pillars on each side.
 // ─────────────────────────────────────────────────────────────────────────────
 function WindowWall() {
-  const z        = ROOM_Z_FRONT
-  const T        = 0.22
-  const frameW   = 1.2              // width of each side frame pillar
-  const openW    = ROOM_W - frameW * 2  // opening width
-  const openH    = ROOM_CEIL - 0.5  // opening almost full height, small bottom sill
-  const topH     = ROOM_CEIL - openH
-  const sillH    = 0.5
+  const z          = -23
+  const openW      = 6.0    // wide opening — feels like the room opens up
+  const openH      = 2.5    // top of opening (leaves a transom + sill)
+  const sillH      = 0.45   // sill height from floor
+  const frameW     = HALF - openW / 2  // side frame pillar width
+  const transomH   = CEIL - openH
+
+  const frameCX    = openW / 2 + frameW / 2
 
   return (
     <group position={[0, 0, z]}>
-      {/* Left frame pillar */}
-      <mesh position={[-(openW / 2 + frameW / 2), ROOM_CEIL / 2, 0]}>
-        <boxGeometry args={[frameW, ROOM_CEIL, T]} />
-        <meshStandardMaterial {...matWall} />
-      </mesh>
-
-      {/* Right frame pillar */}
-      <mesh position={[(openW / 2 + frameW / 2), ROOM_CEIL / 2, 0]}>
-        <boxGeometry args={[frameW, ROOM_CEIL, T]} />
-        <meshStandardMaterial {...matWall} />
-      </mesh>
-
-      {/* Top transom */}
-      {topH > 0 && (
-        <mesh position={[0, openH + topH / 2, 0]}>
-          <boxGeometry args={[openW, topH, T]} />
-          <meshStandardMaterial {...matWall} />
+      {/* Side frame pillars */}
+      {frameW > 0.02 && (
+        <>
+          <mesh position={[-frameCX, CEIL / 2, 0]} receiveShadow>
+            <boxGeometry args={[frameW, CEIL, T * 2]} />
+            <meshLambertMaterial color={WALL_COLOR} />
+          </mesh>
+          <mesh position={[frameCX, CEIL / 2, 0]} receiveShadow>
+            <boxGeometry args={[frameW, CEIL, T * 2]} />
+            <meshLambertMaterial color={WALL_COLOR} />
+          </mesh>
+        </>
+      )}
+      {/* Transom — above the opening */}
+      {transomH > 0.02 && (
+        <mesh position={[0, openH + transomH / 2, 0]}>
+          <boxGeometry args={[openW, transomH, T * 2]} />
+          <meshLambertMaterial color={WALL_COLOR} />
         </mesh>
       )}
-
-      {/* Bottom windowsill */}
+      {/* Sill — below the opening (thick, ground level) */}
       <mesh position={[0, sillH / 2, 0]}>
-        <boxGeometry args={[openW, sillH, T * 2]} />
-        <meshStandardMaterial color="#0f0f20" roughness={0.8} metalness={0} />
+        <boxGeometry args={[openW, sillH, T * 3]} />
+        <meshLambertMaterial color={WALL_COLOR} />
       </mesh>
-
-      {/* City-glow backdrop — a faint emissive plane behind the window opening.
-          Validates the "city beyond glass" sightline without needing a skybox. */}
-      <mesh position={[0, openH / 2 + sillH, -3]}>
-        <planeGeometry args={[openW + 1, openH]} />
-        <meshStandardMaterial
-          color="#050510"
-          emissive="#1a1a6a"
-          emissiveIntensity={0.7}
-          roughness={1}
-          side={THREE.DoubleSide}
-        />
+      {/* Backdrop — a dark plane set back beyond the opening, so the
+          cutout reads as a real void rather than a painted surface */}
+      <mesh position={[0, CEIL / 2, -1.8]}>
+        <planeGeometry args={[openW, CEIL]} />
+        <meshLambertMaterial color="#050508" side={THREE.DoubleSide} />
       </mesh>
-
-      {/* Subtle wide glow light from outside — gives the window a light source feel */}
-      <pointLight
-        position={[0, ROOM_CEIL * 0.5, -2]}
-        intensity={2.0}
-        color="#3a3a9a"
-        distance={12}
-        decay={2}
-      />
     </group>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// RoomArchitecture — the full bounding shell of The Workshop
+// RoomArchitecture — the complete architectural shell for Prototype 0.3.
+//
+// Material language: flat gray (meshLambertMaterial) throughout.
+// Lighting: two directional fills at low angle so surfaces read as geometry
+// without being a lighting design — just visibility.
+//
+// Zero props, furniture, textures, or decorative elements — this prototype
+// is purely testing whether the spatial volume and thresholds work.
 // ─────────────────────────────────────────────────────────────────────────────
 export function RoomArchitecture() {
+  // Room bounds
+  const zBack  =  11    // back wall (behind camera entry point z=8)
+  const zFront = -23    // window wall
+  const depth  = zBack - zFront   // 34 units
+  const zMid   = (zBack + zFront) / 2  // -6
+
   return (
     <group>
 
-      {/* ── FLOOR ─────────────────────────────────────────────────────────── */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, ROOM_Z_MID]}>
-        <planeGeometry args={[ROOM_W, ROOM_DEPTH]} />
-        <meshStandardMaterial {...matFloor} side={THREE.DoubleSide} />
+      {/* ── FLOOR ──────────────────────────────────────────────────────────── */}
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[0, 0, zMid]}
+        receiveShadow
+      >
+        <planeGeometry args={[W, depth]} />
+        <meshLambertMaterial color={FLOOR_COLOR} side={THREE.DoubleSide} />
       </mesh>
 
-      {/* ── CEILING ───────────────────────────────────────────────────────── */}
-      <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, ROOM_CEIL, ROOM_Z_MID]}>
-        <planeGeometry args={[ROOM_W, ROOM_DEPTH]} />
-        <meshStandardMaterial {...matCeil} side={THREE.DoubleSide} />
+      {/* ── CEILING ────────────────────────────────────────────────────────── */}
+      <mesh
+        rotation={[Math.PI / 2, 0, 0]}
+        position={[0, CEIL, zMid]}
+        receiveShadow
+      >
+        <planeGeometry args={[W, depth]} />
+        <meshLambertMaterial color={CEIL_COLOR} side={THREE.DoubleSide} />
       </mesh>
 
-      {/* ── LEFT SIDE WALL (x = -5) ────────────────────────────────────────── */}
-      <mesh position={[-ROOM_W / 2, ROOM_CEIL / 2, ROOM_Z_MID]}>
-        <boxGeometry args={[0.15, ROOM_CEIL, ROOM_DEPTH]} />
-        <meshStandardMaterial {...matWall} />
+      {/* ── LEFT WALL (x = -5) ─────────────────────────────────────────────── */}
+      <mesh position={[-HALF, CEIL / 2, zMid]} receiveShadow castShadow>
+        <boxGeometry args={[T, CEIL, depth]} />
+        <meshLambertMaterial color={WALL_COLOR} />
       </mesh>
 
-      {/* ── RIGHT SIDE WALL (x = +5) ───────────────────────────────────────── */}
-      <mesh position={[ROOM_W / 2, ROOM_CEIL / 2, ROOM_Z_MID]}>
-        <boxGeometry args={[0.15, ROOM_CEIL, ROOM_DEPTH]} />
-        <meshStandardMaterial {...matWall} />
+      {/* ── RIGHT WALL (x = +5) ────────────────────────────────────────────── */}
+      <mesh position={[HALF, CEIL / 2, zMid]} receiveShadow castShadow>
+        <boxGeometry args={[T, CEIL, depth]} />
+        <meshLambertMaterial color={WALL_COLOR} />
       </mesh>
 
-      {/* ── BACK WALL (behind camera start) ───────────────────────────────── */}
-      <mesh position={[0, ROOM_CEIL / 2, ROOM_Z_BACK]}>
-        <boxGeometry args={[ROOM_W, ROOM_CEIL, 0.15]} />
-        <meshStandardMaterial {...matWall} />
+      {/* ── BACK WALL (behind entrance — closes the room) ─────────────────── */}
+      <mesh position={[0, CEIL / 2, zBack]} receiveShadow>
+        <boxGeometry args={[W, CEIL, T]} />
+        <meshLambertMaterial color={WALL_COLOR} />
       </mesh>
 
-      {/* ── ZONE DIVIDERS ─────────────────────────────────────────────────── */}
-      {DIVIDERS.map((d) => (
-        <DividerWall key={d.z} z={d.z} openW={d.openW} openH={d.openH} />
+      {/* ── PARTITION WALLS (zone thresholds with doorway openings) ─────────── */}
+      {PARTITIONS.map((p) => (
+        <PartitionWall key={p.z} z={p.z} openW={p.openW} openH={p.openH} />
       ))}
 
-      {/* ── WINDOW WALL ───────────────────────────────────────────────────── */}
+      {/* ── WINDOW WALL ────────────────────────────────────────────────────── */}
       <WindowWall />
 
-      {/* ── ARCHITECTURAL GRAZING LIGHTS ──────────────────────────────────── 
-          Low-angle lights that reveal the wall and ceiling surfaces as distinct
-          planes, without being a designed lighting pass (that comes later). */}
+      {/* ── ARCHITECTURE VISIBILITY LIGHTING ──────────────────────────────────
+          Two broad, low-intensity directional fills — just enough to reveal
+          the geometry as distinct surfaces. Not a lighting design pass.
+          Angles chosen to graze walls and floor from different directions
+          so all surfaces read, including inside the doorway thresholds. */}
 
-      {/* Warm light washing down from ceiling at Entrance */}
-      <pointLight position={[0, 3.5, 4]}    intensity={0.6} color="#b87a3a" distance={8}  decay={2} />
-      {/* Workbench side */}
-      <pointLight position={[-3.5, 2, -2]}  intensity={0.5} color="#4a7aff" distance={7}  decay={2} />
-      {/* Creations side */}
-      <pointLight position={[3.5, 2.5, -6]} intensity={0.5} color="#3dcc88" distance={7}  decay={2} />
-      {/* Mindset — cooler, calmer */}
-      <pointLight position={[0, 3, -12]}    intensity={0.5} color="#8866cc" distance={8}  decay={2} />
-      {/* Nova marker glow  */}
-      <pointLight position={[1.5, 1.8, -11]} intensity={1.0} color="#00e5ff" distance={5} decay={2} />
-      {/* Window ambient (supplementary to WindowWall's own light) */}
-      <pointLight position={[0, 2.5, -20]}  intensity={0.8} color="#5555bb" distance={8}  decay={2} />
+      {/* Fill A — from above-right, slightly forward — lights floor and left wall */}
+      <directionalLight
+        position={[6, 8, 6]}
+        intensity={0.9}
+        color="#c8c8d4"
+      />
+      {/* Fill B — from above-left, slightly back — lights right wall and ceiling edge */}
+      <directionalLight
+        position={[-5, 6, -14]}
+        intensity={0.5}
+        color="#a0a0b0"
+      />
+      {/* Ambient — stops surfaces going pure black in shadow */}
+      <ambientLight intensity={0.35} color="#888899" />
 
     </group>
   )

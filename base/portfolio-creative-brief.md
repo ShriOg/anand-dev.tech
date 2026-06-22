@@ -359,6 +359,8 @@ This subtly pulls visitors forward through the space without them consciously no
 
 **Visual note for the next diagram/asset pass:** Nova should slightly *overlap* the path visually, not just sit beside it — symbolically, not physically. The point to land subconsciously: every stage of the journey is connected through him.
 
+**✅ Independently confirmed during Prototype 0.2:** even with a plain placeholder sphere and zero character detail, Nova's marker drew the eye before any of the zone landmarks did — testers' instinct was "where's Nova?" before "where's Mindset?" This wasn't asserted in the design, it was observed in the prototype, which is a stronger form of validation than the original design reasoning alone. It confirms the centrality decision in the floorplan (this section, Sec. 20) is doing real work even at the crudest possible fidelity.
+
 ---
 
 ## 20. Architectural Floorplan Specification
@@ -483,16 +485,26 @@ The most underestimated stage — content shapes design, not the reverse.
 - [x] Sticky-note treasure-hunt sequence — **v2 complete**, see `copywriting-and-nova-dialogue.md` Sec. 4. Twelve hidden notes across all six corners, each landing on a sincere-then-funny beat; also produced an improved closing line for the Window wow moment.
 - **Tone correction to carry forward:** the workshop's core quality is *curiosity*, not ambition — keep this in mind for all remaining copy, Nova's voice, and any future art prompts, per the reasoning that ruled out the more "rebellious founder energy" tagline option
 
-**5. Technical architecture**
-Only once the above is locked — now informed by exact requirements rather than abstract stack choices.
-- [ ] Camera spline/easing behavior for this specific room
-- [ ] Asset pipeline & hosting
-- [ ] Live chat backend integration
-- [ ] Mobile fallback plan
-- [ ] Performance budget (texture atlasing, LOD, lazy-loading)
+**5. Technical architecture** — **DONE, see `technical-architecture.md`**
+- [x] Camera spline/easing behavior for this specific room
+- [x] Asset pipeline & hosting approach
+- [x] Live chat (Nova) backend integration approach
+- [x] Mobile fallback plan
+- [x] Performance budget (texture atlasing, LOD, lazy-loading)
 
-**6. Development**
-- [ ] Build
+**6. Development — IN PROGRESS**
+- [x] `base/` handoff folder assembled with full reading-order README for Antigravity
+- [x] **Prototype 0.1** — built and reviewed. **Verdict: 8/10.** Camera/spring/nav architecture validated (motion feels smooth, navigation maps correctly to the floorplan). **Failed:** spatial believability (read as floating boxes/a diagram, not a place) and pacing (felt uniform despite differentiated progress-range allocation).
+- [x] **Prototype 0.2** — built and reviewed. Added colored landmark boxes per zone. **Succeeded:** geography/memorability — visitors can now recall where things are; Nova's placeholder sphere independently drew the eye before zone landmarks did, confirming the centrality decision (see Sec. 18 note). **Still failed:** containment — everything still reads as objects in a void rather than corners/sightlines/thresholds.
+- [ ] **Prototype 0.3** — spec written (`prototype-0.3-spec.md`), not yet built. Adds greybox architecture ONLY (walls, floor, ceiling, openings between zones, window cutout) on top of the existing validated landmarks — uniform gray materials, no lighting/texture polish. Tests containment specifically, and validates the floorplan's actual room scale once it's bounded space rather than an open void.
+- [ ] Prototype 0.4 — lighting volumes
+- [ ] Prototype 0.5 — real props
+- [ ] Prototype 0.6 — final art
+- [ ] Real asset integration (six validated corners)
+- [ ] Copy integration
+- [ ] Nova chat implementation
+- [ ] Mobile adaptation
+- [ ] Performance pass
 
 ---
 
