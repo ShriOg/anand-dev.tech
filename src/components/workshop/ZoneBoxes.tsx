@@ -45,12 +45,7 @@ const ZONE_MARKERS: ZoneMarker[] = [
   },
 ]
 
-// Nova's Desk — slightly larger sphere, the emotional anchor of the room
-const NOVA_DESK = {
-  position: [1.5, 0.4, -11] as [number, number, number],
-  color:    '#00e5ff',
-  emissive: '#00c0e0',
-}
+// Nova's Desk sphere has moved to NovaPresence.tsx
 
 export function ZoneBoxes() {
   return (
@@ -83,41 +78,8 @@ export function ZoneBoxes() {
         </group>
       ))}
 
-      {/* Nova's Desk — distinct sphere marker, always visible */}
-      <group position={NOVA_DESK.position}>
-        <mesh>
-          <sphereGeometry args={[0.25, 20, 20]} />
-          <meshStandardMaterial
-            color={NOVA_DESK.color}
-            emissive={NOVA_DESK.emissive}
-            emissiveIntensity={2.5}
-            roughness={0.1}
-            metalness={0.2}
-          />
-        </mesh>
-        {/* Orbital ring — makes Nova's marker distinctly recognisable */}
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.45, 0.025, 8, 32]} />
-          <meshStandardMaterial
-            color={NOVA_DESK.color}
-            emissive={NOVA_DESK.emissive}
-            emissiveIntensity={2.0}
-          />
-        </mesh>
-        {/* Floor glow */}
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.4, 0]}>
-          <circleGeometry args={[0.7, 24]} />
-          <meshStandardMaterial
-            color={NOVA_DESK.color}
-            emissive={NOVA_DESK.emissive}
-            emissiveIntensity={0.8}
-            transparent
-            opacity={0.25}
-          />
-        </mesh>
-      </group>
     </group>
   )
 }
 
-export { NOVA_DESK, ZONE_MARKERS }
+export { ZONE_MARKERS }

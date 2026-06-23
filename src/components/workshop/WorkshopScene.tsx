@@ -6,6 +6,7 @@ import { CameraRig, ZONE_PROGRESS } from './CameraRig'
 import { ZoneBoxes } from './ZoneBoxes'
 import { RoomArchitecture } from './RoomArchitecture'
 import { ZoneLighting } from './ZoneLighting'
+import { NovaPresence } from './NovaPresence'
 import { WorkshopNav } from './WorkshopNav'
 import { useScrollProgress } from './useScrollProgress'
 
@@ -312,10 +313,11 @@ export function WorkshopScene() {
             produce correct colour-temperature responses. */}
         <RoomArchitecture />
 
-        {/* Zone lighting — per-zone directional lights + point anchors.
-            This is the entire Prototype 0.4 experiment: does light alone,
-            on flat gray geometry, produce emotionally distinct zones? */}
         <ZoneLighting />
+
+        {/* Nova presence system — glow-bleed through thresholds, peek lights,
+            aura halo. Implements Sec. 18 "always near" requirement. */}
+        <NovaPresence />
 
         {/* Zone orientation markers — small glowing cubes, not room-filling boxes */}
         <ZoneBoxes />
@@ -331,7 +333,7 @@ export function WorkshopScene() {
       <ZoneLabelOverlay currentProgress={displayProgress} />
       <ProgressBar progress={displayProgress} />
       <ScrollHint progress={displayProgress} />
-      <PrototypeBadge version="0.4" />
+      <PrototypeBadge version="0.5" />
 
       {/* rAF loop syncing ref → state for HTML overlays without blocking the R3F loop */}
       <ProgressReadout

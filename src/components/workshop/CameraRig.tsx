@@ -83,8 +83,8 @@ const PACING_SEGS: [number, number, number, number, number][] = [
   [0.00, 0.15,   0.000, 0.213,   1.0],  // Entrance → Workbench:  1.42×  brisk, linear
   [0.15, 0.30,   0.213, 0.426,   1.1],  // Workbench → Creations: 1.42×  near-linear
   [0.30, 0.50,   0.426, 0.613,   1.6],  // Creations → Mindset:   0.93×  ease-out, clear slow
-  [0.50, 0.68,   0.613, 0.769,   2.2],  // Mindset → Nova:        0.87×  strong ease-out
-  [0.68, 1.00,   0.769, 1.000,   3.0],  // Nova → Window:         0.72×  extreme, unmistakable
+  [0.50, 0.68,   0.613, 0.769,   2.8],  // Mindset → Nova:        0.87×  deeper ease-out (0.5→2.8)
+  [0.68, 1.00,   0.769, 1.000,   4.5],  // Nova → Window:         0.72×  near-stop reveal (0.5→4.5)
 ]
 
 /**
